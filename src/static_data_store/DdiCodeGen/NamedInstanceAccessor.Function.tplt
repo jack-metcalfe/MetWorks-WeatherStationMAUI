@@ -1,0 +1,16 @@
+﻿// NamedInstanceAccessor.Function
+// Accessor function for named instance {{SafeKey}}
+#nullable enable
+/* Provenance: {{Provenance}} */
+namespace {{Namespace}}
+{
+    internal static partial class {{SafeKey}}_Accessors
+    {
+        // Token contract: SafeKey; Provenance; FailFast; (function-specific tokens)
+        public static object? Get_{{SafeKey}}(IServiceProvider provider)
+        {
+            // Default no-op; real template token builders should supply body tokens
+            return null;
+        }
+    }
+}

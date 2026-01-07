@@ -1,0 +1,13 @@
+﻿// Registry
+// {{GeneratedHeader}}
+#nullable enable
+{{Usings}}
+
+namespace {{Namespace}}
+{
+    public static partial class RegistryAggregate
+    {
+        // Composed registry member partials
+        {{Members}}
+    }
+}

@@ -1,0 +1,13 @@
+﻿// NamedInstanceAccessor.Class
+// {{GeneratedHeader}}
+#nullable enable
+{{Usings}}
+
+namespace {{Namespace}}
+{
+    public static class {{ClassName}}
+    {
+        // Function snippets (each is a static function)
+        {{FunctionSnippets}}
+    }
+}

@@ -1,0 +1,21 @@
+﻿// Initializer
+// {{GeneratedHeader}}
+#nullable enable
+{{Usings}}
+
+using System;
+using System.Threading.Tasks;
+
+namespace {{Namespace}}
+{
+    public static class GeneratedInitializers
+    {
+        public static async Task RunAllInitializersAsync(IServiceProvider provider)
+        {
+            // Insert per-initializer invoker calls here
+            {{Members}}
+
+            await Task.CompletedTask;
+        }
+    }
+}

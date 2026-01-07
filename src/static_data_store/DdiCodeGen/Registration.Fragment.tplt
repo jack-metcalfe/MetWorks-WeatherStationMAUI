@@ -1,0 +1,24 @@
+﻿// Registration.Fragment
+// Per-registration fragment for {{SafeKey}}
+/* Provenance: {{Provenance}} */
+#nullable enable
+using Microsoft.Extensions.DependencyInjection;
+
+namespace {{Namespace}}
+{
+    internal static partial class {{SafeKey}}_RegistrationFragment
+    {
+        // Token contract: SafeKey; Provenance; ServiceType; ImplementationType; Lifetime; FailFast
+        public static void Register_{{SafeKey}}(IServiceCollection services)
+        {
+            // Defensive no-op if token info missing
+            var _svc = "{{ServiceType}}";
+            var _impl = "{{ImplementationType}}";
+            if (string.IsNullOrWhiteSpace(_svc) || string.IsNullOrWhiteSpace(_impl)) return;
+
+            // Intentionally leave the concrete calls to be emitted by token builders that have full types.
+            // Example placeholders:
+            // services.AddSingleton(typeof({_svc}), typeof({_impl}));
+        }
+    }
+}

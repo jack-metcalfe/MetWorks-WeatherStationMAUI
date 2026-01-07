@@ -1,0 +1,16 @@
+﻿// NamedInstanceAccessor.Function.Initializer
+// Initializer-mode accessor for {{SafeKey}}
+#nullable enable
+/* Provenance: {{Provenance}} */
+namespace {{Namespace}}
+{
+    internal static partial class {{SafeKey}}_Accessors
+    {
+        public static async System.Threading.Tasks.Task<object?> Get_{{SafeKey}}_Async(IServiceProvider provider)
+        {
+            // Placeholder: templates should emit real async initializer invocation.
+            await System.Threading.Tasks.Task.CompletedTask;
+            return null;
+        }
+    }
+}

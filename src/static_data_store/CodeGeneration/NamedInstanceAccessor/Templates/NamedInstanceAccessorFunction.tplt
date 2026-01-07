@@ -1,0 +1,16 @@
+﻿	private static I{{INTERFACE}}? _{{NAMED_INSTANCE}};
+    public static async Task<I{{INTERFACE}}> Get{{NAMED_INSTANCE}}Async()
+    {
+        try
+        {
+            if (_{{NAMED_INSTANCE}} is not null) return _{{NAMED_INSTANCE}};
+            var namedInstance = Registry.GetNamedInstance(RegNamedInstanceEnum.{{NAMED_INSTANCE}});
+            return _{{NAMED_INSTANCE}} = (await namedInstance.CreateAndInitializeInstance() as I{{INTERFACE}})
+                ?? throw new InvalidOperationException("Failed to cast to I{{INTERFACE}}.");
+        }
+
+        catch (Exception exception)
+        {
+            throw Logger.LogExceptionAndReturn(exception);
+        }
+    }

@@ -1,0 +1,79 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<!-- <TargetFrameworks>net10.0-android;net10.0-windows10.0.19041.0</TargetFrameworks> -->
+		<!-- <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks> -->
+
+		<!-- Single platform for Windows development -->
+		<!-- Uncomment to build only for Windows during development -->
+		<TargetFrameworks>net10.0-windows10.0.19041.0</TargetFrameworks>
+
+		<OutputType>Exe</OutputType>
+		<RootNamespace>WeatherStationMaui</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+
+		<!-- Explicit usings and nullability -->
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+		<!-- Opt into preview features -->
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+
+		<!-- Optional: enforce consistent language version -->
+		<LangVersion>preview</LangVersion>
+
+		<!-- App metadata -->
+		<ApplicationTitle>WeatherStationMaui</ApplicationTitle>
+		<ApplicationId>biz.metworks.weather-station-maui</ApplicationId>
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<!-- Windows packaging -->
+		<WindowsPackageType>None</WindowsPackageType>
+
+		<NoWarn>$(NoWarn);NU1603</NoWarn>
+
+		<!-- Platform support -->
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+
+		<!-- Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Use latest preview versions explicitly -->
+		<PackageReference Include="Dapper" Version="2.1.66" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0-preview.4.123" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.0" />
+		<PackageReference Include="Npgsql" Version="10.0.0-rc.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ddi_registry\DdiRegistry.csproj" />
+		<ProjectReference Include="..\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits.csproj" />
+		<ProjectReference Include="..\RedStar.Amounts.WeatherExtensions\RedStar.Amounts.WeatherExtensions.csproj" />
+		<ProjectReference Include="..\interfaces\interfaces.csproj" />
+		<ProjectReference Include="..\RedStar.Amounts\RedStar.Amounts\RedStar.Amounts.csproj" />
+		<ProjectReference Include="..\utility\Utility.csproj" />
+	</ItemGroup>
+
+</Project>

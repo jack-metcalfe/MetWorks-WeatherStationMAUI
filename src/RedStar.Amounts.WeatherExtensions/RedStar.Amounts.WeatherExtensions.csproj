@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<!-- Reference RedStar libraries (third-party - DO NOT MODIFY) -->
+		<ProjectReference Include="..\RedStar.Amounts\RedStar.Amounts\RedStar.Amounts.csproj" />
+		<ProjectReference Include="..\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits.csproj" />
+	</ItemGroup>
+</Project>

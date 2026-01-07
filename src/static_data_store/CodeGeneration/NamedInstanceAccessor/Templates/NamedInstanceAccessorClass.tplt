@@ -1,0 +1,7 @@
+﻿// This is a generated file - DO NOT EDIT!
+namespace {{NAMESPACE}};
+#nullable enable
+public static partial class {{CLASS_NAME}}
+{
+{{NAMED_INSTANCE_ACCESSORS}}
+}

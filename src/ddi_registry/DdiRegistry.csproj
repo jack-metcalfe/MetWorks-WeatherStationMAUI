@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>false</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\logging\Logging.csproj" />
+    <ProjectReference Include="..\maui_setting_override_providers\MauiSettingOverrideProviders.csproj" />
+    <ProjectReference Include="..\metworks_services\MetWorksServices.csproj" />
+    <ProjectReference Include="..\raw_packet_record_type_in_postgres_out\RawPacketRecordTypedInPostgresOut.csproj" />
+    <ProjectReference Include="..\settings\Settings.csproj" />
+    <ProjectReference Include="..\udp_in_raw_packet_record_typed_out\UdpInRawPacketRecordTypedOut.csproj" />
+  </ItemGroup>
+</Project>

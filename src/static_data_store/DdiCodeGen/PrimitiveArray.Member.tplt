@@ -1,0 +1,10 @@
+﻿// PrimitiveArray.Member
+// Per-element add lines for primitive array {{SafeKey}}
+#nullable enable
+/* Provenance: {{Provenance}} */
+internal static partial class {{SafeKey}}_PrimitiveArray_Partial
+{
+    // Member snippet for element type {{ElementType}}
+    // Token contract: SafeKey; Provenance; ElementType; FailFast; (element-specific tokens emitted by TokenMapBuilder)
+    {{!-- Example token usage: {{ElementLiteral}} or loop-provided MembersFragment handled by outer templates --}}
+}

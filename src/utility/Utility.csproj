@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>preview</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="YamlDotNet" Version="16.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\interfaces\interfaces.csproj" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<ServiceAssemblyOutputPath>..\..\ServiceAssemblies</ServiceAssemblyOutputPath>
+	</PropertyGroup>
+	<Target Name="CopyToServiceAssemblies" AfterTargets="Build">
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ServiceAssemblyOutputPath)" SkipUnchangedFiles="false" />
+	</Target>
+</Project>

@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "MetWorks",
+  "identity": "metworks.dotnet.classlib.standard",
+  "name": "MetWorks .NET Class Library Standard",
+  "shortName": "met-classlib",
+  "sourceName": "ProjectName",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "symbols": {
+    "TargetFramework": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "net8.0",
+      "replaces": "{{TargetFramework}}"
+    },
+    "ImplicitUsings": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "false",
+      "replaces": "{{ImplicitUsings}}"
+    },
+    "Nullable": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "enable",
+      "replaces": "{{Nullable}}"
+    },
+    "LangVersion": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "latest",
+      "replaces": "{{LangVersion}}"
+    }
+  },
+  "sources": [
+    {
+      "source": "content",
+      "target": "./"
+    }
+  ]
+}

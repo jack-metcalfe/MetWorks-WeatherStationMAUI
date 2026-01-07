@@ -1,0 +1,14 @@
+﻿global using InterfaceDefinition;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.Maui;
+global using Microsoft.Maui.Accessibility;
+global using Microsoft.Maui.Controls;
+global using Microsoft.Maui.Controls.Hosting;
+global using Microsoft.Maui.Hosting;
+global using System;
+global using System.Threading.Tasks;
+global using ServiceRegistry;
+global using System.Threading;
+global using RedStar.Amounts;
+global using RedStar.Amounts.StandardUnits;
+global using static RedStar.Amounts.WeatherExtensions.WeatherUnitAliases;

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>false</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>MetWorksWeather.Services</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ServiceAssemblyOutputPath>..\..\ServiceAssemblies</ServiceAssemblyOutputPath>
+  </PropertyGroup>
+  <Target Name="CopyToServiceAssemblies" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ServiceAssemblyOutputPath)" SkipUnchangedFiles="false" />
+  </Target>
+  <ItemGroup>
+    <ProjectReference Include="..\basic_event_relay\BasicEventRelay.csproj" />
+    <ProjectReference Include="..\enum_definitions\enum_definition.csproj" />
+    <ProjectReference Include="..\interfaces\interfaces.csproj" />
+    <ProjectReference Include="..\metworks_models\MetWorksModels.csproj" />
+    <ProjectReference Include="..\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits.csproj" />
+    <ProjectReference Include="..\RedStar.Amounts.WeatherExtensions\RedStar.Amounts.WeatherExtensions.csproj" />
+    <ProjectReference Include="..\RedStar.Amounts\RedStar.Amounts\RedStar.Amounts.csproj" />
+    <ProjectReference Include="..\udp_packets\UdpPackets.csproj" />
+  </ItemGroup>
+</Project>

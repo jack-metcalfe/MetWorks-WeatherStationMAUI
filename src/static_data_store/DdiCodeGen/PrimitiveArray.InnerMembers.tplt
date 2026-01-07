@@ -1,0 +1,5 @@
+﻿// PrimitiveArray.InnerMembers
+// Inner members container for PrimitiveArray outer
+#nullable enable
+// Inserted member snippets:
+{{Members}}

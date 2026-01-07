@@ -1,0 +1,22 @@
+# Enforce LF for shell scripts and GitHub workflow scripts
+*.sh text eol=lf
+.github/scripts/* text eol=lf
+
+# Ensure YAML workflow files use LF
+.github/workflows/*.yml text eol=lf
+.github/workflows/*.yaml text eol=lf
+
+# Normalize common text/code files to LF
+*.csproj text eol=lf
+*.sln text eol=lf
+*.props text eol=lf
+*.targets text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+
+# Keep binary files unchanged
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary

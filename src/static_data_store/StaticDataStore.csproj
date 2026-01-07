@@ -1,0 +1,77 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="CodeGeneration\NamedInstanceAccessor\Templates\Enums.tplt" />
+		<EmbeddedResource Include="CodeGeneration\NamedInstanceAccessor\Templates\Enums.tplt">
+			<LogicalName>CodeGeneration.NamedInstanceAccessor.Templates.Enums.tplt</LogicalName>
+		</EmbeddedResource>
+		<None Remove="CodeGeneration\NamedInstanceAccessor\Templates\NamedInstanceAccessorClass.tplt" />
+		<EmbeddedResource Include="CodeGeneration\NamedInstanceAccessor\Templates\NamedInstanceAccessorClass.tplt">
+			<LogicalName>CodeGeneration.NamedInstanceAccessor.Templates.NamedInstanceAccessorClass.tplt</LogicalName>
+		</EmbeddedResource>
+		<None Remove="CodeGeneration\NamedInstanceAccessor\Templates\NamedInstanceAccessorFunction.tplt" />
+		<EmbeddedResource Include="CodeGeneration\NamedInstanceAccessor\Templates\NamedInstanceAccessorFunction.tplt">
+			<LogicalName>CodeGeneration.NamedInstanceAccessor.Templates.NamedInstanceAccessorFunction.tplt</LogicalName>
+		</EmbeddedResource>		
+		
+		<None Remove="DdiCodeGen\NamedInstanceAccessor.Function.Initializer.tplt" />
+		<EmbeddedResource Include="DdiCodeGen\NamedInstanceAccessor.Function.Initializer.tplt">
+			<LogicalName>DdiCodeGen.NamedInstanceAccessor.Function.Initializer.tplt</LogicalName>
+		</EmbeddedResource>		
+		
+		
+		<None Remove="DdiCodeGen\NamedInstanceAccessor.Class.tplt" />
+		<EmbeddedResource Include="DdiCodeGen\NamedInstanceAccessor.Class.tplt">
+		  <LogicalName>DdiCodeGen.NamedInstanceAccessor.Class.tplt</LogicalName>
+		</EmbeddedResource>
+
+		<None Remove="DdiCodeGen\NamedInstanceAccessor.Function.NamedInstanceArray.tplt" />
+		<EmbeddedResource Include="DdiCodeGen\NamedInstanceAccessor.Function.NamedInstanceArray.tplt">
+			<LogicalName>DdiCodeGen.NamedInstanceAccessor.Function.NamedInstanceArray.tplt</LogicalName>
+		</EmbeddedResource>		
+
+		<None Remove="DdiCodeGen\NamedInstanceAccessor.Function.tplt" />
+		<EmbeddedResource Include="DdiCodeGen\NamedInstanceAccessor.Function.tplt">
+			<LogicalName>DdiCodeGen.NamedInstanceAccessor.Function.tplt</LogicalName>
+		</EmbeddedResource>
+		<None Remove="DdiCodeGen\PrimitiveArray.tplt" />
+		<EmbeddedResource Include="DdiCodeGen\PrimitiveArray.tplt">
+			<LogicalName>DdiCodeGen.PrimitiveArray.tplt</LogicalName>
+		</EmbeddedResource>
+		<None Remove="DdiCodeGen\PrimitiveArray.InnerMembers.tplt" />
+		<EmbeddedResource Include="DdiCodeGen\PrimitiveArray.InnerMembers.tplt">
+			<LogicalName>DdiCodeGen.PrimitiveArray.InnerMembers.tplt</LogicalName>
+		</EmbeddedResource>
+		<None Remove="DdiCodeGen\PrimitiveArray.Member.tplt" />
+		<EmbeddedResource Include="DdiCodeGen\PrimitiveArray.Member.tplt">
+			<LogicalName>DdiCodeGen.PrimitiveArray.Member.tplt</LogicalName>
+		</EmbeddedResource>
+		<None Remove="ListenerSink\lightning.sql" />
+		<EmbeddedResource Include="ListenerSink\lightning.sql">
+			<LogicalName>ListenerSink.lightning.sql</LogicalName>
+		</EmbeddedResource>
+		<None Remove="ListenerSink\observation.sql" />
+		<EmbeddedResource Include="ListenerSink\observation.sql">
+			<LogicalName>ListenerSink.observation.sql</LogicalName>
+		</EmbeddedResource>
+		<None Remove="ListenerSink\precipitation.sql" />
+		<EmbeddedResource Include="ListenerSink\precipitation.sql">
+			<LogicalName>ListenerSink.precipitation.sql</LogicalName>
+		</EmbeddedResource>
+		<None Remove="ListenerSink\wind.sql" />
+		<EmbeddedResource Include="ListenerSink\wind.sql">
+			<LogicalName>ListenerSink.wind.sql</LogicalName>
+		</EmbeddedResource>
+		<None Remove="ServiceRegistryConfiguration\ServiceRegistry.yaml" />
+		<EmbeddedResource Include="ServiceRegistryConfiguration\ServiceRegistry.yaml">
+			<LogicalName>ServiceRegistryConfiguration.ServiceRegistry.yaml</LogicalName>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\utility\Utility.csproj" />
+	</ItemGroup>
+</Project>

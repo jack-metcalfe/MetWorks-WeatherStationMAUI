@@ -1,0 +1,6 @@
+﻿// This is a generated file - DO NOT EDIT!
+namespace {{NAMESPACE}};
+{{SCOPE}} enum {{COMPONENT}}Enum
+{
+	{{ENUM_VALUES}}
+}

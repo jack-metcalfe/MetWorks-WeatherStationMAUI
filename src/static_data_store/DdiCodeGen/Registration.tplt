@@ -1,0 +1,18 @@
+﻿// Registration
+// {{GeneratedHeader}}
+#nullable enable
+{{Usings}}
+
+using Microsoft.Extensions.DependencyInjection;
+
+namespace {{Namespace}}
+{
+    public static class GeneratedRegistrations
+    {
+        public static void AddGeneratedServices(IServiceCollection services)
+        {
+            // Aggregate call lines inserted here
+            {{Members}}
+        }
+    }
+}

@@ -1,0 +1,19 @@
+﻿// Initializer.Invoker
+// Per-initializer invoker snippet for {{SafeKey}}
+/* Provenance: {{Provenance}} */
+#nullable enable
+using System;
+using System.Threading.Tasks;
+
+namespace {{Namespace}}
+{
+    internal static partial class {{SafeKey}}_Initializer
+    {
+        // Token contract: SafeKey; Provenance; FailFast
+        public static Task Invoke_{{SafeKey}}Async(IServiceProvider provider)
+        {
+            // Default no-op invoker; real token builders should emit invocation body.
+            return Task.CompletedTask;
+        }
+    }
+}

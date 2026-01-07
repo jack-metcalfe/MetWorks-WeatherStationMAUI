@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\basic_event_relay\BasicEventRelay.csproj" />
+		<ProjectReference Include="..\enum_definitions\enum_definition.csproj" />
+		<ProjectReference Include="..\interfaces\interfaces.csproj" />
+		<ProjectReference Include="..\metworks_models\MetWorksModels.csproj" />
+		<ProjectReference Include="..\metworks_services\MetWorksServices.csproj" />
+		<ProjectReference Include="..\udp_packets\UdpPackets.csproj" />
+		<ProjectReference Include="..\utility\Utility.csproj" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<ServiceAssemblyOutputPath>..\..\ServiceAssemblies</ServiceAssemblyOutputPath>
+	</PropertyGroup>
+	<Target Name="CopyToServiceAssemblies" AfterTargets="Build">
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ServiceAssemblyOutputPath)" SkipUnchangedFiles="false" />
+	</Target>
+</Project>

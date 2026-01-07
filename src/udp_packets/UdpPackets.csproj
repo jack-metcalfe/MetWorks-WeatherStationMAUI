@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\enum_definitions\enum_definition.csproj" />
+    <ProjectReference Include="..\interfaces\interfaces.csproj" />
+    <ProjectReference Include="..\utility\Utility.csproj" />
+  </ItemGroup>
+
+	<PropertyGroup>
+		<ServiceAssemblyOutputPath>..\..\ServiceAssemblies</ServiceAssemblyOutputPath>
+	</PropertyGroup>
+	<Target Name="CopyToServiceAssemblies" AfterTargets="Build">
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ServiceAssemblyOutputPath)" SkipUnchangedFiles="false" />
+	</Target>
+</Project>
