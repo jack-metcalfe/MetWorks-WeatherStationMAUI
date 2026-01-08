@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MetWorksWeather.ViewModels"
+             x:Class="MetWorksWeather.Pages.LargeFormatWeatherView"
+             Title="Weather Station - Large Format"
+             x:DataType="viewmodels:LargeFormatWeatherViewModel"
+             BackgroundColor="{StaticResource PurpleVikings}">
+
+    <Grid Margin="0" Padding="0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="2*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ROW 0: HEADERS (Temp | Date | Wind) -->
+
+        <!-- Temperature Header -->
+        <Border Grid.Row="0" Grid.Column="0" StrokeThickness="0">
+            <Label
+                FontSize="45"
+                TextColor="{StaticResource GoldVikings}"
+                VerticalTextAlignment="End"
+                HorizontalTextAlignment="Center"
+                Text="Temp" />
+        </Border>
+
+        <!-- Date Header (displays current date) -->
+        <Border Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" StrokeThickness="0">
+            <Label 
+                FontSize="150"
+                TextColor="{StaticResource GoldVikings}" 
+                VerticalTextAlignment="Start"
+                HorizontalTextAlignment="Center"
+                Margin="0,90,0,0"
+                Text="{Binding TimeDayOfWeek}" />
+        </Border>
+
+        <!-- Wind Header -->
+        <Border Grid.Row="0" Grid.Column="2" StrokeThickness="0">
+            <Label 
+                FontSize="45"
+                TextColor="{StaticResource GoldVikings}" 
+                VerticalTextAlignment="End"
+                HorizontalTextAlignment="Center" 
+                Text="Wind" />
+        </Border>
+
+        <!-- ========================================
+             ROWS 1-2: LARGE VALUES (Temperature | Time HH | Wind Direction)
+             ======================================== -->
+
+        <!-- Temperature Value (with small unit above) -->
+        <Border Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" StrokeThickness="0">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="5">
+                <!-- Small unit symbol -->
+                <Label 
+                    FontSize="32"
+                    TextColor="{StaticResource GoldVikings}"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding TemperatureUnit}" />
+                <!-- Large temperature value -->
+                <Label 
+                    FontSize="328"
+                    Margin="0,-100,0,0"
+                    TextColor="{StaticResource GoldVikings}"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding TemperatureValue}" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Time - Hours and Date (large center display) -->
+        <Border Grid.Row="2" Grid.Column="1" Grid.RowSpan="3" StrokeThickness="0">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="0">
+                <!-- Date line 2: "Jan 08" -->
+                <Label
+                    FontSize="150"
+                    Margin="0,0,0,0"
+                    TextColor="{StaticResource GoldVikings}"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding TimeDateDisplay}" />
+                <!-- Time: "11:30" -->
+                <Label
+                    FontSize="150"
+                    Margin="0,0,0,0"
+                    TextColor="{StaticResource GoldVikings}"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding TimeDisplay}" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Wind Direction and Speed -->
+        <Border Grid.Row="1" Grid.Column="2" Grid.RowSpan="2" StrokeThickness="0">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
+                <!-- Wind direction (small) -->
+                <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <Label 
+                        FontSize="45"
+                        TextColor="{StaticResource GoldVikings}"
+                        Text="{Binding WindDirectionCardinal}" />
+                    <Label 
+                        FontSize="45"
+                        TextColor="{StaticResource GoldVikings}"
+                        Text="{Binding WindDirectionDegrees}" />
+                </HorizontalStackLayout>
+
+                <!-- Wind speed unit (small) -->
+                <Label 
+                    FontSize="32"
+                    TextColor="{StaticResource GoldVikings}"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding WindSpeedUnit}" />
+
+                <!-- Wind speed value (large) -->
+                <Label 
+                    FontSize="265"
+                    Margin="0,-70,0,0"
+                    TextColor="{StaticResource GoldVikings}"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding WindSpeedValue}" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Humidity Header -->
+        <Border Grid.Row="3" Grid.Column="0" StrokeThickness="0">
+            <Label 
+                FontSize="45"
+                Margin="0,-10,0,0"
+                TextColor="{StaticResource GoldVikings}"  
+                VerticalTextAlignment="End"
+                HorizontalTextAlignment="Center"
+                Text="Humidity" />
+        </Border>
+
+        <!-- UV Header -->
+        <Border Grid.Row="3" Grid.Column="2" StrokeThickness="0">
+            <Label 
+                FontSize="45"
+                TextColor="{StaticResource GoldVikings}"  
+                VerticalTextAlignment="End"
+                HorizontalTextAlignment="Center"
+                Text="UV Index" />
+        </Border>
+
+        <!-- Humidity Value -->
+        <Border Grid.Row="4" Grid.Column="0" StrokeThickness="0">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="5">
+                <!-- Small unit symbol -->
+                <Label 
+                    FontSize="32"
+                    TextColor="{StaticResource GoldVikings}"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding HumidityUnit}" />
+                <!-- Large humidity value -->
+                <Label 
+                    FontSize="265"
+                    Margin="0,-100,0,0"
+                    TextColor="{StaticResource GoldVikings}"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding HumidityValue}" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- UV Index Value -->
+        <Border Grid.Row="4" Grid.Column="2" StrokeThickness="0">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="5">
+                <!-- Spacer for alignment (UV has no unit) -->
+                <Label 
+                    FontSize="32"
+                    TextColor="{StaticResource GoldVikings}"
+                    HorizontalTextAlignment="Center"
+                    Text=" " />
+                <!-- Large UV value -->
+                <Label 
+                    FontSize="265"
+                    Margin="0,-100,0,0"
+                    TextColor="{StaticResource GoldVikings}"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding UvIndexValue}" />
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+
+</ContentPage>

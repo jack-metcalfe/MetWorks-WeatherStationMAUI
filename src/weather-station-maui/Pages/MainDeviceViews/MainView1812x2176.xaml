@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sys="clr-namespace:System;assembly=netstandard"    
+    x:Class="TempestMonitor.Views.MainDeviceViews.MainView1812x2176"
+    xmlns:exe="clr-namespace:TempestMonitor.ViewModels;assembly=TempestMonitor"
+    x:DataType="exe:MainViewModel"
+>
+    <Grid 
+        BackgroundColor="{StaticResource PurpleVikings}"
+        Margin="0,0,0,0"
+        Padding="0,0,0,0"
+    >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height=".5*"/>
+            <RowDefinition Height=".5*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height=".5*"/>
+            <RowDefinition Height="2*"/>
+        </Grid.RowDefinitions>
+        <Border
+            Grid.Row="0"
+            Grid.Column="0"
+            StrokeThickness="0"
+        >
+            <Label
+                FontSize="35"
+                TextColor="{StaticResource GoldVikings}"
+                VerticalTextAlignment="End"
+                HorizontalTextAlignment="Center"
+                Text="Temp"
+            />
+        </Border>
+        <Border
+            Grid.Row="0"
+            Grid.Column="1"
+            StrokeThickness="0"
+        >
+            <Label 
+                FontSize="35"
+                TextColor="{StaticResource GoldVikings}" 
+                VerticalTextAlignment="End"
+                HorizontalTextAlignment="Center" 
+                Text="Wind"
+            />
+        </Border>
+        <Border
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.RowSpan="1"
+            StrokeThickness="0"
+        >
+            <Label 
+                Margin="0,0,0,0"
+                FontSize="155"
+                TextColor="{StaticResource GoldVikings}"                    
+                VerticalTextAlignment="Center"
+                HorizontalTextAlignment="Center" 
+                Text="{Binding ObservableVW_Observation.air_temperature, StringFormat='{0:###}'}"
+            />
+        </Border>
+        <Border
+            Grid.Row="1"
+            Grid.Column="1"
+            StrokeThickness="0"
+        >
+            <Label 
+                FontSize="35"
+                TextColor="{StaticResource GoldVikings}"
+                VerticalTextAlignment="Center"
+                HorizontalTextAlignment="Center" 
+                Text="{Binding ObservableVW_WindModel.wind_direction_short_cardinal, StringFormat='{0}'}"
+            />
+        </Border>
+        <Border
+            Grid.Row="2"
+            Grid.Column="1"
+            Grid.RowSpan="1"
+            StrokeThickness="0"
+        >
+            <Label 
+                FontSize="155"
+                Margin="0,0,0,0"
+                TextColor="{StaticResource GoldVikings}" 
+                VerticalTextAlignment="Center" 
+                HorizontalTextAlignment="Center" 
+                Text="{Binding ObservableVW_WindModel.wind_speed, StringFormat='{0:##0}'}"
+            />
+        </Border>
+        <Border
+            Grid.Row="3"
+            Grid.Column="0"
+            StrokeThickness="0"
+        >
+            <Label 
+                FontSize="35"
+                Margin="0,0,0,0"
+                TextColor="{StaticResource GoldVikings}"  
+                VerticalTextAlignment="End"
+                HorizontalTextAlignment="Center"
+                Text="Humidity"
+            />
+        </Border>
+        <Border
+            Grid.Row="3"
+            Grid.Column="1"
+            StrokeThickness="0"
+        >
+            <Label 
+                FontSize="35"
+                TextColor="{StaticResource GoldVikings}"  
+                VerticalTextAlignment="Center"
+                HorizontalTextAlignment="Center"
+                Text="UV"
+            />
+        </Border>
+        <Border
+            Grid.Row="4"
+            Grid.Column="0"
+            StrokeThickness="0"
+        >
+            <Label 
+                FontSize="155"
+                Margin="0,0,0,0"
+                TextColor="{StaticResource GoldVikings}" 
+                VerticalTextAlignment="Center"
+                HorizontalTextAlignment="Center" 
+                Text="{Binding ObservableVW_Observation.relative_humidity, StringFormat='{0:###}'}"/>
+        </Border>
+        <Border
+            Grid.Row="4"
+            Grid.Column="1"
+            StrokeThickness="0"
+        >
+            <Label 
+                FontSize="155"
+                Margin="0,0,0,0"
+                TextColor="{StaticResource GoldVikings}" 
+                VerticalTextAlignment="Center" 
+                HorizontalTextAlignment="Center" 
+                Text="{Binding ObservableVW_Observation.uv, StringFormat='{0:#0}'}"
+            />
+        </Border>
+    </Grid>
+</ContentView>
