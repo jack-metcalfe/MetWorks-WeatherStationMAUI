@@ -13,6 +13,10 @@
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 
+		<!-- Force output to Windows native file system to avoid WSL COM issues -->
+		<BaseOutputPath>C:\Temp\WeatherStation\bin\</BaseOutputPath>
+		<BaseIntermediateOutputPath>C:\Temp\WeatherStation\obj\</BaseIntermediateOutputPath>
+
 		<!-- Explicit usings and nullability -->
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
@@ -60,15 +64,18 @@
 
 	<ItemGroup>
 		<!-- Use latest preview versions explicitly -->
-		<PackageReference Include="Dapper" Version="2.1.66" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0-preview.4.123" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.0" />
-		<PackageReference Include="Npgsql" Version="10.0.0-rc.1" />
+		<PackageReference Include="Dapper" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" />
+		<PackageReference Include="Microsoft.Maui.Controls" />
+		<PackageReference Include="Npgsql" />
+		<PackageReference Include="System.Reactive" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\ddi_registry\DdiRegistry.csproj" />
+		<ProjectReference Include="..\enum_definitions\enum_definition.csproj" />
+		<ProjectReference Include="..\metworks_models\MetWorksModels.csproj" />
 		<ProjectReference Include="..\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits.csproj" />
 		<ProjectReference Include="..\RedStar.Amounts.WeatherExtensions\RedStar.Amounts.WeatherExtensions.csproj" />
 		<ProjectReference Include="..\interfaces\interfaces.csproj" />
@@ -76,4 +83,11 @@
 		<ProjectReference Include="..\utility\Utility.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<MauiXaml Update="Pages\WeatherPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+	</ItemGroup>
+
 </Project>
+

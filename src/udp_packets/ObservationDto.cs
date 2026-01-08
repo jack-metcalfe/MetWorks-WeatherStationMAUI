@@ -1,19 +1,12 @@
 ﻿namespace UdpPackets;
 internal sealed class ObservationDto : PacketDtoBase, IObservationDto
 {
-    [JsonPropertyName("firmware_revision")] public int FirmwareRevision { get; init; }
-    [JsonIgnore] public IObservationReadingDto[] Observations { get; init; }
-    [JsonPropertyName("obs")] public JsonElement Measurements { get; init; }
-    [JsonConstructor]
-    public ObservationDto(string serial_number, string type, string hub_sn, int firmware_revision, JsonElement obs)
-    {
-        SerialNumber = serial_number;
-        Type = type;
-        HubSerialNumber = hub_sn;
-        FirmwareRevision = firmware_revision;
-        Measurements = obs;
-
-        Observations = obs.EnumerateArray()
+    [JsonPropertyName("firmware_revision")] public required int FirmwareRevision { get; init; }
+    [JsonPropertyName("obs")] public required JsonElement Measurements { get; init; }
+    
+    [JsonIgnore] 
+    public IObservationReadingDto[] Observations => 
+        Measurements.EnumerateArray()
             .Select(inner => inner.EnumerateArray().ToArray())
             .Select(array => new ObservationReadingDto
             {
@@ -37,5 +30,4 @@ internal sealed class ObservationDto : PacketDtoBase, IObservationDto
                 ReportingInterval = array[17].GetInt32()
             })
             .ToArray();
-    }
 }

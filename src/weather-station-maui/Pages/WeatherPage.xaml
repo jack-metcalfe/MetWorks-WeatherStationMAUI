@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MetWorksWeather.ViewModels"
+             x:Class="MetWorksWeather.Pages.WeatherPage"
+             Title="Weather Station"
+             x:DataType="viewmodels:WeatherViewModel">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            
+            <Label Text="Current Weather"
+                   FontSize="32"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+
+            <!-- Wind Section -->
+            <Frame Padding="15" BackgroundColor="{AppThemeBinding Light=#F0F0F0, Dark=#2C2C2C}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Wind" FontSize="24" FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto, Auto" ColumnSpacing="10" RowSpacing="5">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Speed:" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding WindSpeedDisplay}" FontAttributes="Bold" />
+                        
+                        <Label Grid.Row="1" Grid.Column="0" Text="Direction:" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding WindDirectionDisplay}" FontAttributes="Bold" />
+                        
+                        <Label Grid.Row="2" Grid.Column="0" Text="Gust:" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding WindGustDisplay}" FontAttributes="Bold" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Temperature Section -->
+            <Frame Padding="15" BackgroundColor="{AppThemeBinding Light=#F0F0F0, Dark=#2C2C2C}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Temperature" FontSize="24" FontAttributes="Bold" />
+                    <Label Text="{Binding TemperatureDisplay}" FontSize="48" FontAttributes="Bold" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Pressure Section -->
+            <Frame Padding="15" BackgroundColor="{AppThemeBinding Light=#F0F0F0, Dark=#2C2C2C}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Pressure" FontSize="24" FontAttributes="Bold" />
+                    <Label Text="{Binding PressureDisplay}" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Humidity Section -->
+            <Frame Padding="15" BackgroundColor="{AppThemeBinding Light=#F0F0F0, Dark=#2C2C2C}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Humidity" FontSize="24" FontAttributes="Bold" />
+                    <Label Text="{Binding HumidityDisplay}" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

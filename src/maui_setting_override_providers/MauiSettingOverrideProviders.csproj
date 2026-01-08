@@ -18,8 +18,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.0" />
-		<PackageReference Include="YamlDotNet" Version="16.3.0" />
+		<PackageReference Include="Microsoft.Maui.Controls"/>
+		<PackageReference Include="YamlDotNet"/>
 	</ItemGroup>
 
 	<ItemGroup>

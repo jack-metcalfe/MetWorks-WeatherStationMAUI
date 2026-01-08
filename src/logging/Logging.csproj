@@ -9,7 +9,7 @@
     <ProjectReference Include="..\interfaces\interfaces.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="*" />
-    <PackageReference Include="Serilog.Sinks.File" Version="*" />
+    <PackageReference Include="Serilog"/>
+    <PackageReference Include="Serilog.Sinks.File"/>
   </ItemGroup>
 </Project>

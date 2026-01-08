@@ -1,4 +1,9 @@
-﻿namespace MetWorksWeather;
+﻿using MetWorksWeather.Pages;
+using MetWorksWeather.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MetWorksWeather;
+
 public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
@@ -12,8 +17,11 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
+        // NOTE: MockWeatherReadingService is now started in StartupInitializer.cs
+        // No need to register it here - it publishes directly to ISingletonEventRelay
+        
 #if DEBUG
-		builder.Logging.AddDebug();
+        builder.Logging.AddDebug();
 #endif
 
         return builder.Build();

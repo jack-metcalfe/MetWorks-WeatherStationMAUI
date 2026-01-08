@@ -375,9 +375,11 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                 
                 IFileLoggerSafe.Warning(
                     $"⚠️ Received unimplemented packet type from {result.RemoteEndPoint} " +
-                    $"({result.Buffer.Length} bytes)");
+                        $"({result.Buffer.Length} bytes)");
+                IFileLoggerSafe.Warning($"packet contents [{iRawPacketRecordTyped.RawPacketJson}]");
+
             }
-            
+
             await Task.CompletedTask;
         }
         catch (Exception exception)

@@ -158,7 +158,7 @@ public class SettingsRepository : ISettingsRepository
     // ENHANCED: ApplyOverrides with Change Tracking
     // ========================================
 
-    public async Task<bool> ApplyOverrides()
+    async Task<bool> ApplyOverrides()
     {
         if (InitializationState != InitializationStateEnum.Ready)
             throw new InvalidOperationException("SettingsRepository must be initialized before applying overrides.");

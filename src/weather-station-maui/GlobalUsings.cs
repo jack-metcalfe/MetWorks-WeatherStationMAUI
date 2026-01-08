@@ -12,3 +12,5 @@ global using System.Threading;
 global using RedStar.Amounts;
 global using RedStar.Amounts.StandardUnits;
 global using static RedStar.Amounts.WeatherExtensions.WeatherUnitAliases;
+global using EnumDefinition;
+global using MetWorksModels.Weather;

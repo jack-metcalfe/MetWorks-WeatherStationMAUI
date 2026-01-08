@@ -54,7 +54,8 @@ public class WeatherDataTransformer : IAsyncDisposable
     public async Task<bool> InitializeAsync(
         IFileLogger iFileLogger,
         ISettingsRepository iSettingsRepository,
-        ProvenanceTracker? provenanceTracker = null)
+        ProvenanceTracker? provenanceTracker = null
+    )
     {
         if (iFileLogger is null)
             throw new ArgumentNullException(nameof(iFileLogger));
@@ -260,8 +261,27 @@ public class WeatherDataTransformer : IAsyncDisposable
             $"Converted to {reading.PacketType} with user units",
             transformEnd - transformStart);
 
-        // Publish typed reading
-        ISingletonEventRelay.Send(reading);
+        // ========================================
+        // FIX: Send the SPECIFIC type, not the base interface
+        // ========================================
+        switch (reading)
+        {
+            case IObservationReading obs:
+                ISingletonEventRelay.Send(obs);  // ✅ Send as IObservationReading
+                break;
+            case IWindReading wind:
+                ISingletonEventRelay.Send(wind);  // ✅ Send as IWindReading
+                break;
+            case IPrecipitationReading precip:
+                ISingletonEventRelay.Send(precip);  // ✅ Send as IPrecipitationReading
+                break;
+            case ILightningReading lightning:
+                ISingletonEventRelay.Send(lightning);  // ✅ Send as ILightningReading
+                break;
+            default:
+                FileLoggerSafe.Warning($"⚠️ Unknown reading type: {reading.GetType().Name}");
+                break;
+        }
 
         FileLoggerSafe.Debug($"📤 Published {reading.PacketType} reading: {reading.Id}");
     }
@@ -279,6 +299,7 @@ public class WeatherDataTransformer : IAsyncDisposable
             if (reading is null)
             {
                 FileLoggerSafe.Warning($"⚠️ Failed to parse observation packet {rawPacket.Id}");
+                FileLoggerSafe.Warning($"observation contents {rawPacket.RawPacketJson}");
                 return null;
             }
 

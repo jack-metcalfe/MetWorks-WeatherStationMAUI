@@ -2,6 +2,7 @@
 using RedStar.Amounts;
 using RedStar.Amounts.StandardUnits;
 using RedStar.Amounts.WeatherExtensions;
+using MetWorksWeather.Services;
 
 namespace MetWorksWeather;
 
@@ -11,6 +12,7 @@ public class StartupInitializer
     private static IFileLogger? _fileLogger;
     private static bool _isInitialized = false;
     private static bool _isDatabaseAvailable = false;
+    private static MockWeatherReadingService? _mockWeatherService; // NEW: Mock service
     
     // Expose registry for dependency access
     public static Registry? Registry => _appRegistry;
@@ -50,14 +52,14 @@ public class StartupInitializer
         try
         {
             // ========================================
-            // NEW: Register RedStar.Amounts FIRST
+            // Register RedStar.Amounts FIRST
             // ========================================
             Debug.WriteLine("📐 Registering RedStar.Amounts units...");
             UnitManager.RegisterByAssembly(typeof(TemperatureUnits).Assembly);
             Debug.WriteLine("✅ RedStar.Amounts units registered");
             
             // ========================================
-            // NEW: Register weather unit aliases
+            // Register weather unit aliases
             // ========================================
             Debug.WriteLine("🌤️ Registering weather unit aliases...");
             WeatherUnitAliases.Register();
@@ -107,6 +109,18 @@ public class StartupInitializer
                 
                 throw;
             }
+            
+            // ========================================
+            // NEW: Start Mock Weather Service for Development
+            // ========================================
+            // TODO: Remove this in production or add conditional compilation
+            //#if DEBUG
+            //Debug.WriteLine("🎭 Starting mock weather service for development...");
+            //_mockWeatherService = new MockWeatherReadingService();
+            //_mockWeatherService.Start();
+            //_fileLogger?.Information("🎭 Mock weather service started - publishing fake data every 2 seconds");
+            //Debug.WriteLine("✅ Mock weather service running");
+            //#endif
         }
         catch (Exception exception)
         {
@@ -179,6 +193,16 @@ public class StartupInitializer
         {
             _fileLogger?.Information("🛑 Shutting down application services...");
             Debug.WriteLine("🛑 Shutting down application services...");
+            
+            // Stop mock service if running
+            if (_mockWeatherService != null)
+            {
+                Debug.WriteLine("🎭 Stopping mock weather service...");
+                _mockWeatherService.Stop();
+                _mockWeatherService.Dispose();
+                _mockWeatherService = null;
+                Debug.WriteLine("✅ Mock weather service stopped");
+            }
             
             if (_appRegistry != null)
             {
