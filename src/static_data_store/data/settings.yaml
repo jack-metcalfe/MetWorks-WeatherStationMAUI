@@ -1,0 +1,149 @@
+﻿values:
+  - path: /services/udpListener/preferredPort
+    value: "50222"
+
+definitions:
+  - path: /services/unitOfMeasure/airPressure
+    defaultValue: "inch of mercury"
+    description: "Unit that air pressure is provided in"
+    expectedValueType: "String"
+    allowableValues:
+      - "atmosphere"
+      - "bar"
+      - "hectopascal"
+      - "inch of mercury"
+      - "kilopascal"
+      - "millibar"
+      - "pascal"
+    isEditable: true
+    isSecret: false
+    
+  - path:   /services/unitOfMeasure/airTemperature
+    defaultValue: "degree fahrenheit"
+    description: "Unit that air temperature is provided in"
+    expectedValueType: "String"
+    allowableValues:
+    - "degree fahrenheit"
+    - "degree celsius"
+    isEditable: true
+    isSecret: false
+
+  - path: /services/unitOfMeasure/lightningDistance
+    defaultValue: "mile"
+    description: "Unit that lightning distance is provided in"
+    expectedValueType: "String"
+    allowableValues:
+      - "kilometer"
+      - "meter"
+      - "mile"
+      - "nautical mile"
+    isEditable: true
+    isSecret: false
+  
+  - path: /services/unitOfMeasure/precipitationAmount
+    defaultValue: "inch"
+    description: "Unit that the amount of precipitation is provided in"
+    expectedValueType: "String"
+    allowableValues:
+      - "centimeter"
+      - "millimeter"
+      - "inch"
+    isSecret: false
+
+  - path: /services/unitOfMeasure/windSpeed
+    defaultValue: "mile/hour"
+    description: "Unit that lightning distance is provided in"
+    expectedValueType: "String"
+    allowableValues:
+    - "kilometer/hour"
+    - "knot"
+    - "meter/second"
+    - "mile/hour"
+    isSecret: false
+
+  - path: /services/xmlToPostgreSQL/connectionString
+    defaultValue: "Host=192.168.8.9;Port=5432;Database=weather;Username=weather;Password=Sylvia3927"
+    description: "Connection string for PostgreSQL database"
+    expectedValueType: "String"
+    allowableValues:
+    isSecret: true
+
+  - path: /services/xmlToPostgreSQL/enableBuffering
+    defaultValue: "false"
+    description: "Enable buffering for PostgreSQL database"
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
+    isSecret: false
+
+  - path: /services/logging/loggerFile/fileSizeLimitBytes
+    defaultValue: "10485760"
+    description: "File size limit in bytes"
+    expectedValueType: "Int32"
+    allowableValues: []
+    isSecret: false
+
+  - path: /services/logging/loggerFile/minimumLevel
+    defaultValue: "Information"
+    description: "Minimum log level"
+    expectedValueType: "String"
+    allowableValues:
+      - "Verbose"
+      - "Debug"
+      - "Information"
+      - "Warning"
+      - "Error"
+      - "Fatal"
+    isSecret: false
+
+  - path: /services/logging/loggerFile/outputTemplate
+    defaultValue: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+    description: "Serilog output template"
+    expectedValueType: "String"
+    allowableValues: []
+    isSecret: false
+
+  - path: /services/logging/loggerFile/relativeLogPath
+    defaultValue: "Logs/log-.txt"
+    description: "File path for log files"
+    expectedValueType: "String"
+    allowableValues: []
+    isSecret: false
+
+  - path: /services/logging/loggerFile/retainedFileCountLimit
+    defaultValue: "7"
+    description: "Retained file count limit"
+    expectedValueType: "Int32"
+    allowableValues: []
+    isSecret: false
+
+  - path: /services/logging/loggerFile/rollingInterval
+    defaultValue: "Day"
+    description: "Rolling Interval"
+    expectedValueType: "String"
+    allowableValues:
+      - "Infinite"
+      - "Year"
+      - "Month"
+      - "Day"
+      - "Hour"
+      - "Minute"
+    isSecret: false
+
+  - path: /services/logging/loggerFile/rollOnFileSizeLimit
+    defaultValue: "false"
+    description: "Roll on file size limit"
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
+    isSecret: false
+
+  - path: /services/udpListener/preferredPort
+    defaultValue: "50222"
+    description: "UDP Port for listening for readings from Tempest Weather Station"
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false

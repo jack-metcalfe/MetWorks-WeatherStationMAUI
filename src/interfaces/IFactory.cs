@@ -1,5 +1,5 @@
-﻿namespace InterfaceDefinition;
+﻿namespace Interfaces;
 public interface IFactory<TReturnType, TInputType>
 {
-    TReturnType Create(IFileLogger iFileLogger, TInputType input);
+    TReturnType Create(ILogger iFileLogger, TInputType input);
 }

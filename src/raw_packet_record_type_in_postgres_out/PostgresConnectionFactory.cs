@@ -6,8 +6,8 @@
 /// </summary>
 internal class PostgresConnectionFactory
 {
-    IFileLogger? IFileLogger { get; set; }
-    IFileLogger IFileLoggerSafe => NullPropertyGuard.GetSafeClass(
+    ILogger? IFileLogger { get; set; }
+    ILogger IFileLoggerSafe => NullPropertyGuard.GetSafeClass(
         IFileLogger, "PostgresConnectionFactory not initialized. Call InitializeAsync before using.");
     
     string? ConnectionString { get; set; }
@@ -18,7 +18,7 @@ internal class PostgresConnectionFactory
     {
     }
     
-    async Task<bool> InitializeAsync(IFileLogger iFileLogger, string connectionString)
+    async Task<bool> InitializeAsync(ILogger iFileLogger, string connectionString)
     {
         IFileLogger = iFileLogger;
         ConnectionString = connectionString;
@@ -26,7 +26,7 @@ internal class PostgresConnectionFactory
     }
     
     public static async Task<PostgresConnectionFactory> CreateAsync(
-        IFileLogger iFileLogger, string connectionString)
+        ILogger iFileLogger, string connectionString)
     {
         var postgresConnectionFactory = new PostgresConnectionFactory();
         if (await postgresConnectionFactory.InitializeAsync(iFileLogger, connectionString))

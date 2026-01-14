@@ -1,4 +1,3 @@
-using System.Reflection.Metadata.Ecma335;
 using System.Net.NetworkInformation;
 
 namespace UdpInRawPacketRecordTypedOut;
@@ -10,6 +9,33 @@ namespace UdpInRawPacketRecordTypedOut;
 /// </summary>
 public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
 {
+    bool _isInitialized = false;
+
+    ILogger? _iLogger = null;
+    ILogger ILogger
+    {
+        get => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
+        set => _iLogger = value;
+    }
+
+    IEventRelayBasic? _iEventRelayBasic = null;
+    IEventRelayBasic IEventRelayBasic
+    {
+        get => NullPropertyGuard.Get(
+            _isInitialized, _iEventRelayBasic, nameof(IEventRelayBasic)
+        );
+        set => _iEventRelayBasic = value;
+    }
+
+    ISettingRepository? _iSettingRepository;
+    ISettingRepository ISettingRepository
+    {
+        get => NullPropertyGuard.Get(
+            _isInitialized, _iSettingRepository, nameof(IEventRelayBasic)
+        );
+        set => _iSettingRepository = value;
+    }
+
     private const int MaxRetryAttempts = 3;
     private const int RetryDelaySeconds = 5;
     private const int ReceiveTimeoutSeconds = 10;
@@ -22,98 +48,90 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
     private int _consecutiveErrors = 0;
     private const int MaxConsecutiveErrors = 10;
     
-    IFileLogger? IFileLogger { get; set; }
-    IFileLogger IFileLoggerSafe => NullPropertyGuard.GetSafeClass(
-        IFileLogger, "Listener not initialized. Call InitializeAsync before using.");
-    
     UdpClient? UdpClient { get; set; }
     UdpClient UdpClientSafe => NullPropertyGuard.GetSafeClass(
-        UdpClient, "Listener not initialized. Call InitializeAsync before using.", IFileLoggerSafe);
+        UdpClient, "Listener not initialized. Call InitializeAsync before using.", ILogger);
     
     CancellationTokenSource LocalCancellationTokenSource { get; set; } = new ();
     CancellationTokenSource LocalCancellationTokenSourceSafe => NullPropertyGuard.GetSafeClass(
-        LocalCancellationTokenSource, "Listener not initialized. Call InitializeAsync before using.", IFileLoggerSafe);
+        LocalCancellationTokenSource, "Listener not initialized. Call InitializeAsync before using.", ILogger);
     CancellationToken LocalCancellationTokenSafe => LocalCancellationTokenSourceSafe.Token;
     
     CancellationTokenSource? LinkedCancellationTokenSource { get; set; }
     CancellationTokenSource LinkedCancellationTokenSourceSafe => NullPropertyGuard.GetSafeClass(
-        LinkedCancellationTokenSource, "Listener not initialized. Call InitializeAsync before using.", IFileLoggerSafe);
+        LinkedCancellationTokenSource, "Listener not initialized. Call InitializeAsync before using.", ILogger);
     
-    ISettingsRepository? ISettingsRepository { get; set; }
-    ISettingsRepository ISettingsRepositorySafe => NullPropertyGuard.GetSafeClass(
-        ISettingsRepository, "Listener not initialized. Call InitializeAsync before using.", IFileLoggerSafe);
-    
-    ProvenanceTracker? ProvenanceTracker { get; set; }
-    
-    static Transformer()
-    {
-    }
-    
+    ProvenanceTracker? ProvenanceTracker { get; set; }    
     public Transformer()
     {
-    }
-    
+    }    
     public async Task<bool> InitializeAsync(
-        IFileLogger iFileLogger,
-        ISettingsRepository iSettingsRepository,
+        ILogger iLogger,
+        ISettingRepository iSettingRepository,
+        IEventRelayBasic iEventRelayBasic,
         CancellationTokenSource externalCancellationTokenSource,
-        ProvenanceTracker? provenanceTracker = null  // NEW: Optional
+        ProvenanceTracker? provenanceTracker = null
     )
     {
         try
         {
-            IFileLogger = iFileLogger; // Enable local logging immediately when can
+            ILogger = iLogger;
+            ISettingRepository = iSettingRepository;
+            IEventRelayBasic = iEventRelayBasic;
+            ProvenanceTracker = provenanceTracker;
+            _isInitialized = true;
+
+            if (ProvenanceTracker is null)
+                ILogger.Warning("⚠️ Provenance tracking is not enabled for UDP listener");
+            else
+                ILogger.Information("🔍 Provenance tracking enabled for UDP listener");
 
             LinkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
                 externalCancellationTokenSource.Token, LocalCancellationTokenSafe
             );
-
-            ISettingsRepository = iSettingsRepository;
-            
             // Log network interfaces for diagnostics
             LogNetworkInterfaces();
-            
-            IFileLoggerSafe.Information("🛠️ UDP listener initialized successfully");
-            
-            ProvenanceTracker = provenanceTracker;
 
-            if (ProvenanceTracker != null)
+            if (!await SetupAsync().ConfigureAwait(false))
             {
-                IFileLoggerSafe.Information("🔍 Provenance tracking enabled for UDP listener");
+                ILogger.Error("❌ UDP listener setup failed");
+                return false;
             }
             
-            var isSetup = await SetupAsync().ConfigureAwait(false);
-            if (!isSetup)
+            if (!await StartAsync().ConfigureAwait(false))
+            {
+                ILogger.Error("❌ UDP listener failed to start");
                 return false;
-            
-            var isRunning = await StartAsync().ConfigureAwait(false);
-            return isRunning;
+            }
+
+            ILogger.Information("🛠️ UDP listener initialized successfully");
+
+            return await Task.FromResult(_isInitialized);
         }
         catch (Exception exception)
         {
-            throw IFileLoggerSafe.LogExceptionAndReturn(exception, "❌ UDP listener initialization failed");
+            throw ILogger.LogExceptionAndReturn(exception, "❌ UDP listener initialization failed");
         }
     }
-
     private void LogNetworkInterfaces()
     {
         try
         {
-            IFileLoggerSafe.Information("📡 Available network interfaces:");
+            ILogger.Information("📡 Available network interfaces:");
             
             var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
-            foreach (var ni in networkInterfaces)
+            foreach (var networkInterface in networkInterfaces)
             {
-                if (ni.OperationalStatus == OperationalStatus.Up && 
-                    ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                if (networkInterface.OperationalStatus == OperationalStatus.Up && 
+                    networkInterface.NetworkInterfaceType != NetworkInterfaceType.Loopback)
                 {
-                    IFileLoggerSafe.Information($"   • {ni.Name} ({ni.Description}) - {ni.NetworkInterfaceType}");
+                    ILogger.Information($"   • {networkInterface.Name} ({networkInterface.Description}) - {networkInterface.NetworkInterfaceType}");
                     
-                    foreach (var addr in ni.GetIPProperties().UnicastAddresses)
+                    foreach (var addr in networkInterface.GetIPProperties().UnicastAddresses)
                     {
-                        if (addr.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        if (addr.Address.AddressFamily == AddressFamily.InterNetwork)
                         {
-                            IFileLoggerSafe.Information($"     IPv4: {addr.Address}");
+                            ILogger.Information($"     IPv4: {addr.Address}");
                         }
                     }
                 }
@@ -121,34 +139,33 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
         }
         catch (Exception exception)
         {
-            IFileLoggerSafe.Warning($"⚠️ Could not enumerate network interfaces: {exception.Message}");
+            ILogger.Warning($"⚠️ Could not enumerate network interfaces: {exception.Message}");
         }
     }
 
     async Task<bool> SetupAsync()
     {
-        var preferredPort = Convert.ToInt32(ISettingsRepositorySafe
-            .GetValueOrDefault("/services/UDPSettings/PreferredPort"));
+        var preferredPort = ISettingRepository.GetValueOrDefault<int>(
+                UdpListenerGroupSettingsDefinition.BuildSettingPath(UdpListener_preferredPort)
+            );
         
         // Try preferred port first
         if (await TryBindToPortAsync(preferredPort))
-        {
             return true;
-        }
         
         // If preferred port fails, try alternate ports
-        IFileLoggerSafe.Warning($"⚠️ Failed to bind to preferred port {preferredPort}, trying alternates...");
+        ILogger.Warning($"⚠️ Failed to bind to preferred port {preferredPort}, trying alternates...");
         
         for (int port = preferredPort + 1; port < preferredPort + 10; port++)
         {
             if (await TryBindToPortAsync(port))
             {
-                IFileLoggerSafe.Information($"✅ Successfully bound to alternate port {port}");
+                ILogger.Information($"✅ Successfully bound to alternate port {port}");
                 return true;
             }
         }
         
-        IFileLoggerSafe.Error("❌ Failed to bind to any UDP port after trying alternates");
+        ILogger.Error("❌ Failed to bind to any UDP port after trying alternates");
         return false;
     }
     
@@ -167,7 +184,7 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                 }
                 
                 var endpoint = UdpClient.Client.LocalEndPoint?.ToString() ?? "(unbound)";
-                IFileLoggerSafe.Information($"✅ Bound UDP listener to ALL INTERFACES on port {port} ({endpoint})");
+                ILogger.Information($"✅ Bound UDP listener to ALL INTERFACES on port {port} ({endpoint})");
                 
                 await Task.CompletedTask;
                 return true;
@@ -178,7 +195,7 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
             {
                 if (attempt < MaxRetryAttempts)
                 {
-                    IFileLoggerSafe.Warning(
+                    ILogger.Warning(
                         $"⚠️ Attempt {attempt}/{MaxRetryAttempts}: Port {port} unavailable " +
                         $"({socketException.SocketErrorCode}). Retrying in {RetryDelaySeconds}s...");
                     
@@ -186,14 +203,14 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                 }
                 else
                 {
-                    IFileLoggerSafe.Warning(
+                    ILogger.Warning(
                         $"❌ Port {port} unavailable after {MaxRetryAttempts} attempts: " +
                         $"{socketException.SocketErrorCode}");
                 }
             }
             catch (Exception exception)
             {
-                IFileLoggerSafe.Warning($"❌ Unexpected error binding to port {port}: {exception.Message}");
+                ILogger.Warning($"❌ Unexpected error binding to port {port}: {exception.Message}");
                 return false;
             }
         }
@@ -206,12 +223,12 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
         try
         {
             _receiveTask = Task.Run(async () => await ReceiveLoopAsync());
-            IFileLoggerSafe.Information("🚀 UDP receive loop started");
+            ILogger.Information("🚀 UDP receive loop started");
             return await Task.FromResult(true);
         }
         catch (Exception exception)
         {
-            IFileLoggerSafe.LogExceptionAndReturn(exception, "Failed to start receive loop");
+            ILogger.LogExceptionAndReturn(exception, "Failed to start receive loop");
             return await Task.FromResult(false);
         }
     }
@@ -221,8 +238,8 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
         var lastWarningTime = DateTime.MinValue;
         var noDataWarningInterval = TimeSpan.FromMinutes(NoDataWarningMinutes);
         
-        IFileLoggerSafe.Information("📡 UDP receive loop active, waiting for packets...");
-        IFileLoggerSafe.Information($"⏱️ Timeout: {ReceiveTimeoutSeconds}s | Warning interval: {NoDataWarningMinutes}m");
+        ILogger.Information("📡 UDP receive loop active, waiting for packets...");
+        ILogger.Information($"⏱️ Timeout: {ReceiveTimeoutSeconds}s | Warning interval: {NoDataWarningMinutes}m");
         
         while (!LocalCancellationTokenSourceSafe.IsCancellationRequested)
         {
@@ -259,7 +276,7 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                             ? "never" 
                             : $"{(DateTime.UtcNow - _lastPacketReceived).TotalMinutes:F1} minutes ago";
                         
-                        IFileLoggerSafe.Warning(
+                        ILogger.Warning(
                             $"⏰ No UDP packets received in {NoDataWarningMinutes} minute(s). " +
                             $"Last packet: {timeSinceLastPacket}. " +
                             $"Total received: {_totalPacketsReceived}. " +
@@ -275,13 +292,13 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
             catch (OperationCanceledException) when (LocalCancellationTokenSafe.IsCancellationRequested)
             {
                 // Graceful shutdown requested
-                IFileLoggerSafe.Information("🛑 UDP listener canceled gracefully");
+                ILogger.Information("🛑 UDP listener canceled gracefully");
                 break;
             }
             catch (ObjectDisposedException)
             {
                 // UDP client was disposed (likely during shutdown)
-                IFileLoggerSafe.Information("🛑 UDP client was disposed");
+                ILogger.Information("🛑 UDP client was disposed");
                 break;
             }
             catch (SocketException socketException)
@@ -289,14 +306,14 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                 _consecutiveErrors++;
                 _totalPacketErrors++;
                 
-                IFileLoggerSafe.Error(
+                ILogger.Error(
                     $"⚠️ Socket error in UDP receive loop (#{_consecutiveErrors}): " +
                     $"{socketException.Message} (ErrorCode: {socketException.SocketErrorCode})");
                 
                 // If too many consecutive errors, something is seriously wrong
                 if (_consecutiveErrors >= MaxConsecutiveErrors)
                 {
-                    IFileLoggerSafe.Error(
+                    ILogger.Error(
                         $"❌ Too many consecutive socket errors ({_consecutiveErrors}). " +
                         "UDP listener may be in a bad state. Consider restarting the application.");
                     
@@ -315,16 +332,16 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                 _totalPacketErrors++;
                 
                 // Log the error but DON'T throw - keep the receive loop running
-                IFileLoggerSafe.Error(
+                ILogger.Error(
                     $"⚠️ Unexpected error in UDP receive loop (#{_consecutiveErrors}): " +
                     $"{exception.GetType().Name}: {exception.Message}");
                 
-                IFileLoggerSafe.Debug($"   Stack trace: {exception.StackTrace}");
+                ILogger.Debug($"   Stack trace: {exception.StackTrace}");
                 
                 // Throttle on repeated errors
                 if (_consecutiveErrors >= MaxConsecutiveErrors)
                 {
-                    IFileLoggerSafe.Error(
+                    ILogger.Error(
                         $"❌ Too many consecutive errors ({_consecutiveErrors}). Throttling receive loop.");
                     await Task.Delay(TimeSpan.FromSeconds(30), LocalCancellationTokenSafe);
                 }
@@ -337,7 +354,7 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
         }
         
         // Log final statistics
-        IFileLoggerSafe.Information(
+        ILogger.Information(
             $"🏁 UDP receive loop ended. " +
             $"Total packets: {_totalPacketsReceived}, " +
             $"Total errors: {_totalPacketErrors}");
@@ -355,16 +372,15 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
             
             if (iRawPacketRecordTyped.PacketEnum != PacketEnum.NotImplemented)
             {
-                // NEW: Track parsing step
                 ProvenanceTracker?.AddStep(
                     iRawPacketRecordTyped.Id,
                     "JSON Parse",
                     "UdpTransformer",
                     $"Packet type: {iRawPacketRecordTyped.PacketEnum}");
                 
-                ISingletonEventRelay.Send(iRawPacketRecordTyped);
+                IEventRelayBasic.Send(iRawPacketRecordTyped);
                 
-                IFileLoggerSafe.Information(
+                ILogger.Information(
                     $"📦 Received {iRawPacketRecordTyped.PacketEnum} packet from {result.RemoteEndPoint} " +
                     $"({result.Buffer.Length} bytes) [Total: {_totalPacketsReceived}]");
             }
@@ -373,10 +389,10 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                 // NEW: Mark as failed
                 ProvenanceTracker?.UpdateStatus(iRawPacketRecordTyped.Id, DataStatus.Failed);
                 
-                IFileLoggerSafe.Warning(
+                ILogger.Warning(
                     $"⚠️ Received unimplemented packet type from {result.RemoteEndPoint} " +
                         $"({result.Buffer.Length} bytes)");
-                IFileLoggerSafe.Warning($"packet contents [{iRawPacketRecordTyped.RawPacketJson}]");
+                ILogger.Warning($"packet contents [{iRawPacketRecordTyped.RawPacketJson}]");
 
             }
 
@@ -385,12 +401,12 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
         catch (Exception exception)
         {
             // Log packet processing errors but don't let them kill the receive loop
-            IFileLoggerSafe.Error(
+            ILogger.Error(
                 $"❌ Error processing packet from {result.RemoteEndPoint}: " +
                 $"{exception.Message}");
             
             // Optionally log the raw packet data for debugging
-            IFileLoggerSafe.Debug($"   Raw packet ({result.Buffer.Length} bytes): " +
+            ILogger.Debug($"   Raw packet ({result.Buffer.Length} bytes): " +
                 $"{System.Text.Encoding.UTF8.GetString(result.Buffer).Substring(0, Math.Min(100, result.Buffer.Length))}...");
         }
     }
@@ -399,7 +415,7 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
     {
         try
         {
-            IFileLoggerSafe.Information("🧹 Disposing UDP listener...");
+            ILogger.Information("🧹 Disposing UDP listener...");
             
             // Cancel the receive loop
             LocalCancellationTokenSource?.Cancel();
@@ -414,7 +430,7 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                 }
                 catch (TimeoutException)
                 {
-                    IFileLoggerSafe.Warning("⚠️ Receive task did not complete within timeout during disposal");
+                    ILogger.Warning("⚠️ Receive task did not complete within timeout during disposal");
                 }
             }
             
@@ -423,13 +439,13 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
             LinkedCancellationTokenSource?.Dispose();
             LocalCancellationTokenSource?.Dispose();
             
-            IFileLoggerSafe.Information(
+            ILogger.Information(
                 $"✅ UDP listener disposed. Final stats - " +
                 $"Packets: {_totalPacketsReceived}, Errors: {_totalPacketErrors}");
         }
         catch (Exception exception)
         {
-            IFileLoggerSafe.Warning($"⚠️ Error during UDP listener disposal: {exception.Message}");
+            ILogger.Warning($"⚠️ Error during UDP listener disposal: {exception.Message}");
         }
         
         await Task.CompletedTask;

@@ -14,12 +14,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="YamlDotNet"/>
+		<PackageReference Include="YamlDotNet" />
+		<PackageReference Include="Microsoft.Maui.Controls" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\interfaces\interfaces.csproj" />
-	  <ProjectReference Include="..\settings_override_structures\SettingsOverrideStructures.csproj" />
+	  <ProjectReference Include="..\basic_event_relay\EventRelay.csproj" />
+	  <ProjectReference Include="..\Constants\Constants.csproj" />
+	  <ProjectReference Include="..\interfaces\Interfaces.csproj" />
 	  <ProjectReference Include="..\static_data_store\StaticDataStore.csproj" />
 	  <ProjectReference Include="..\utility\Utility.csproj" />
 	</ItemGroup>

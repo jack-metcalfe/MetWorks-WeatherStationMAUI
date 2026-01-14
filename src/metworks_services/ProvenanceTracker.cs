@@ -10,26 +10,25 @@ namespace MetWorksServices;
 public class ProvenanceTracker
 {
     private const int MaxLineages = 1000;
-    
+    bool _isInitialized = false;
+    ILogger? _iLogger = null;
+    ILogger ILogger
+    {
+        get => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
+        set => _iLogger = value;
+    }
     private readonly ConcurrentDictionary<Guid, DataLineage> _lineageStore = new();
     private readonly ConcurrentQueue<Guid> _lineageQueue = new(); // LRU tracking
-    private IFileLogger? _fileLogger;
-    
-    private IFileLogger FileLoggerSafe => 
-        _fileLogger ?? throw new InvalidOperationException("ProvenanceTracker not initialized. Call InitializeAsync first.");
-
     /// <summary>
     /// Initializes the provenance tracker.
     /// </summary>
-    public async Task<bool> InitializeAsync(IFileLogger iFileLogger)
+    public async Task<bool> InitializeAsync(
+        ILogger iLogger
+    )
     {
-        if (iFileLogger is null)
-            throw new ArgumentNullException(nameof(iFileLogger), "File logger cannot be null.");
-
-        _fileLogger = iFileLogger;
-        _fileLogger.Information("🔍 ProvenanceTracker initialized successfully");
-        
-        return await Task.FromResult(true);
+        ILogger = iLogger;
+        _isInitialized = true;
+        return await Task.FromResult(_isInitialized);
     }
 
     /// <summary>
@@ -69,7 +68,7 @@ public class ProvenanceTracker
         // Enforce LRU eviction
         EnforceLruLimit();
 
-        FileLoggerSafe.Debug($"📊 Tracking new packet: {packet.Id} ({packet.PacketEnum})");
+        ILogger.Debug($"📊 Tracking new packet: {packet.Id} ({packet.PacketEnum})");
         
         return lineage;
     }
@@ -81,7 +80,7 @@ public class ProvenanceTracker
     {
         if (!_lineageStore.TryGetValue(packetId, out var lineage))
         {
-            FileLoggerSafe.Warning($"⚠️ Cannot add step '{stepName}' - lineage not found for packet: {packetId}");
+            ILogger.Warning($"⚠️ Cannot add step '{stepName}' - lineage not found for packet: {packetId}");
             return;
         }
 
@@ -100,7 +99,7 @@ public class ProvenanceTracker
         var updatedLineage = lineage with { LastUpdated = DateTime.UtcNow };
         _lineageStore[packetId] = updatedLineage;
 
-        FileLoggerSafe.Debug($"📝 Added step '{stepName}' to packet {packetId}");
+        ILogger.Debug($"📝 Added step '{stepName}' to packet {packetId}");
     }
 
     /// <summary>
@@ -110,7 +109,7 @@ public class ProvenanceTracker
     {
         if (!_lineageStore.TryGetValue(packetId, out var lineage))
         {
-            FileLoggerSafe.Warning($"⚠️ Cannot update status - lineage not found for packet: {packetId}");
+            ILogger.Warning($"⚠️ Cannot update status - lineage not found for packet: {packetId}");
             return;
         }
 
@@ -122,7 +121,7 @@ public class ProvenanceTracker
         
         _lineageStore[packetId] = updatedLineage;
 
-        FileLoggerSafe.Debug($"📊 Updated status for packet {packetId}: {newStatus}");
+        ILogger.Debug($"📊 Updated status for packet {packetId}: {newStatus}");
     }
 
     /// <summary>
@@ -132,7 +131,7 @@ public class ProvenanceTracker
     {
         if (!_lineageStore.TryGetValue(packetId, out var lineage))
         {
-            FileLoggerSafe.Warning($"⚠️ Cannot record error - lineage not found for packet: {packetId}");
+            ILogger.Warning($"⚠️ Cannot record error - lineage not found for packet: {packetId}");
             return;
         }
 
@@ -150,7 +149,7 @@ public class ProvenanceTracker
         
         _lineageStore[packetId] = updatedLineage;
 
-        FileLoggerSafe.Error($"❌ Error recorded for packet {packetId} in {component}.{stepName}: {exception.Message}");
+        ILogger.Error($"❌ Error recorded for packet {packetId} in {component}.{stepName}: {exception.Message}");
     }
 
     /// <summary>
@@ -160,7 +159,7 @@ public class ProvenanceTracker
     {
         if (!_lineageStore.TryGetValue(packetId, out var lineage))
         {
-            FileLoggerSafe.Warning($"⚠️ Cannot link transformed reading - lineage not found for packet: {packetId}");
+            ILogger.Warning($"⚠️ Cannot link transformed reading - lineage not found for packet: {packetId}");
             return;
         }
 
@@ -173,7 +172,7 @@ public class ProvenanceTracker
         
         _lineageStore[packetId] = updatedLineage;
 
-        FileLoggerSafe.Debug($"🔗 Linked transformed reading {transformedId} to packet {packetId}");
+        ILogger.Debug($"🔗 Linked transformed reading {transformedId} to packet {packetId}");
     }
 
     /// <summary>
@@ -183,7 +182,7 @@ public class ProvenanceTracker
     {
         if (!_lineageStore.TryGetValue(packetId, out var lineage))
         {
-            FileLoggerSafe.Warning($"⚠️ Cannot link database record - lineage not found for packet: {packetId}");
+            ILogger.Warning($"⚠️ Cannot link database record - lineage not found for packet: {packetId}");
             return;
         }
 
@@ -196,7 +195,7 @@ public class ProvenanceTracker
         
         _lineageStore[packetId] = updatedLineage;
 
-        FileLoggerSafe.Debug($"💾 Linked database record {dbRecordId} to packet {packetId}");
+        ILogger.Debug($"💾 Linked database record {dbRecordId} to packet {packetId}");
     }
 
     /// <summary>
@@ -311,7 +310,7 @@ public class ProvenanceTracker
         {
             if (_lineageStore.TryRemove(oldestId, out var removed))
             {
-                FileLoggerSafe.Debug($"🗑️ Evicted old lineage (LRU): {oldestId}");
+                ILogger.Debug($"🗑️ Evicted old lineage (LRU): {oldestId}");
             }
         }
     }

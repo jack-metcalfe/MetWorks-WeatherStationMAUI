@@ -8,14 +8,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Dapper"/>
-		<PackageReference Include="Npgsql"/>
+		<PackageReference Include="Dapper" />
+		<PackageReference Include="Npgsql" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\basic_event_relay\BasicEventRelay.csproj" />
+	  <ProjectReference Include="..\basic_event_relay\EventRelay.csproj" />
+	  <ProjectReference Include="..\Constants\Constants.csproj" />
 	  <ProjectReference Include="..\enum_definitions\enum_definition.csproj" />
-	  <ProjectReference Include="..\interfaces\interfaces.csproj" />
+	  <ProjectReference Include="..\interfaces\Interfaces.csproj" />
 	  <ProjectReference Include="..\metworks_models\MetWorksModels.csproj" />
 	  <ProjectReference Include="..\metworks_services\MetWorksServices.csproj" />
 	  <ProjectReference Include="..\static_data_store\StaticDataStore.csproj" />

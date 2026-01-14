@@ -1,12 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<!-- <TargetFrameworks>net10.0-android;net10.0-windows10.0.19041.0</TargetFrameworks> -->
-		<!-- <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks> -->
-
-		<!-- Single platform for Windows development -->
-		<!-- Uncomment to build only for Windows during development -->
-		<TargetFrameworks>net10.0-windows10.0.19041.0</TargetFrameworks>
+		<!-- Multi-platform targeting: Windows and Android -->
+		<TargetFrameworks>net10.0-android;net10.0-windows10.0.19041.0</TargetFrameworks>
 
 		<OutputType>Exe</OutputType>
 		<RootNamespace>WeatherStationMaui</RootNamespace>
@@ -29,7 +25,7 @@
 
 		<!-- App metadata -->
 		<ApplicationTitle>WeatherStationMaui</ApplicationTitle>
-		<ApplicationId>biz.metworks.weather-station-maui</ApplicationId>
+		<ApplicationId>biz.metworks.weather_station_maui</ApplicationId>
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
@@ -42,7 +38,8 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</TargetPlatformMinVersion>
-	</PropertyGroup>
+	  <UserSecretsId>94164f6e-e905-4cf6-a6cc-88db8b8b3d35</UserSecretsId>
+  </PropertyGroup>
 
 	<ItemGroup>
 		<!-- App Icon -->
@@ -63,6 +60,24 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Remove="Pages\MainDeviceViews\MainView1080x2400 .xaml.cs" />
+		<Compile Remove="Pages\MainDeviceViews\MainView1440x2304.xaml.cs" />
+		<Compile Remove="Pages\MainDeviceViews\MainView2304x1440.xaml.cs" />
+		<Compile Remove="Pages\MainDeviceViews\MainView2400x1080.xaml.cs" />
+		<Compile Remove="Pages\MainDeviceViews\MainVIew2485x970.xaml.cs" />
+		<Compile Remove="Pages\MainDeviceViews\MainView970x2485.xaml.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<MauiXaml Remove="Pages\MainDeviceViews\MainView1080x2400 .xaml" />
+		<MauiXaml Remove="Pages\MainDeviceViews\MainView1440x2304.xaml" />
+		<MauiXaml Remove="Pages\MainDeviceViews\MainView2304x1440.xaml" />
+		<MauiXaml Remove="Pages\MainDeviceViews\MainView2400x1080.xaml" />
+		<MauiXaml Remove="Pages\MainDeviceViews\MainVIew2485x970.xaml" />
+		<MauiXaml Remove="Pages\MainDeviceViews\MainView970x2485.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<!-- Use latest preview versions explicitly -->
 		<PackageReference Include="Dapper" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" />
@@ -78,49 +93,30 @@
 		<ProjectReference Include="..\metworks_models\MetWorksModels.csproj" />
 		<ProjectReference Include="..\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits.csproj" />
 		<ProjectReference Include="..\RedStar.Amounts.WeatherExtensions\RedStar.Amounts.WeatherExtensions.csproj" />
-		<ProjectReference Include="..\interfaces\interfaces.csproj" />
+		<ProjectReference Include="..\interfaces\Interfaces.csproj" />
 		<ProjectReference Include="..\RedStar.Amounts\RedStar.Amounts\RedStar.Amounts.csproj" />
 		<ProjectReference Include="..\utility\Utility.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Pages\MainDeviceViews\MainView1920x1200.xaml.cs">
+	    <DependentUpon>MainView1920x1200.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
 		<MauiXaml Update="Pages\LargeFormatWeatherView.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainView1080x2400 .xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainView1440x2304.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainView1812x2176.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Pages\MainDeviceViews\MainView1920x1200.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainView2176x1812.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainView2304x1440.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainView2400x1080.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainVIew2485x970.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainView970x2485.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Pages\WeatherPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Resources\Styles\WeatherColors.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 	</ItemGroup>
-
 </Project>
 

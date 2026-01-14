@@ -10,7 +10,7 @@ public static class StringReaderFactory
         return new StringReader(streamReader.ReadToEnd());
     }
 
-    public static StringReader FromPath(string filePath, IFileLogger iFileLogger, Encoding? encoding = null)
+    public static StringReader FromPath(string filePath, ILogger iFileLogger, Encoding? encoding = null)
     {
         try
         {

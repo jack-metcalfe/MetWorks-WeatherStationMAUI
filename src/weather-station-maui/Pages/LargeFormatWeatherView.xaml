@@ -21,8 +21,6 @@
             <RowDefinition Height="2*"/>
         </Grid.RowDefinitions>
 
-        <!-- ROW 0: HEADERS (Temp | Date | Wind) -->
-
         <!-- Temperature Header -->
         <Border Grid.Row="0" Grid.Column="0" StrokeThickness="0">
             <Label
@@ -53,10 +51,6 @@
                 HorizontalTextAlignment="Center" 
                 Text="Wind" />
         </Border>
-
-        <!-- ========================================
-             ROWS 1-2: LARGE VALUES (Temperature | Time HH | Wind Direction)
-             ======================================== -->
 
         <!-- Temperature Value (with small unit above) -->
         <Border Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" StrokeThickness="0">

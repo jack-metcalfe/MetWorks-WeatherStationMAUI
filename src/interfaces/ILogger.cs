@@ -1,5 +1,5 @@
-﻿namespace InterfaceDefinition;
-public interface ILogger : IRegistryExport
+﻿namespace Interfaces;
+public interface ILogger
 {
     void Information(string message);
     void Warning(string message);

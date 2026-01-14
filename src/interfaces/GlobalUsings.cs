@@ -1,5 +1,5 @@
 ﻿global using EnumDefinition;
-global using InterfaceDefinition.Settings;
+global using Interfaces.Settings;
 global using Json.Schema;
 global using System;
 global using System.Collections.Generic;

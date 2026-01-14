@@ -10,12 +10,19 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+
         _shutdownCts = new CancellationTokenSource();
     }
     
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var window = new Window(new AppShell());
+        // Select and load appropriate view for this device
+        // Log device info for debugging
+        System.Diagnostics.Debug.WriteLine("🔍 Device Detection:");
+        System.Diagnostics.Debug.WriteLine(DeviceViewSelector.GetDeviceInfo());
+
+        var mainPage = DeviceViewSelector.GetViewForCurrentDevice();
+        var window = new Window(mainPage);
 
         window.Created += async (s, e) =>
         {

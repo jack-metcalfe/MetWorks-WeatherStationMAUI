@@ -1,4 +1,4 @@
-﻿namespace InterfaceDefinition;
+﻿namespace Interfaces;
 public interface IValidationResult
 {
     public bool IsValid { get; set; }

@@ -1,13 +1,5 @@
-using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Timers;
-using MetWorksModels.Weather;
-using BasicEventRelay;
-using Timer = System.Timers.Timer;
-
 namespace MetWorksWeather.ViewModels;
-
+using Timer = System.Timers.Timer;
 /// <summary>
 /// ViewModel for large-format weather display (viewable from ~20 feet).
 /// Extends WeatherViewModel with separated value/unit properties and time display.
@@ -18,12 +10,11 @@ public class LargeFormatWeatherViewModel : INotifyPropertyChanged, IDisposable
     private IObservationReading? _currentObservation;
     private Timer? _clockTimer;
     private DateTime _currentTime = DateTime.Now;
-
     public LargeFormatWeatherViewModel()
     {
         // Subscribe to weather readings
-        ISingletonEventRelay.Register<IWindReading>(this, OnWindReceived);
-        ISingletonEventRelay.Register<IObservationReading>(this, OnObservationReceived);
+        //IEventRelayBasic.Register<IWindReading>(this, OnWindReceived);
+        //IEventRelayBasic.Register<IObservationReading>(this, OnObservationReceived);
         
         // Initialize time display and start clock timer
         InitializeClockTimer();
@@ -32,7 +23,6 @@ public class LargeFormatWeatherViewModel : INotifyPropertyChanged, IDisposable
     // ========================================
     // Clock Timer Logic
     // ========================================
-
     private void InitializeClockTimer()
     {
         _currentTime = DateTime.Now;
@@ -51,7 +41,6 @@ public class LargeFormatWeatherViewModel : INotifyPropertyChanged, IDisposable
         _clockTimer.AutoReset = false; // Fire once, then reconfigure
         _clockTimer.Start();
     }
-
     private void OnClockTimerFirstTick(object? sender, ElapsedEventArgs e)
     {
         // First tick - now synchronized to top of minute
@@ -67,12 +56,10 @@ public class LargeFormatWeatherViewModel : INotifyPropertyChanged, IDisposable
             _clockTimer.Start();
         }
     }
-
     private void OnClockTimerTick(object? sender, ElapsedEventArgs e)
     {
         UpdateTimeDisplay();
     }
-
     private void UpdateTimeDisplay()
     {
         Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
@@ -83,11 +70,9 @@ public class LargeFormatWeatherViewModel : INotifyPropertyChanged, IDisposable
             OnPropertyChanged(nameof(TimeDisplay));
         });
     }
-
     // ========================================
     // Event Handlers
     // ========================================
-
     private void OnWindReceived(IWindReading reading)
     {
         Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
@@ -151,77 +136,57 @@ public class LargeFormatWeatherViewModel : INotifyPropertyChanged, IDisposable
     // ========================================
     // Temperature Display Properties
     // ========================================
-
     public bool HasObservationData => CurrentObservation != null;
-
     public string TemperatureValue => 
         CurrentObservation != null 
             ? $"{CurrentObservation.Temperature.Value:F0}" 
             : "--";
-
     public string TemperatureUnit => 
         CurrentObservation != null 
             ? $"{CurrentObservation.Temperature.Unit.Symbol}" 
             : "";
-
     // ========================================
     // Wind Display Properties
     // ========================================
-
     public bool HasWindData => CurrentWind != null;
-
     public string WindSpeedValue => 
         CurrentWind != null 
             ? $"{CurrentWind.Speed.Value:F0}" 
             : "--";
-
     public string WindSpeedUnit => 
         CurrentWind != null 
             ? CurrentWind.Speed.Unit.Symbol 
             : "";
-
     public string WindDirectionCardinal => 
         CurrentWind != null 
             ? CurrentWind.DirectionCardinal 
             : "--";
-
     public string WindDirectionDegrees => 
         CurrentWind != null 
-            ? $"({CurrentWind.DirectionDegrees:F0}°)" 
+            ? $"{CurrentWind.DirectionDegrees:F0}°" 
             : "";
-
     // ========================================
     // Humidity Display Properties
     // ========================================
-
     public string HumidityValue => 
         CurrentObservation != null 
             ? $"{CurrentObservation.HumidityPercent:F0}" 
             : "--";
-
     public string HumidityUnit => "%";
-
     // ========================================
     // UV Index Display Properties
     // ========================================
-
     public string UvIndexValue => 
         CurrentObservation?.UvIndex != null 
             ? $"{CurrentObservation.UvIndex:F0}" 
             : "--";
-
     public string UvIndexUnit => ""; // UV Index has no unit
-
     // ========================================
     // Time Display Properties
     // ========================================
-
     public string TimeDayOfWeek => _currentTime.ToString("ddd");
-
     public string TimeDateDisplay => _currentTime.ToString("MMM dd");
-
     public string TimeDisplay => _currentTime.ToString("HH:mm");
-
     // ========================================
     // Disposal
     // ========================================
@@ -230,8 +195,8 @@ public class LargeFormatWeatherViewModel : INotifyPropertyChanged, IDisposable
     {
         _clockTimer?.Stop();
         _clockTimer?.Dispose();
-        ISingletonEventRelay.Unregister<IWindReading>(this);
-        ISingletonEventRelay.Unregister<IObservationReading>(this);
+        //IEventRelayBasic.Unregister<IWindReading>(this);
+        //IEventRelayBasic.Unregister<IObservationReading>(this);
     }
 
     // ========================================

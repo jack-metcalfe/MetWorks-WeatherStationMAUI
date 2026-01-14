@@ -13,7 +13,7 @@ public static class NullPropertyGuard
         return value;
     }
     public static T GetSafeClass<T>
-        (T? value, string? message = null, IFileLogger? iFileLogger = null) where T : class
+        (T? value, string? message = null, ILogger? iFileLogger = null) where T : class
     {
         if (value is null
             || (value is string s && string.IsNullOrWhiteSpace(s))
@@ -28,7 +28,7 @@ public static class NullPropertyGuard
     }
 
     public static T GetSafeStruct<T>
-        (T value, string? message = null, IFileLogger? iFileLogger = null) where T : struct
+        (T value, string? message = null, ILogger? iFileLogger = null) where T : struct
     {
         if (EqualityComparer<T>.Default.Equals(value, default))
         {
@@ -40,7 +40,7 @@ public static class NullPropertyGuard
         return value;
     }
     public static T GetSafeNullableStruct<T>
-        (T? value, string? message = null, IFileLogger? iFileLogger = null) where T : struct
+        (T? value, string? message = null, ILogger? iFileLogger = null) where T : struct
     {
         if (value is null || EqualityComparer<T>.Default.Equals(value.Value, default))
         {

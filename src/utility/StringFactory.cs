@@ -1,7 +1,7 @@
 ﻿namespace Utility;
 public static class StringFactory
 {
-    public static string FromPath(IFileLogger iFileLogger, string filePath)
+    public static string FromPath(ILogger iFileLogger, string filePath)
     {
         try
         {

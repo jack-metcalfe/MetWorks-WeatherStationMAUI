@@ -436,3 +436,10 @@ obj/
 
 generated/
 
+# User-specific override files (writable at runtime)
+**/Resources/Raw/overrides.yaml
+**/overrides.yaml
+src/weather-station-maui/Resources/Raw/overrides.yaml
+
+# Keep the template
+#!**/overrides.template.yaml

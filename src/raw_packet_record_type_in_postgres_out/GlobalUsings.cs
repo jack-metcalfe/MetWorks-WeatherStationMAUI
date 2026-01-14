@@ -1,7 +1,7 @@
-﻿global using BasicEventRelay;
+﻿global using EventRelay;
 global using Dapper;
 global using EnumDefinition;
-global using InterfaceDefinition;
+global using Interfaces;
 global using Npgsql;
 global using StaticDataStore;
 global using System;
@@ -13,3 +13,4 @@ global using UdpPackets;
 global using Utility;
 global using System.Linq;
 global using MetWorksServices;
+global using static Constants.Settings.Paths.GroupSettingDefinitions;

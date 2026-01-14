@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Assignments.Initializer
-// Generated On:        2026-01-07T05:31:08.6249926Z
+// Generated On:        2026-01-14T03:28:51.5070336Z
 #nullable enable
 using System.Threading.Tasks;
 
@@ -24,8 +24,8 @@ namespace ServiceRegistry
             // Step 2: call its async initializer with assignment values.
             // All argument expressions are fully computed by the pipeline.
             await instance.InitializeAsync(
-                // Parameter: iFileLogger: registry.GetTheFileLogger()
-                iFileLogger: registry.GetTheFileLogger()
+                // Parameter: iLogger: registry.GetTheLoggerFile()
+                iLogger: registry.GetTheLoggerFile()
             );
         }
     }

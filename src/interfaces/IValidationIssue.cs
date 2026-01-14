@@ -1,4 +1,4 @@
-﻿namespace InterfaceDefinition;
+﻿namespace Interfaces;
 public interface IValidationIssue
 {
     public string? Message { get; set; }

@@ -6,17 +6,13 @@ codeGen:
   initializer: "InitializeAsync"
 
 namespace:
-  - name: "InterfaceDefinition"
+  - name: "Interfaces"
     interface:
-      - name: "IFileLogger"
-      - name: "ISettingConfiguration"
-      - name: "ISettingsRepository"
-      - name: "IBackgroundService"
-    class: []
-
-  - name: "InterfaceDefinition.Settings"
-    interface:
-      - name: "ISettingOverridesProvider"
+      - name: "IEventRelayBasic"
+      - name: "IEventRelayPath"
+      - name: "ILogger"
+      - name: "ISettingProvider"
+      - name: "ISettingRepository"
     class: []
 
   - name: "System"
@@ -36,107 +32,82 @@ namespace:
         interface: null
         parameter: []
 
+  - name: "EventRelay"
+    interface: []
+    class:
+      - name: "EventRelayBasic"
+        interface: "Interfaces.IEventRelayBasic"
+        parameter: []
+      - name: "EventRelayPath"
+        interface: "Interfaces.IEventRelayPath"
+        parameter: []
+
   - name: "Logging"
     interface: []
     class:
-      - name: "FileLogger"
-        interface: InterfaceDefinition.IFileLogger
+      - name: "LoggerStub"
+        interface: Interfaces.ILogger
+        parameter: []
+      - name: "LoggerFile"
+        interface: Interfaces.ILogger
         parameter:
-          - name: "fileSizeLimitBytes"
-            class: "System.Int32"
-            interface: null
-          - name: "minimumLevel"
-            class: "System.String"
-            interface: null
-          - name: "outputTemplate"
-            class: "System.String"
-            interface: null
-          - name: "path"
-            class: "System.String"
-            interface: null
-          - name: "retainedFileCountLimit"
-            class: "System.Int32"
-            interface: null
-          - name: "rollingInterval"
-            class: "System.String"
-            interface: null
-          - name: "rollOnFileSizeLimit"
-            class: "System.Boolean"
-            interface: null
-
-  - name: "MauiSettingOverridesProviders"
-    interface: []
-    class:
-      - name: "AppDataSettingOverridesProvider"
-        interface: InterfaceDefinition.Settings.ISettingOverridesProvider
-        parameter:
-          - name: "filename"
-            class: "System.String"
+          - name: "iLogger"
+            class: null
+            interface: "Interfaces.ILogger"
+          - name: "iSettingRepository"
+            class: null
+            interface: "Interfaces.ISettingRepository"
 
   - name: "Settings"
     interface: []
     class:
-      - name: "SettingConfiguration"
-        interface: InterfaceDefinition.ISettingConfiguration
+      - name: "SettingProvider"
+        interface: Interfaces.ISettingProvider
         parameter:
-          - name: "defaultValue"
-            class: "System.String"
-            interface: null
-          - name: "description"
-            class: "System.String"
-            interface: null
-          - name: "expectedValueType"
-            class: "System.String"
-            interface: null  
-          - name: "group"
-            class: "System.String"
-            interface: null
-          - name: "isEditable"
-            class: "System.Boolean"
-            interface: null
-          - name: "path"
-            class: "System.String"
-            interface: null
-          - name: "enumValues"
-            class: "System.String[]"
-            interface: null
-          - name: "isSecret"
-            class: "System.Boolean?"
-            interface: null
-      - name: "SettingsRepository"
-        interface: InterfaceDefinition.ISettingsRepository
+          - name: "iLogger"
+            class: null
+            interface: "Interfaces.ILogger"
+      - name: "SettingRepository"
+        interface: Interfaces.ISettingRepository
         parameter:
-          - name: "iFileLogger"
+          - name: "iLogger"
             class: null
-            interface: "InterfaceDefinition.IFileLogger"
-          - name: "settingConfigurations"
+            interface: "Interfaces.ILogger"
+          - name: "iSettingProvider"
             class: null
-            interface: "InterfaceDefinition.ISettingConfiguration[]"
-          - name: "iSettingOverridesProvider"
-            class: null
-            interface: "InterfaceDefinition.Settings.ISettingOverridesProvider"
+            interface: "Interfaces.ISettingProvider"
 
-  # ========================================
-  # NEW: MetWorksWeather Services Namespace
-  # ========================================
+  - name: "RedStar.Amounts.WeatherExtensions"
+    interface: []
+    class:
+      - name: "UnitsOfMeasureInitializer"
+        interface: null
+        parameter:
+          - name: "iLogger"
+            class: null
+            interface: "Interfaces.ILogger" 
+
   - name: "MetWorksServices"
     interface: []
     class:
       - name: "ProvenanceTracker"
         interface: null
         parameter:
-          - name: "iFileLogger"
+          - name: "iLogger"
             class: null
-            interface: "InterfaceDefinition.IFileLogger"
+            interface: "Interfaces.ILogger"
       - name: "WeatherDataTransformer"
         interface: null
         parameter:
-          - name: "iFileLogger"
+          - name: "iLogger"
             class: null
-            interface: "InterfaceDefinition.IFileLogger"
-          - name: "iSettingsRepository"
+            interface: "Interfaces.ILogger"
+          - name: "iSettingRepository"
             class: null
-            interface: "InterfaceDefinition.ISettingsRepository"
+            interface: "Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "Interfaces.IEventRelayBasic"
           - name: "provenanceTracker"
             class: "MetWorksServices.ProvenanceTracker"
             interface: null
@@ -145,18 +116,17 @@ namespace:
     interface: []
     class:
       - name: "Transformer"
-        interface: InterfaceDefinition.IBackgroundService
+        interface: Interfaces.IBackgroundService
         parameter:
-          - name: "iFileLogger"
+          - name: "iLogger"
             class: null
-            interface: "InterfaceDefinition.IFileLogger"
-          - name: "iSettingsRepository"
+            interface: "Interfaces.ILogger"
+          - name: "iSettingRepository"
             class: null
-            interface: "InterfaceDefinition.ISettingsRepository"
+            interface: "Interfaces.ISettingRepository"
           - name: "externalCancellationTokenSource"
             class: "System.Threading.CancellationTokenSource"
             interface: null
-          # NEW: Optional provenance tracker parameter
           - name: "provenanceTracker"
             class: "MetWorksServices.ProvenanceTracker"
             interface: null
@@ -165,15 +135,14 @@ namespace:
     interface: []
     class:
       - name: "ListenerSink"
-        interface: InterfaceDefinition.IBackgroundService
+        interface: Interfaces.IBackgroundService
         parameter:
-          - name: "iFileLogger"
+          - name: "iLogger"
             class: null
-            interface: "InterfaceDefinition.IFileLogger"
-          - name: "iSettingsRepository"
+            interface: "Interfaces.ILogger"
+          - name: "iSettingRepository"
             class: null
-            interface: "InterfaceDefinition.ISettingsRepository"
-          # NEW: Optional provenance tracker parameter
+            interface: "Interfaces.ISettingRepository"
           - name: "provenanceTracker"
             class: "MetWorksServices.ProvenanceTracker"
             interface: null
@@ -184,337 +153,74 @@ instance:
     assignment: []
     element: []
 
-  - name: "TheFileLogger"
-    class: "Logging.FileLogger"
-    assignment:
-      - name: "fileSizeLimitBytes"
-        literal: "10485760"
-        instance: null
-      - name: "minimumLevel"
-        literal: "Information"
-        instance: null
-      - name: "outputTemplate"
-        literal: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
-        instance: null
-      - name: "path"
-        literal: "C:/Temp/Logs/log-.txt"
-        instance: null
-      - name: "retainedFileCountLimit"
-        literal: "7"
-        instance: null
-      - name: "rollingInterval"
-        literal: "Day"
-        instance: null
-      - name: "rollOnFileSizeLimit"
-        literal: "true"
-        instance: null
+  - name: "TheEventRelayBasic"
+    class: "EventRelay.EventRelayBasic"
+    assignment: []
     element: []
 
-  # ========================================
-  # NEW: ProvenanceTracker Instance
-  # ========================================
+  - name: "TheEventRelayPath"
+    class: "EventRelay.EventRelayPath"
+    assignment: []
+    element: []
+
+  - name: "TheLoggerStub"
+    class: "Logging.LoggerStub"
+    assignment: []
+    element: []
+
+  - name: "TheSettingProvider"
+    class: "Settings.SettingProvider"
+    assignment:
+      - name: "iLogger"
+        literal: null
+        instance: "TheLoggerStub"
+    element: []
+
+  - name: "TheSettingRepository"
+    class: "Setting.SettingRepository"
+    assignment:
+      - name: "iLogger"
+        literal: null
+        instance: "TheLoggerStub"
+      - name: "iSettingProvider"
+        literal: null
+        instance: "TheSettingProvider"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+    element: []
+
+  - name: "TheLoggerFile"
+    class: "Logging.LoggerFile"
+    assignment:
+      - name: "iLogger"
+        literal: null
+        instance: "TheLoggerStub"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+    element: []
+
   - name: "TheProvenanceTracker"
     class: "MetWorksServices.ProvenanceTracker"
     assignment:
-      - name: "iFileLogger"
+      - name: "iLogger"
         literal: null
-        instance: "TheFileLogger"
+        instance: "TheLoggerFile"
     element: []
 
-  - name: "TheUdpPortSetting"
-    class: "Settings.SettingConfiguration"
-    assignment:
-      - name: "defaultValue"
-        literal: "50222"
-        instance: null
-      - name: "description"
-        literal: "UDP Port for listening for readings from Tempest Weather Station"
-        instance: null
-      - name: "expectedValueType"
-        literal: "Int32"
-        instance: null
-      - name: "group"
-        literal: "UDPSettings"
-        instance: null
-      - name: "isEditable"
-        literal: "true"
-        instance: null
-      - name: "path"
-        literal: "/services/UDPSettings/PreferredPort"
-        instance: null
-      - name: "enumValues"
-        literal: "[]"
-        instance: null
-      - name: "isSecret"
-        literal: null
-        instance: null
-    element: []
-
-  - name: "TheUdpPortSettings"
-    class: "Settings.SettingConfiguration[]"
-    assignment: []
-    element:
-      - literal: null
-        instance: "TheUdpPortSetting"
-
-  - name: "TemperatureOptions"
-    class: "System.String[]"
-    assignment: []
-    element:
-      - literal: "degree celsius"
-        instance: null
-      - literal: "degree fahrenheit"
-        instance: null
-
-  - name: "UdpTemperatureSetting"
-    class: "Settings.SettingConfiguration"
-    assignment:
-      - name: "defaultValue"
-        literal: "degree fahrenheit"
-      - name: "description"
-        literal: "Override temperature unit for UDP readings"
-        instance: null
-      - name: "expectedValueType"
-        literal: "String"
-        instance: null
-      - name: "group"
-        literal: "units"
-        instance: null
-      - name: "isEditable"
-        literal: "true"
-        instance: null
-      - name: "path"
-        literal: "/services/udp/unitOverrides/temperature"
-        instance: null
-      - name: "enumValues"
-        literal: null
-        instance: "TemperatureOptions"
-      - name: "isSecret"
-        literal: null
-        instance: null
-    element: []
-
-  - name: "WindspeedOptions"
-    class: "System.String[]"
-    assignment: []
-    element:
-      - literal: "kilometer/hour"
-        instance: null
-      - literal: "knot"
-        instance: null
-      - literal: "meter/second"
-        instance: null
-      - literal: "mile/hour"
-        instance: null
-
-  - name: "UdpWindspeedSetting"
-    class: "Settings.SettingConfiguration"
-    assignment:
-      - name: "defaultValue"
-        literal: "mile/hour"
-        instance: null
-      - name: "description"
-        literal: "Override wind speed unit for UDP readings"
-        instance: null
-      - name: "expectedValueType"
-        literal: "String"
-        instance: null
-      - name: "group"
-        literal: "units"
-        instance: null
-      - name: "isEditable"
-        literal: "true"
-        instance: null
-      - name: "path"
-        literal: "/services/udp/unitOverrides/windSpeed"
-        instance: null
-      - name: "enumValues"
-        literal: null
-        instance: "WindspeedOptions"
-      - name: "isSecret"
-        literal: null
-        instance: null
-    element: []
-
-  - name: "PressureOptions"
-    class: "System.String[]"
-    assignment: []
-    element:
-      - literal: "atmosphere"
-        instance: null
-      - literal: "bar"
-        instance: null
-      - literal: "hectopascal"
-        instance: null
-      - literal: "inch of mercury"
-        instance: null
-      - literal: "kilopascal"
-        instance: null
-      - literal: "millibar"
-        instance: null
-      - literal: "pascal"
-        instance: null
-
-  - name: "UdpPressureSetting"
-    class: "Settings.SettingConfiguration"
-    assignment:
-      - name: "defaultValue"
-        literal: "millibar"
-        instance: null
-      - name: "description"
-        literal: "Override pressure unit for UDP readings"
-        instance: null
-      - name: "expectedValueType"
-        literal: "String"
-        instance: null
-      - name: "group"
-        literal: "units"
-        instance: null
-      - name: "isEditable"
-        literal: "true"
-        instance: null
-      - name: "path"
-        literal: "/services/udp/unitOverrides/pressure"
-        instance: null
-      - name: "enumValues"
-        literal: null
-        instance: "PressureOptions"
-      - name: "isSecret"
-        literal: null
-        instance: null
-    element: []
-
-  - name: "PrecipitationOptions"
-    class: "System.String[]"
-    assignment: []
-    element:
-      - literal: "centimeter"
-        instance: null
-      - literal: "inch"
-        instance: null
-      - literal: "millimeter"
-        instance: null
-
-  - name: "UdpPrecipitationSetting"
-    class: "Settings.SettingConfiguration"
-    assignment:
-      - name: "defaultValue"
-        literal: "inch"
-        instance: null
-      - name: "description"
-        literal: "Override precipitation unit for UDP readings"
-        instance: null
-      - name: "expectedValueType"
-        literal: "String"
-        instance: null
-      - name: "group"
-        literal: "units"
-        instance: null
-      - name: "isEditable"
-        literal: "true"
-        instance: null
-      - name: "path"
-        literal: "/services/udp/unitOverrides/precipitation"
-        instance: null
-      - name: "enumValues"
-        literal: null
-        instance: "PrecipitationOptions"
-      - name: "isSecret"
-        literal: null
-        instance: null
-    element: []
-
-  - name: "DistanceOptions"
-    class: "System.String[]"
-    assignment: []
-    element:
-      - literal: "kilometer"
-        instance: null
-      - literal: "meter"
-        instance: null
-      - literal: "mile"
-        instance: null
-      - literal: "nautical mile"
-        instance: null
-
-  - name: "UdpDistanceSetting"
-    class: "Settings.SettingConfiguration"
-    assignment:
-      - name: "defaultValue"
-        literal: "mile"
-        instance: null
-      - name: "description"
-        literal: "Override distance unit for UDP readings"
-        instance: null
-      - name: "expectedValueType"
-        literal: "String"
-        instance: null
-      - name: "group"
-        literal: "units"
-        instance: null
-      - name: "isEditable"
-        literal: "true"
-        instance: null
-      - name: "path"
-        literal: "/services/udp/unitOverrides/distance"
-        instance: null
-      - name: "enumValues"
-        literal: null
-        instance: "DistanceOptions"
-      - name: "isSecret"
-        literal: null
-        instance: null
-    element: []
-
-  - name: "TheUdpListenerSettings"
-    class: "Settings.SettingConfiguration[]"
-    assignment: []
-    element:
-      - literal: null
-        instance: "UdpTemperatureSetting"
-      - literal: null
-        instance: "UdpWindspeedSetting"
-      - literal: null
-        instance: "UdpPressureSetting"
-      - literal: null
-        instance: "UdpPrecipitationSetting"
-      - literal: null
-        instance: "UdpDistanceSetting"
-
-  - name: "TheAppDataSettingOverridesProvider"
-    class: "MauiSettingOverridesProviders.AppDataSettingOverridesProvider"
-    assignment:
-      - name: "filename"
-        literal: "TheOverridesFile.ovr"
-        instance: null
-    element: []
-
-  - name: "TheUDPSettingsRepository"
-    class: "Settings.SettingsRepository"
-    assignment:
-      - name: "iFileLogger"
-        literal: null
-        instance: "TheFileLogger"
-      - name: "settingConfigurations"
-        literal: null
-        instance: "TheUdpPortSettings"
-      - name: "iSettingOverridesProvider"
-        literal: null
-        instance: "TheAppDataSettingOverridesProvider"
-    element: []
-
-  # ========================================
-  # NEW: WeatherDataTransformer Instance
-  # ========================================
   - name: "TheWeatherDataTransformer"
     class: "MetWorksServices.WeatherDataTransformer"
     assignment:
-      - name: "iFileLogger"
+      - name: "iLogger"
         literal: null
-        instance: "TheFileLogger"
-      - name: "iSettingsRepository"
+        instance: "TheLoggerFile"
+      - name: "iSettingRepository"
         literal: null
-        instance: "TheUDPSettingsRepository"
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
       - name: "provenanceTracker"
         literal: null
         instance: "TheProvenanceTracker"
@@ -523,81 +229,29 @@ instance:
   - name: "TheUdpListener"
     class: "UdpInRawPacketRecordTypedOut.Transformer"
     assignment:
-      - name: "iFileLogger"
+      - name: "iLogger"
         literal: null
-        instance: "TheFileLogger"
-      - name: "iSettingsRepository"
+        instance: "TheLoggerFile"
+      - name: "iSettingRepository"
         literal: null
-        instance: "TheUDPSettingsRepository"
+        instance: "TheUDPSettingRepository"
       - name: "externalCancellationTokenSource"
         literal: null
         instance: "RootCancellationTokenSource"
-      # NEW: Wire up provenance tracker
       - name: "provenanceTracker"
         literal: null
         instance: "TheProvenanceTracker"
     element: []
 
-  - name: "ThePostgresConnection"
-    class: "Settings.SettingConfiguration"
-    assignment:
-      - name: "defaultValue"
-        literal: "Host=sampleIP;Username=sampleUser;Password=samplePassword;Database=sampleDatabase;SslMode=Disable"
-        instance: null
-      - name: "description"
-        literal: "Connection string for save weather data to Postgres"
-        instance: null
-      - name: "expectedValueType"
-        literal: "String"
-        instance: null
-      - name: "group"
-        literal: "database"
-        instance: null
-      - name: "isEditable"
-        literal: "true"
-        instance: null
-      - name: "path"
-        literal: "/services/RawPacketRecordTypedInPostgresOut/connectionString"
-        instance: null
-      - name: "enumValues"
-        literal: "[]"
-        instance: null
-      - name: "isSecret"
-        literal: "true"
-        instance: null
-    element: []
-
-  - name: "ThePostgresSettings"
-    class: "Settings.SettingConfiguration[]"
-    assignment: []
-    element:
-      - literal: null
-        instance: "ThePostgresConnection"
-
-  - name: "ThePostgresSettingsRepository"
-    class: "Settings.SettingsRepository"
-    assignment:
-      - name: "iFileLogger"
-        literal: null
-        instance: "TheFileLogger"
-      - name: "settingConfigurations"
-        literal: null
-        instance: "ThePostgresSettings"
-      - name: "iSettingOverridesProvider"
-        literal: null
-        instance: "TheAppDataSettingOverridesProvider"
-    element: []
-
   - name: "TheRawPacketRecordTypedInPostgresOut"
     class: "RawPacketRecordTypedInPostgresOut.ListenerSink"
     assignment:
-      - name: "iFileLogger"
+      - name: "iLogger"
         literal: null
-        instance: "TheFileLogger"
-      - name: "iSettingsRepository"
+        instance: "TheLoggerFile"
+      - name: "iSettingRepository"
         literal: null
-        instance: "ThePostgresSettingsRepository"
-      # NEW: Wire up provenance tracker
+        instance: "TheSettingRepository"
       - name: "provenanceTracker"
         literal: null
         instance: "TheProvenanceTracker"

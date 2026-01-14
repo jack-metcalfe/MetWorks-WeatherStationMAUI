@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Text.Json;
-using System.Threading.Tasks;
-using UdpPackets;
-using RedStar.Amounts.WeatherExtensions;
-using MetWorksModels;
-using Utility;
+﻿namespace MetWorksServices;
 
-namespace MetWorksServices;
+//using xxx = Dictionary<MeasurementType, UnitData>;
 
 /// <summary>
 /// Transforms raw UDP packets into typed weather readings with user-preferred units.
@@ -16,19 +9,42 @@ namespace MetWorksServices;
 /// </summary>
 public class WeatherDataTransformer : IAsyncDisposable
 {
-    // ========================================
-    // Dependencies
-    // ========================================
-    private IFileLogger? _fileLogger;
-    private ISettingsRepository? _settingsRepository;
-    private ProvenanceTracker? _provenanceTracker;
+    bool _isInitialized = false;
 
-    private IFileLogger FileLoggerSafe => 
-        _fileLogger ?? throw new InvalidOperationException("WeatherDataTransformer not initialized.");
+    ILogger? _iLogger = null;
+    ILogger ILogger
+    {
+        get => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
+        set => _iLogger = value;
+    }
+
+    IEventRelayBasic? _iEventRelayBasic = null;
+    IEventRelayBasic IEventRelayBasic
+    {
+        get => NullPropertyGuard.Get(
+            _isInitialized, _iEventRelayBasic, nameof(IEventRelayBasic));
+        set => _iEventRelayBasic = value;
+    }
+
+    IEventRelayPath? _iEventRelayPath = null;
+    IEventRelayPath IEventRelayPath
+    {
+        get => NullPropertyGuard.Get(
+            _isInitialized, _iEventRelayPath, nameof(IEventRelayPath));
+        set => _iEventRelayPath = value;
+    }
+
+    ISettingRepository? _iSettingRepository;
+    ISettingRepository ISettingRepository
+    {
+        get => NullPropertyGuard.Get(
+            _isInitialized, _iSettingRepository, nameof(ISettingRepository)
+        );
+        set => _iSettingRepository = value;
+    }
+
+    ProvenanceTracker? _provenanceTracker;
     
-    private ISettingsRepository SettingsRepositorySafe =>
-        _settingsRepository ?? throw new InvalidOperationException("WeatherDataTransformer not initialized.");
-
     // ========================================
     // Last-Packet Cache (LRU pattern)
     // ========================================
@@ -36,132 +52,114 @@ public class WeatherDataTransformer : IAsyncDisposable
     /// Maintains the most recent packet per PacketEnum type for retransformation.
     /// When settings change, we retransform ALL cached packets with new unit preferences.
     /// </summary>
-    private readonly ConcurrentDictionary<PacketEnum, IRawPacketRecordTyped> _lastPacketCache = new();
-
-    // ========================================
-    // Unit Preference Fields
-    // ========================================
-    private Unit _preferredTemperatureUnit = TemperatureUnits.DegreeFahrenheit;
-    private Unit _preferredPressureUnit = PressureUnits.InchOfMercury;
-    private Unit _preferredSpeedUnit = SpeedUnits.MilePerHour;
-    private Unit _preferredDistanceUnit = LengthUnits.Mile;
-    private Unit _preferredPrecipitationUnit = LengthUnits.Inch;
+    readonly ConcurrentDictionary<PacketEnum, IRawPacketRecordTyped> _lastPacketCache = new();
 
     // ========================================
     // Initialization
     // ========================================
-
     public async Task<bool> InitializeAsync(
-        IFileLogger iFileLogger,
-        ISettingsRepository iSettingsRepository,
+        ILogger iLogger,
+        ISettingRepository iSettingRepository,
+        IEventRelayBasic iEventRelayBasic,
+        IEventRelayPath iEventRelayPath,
         ProvenanceTracker? provenanceTracker = null
     )
     {
-        if (iFileLogger is null)
-            throw new ArgumentNullException(nameof(iFileLogger));
-        
-        if (iSettingsRepository is null)
-            throw new ArgumentNullException(nameof(iSettingsRepository));
-
-        _fileLogger = iFileLogger;
-        _settingsRepository = iSettingsRepository;
-        _provenanceTracker = provenanceTracker; // Optional
-
         try
         {
-            // Register RedStar.Amounts temperature conversions
-            RegisterUnitConversions();
+            ILogger = iLogger;
+            ISettingRepository = iSettingRepository;
+            IEventRelayBasic = iEventRelayBasic;
+            IEventRelayPath = iEventRelayPath;
+            _provenanceTracker = provenanceTracker; // Optional
 
+            _isInitialized = true;
             // Load current unit preferences from settings
-            LoadUnitPreferences();
+            if (!LoadUnitPreference(iSettingRepository, iLogger))
+            {
+                iLogger.Error("Failed to load unit preferences during initialization");
+                return false;
+            }
+
+            ILogger.Information("🌡️ WeatherDataTransformer initialized successfully");
+            foreach(var unitKVP in _preferredUnits)
+                ILogger.Information($"   {unitKVP.Key}: {unitKVP.Value.Name}");
 
             // Subscribe to unit setting changes (wildcard pattern)
-            _settingsRepository.OnSettingsChanged("/services/udp/unitOverrides", OnUnitSettingChanged);
+            IEventRelayPath.Register(UnitOfMeasureGroupSettingsDefinition.GroupBasePath, OnUnitSettingChanged);
 
             // Subscribe to raw packet events
-            ISingletonEventRelay.Register<IRawPacketRecordTyped>(this, OnRawPacketReceived);
-
-            _fileLogger.Information("🌡️ WeatherDataTransformer initialized successfully");
-            _fileLogger.Information($"   Temperature: {_preferredTemperatureUnit.Name}");
-            _fileLogger.Information($"   Pressure: {_preferredPressureUnit.Name}");
-            _fileLogger.Information($"   Speed: {_preferredSpeedUnit.Name}");
-            _fileLogger.Information($"   Distance: {_preferredDistanceUnit.Name}");
-            _fileLogger.Information($"   Precipitation: {_preferredPrecipitationUnit.Name}");
+            IEventRelayBasic.Register<IRawPacketRecordTyped>(this, OnRawPacketReceived);
 
             return await Task.FromResult(true);
         }
         catch (Exception ex)
         {
-            _fileLogger.Error($"❌ WeatherDataTransformer initialization failed: {ex.Message}");
+            _iLogger.Error($"❌ WeatherDataTransformer initialization failed: {ex.Message}");
             throw;
         }
     }
 
-    // ========================================
-    // Unit Conversion Registration
-    // ========================================
-
     private void RegisterUnitConversions()
     {
-        // Temperature conversions (already registered in TemperatureUnits)
-        TemperatureUnits.RegisterConversions();
-        
-        FileLoggerSafe.Debug("✅ RedStar.Amounts unit conversions registered");
     }
 
     // ========================================
     // Unit Preference Management
     // ========================================
 
-    /// <summary>
-    /// Loads unit preferences from settings repository.
-    /// Public for testing purposes.
-    /// </summary>
-    public void RefreshUnitPreferences() => LoadUnitPreferences();
+    Dictionary<MeasurementTypeEnum, Unit> _preferredUnits = new();
 
-    private void LoadUnitPreferences()
+    bool LoadUnitPreference(ISettingRepository iSettingsRepository, ILogger iLogger)
     {
         try
         {
-            // Temperature
-            var tempSetting = SettingsRepositorySafe.GetValueOrDefault("/services/udp/unitOverrides/temperature");
-            _preferredTemperatureUnit = UnitManager.GetUnitByName(tempSetting ?? "degree fahrenheit");
+            var unitOfMeasure_airPressure = iSettingsRepository.GetValueOrDefault<string>(
+                    UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(UnitOfMeasure_airPressure)
+                );
+            _preferredUnits[MeasurementTypeEnum.AirPressure] = Unit.Parse(unitOfMeasure_airPressure);
 
-            // Pressure
-            var pressureSetting = SettingsRepositorySafe.GetValueOrDefault("/services/udp/unitOverrides/pressure");
-            _preferredPressureUnit = UnitManager.GetUnitByName(pressureSetting ?? "inch of mercury");
+            var unitOfMeasure_airTemperature = iSettingsRepository.GetValueOrDefault<string>(
+                    UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(UnitOfMeasure_airTemperature)
+                );
+            _preferredUnits[MeasurementTypeEnum.AirTemperature] = Unit.Parse(unitOfMeasure_airTemperature);
 
-            // Speed
-            var speedSetting = SettingsRepositorySafe.GetValueOrDefault("/services/udp/unitOverrides/windSpeed");
-            _preferredSpeedUnit = UnitManager.GetUnitByName(speedSetting ?? "mile/hour");
+            var unitOfMeasure_lightningDistance = iSettingsRepository.GetValueOrDefault<string>(
+                    UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(UnitOfMeasure_lightningDistance)
+                );
+            _preferredUnits[MeasurementTypeEnum.LightningDistance] = Unit.Parse(unitOfMeasure_lightningDistance);
 
-            // Distance
-            var distanceSetting = SettingsRepositorySafe.GetValueOrDefault("/services/udp/unitOverrides/distance");
-            _preferredDistanceUnit = UnitManager.GetUnitByName(distanceSetting ?? "mile");
+            var unitOfMeasure_precipitationAmount = iSettingsRepository.GetValueOrDefault<string>(
+                    UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(UnitOfMeasure_precipitationAmount)
+                );
+            _preferredUnits[MeasurementTypeEnum.PrecipitationAmount] = Unit.Parse(unitOfMeasure_precipitationAmount);
 
-            // Precipitation
-            var precipSetting = SettingsRepositorySafe.GetValueOrDefault("/services/udp/unitOverrides/precipitation");
-            _preferredPrecipitationUnit = UnitManager.GetUnitByName(precipSetting ?? "inch");
+            var unitOfMeasure_windSpeed = iSettingsRepository.GetValueOrDefault<string>(
+                    UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(UnitOfMeasure_windSpeed)
+                );
+            _preferredUnits[MeasurementTypeEnum.WindSpeed] = Unit.Parse(unitOfMeasure_windSpeed);
 
-            FileLoggerSafe.Debug("✅ Unit preferences loaded successfully");
-        }
+            return true;
+        }        
+        
         catch (Exception ex)
         {
-            FileLoggerSafe.Error($"❌ Failed to load unit preferences: {ex.Message}");
-            // Keep default units if settings fail
-        }
+            iLogger.Error(
+                $"❌ Failed to load unit preferences: {ex.Message}"
+            );
+            return false;
+        }   
     }
 
     // ========================================
     // Settings Change Handler
     // ========================================
 
-    private void OnUnitSettingChanged(string path, string? oldValue, string? newValue)
+    private void OnUnitSettingChanged(ISettingValue iSettingValue)
     {
-        FileLoggerSafe.Information($"🔄 Unit setting changed: {path} = '{oldValue}' -> '{newValue}'");
+        ILogger.Information($"🔄 Unit setting changed");
 
-        // Reload all unit preferences
-        LoadUnitPreferences();
+        LoadUnitPreference(ISettingRepository, ILogger);
 
         // Retransform all cached packets with new units
         RetransformCachedPackets();
@@ -170,17 +168,16 @@ public class WeatherDataTransformer : IAsyncDisposable
     // ========================================
     // Retransformation Logic
     // ========================================
-
     private void RetransformCachedPackets()
     {
         var cachedCount = _lastPacketCache.Count;
         if (cachedCount == 0)
         {
-            FileLoggerSafe.Debug("No cached packets to retransform");
+            ILogger.Debug("No cached packets to retransform");
             return;
         }
 
-        FileLoggerSafe.Information($"🔄 Retransforming {cachedCount} cached packets with new unit preferences");
+        ILogger.Information($"🔄 Retransforming {cachedCount} cached packets with new unit preferences");
 
         foreach (var kvp in _lastPacketCache)
         {
@@ -190,17 +187,17 @@ public class WeatherDataTransformer : IAsyncDisposable
             try
             {
                 TransformAndPublish(rawPacket, isRetransformation: true);
-                FileLoggerSafe.Debug($"✅ Retransformed {packetType} packet: {rawPacket.Id}");
+                ILogger.Debug($"✅ Retransformed {packetType} packet: {rawPacket.Id}");
             }
             catch (Exception ex)
             {
-                FileLoggerSafe.Error($"❌ Failed to retransform {packetType} packet {rawPacket.Id}: {ex.Message}");
+                ILogger.Error($"❌ Failed to retransform {packetType} packet {rawPacket.Id}: {ex.Message}");
                 
                 _provenanceTracker?.RecordError(rawPacket.Id, "WeatherDataTransformer", "Retransform", ex);
             }
         }
 
-        FileLoggerSafe.Information($"✅ Retransformation complete: {cachedCount} packets processed");
+        ILogger.Information($"✅ Retransformation complete: {cachedCount} packets processed");
     }
 
     // ========================================
@@ -221,7 +218,7 @@ public class WeatherDataTransformer : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            FileLoggerSafe.Error($"❌ Failed to process packet {rawPacket.Id}: {ex.Message}");
+            ILogger.Error($"❌ Failed to process packet {rawPacket.Id}: {ex.Message}");
             
             _provenanceTracker?.RecordError(rawPacket.Id, "WeatherDataTransformer", "Transform", ex);
         }
@@ -231,31 +228,31 @@ public class WeatherDataTransformer : IAsyncDisposable
     // Core Transformation Logic
     // ========================================
 
-    private void TransformAndPublish(IRawPacketRecordTyped rawPacket, bool isRetransformation)
+    private void TransformAndPublish(IRawPacketRecordTyped iRawPacketRecordTyped, bool isRetransformation)
     {
         var transformStart = DateTime.UtcNow;
 
-        IWeatherReading? reading = rawPacket.PacketEnum switch
+        IWeatherReading? reading = iRawPacketRecordTyped.PacketEnum switch
         {
-            PacketEnum.Observation => ParseObservation(rawPacket, isRetransformation),
-            PacketEnum.Wind => ParseWind(rawPacket, isRetransformation),
-            PacketEnum.Precipitation => ParsePrecipitation(rawPacket, isRetransformation),
-            PacketEnum.Lightning => ParseLightning(rawPacket, isRetransformation),
+            PacketEnum.Observation => ParseObservation(iRawPacketRecordTyped, isRetransformation),
+            PacketEnum.Wind => ParseWind(iRawPacketRecordTyped, isRetransformation),
+            PacketEnum.Precipitation => ParsePrecipitation(iRawPacketRecordTyped, isRetransformation),
+            PacketEnum.Lightning => ParseLightning(iRawPacketRecordTyped, isRetransformation),
             _ => null
         };
 
         if (reading is null)
         {
-            FileLoggerSafe.Warning($"⚠️ Failed to parse {rawPacket.PacketEnum} packet {rawPacket.Id}");
+            ILogger.Warning($"⚠️ Failed to parse {iRawPacketRecordTyped.PacketEnum} packet {iRawPacketRecordTyped.Id}");
             return;
         }
 
         var transformEnd = DateTime.UtcNow;
 
         // Track transformation in provenance
-        _provenanceTracker?.LinkTransformedReading(rawPacket.Id, reading.Id);
+        _provenanceTracker?.LinkTransformedReading(iRawPacketRecordTyped.Id, reading.Id);
         _provenanceTracker?.AddStep(
-            rawPacket.Id, 
+            iRawPacketRecordTyped.Id, 
             isRetransformation ? "Retransformation" : "Transformation",
             "WeatherDataTransformer",
             $"Converted to {reading.PacketType} with user units",
@@ -267,23 +264,23 @@ public class WeatherDataTransformer : IAsyncDisposable
         switch (reading)
         {
             case IObservationReading obs:
-                ISingletonEventRelay.Send(obs);  // ✅ Send as IObservationReading
+                IEventRelayBasic.Send(obs);  // ✅ Send as IObservationReading
                 break;
             case IWindReading wind:
-                ISingletonEventRelay.Send(wind);  // ✅ Send as IWindReading
+                IEventRelayBasic.Send(wind);  // ✅ Send as IWindReading
                 break;
             case IPrecipitationReading precip:
-                ISingletonEventRelay.Send(precip);  // ✅ Send as IPrecipitationReading
+                IEventRelayBasic.Send(precip);  // ✅ Send as IPrecipitationReading
                 break;
             case ILightningReading lightning:
-                ISingletonEventRelay.Send(lightning);  // ✅ Send as ILightningReading
+                IEventRelayBasic.Send(lightning);  // ✅ Send as ILightningReading
                 break;
             default:
-                FileLoggerSafe.Warning($"⚠️ Unknown reading type: {reading.GetType().Name}");
+                ILogger.Warning($"⚠️ Unknown reading type: {reading.GetType().Name}");
                 break;
         }
 
-        FileLoggerSafe.Debug($"📤 Published {reading.PacketType} reading: {reading.Id}");
+        ILogger.Debug($"📤 Published {reading.PacketType} reading: {reading.Id}");
     }
 
     // ========================================
@@ -298,17 +295,17 @@ public class WeatherDataTransformer : IAsyncDisposable
             var reading = TempestPacketParser.ParseObservation(rawPacket);
             if (reading is null)
             {
-                FileLoggerSafe.Warning($"⚠️ Failed to parse observation packet {rawPacket.Id}");
-                FileLoggerSafe.Warning($"observation contents {rawPacket.RawPacketJson}");
+                ILogger.Warning($"⚠️ Failed to parse observation packet {rawPacket.Id}");
+                ILogger.Warning($"observation contents {rawPacket.RawPacketJson}");
                 return null;
             }
 
             // Convert from Tempest's METRIC units to user preferences
             var temperature = new Amount(reading.AirTemperature, TemperatureUnits.DegreeCelsius)
-                .ConvertedTo(_preferredTemperatureUnit);
+                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.AirTemperature]);
             
             var pressure = new Amount(reading.StationPressure, PressureUnits.MilliBar)
-                .ConvertedTo(_preferredPressureUnit);
+                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.AirPressure]);
 
             return new ObservationReading
             {
@@ -329,15 +326,17 @@ public class WeatherDataTransformer : IAsyncDisposable
                     TransformStartTime = DateTime.UtcNow,
                     TransformEndTime = DateTime.UtcNow,
                     SourceUnits = "degree celsius, millibar",
-                    TargetUnits = $"{_preferredTemperatureUnit.Name}, {_preferredPressureUnit.Name}",
+                    TargetUnits = 
+                        $"{_preferredUnits[MeasurementTypeEnum.AirTemperature].Name}," +
+                        $"{_preferredUnits[MeasurementTypeEnum.AirPressure].Name}",
                     TransformerVersion = isRetransformation ? "1.0-retransform" : "1.0"
                 }
             };
         }
         catch (Exception ex)
         {
-            FileLoggerSafe.Error($"❌ Failed to parse Observation packet: {ex.Message}");
-            FileLoggerSafe.Debug($"   Stack trace: {ex.StackTrace}");
+            ILogger.Error($"❌ Failed to parse Observation packet: {ex.Message}");
+            ILogger.Debug($"   Stack trace: {ex.StackTrace}");
             return null;
         }
     }
@@ -350,13 +349,13 @@ public class WeatherDataTransformer : IAsyncDisposable
             var windDto = TempestPacketParser.ParseWind(rawPacket);
             if (windDto is null)
             {
-                FileLoggerSafe.Warning($"⚠️ Failed to parse wind packet {rawPacket.Id}");
+                ILogger.Warning($"⚠️ Failed to parse wind packet {rawPacket.Id}");
                 return null;
             }
 
             // Convert from Tempest's METRIC units (m/s) to user preferences
             var speed = new Amount(windDto.WindSpeed, SpeedUnits.MeterPerSecond)
-                .ConvertedTo(_preferredSpeedUnit);
+                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.WindSpeed]);
 
             return new WindReading
             {
@@ -375,15 +374,15 @@ public class WeatherDataTransformer : IAsyncDisposable
                     TransformStartTime = DateTime.UtcNow,
                     TransformEndTime = DateTime.UtcNow,
                     SourceUnits = "meter/second",
-                    TargetUnits = _preferredSpeedUnit.Name,
+                    TargetUnits = _preferredUnits[MeasurementTypeEnum.WindSpeed].Name,
                     TransformerVersion = isRetransformation ? "1.0-retransform" : "1.0"
                 }
             };
         }
         catch (Exception ex)
         {
-            FileLoggerSafe.Error($"❌ Failed to parse Wind packet: {ex.Message}");
-            FileLoggerSafe.Debug($"   Stack trace: {ex.StackTrace}");
+            ILogger.Error($"❌ Failed to parse Wind packet: {ex.Message}");
+            ILogger.Debug($"   Stack trace: {ex.StackTrace}");
             return null;
         }
     }
@@ -396,7 +395,7 @@ public class WeatherDataTransformer : IAsyncDisposable
             var precipDto = TempestPacketParser.ParsePrecipitation(rawPacket);
             if (precipDto is null)
             {
-                FileLoggerSafe.Warning($"⚠️ Failed to parse precipitation packet {rawPacket.Id}");
+                ILogger.Warning($"⚠️ Failed to parse precipitation packet {rawPacket.Id}");
                 return null;
             }
 
@@ -407,7 +406,7 @@ public class WeatherDataTransformer : IAsyncDisposable
                 SourcePacketId = rawPacket.Id,
                 Timestamp = DateTimeOffset.FromUnixTimeSeconds(precipDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime,
                 ReceivedUtc = rawPacket.ReceivedTime,
-                RainRate = new Amount(0, LengthUnits.MilliMeter).ConvertedTo(_preferredPrecipitationUnit),  // Event only
+                RainRate = new Amount(0, LengthUnits.MilliMeter).ConvertedTo(_preferredUnits[MeasurementTypeEnum.PrecipitationAmount]),
                 DailyAccumulation = null,  // Get from observation packet
                 Provenance = new ReadingProvenance
                 {
@@ -416,15 +415,15 @@ public class WeatherDataTransformer : IAsyncDisposable
                     TransformStartTime = DateTime.UtcNow,
                     TransformEndTime = DateTime.UtcNow,
                     SourceUnits = "millimeter",
-                    TargetUnits = _preferredPrecipitationUnit.Name,
+                    TargetUnits = _preferredUnits[MeasurementTypeEnum.PrecipitationAmount].Name,
                     TransformerVersion = isRetransformation ? "1.0-retransform" : "1.0"
                 }
             };
         }
         catch (Exception ex)
         {
-            FileLoggerSafe.Error($"❌ Failed to parse Precipitation packet: {ex.Message}");
-            FileLoggerSafe.Debug($"   Stack trace: {ex.StackTrace}");
+            ILogger.Error($"❌ Failed to parse Precipitation packet: {ex.Message}");
+            ILogger.Debug($"   Stack trace: {ex.StackTrace}");
             return null;
         }
     }
@@ -437,13 +436,13 @@ public class WeatherDataTransformer : IAsyncDisposable
             var lightningDto = TempestPacketParser.ParseLightning(rawPacket);
             if (lightningDto is null)
             {
-                FileLoggerSafe.Warning($"⚠️ Failed to parse lightning packet {rawPacket.Id}");
+                ILogger.Warning($"⚠️ Failed to parse lightning packet {rawPacket.Id}");
                 return null;
             }
 
             // Convert from Tempest's METRIC units (km) to user preferences
             var strikeDistance = new Amount(lightningDto.LightningStrikeDistanceKm, LengthUnits.KiloMeter)
-                .ConvertedTo(_preferredDistanceUnit);
+                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.LightningDistance]);
 
             return new LightningReading
             {
@@ -460,15 +459,15 @@ public class WeatherDataTransformer : IAsyncDisposable
                     TransformStartTime = DateTime.UtcNow,
                     TransformEndTime = DateTime.UtcNow,
                     SourceUnits = "kilometer",
-                    TargetUnits = _preferredDistanceUnit.Name,
+                    TargetUnits = _preferredUnits[MeasurementTypeEnum.LightningDistance].Name,
                     TransformerVersion = isRetransformation ? "1.0-retransform" : "1.0"
                 }
             };
         }
         catch (Exception ex)
         {
-            FileLoggerSafe.Error($"❌ Failed to parse Lightning packet: {ex.Message}");
-            FileLoggerSafe.Debug($"   Stack trace: {ex.StackTrace}");
+            ILogger.Error($"❌ Failed to parse Lightning packet: {ex.Message}");
+            ILogger.Debug($"   Stack trace: {ex.StackTrace}");
             return null;
         }
     }
@@ -517,13 +516,13 @@ public class WeatherDataTransformer : IAsyncDisposable
         try
         {
             // Unsubscribe from events
-            ISingletonEventRelay.Unregister<IRawPacketRecordTyped>(this);
+            IEventRelayBasic.Unregister<IRawPacketRecordTyped>(this);
 
-            FileLoggerSafe.Information("🛑 WeatherDataTransformer disposed");
+            ILogger.Information("🛑 WeatherDataTransformer disposed");
         }
         catch (Exception ex)
         {
-            FileLoggerSafe?.Warning($"⚠️ Error during WeatherDataTransformer disposal: {ex.Message}");
+            ILogger?.Warning($"⚠️ Error during WeatherDataTransformer disposal: {ex.Message}");
         }
 
         await Task.CompletedTask;

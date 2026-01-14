@@ -2,7 +2,7 @@
 public class ReadOnlyMemoryOfCharFactory
 {
     public static ReadOnlyMemory<char> FromPath(
-        IFileLogger iFileLoggger, string filePath, Encoding? encoding = null)
+        ILogger iFileLoggger, string filePath, Encoding? encoding = null)
     {
         encoding ??= Encoding.UTF8;
         string content = File.ReadAllText(filePath, encoding);

@@ -10,7 +10,6 @@ public partial class WeatherPage : ContentPage
     {
         InitializeComponent();
         
-        // No dependency injection needed - ViewModel uses ISingletonEventRelay
         _viewModel = new WeatherViewModel();
         BindingContext = _viewModel;
     }

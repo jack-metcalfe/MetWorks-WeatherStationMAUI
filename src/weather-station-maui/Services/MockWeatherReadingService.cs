@@ -1,12 +1,3 @@
-using System;
-using System.Threading;
-using BasicEventRelay;
-using MetWorksModels.Weather;
-using MetWorksModels.Provenance;
-using RedStar.Amounts;
-using RedStar.Amounts.StandardUnits;
-using Utility;
-
 namespace MetWorksWeather.Services;
 
 /// <summary>
@@ -18,9 +9,9 @@ namespace MetWorksWeather.Services;
 /// </summary>
 public class MockWeatherReadingService : IDisposable
 {
-    private Timer? _timer;
-    private readonly Random _random = new();
-    private bool _isRunning;
+    ThreadingTimer? _timer;
+    readonly Random _random = new();
+    bool _isRunning;
 
     public bool IsRunning => _isRunning;
 
@@ -35,13 +26,13 @@ public class MockWeatherReadingService : IDisposable
         _isRunning = true;
 
         // Emit mock readings every 2 seconds
-        _timer = new Timer(_ =>
+        _timer = new ThreadingTimer(_ =>
         {
             try
             {
                 // Send same message types as real WeatherDataTransformer
-                ISingletonEventRelay.Send(CreateMockObservationReading());
-                ISingletonEventRelay.Send(CreateMockWindReading());
+                //IEventRelayBasic.Send(CreateMockObservationReading());
+                //IEventRelayBasic.Send(CreateMockWindReading());
             }
             catch (Exception ex)
             {

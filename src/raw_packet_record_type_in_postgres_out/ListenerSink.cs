@@ -5,6 +5,32 @@ namespace RawPacketRecordTypedInPostgresOut;
 
 public class ListenerSink : IBackgroundService
 {
+    bool _isInitialized = false;
+
+    ILogger? _iLogger = null;
+    ILogger ILogger
+    {
+        get => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
+        set => _iLogger = value;
+    }
+
+    IEventRelayBasic? _iEventRelayBasic = null;
+    IEventRelayBasic IEventRelayBasic
+    {
+        get => NullPropertyGuard.Get(
+            _isInitialized, _iEventRelayBasic, nameof(IEventRelayBasic));
+        set => _iEventRelayBasic = value;
+    }
+
+    ISettingRepository? _iSettingsRepository;
+    ISettingRepository ISettingRepository
+    {
+        get => NullPropertyGuard.Get(
+            _isInitialized, _iSettingsRepository, nameof(ISettingRepository)
+        );
+        set => _iSettingsRepository = value;
+    }
+    ProvenanceTracker? ProvenanceTracker { get; set; }
     static Dictionary<PacketEnum, string> PacketToTableDictionary = new ()
     {
         { PacketEnum.Lightning, "lightning" },
@@ -14,90 +40,80 @@ public class ListenerSink : IBackgroundService
     };
     
     // Connection state tracking
-    private bool _isDatabaseAvailable = false;
-    private bool _isInitializing = false;
-    private DateTime _lastConnectionAttempt = DateTime.MinValue;
-    private DateTime _lastSuccessfulWrite = DateTime.MinValue;
-    private int _failureCount = 0;
-    private const int MaxConsecutiveFailures = 5;
-    private const int ReconnectionIntervalSeconds = 30;
-    
+    bool _isDatabaseAvailable = false;
+    bool _isInitializing = false;
+    DateTime _lastConnectionAttempt = DateTime.MinValue;
+    DateTime _lastSuccessfulWrite = DateTime.MinValue;
+    int _failureCount = 0;
+    const int MaxConsecutiveFailures = 5;
+    const int ReconnectionIntervalSeconds = 30;
+
     // Message buffering (optional)
-    private ConcurrentQueue<IRawPacketRecordTyped>? _messageBuffer;
-    private const int MaxBufferSize = 1000;
-    private bool _bufferingEnabled = false;
-    
+    ConcurrentQueue<IRawPacketRecordTyped>? _messageBuffer;
+    const int MaxBufferSize = 1000;
+    bool _bufferingEnabled = false;
+
     // Health monitoring
-    private Timer? _healthCheckTimer;
-    private Timer? _reconnectionTimer;
-    
+    Timer? _healthCheckTimer;
+    Timer? _reconnectionTimer;
+
+    string _connectionString = string.Empty;
     PostgresConnectionFactory? PostgresConnectionFactory { get; set; }
     PostgresConnectionFactory PostgresConnectionFactorySafe => NullPropertyGuard.GetSafeClass(
         PostgresConnectionFactory, "Listener not initialized. Call InitializeAsync before using.");
-    
-    IFileLogger? IFileLogger { get; set; }
-    IFileLogger IFileLoggerSafe => NullPropertyGuard.GetSafeClass(
-        IFileLogger, "Listener not initialized. Call InitializeAsync before using.");
-    
-    ISettingsRepository? ISettingsRepository { get; set; }
-    ISettingsRepository ISettingsRepositorySafe => NullPropertyGuard.GetSafeClass(
-        ISettingsRepository, "Listener not initialized. Call InitializeAsync before using.");
-    
-    ProvenanceTracker? ProvenanceTracker { get; set; }
-    
+
     public ListenerSink()
     {
     }
-    
     public async Task<bool> InitializeAsync(
-        IFileLogger iFileLogger,
-        ISettingsRepository iSettingsRepository,
-        ProvenanceTracker? provenanceTracker = null  // NEW: Optional
+        ILogger iLogger,
+        ISettingRepository iSettingRepository,
+        IEventRelayBasic iEventRelayBasic,
+        ProvenanceTracker? provenanceTracker = null
     )
     {
         try
         {
-            IFileLogger = iFileLogger;
-            ISettingsRepository = iSettingsRepository;
+            _iLogger = iLogger;
+            ISettingRepository = iSettingRepository;
+            IEventRelayBasic = iEventRelayBasic;
             ProvenanceTracker = provenanceTracker;
-
+            _isInitialized = true;
             if (ProvenanceTracker != null)
-            {
-                IFileLoggerSafe.Information("🔍 Provenance tracking enabled for PostgreSQL listener");
-            }
-            
-            // Check if buffering is enabled
-            var bufferingSetting = iSettingsRepository.GetValueOrDefault(
-                "/services/RawPacketRecordTypedInPostgresOut/enableBuffering");
-            _bufferingEnabled = bool.TryParse(bufferingSetting, out var bufferEnabled) && bufferEnabled;
-            
+                ILogger.Information("🔍 Provenance tracking enabled for PostgreSQL listener");
+
+            _bufferingEnabled = ISettingRepository.GetValueOrDefault<bool>(
+                    XMLToPostgreSQLGroupSettingsDefinition.BuildSettingPath(XMLToPostgreSQL_enableBuffering)
+                );
+
             if (_bufferingEnabled)
             {
                 _messageBuffer = new ConcurrentQueue<IRawPacketRecordTyped>();
-                IFileLoggerSafe.Information("📦 Message buffering enabled for PostgreSQL listener");
+                ILogger.Information("📦 Message buffering enabled for PostgreSQL listener");
             }
-            
-            var connectionString = iSettingsRepository
-                .GetValueOrDefault(@"/services/RawPacketRecordTypedInPostgresOut/connectionString");
-            
-            if (string.IsNullOrWhiteSpace(connectionString))
+
+            _connectionString = ISettingRepository.GetValueOrDefault<string>(
+                    XMLToPostgreSQLGroupSettingsDefinition.BuildSettingPath(XMLToPostgreSQL_connectionString)
+                );
+
+            if (string.IsNullOrWhiteSpace(_connectionString))
             {
-                IFileLoggerSafe.Warning("⚠️ PostgreSQL connection string not configured. Running in degraded mode.");
+                ILogger.Warning("⚠️ PostgreSQL connection string not configured. Running in degraded mode.");
                 await StartDegradedAsync();
                 return true; // Return true to allow app to continue
             }
             
             // Attempt initial connection
-            var connected = await TryEstablishConnectionAsync(connectionString);
+            var connected = await TryEstablishConnectionAsync(_connectionString);
             
             if (connected)
             {
-                IFileLoggerSafe.Information("✅ PostgreSQL listener initialized with active connection");
+                ILogger.Information("✅ PostgreSQL listener initialized with active connection");
                 await StartAsync();
             }
             else
             {
-                IFileLoggerSafe.Warning("⚠️ PostgreSQL initially unavailable. Starting in degraded mode with auto-reconnect.");
+                ILogger.Warning("⚠️ PostgreSQL initially unavailable. Starting in degraded mode with auto-reconnect.");
                 await StartDegradedAsync();
             }
             
@@ -105,8 +121,8 @@ public class ListenerSink : IBackgroundService
         }
         catch (Exception exception)
         {
-            IFileLoggerSafe.Error($"❌ Error during PostgreSQL listener initialization: {exception.Message}");
-            IFileLoggerSafe.Warning("⚠️ Starting PostgreSQL listener in degraded mode");
+            ILogger.Error($"❌ Error during PostgreSQL listener initialization: {exception.Message}");
+            ILogger.Warning("⚠️ Starting PostgreSQL listener in degraded mode");
             await StartDegradedAsync();
             return true; // Don't throw - allow app to continue
         }
@@ -116,7 +132,7 @@ public class ListenerSink : IBackgroundService
     {
         if (_isInitializing)
         {
-            IFileLoggerSafe.Debug("⏳ Connection attempt already in progress, skipping");
+            ILogger.Debug("⏳ Connection attempt already in progress, skipping");
             return false;
         }
         
@@ -125,11 +141,11 @@ public class ListenerSink : IBackgroundService
         
         try
         {
-            IFileLoggerSafe.Information("🔌 Attempting to establish PostgreSQL connection...");
+            ILogger.Information("🔌 Attempting to establish PostgreSQL connection...");
             
             // Create the connection factory
             PostgresConnectionFactory = await PostgresConnectionFactory.CreateAsync(
-                IFileLoggerSafe, connectionString);
+                ILogger, connectionString);
             
             // Test the connection using the new async method
             await using (var testConnection = await PostgresConnectionFactorySafe.CreateConnectionAsync())
@@ -143,7 +159,7 @@ public class ListenerSink : IBackgroundService
                     // Extract just the PostgreSQL version number for cleaner logging
                     var versionString = version.ToString() ?? "Unknown";
                     var versionShort = versionString.Split(' ').Take(2).ToArray();
-                    IFileLoggerSafe.Information($"✅ Connected to {string.Join(" ", versionShort)}");
+                    ILogger.Information($"✅ Connected to {string.Join(" ", versionShort)}");
                 }
                 
                 // Verify we can query system tables
@@ -151,25 +167,25 @@ public class ListenerSink : IBackgroundService
                     "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'", 
                     testConnection);
                 var tableCount = await testQuery.ExecuteScalarAsync();
-                IFileLoggerSafe.Debug($"📊 Found {tableCount} tables in public schema");
+                ILogger.Debug($"📊 Found {tableCount} tables in public schema");
             }
             
             // Initialize database schema (this creates its own connection)
-            IFileLoggerSafe.Information("🗄️ Initializing database schema...");
+            ILogger.Information("🗄️ Initializing database schema...");
             await PostgresInitializer.DatabaseInitializeAsync(
-                IFileLoggerSafe, PostgresConnectionFactorySafe.CreateConnection());
+                ILogger, PostgresConnectionFactorySafe.CreateConnection());
             
             _isDatabaseAvailable = true;
             _failureCount = 0;
             _lastSuccessfulWrite = DateTime.UtcNow;
             
-            IFileLoggerSafe.Information("✅ PostgreSQL connection established successfully");
+            ILogger.Information("✅ PostgreSQL connection established successfully");
             
             // Process any buffered messages
             if (_bufferingEnabled && _messageBuffer != null && !_messageBuffer.IsEmpty)
             {
                 var bufferedCount = _messageBuffer.Count;
-                IFileLoggerSafe.Information($"📦 Found {bufferedCount} buffered messages, starting processing...");
+                ILogger.Information($"📦 Found {bufferedCount} buffered messages, starting processing...");
                 _ = Task.Run(() => ProcessBufferedMessagesAsync());
             }
             
@@ -186,21 +202,21 @@ public class ListenerSink : IBackgroundService
                 errorDetails += $", SqlState: {npgsqlException.SqlState}";
             }
             
-            IFileLoggerSafe.Warning(
+            ILogger.Warning(
                 $"⚠️ Failed to establish PostgreSQL connection: {npgsqlException.Message} ({errorDetails})");
             
             // Log specific error hints
             if (npgsqlException.Message.Contains("timeout"))
             {
-                IFileLoggerSafe.Warning("   💡 Hint: Check network connectivity and firewall settings");
+                ILogger.Warning("   💡 Hint: Check network connectivity and firewall settings");
             }
             else if (npgsqlException.Message.Contains("authentication"))
             {
-                IFileLoggerSafe.Warning("   💡 Hint: Verify username and password in connection string");
+                ILogger.Warning("   💡 Hint: Verify username and password in connection string");
             }
             else if (npgsqlException.Message.Contains("does not exist"))
             {
-                IFileLoggerSafe.Warning("   💡 Hint: Ensure the database exists and is accessible");
+                ILogger.Warning("   💡 Hint: Ensure the database exists and is accessible");
             }
             
             return false;
@@ -208,17 +224,17 @@ public class ListenerSink : IBackgroundService
         catch (TimeoutException timeoutException)
         {
             _isDatabaseAvailable = false;
-            IFileLoggerSafe.Warning(
+            ILogger.Warning(
                 $"⚠️ Connection timeout: {timeoutException.Message}");
-            IFileLoggerSafe.Warning("   💡 Hint: Database server may be unreachable or overloaded");
+            ILogger.Warning("   💡 Hint: Database server may be unreachable or overloaded");
             return false;
         }
         catch (Exception exception)
         {
             _isDatabaseAvailable = false;
-            IFileLoggerSafe.Warning($"⚠️ Failed to establish PostgreSQL connection: {exception.Message}");
-            IFileLoggerSafe.Debug($"   Exception type: {exception.GetType().Name}");
-            IFileLoggerSafe.Debug($"   Stack trace: {exception.StackTrace}");
+            ILogger.Warning($"⚠️ Failed to establish PostgreSQL connection: {exception.Message}");
+            ILogger.Debug($"   Exception type: {exception.GetType().Name}");
+            ILogger.Debug($"   Stack trace: {exception.StackTrace}");
             return false;
         }
         finally
@@ -229,11 +245,11 @@ public class ListenerSink : IBackgroundService
     
     private async Task StartDegradedAsync()
     {
-        IFileLoggerSafe.Warning("🔶 PostgreSQL listener running in DEGRADED MODE");
-        IFileLoggerSafe.Information("🔄 Auto-reconnection enabled - will retry every 30 seconds");
+        ILogger.Warning("🔶 PostgreSQL listener running in DEGRADED MODE");
+        ILogger.Information("🔄 Auto-reconnection enabled - will retry every 30 seconds");
         
         // Register event handler even in degraded mode
-        ISingletonEventRelay.Register<IRawPacketRecordTyped>(this, ReceiveHandler);
+        IEventRelayBasic.Register<IRawPacketRecordTyped>(this, ReceiveHandler);
         
         // Start reconnection attempts
         StartReconnectionTimer();
@@ -246,8 +262,8 @@ public class ListenerSink : IBackgroundService
     
     public async Task<bool> StartAsync()
     {
-        IFileLoggerSafe.Information("✅ PostgreSQL Listener started in ACTIVE mode");
-        ISingletonEventRelay.Register<IRawPacketRecordTyped>(this, ReceiveHandler);
+        ILogger.Information("✅ PostgreSQL Listener started in ACTIVE mode");
+        IEventRelayBasic.Register<IRawPacketRecordTyped>(this, ReceiveHandler);
         
         // Start health monitoring
         StartHealthMonitoring();
@@ -270,7 +286,7 @@ public class ListenerSink : IBackgroundService
             TimeSpan.FromSeconds(60), 
             TimeSpan.FromSeconds(60));
         
-        IFileLoggerSafe.Information("🏥 Health monitoring started for PostgreSQL listener");
+        ILogger.Information("🏥 Health monitoring started for PostgreSQL listener");
     }
     
     private void StartReconnectionTimer()
@@ -285,7 +301,7 @@ public class ListenerSink : IBackgroundService
             TimeSpan.FromSeconds(ReconnectionIntervalSeconds),
             TimeSpan.FromSeconds(ReconnectionIntervalSeconds));
         
-        IFileLoggerSafe.Information("🔄 Reconnection timer started for PostgreSQL listener");
+        ILogger.Information("🔄 Reconnection timer started for PostgreSQL listener");
     }
     
     private void HealthCheckCallback(object? state)
@@ -301,13 +317,13 @@ public class ListenerSink : IBackgroundService
                 // Database is up - check for stale writes
                 if (timeSinceLastWrite > TimeSpan.FromMinutes(5) && _lastSuccessfulWrite != DateTime.MinValue)
                 {
-                    IFileLoggerSafe.Warning(
+                    ILogger.Warning(
                         $"⚠️ PostgreSQL [{status}] No writes in {timeSinceLastWrite.TotalMinutes:F1} minutes. " +
                         $"Buffer: {bufferSize} messages");
                 }
                 else
                 {
-                    IFileLoggerSafe.Debug(
+                    ILogger.Debug(
                         $"💚 PostgreSQL [{status}] Healthy - Last write: {timeSinceLastWrite.TotalSeconds:F0}s ago. " +
                         $"Failures: {_failureCount}");
                 }
@@ -316,7 +332,7 @@ public class ListenerSink : IBackgroundService
             {
                 // Database is down
                 var timeSinceLastAttempt = DateTime.UtcNow - _lastConnectionAttempt;
-                IFileLoggerSafe.Warning(
+                ILogger.Warning(
                     $"🔶 PostgreSQL [{status}] Unavailable - Last attempt: {timeSinceLastAttempt.TotalSeconds:F0}s ago. " +
                     $"Buffer: {bufferSize} messages. " +
                     $"Failures: {_failureCount}");
@@ -325,14 +341,14 @@ public class ListenerSink : IBackgroundService
             // If too many consecutive failures, mark as unavailable
             if (_failureCount >= MaxConsecutiveFailures && _isDatabaseAvailable)
             {
-                IFileLoggerSafe.Error(
+                ILogger.Error(
                     $"❌ PostgreSQL has {_failureCount} consecutive failures. Marking as UNAVAILABLE.");
                 _isDatabaseAvailable = false;
             }
         }
         catch (Exception exception)
         {
-            IFileLoggerSafe.Error($"❌ Error in health check: {exception.Message}");
+            ILogger.Error($"❌ Error in health check: {exception.Message}");
         }
     }
     
@@ -347,16 +363,16 @@ public class ListenerSink : IBackgroundService
         if (timeSinceLastAttempt < TimeSpan.FromSeconds(ReconnectionIntervalSeconds - 5))
             return;
         
-        IFileLoggerSafe.Information("🔄 Attempting automatic PostgreSQL reconnection...");
+        ILogger.Information("🔄 Attempting automatic PostgreSQL reconnection...");
         
         _ = Task.Run(async () =>
         {
-            var connectionString = ISettingsRepositorySafe
+            var connectionString = ISettingRepository
                 .GetValueOrDefault(@"/services/RawPacketRecordTypedInPostgresOut/connectionString");
             
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                IFileLoggerSafe.Warning("⚠️ Cannot reconnect - connection string not available");
+                ILogger.Warning("⚠️ Cannot reconnect - connection string not available");
                 return;
             }
             
@@ -364,11 +380,11 @@ public class ListenerSink : IBackgroundService
             
             if (connected)
             {
-                IFileLoggerSafe.Information("✅ PostgreSQL reconnection SUCCESSFUL! Resuming normal operation.");
+                ILogger.Information("✅ PostgreSQL reconnection SUCCESSFUL! Resuming normal operation.");
             }
             else
             {
-                IFileLoggerSafe.Warning("❌ PostgreSQL reconnection failed. Will retry in 30 seconds.");
+                ILogger.Warning("❌ PostgreSQL reconnection failed. Will retry in 30 seconds.");
             }
         });
     }
@@ -386,13 +402,13 @@ public class ListenerSink : IBackgroundService
             if (_messageBuffer.Count < MaxBufferSize)
             {
                 _messageBuffer.Enqueue(iRawPacketRecordTyped);
-                IFileLoggerSafe.Debug(
+                ILogger.Debug(
                     $"📦 Message buffered ({_messageBuffer.Count}/{MaxBufferSize}): {iRawPacketRecordTyped.PacketEnum} id '{iRawPacketRecordTyped.Id}'");
                 return;
             }
             else
             {
-                IFileLoggerSafe.Warning(
+                ILogger.Warning(
                     $"⚠️ Buffer full ({MaxBufferSize}), dropping message: {iRawPacketRecordTyped.PacketEnum} id '{iRawPacketRecordTyped.Id}'");
                 return;
             }
@@ -401,7 +417,7 @@ public class ListenerSink : IBackgroundService
         // If database is unavailable and buffering is disabled, drop the message
         if (!_isDatabaseAvailable)
         {
-            IFileLoggerSafe.Warning(
+            ILogger.Warning(
                 $"🔶 Database unavailable, dropping message: {iRawPacketRecordTyped.PacketEnum} id '{iRawPacketRecordTyped.Id}'");
             return;
         }
@@ -438,14 +454,14 @@ public class ListenerSink : IBackgroundService
             // NEW: Link database record in provenance
             ProvenanceTracker?.LinkDatabaseRecord(iRawPacketRecordTyped.Id, iRawPacketRecordTyped.Id);
 
-            IFileLoggerSafe.Information(
+            ILogger.Information(
                 $"✅ Wrote to PostgreSQL '{tableString}' - {iRawPacketRecordTyped.PacketEnum} id '{iRawPacketRecordTyped.Id}' ({rowsAffected} row)");
         }
         catch (Npgsql.NpgsqlException npgsqlException)
         {
             _failureCount++;
             
-            IFileLoggerSafe.Error(
+            ILogger.Error(
                 $"❌ PostgreSQL error writing to '{tableString}' (failure #{_failureCount}): " +
                 $"{npgsqlException.Message} (ErrorCode: {npgsqlException.ErrorCode})");
             
@@ -459,11 +475,11 @@ public class ListenerSink : IBackgroundService
             // Check for specific PostgreSQL errors
             if (npgsqlException.SqlState == "23505") // Unique violation
             {
-                IFileLoggerSafe.Warning($"   💡 Duplicate key violation - message may have been processed already");
+                ILogger.Warning($"   💡 Duplicate key violation - message may have been processed already");
             }
             else if (npgsqlException.SqlState == "08006") // Connection failure
             {
-                IFileLoggerSafe.Warning($"   💡 Connection lost - marking database as unavailable");
+                ILogger.Warning($"   💡 Connection lost - marking database as unavailable");
                 _isDatabaseAvailable = false;
             }
             
@@ -473,14 +489,14 @@ public class ListenerSink : IBackgroundService
                 if (_messageBuffer.Count < MaxBufferSize)
                 {
                     _messageBuffer.Enqueue(iRawPacketRecordTyped);
-                    IFileLoggerSafe.Warning($"📦 Message moved to buffer after failure (buffer size: {_messageBuffer.Count})");
+                    ILogger.Warning($"📦 Message moved to buffer after failure (buffer size: {_messageBuffer.Count})");
                 }
             }
         }
         catch (TimeoutException)
         {
             _failureCount++;
-            IFileLoggerSafe.Error($"⏱️ Database write timeout (failure #{_failureCount})");
+            ILogger.Error($"⏱️ Database write timeout (failure #{_failureCount})");
             
             // NEW: Record timeout error in provenance
             ProvenanceTracker?.RecordError(
@@ -493,7 +509,7 @@ public class ListenerSink : IBackgroundService
         {
             _failureCount++;
             
-            IFileLoggerSafe.Error(
+            ILogger.Error(
                 $"❌ Failed to write to PostgreSQL '{tableString}' (failure #{_failureCount}): " +
                 $"{exception.GetType().Name}: {exception.Message}");
             
@@ -512,7 +528,7 @@ public class ListenerSink : IBackgroundService
             return;
         
         var bufferSize = _messageBuffer.Count;
-        IFileLoggerSafe.Information($"📤 Processing {bufferSize} buffered messages...");
+        ILogger.Information($"📤 Processing {bufferSize} buffered messages...");
         
         int processed = 0;
         int failed = 0;
@@ -533,20 +549,20 @@ public class ListenerSink : IBackgroundService
             catch (Exception exception)
             {
                 failed++;
-                IFileLoggerSafe.Error($"❌ Failed to process buffered message: {exception.Message}");
+                ILogger.Error($"❌ Failed to process buffered message: {exception.Message}");
                 
                 // If failures mount, stop processing and re-queue remaining
                 if (failed >= 5)
                 {
                     _messageBuffer.Enqueue(message); // Put it back
-                    IFileLoggerSafe.Warning($"⚠️ Stopping buffer processing due to failures. {_messageBuffer.Count} messages remain.");
+                    ILogger.Warning($"⚠️ Stopping buffer processing due to failures. {_messageBuffer.Count} messages remain.");
                     _isDatabaseAvailable = false;
                     break;
                 }
             }
         }
         
-        IFileLoggerSafe.Information(
+        ILogger.Information(
             $"✅ Buffer processing complete. Processed: {processed}, Failed: {failed}, Remaining: {_messageBuffer.Count}");
     }
     
@@ -557,10 +573,10 @@ public class ListenerSink : IBackgroundService
         
         _reconnectionTimer?.Dispose();
         _reconnectionTimer = null;
-        
-        ISingletonEventRelay.Unregister<IRawPacketRecordTyped>(this);
-        
-        IFileLoggerSafe.Information("🧹 PostgreSQL listener disposed");
+
+        IEventRelayBasic.Unregister<IRawPacketRecordTyped>(this);
+
+        ILogger.Information("🧹 PostgreSQL listener disposed");
         await Task.CompletedTask;
     }
 }

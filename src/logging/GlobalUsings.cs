@@ -2,4 +2,9 @@
 global using System.Threading.Tasks;
 global using Serilog;
 global using Serilog.Events;
-global using InterfaceDefinition;
+global using Interfaces;
+global using System.IO;
+global using Microsoft.Maui.Storage;
+global using ILogger = Interfaces.ILogger;
+global using static Constants.Settings.Paths.GroupSettingDefinitions;
+global using Utility;

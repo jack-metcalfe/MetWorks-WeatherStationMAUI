@@ -7,7 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\logging\Logging.csproj" />
-    <ProjectReference Include="..\maui_setting_override_providers\MauiSettingOverrideProviders.csproj" />
     <ProjectReference Include="..\metworks_services\MetWorksServices.csproj" />
     <ProjectReference Include="..\raw_packet_record_type_in_postgres_out\RawPacketRecordTypedInPostgresOut.csproj" />
     <ProjectReference Include="..\settings\Settings.csproj" />

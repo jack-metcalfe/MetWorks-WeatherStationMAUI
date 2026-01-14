@@ -1,7 +1,6 @@
-﻿global using InterfaceDefinition;
+﻿global using Interfaces;
 global using UdpPackets;
 global using EnumDefinition;
-global using BasicEventRelay;
 global using System.Threading.Tasks;
 global using MetWorksModels.Weather;
 global using MetWorksModels.Provenance;
@@ -12,3 +11,6 @@ global using System.Collections.Concurrent;
 global using System.Collections.Generic;
 global using System.Linq;
 global using System.Text.Json;
+global using Utility;
+global using static Constants.Measurement.MeasurementHelper;
+global using static Constants.Settings.Paths.GroupSettingDefinitions;

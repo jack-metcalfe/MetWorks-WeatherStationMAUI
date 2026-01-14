@@ -1,4 +1,4 @@
-﻿namespace InterfaceDefinition;
+﻿namespace Interfaces;
 public interface IRegistryExport
 {
 }

@@ -15,7 +15,8 @@ public static class TempestPacketParser
         try
         {
             var dto = PacketEnumToConcreteDto.PacketHandlers[PacketEnum.Observation](
-                rawPacket.RawPacketJson.AsMemory()) as ObservationDto;
+                rawPacket.RawPacketJson.AsMemory()
+            ) as ObservationDto;
             
             return dto?.Observations.Length > 0 ? dto.Observations[0] : null;
         }

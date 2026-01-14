@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\enum_definitions\enum_definition.csproj" />
-    <ProjectReference Include="..\interfaces\interfaces.csproj" />
+    <ProjectReference Include="..\interfaces\Interfaces.csproj" />
     <ProjectReference Include="..\utility\Utility.csproj" />
   </ItemGroup>
 

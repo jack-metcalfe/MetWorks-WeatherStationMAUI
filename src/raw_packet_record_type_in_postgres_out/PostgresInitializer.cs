@@ -9,7 +9,7 @@ internal class PostgresInitializer
         "wind.sql"
     };
     internal static async Task<bool> DatabaseInitializeAsync(
-        IFileLogger iFileLogger,
+        ILogger iFileLogger,
         IDbConnection iDbConnection
     )
     {
@@ -20,7 +20,7 @@ internal class PostgresInitializer
             try
             {
                 var scriptPath = Path.Combine(typeof(ListenerSink).Name, scriptFilename);
-                var script = IStaticDataStoreContract.GetResourceAsString(scriptPath.Replace('\\', '/'))
+                var script = IStaticDataStore.GetString(scriptPath.Replace('\\', '/'))
                     ?? throw new InvalidOperationException(
                         $"PostgreSQL script {scriptPath} not found in string provider.");
                 iFileLogger.Information("Applying PostgreSQL DDL from {scriptPath}");

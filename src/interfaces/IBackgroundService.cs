@@ -1,5 +1,5 @@
-﻿namespace InterfaceDefinition;
-public interface IBackgroundService : IRegistryExport
+﻿namespace Interfaces;
+public interface IBackgroundService
 {
     Task<bool> StartAsync();
 }

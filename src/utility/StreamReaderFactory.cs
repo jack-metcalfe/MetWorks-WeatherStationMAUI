@@ -15,7 +15,7 @@ public static class StreamReaderFactory
         var stream = new MemoryStream(byteArray);
         return new StreamReader(stream, encoding);
     }
-    public static StreamReader FromPath(string filePath, IFileLogger iFileLogger, Encoding? encoding = null)
+    public static StreamReader FromPath(string filePath, ILogger iFileLogger, Encoding? encoding = null)
     {
         try
         {

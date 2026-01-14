@@ -1,7 +1,7 @@
 ﻿namespace StaticDataStore;
-internal static class StaticData
+public static class StaticData
 {
-    public static Stream? GetResourceAsStream(string path)
+    public static Stream? GetStream(string path)
     {
         var assembly = typeof(StaticData).Assembly;
         var resourceName = assembly.GetManifestResourceNames()
@@ -9,9 +9,9 @@ internal static class StaticData
 
         return resourceName != null ? assembly.GetManifestResourceStream(resourceName) : null;
     }
-    public static string? GetResourceAsString(string path)
+    public static string? GetString(string path)
     {
-        using var stream = GetResourceAsStream(path);
+        using var stream = GetStream(path);
         if (stream == null) return null;
 
         using var reader = new StreamReader(stream);

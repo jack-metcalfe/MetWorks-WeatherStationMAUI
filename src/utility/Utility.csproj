@@ -8,11 +8,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="YamlDotNet"/>
+	  <PackageReference Include="YamlDotNet" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\interfaces\interfaces.csproj" />
+	  <ProjectReference Include="..\interfaces\Interfaces.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>
