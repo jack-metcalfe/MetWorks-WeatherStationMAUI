@@ -7,7 +7,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\enum_definitions\enum_definition.csproj" />
-	  <ProjectReference Include="..\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits.csproj" />
+	  <ProjectReference Include="..\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits.csproj" />
 	  <ProjectReference Include="..\RedStar.Amounts\RedStar.Amounts\RedStar.Amounts.csproj" />
 	</ItemGroup>
 </Project>

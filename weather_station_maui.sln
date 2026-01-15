@@ -29,8 +29,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "weather-station-maui", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedStar.Amounts", "src\RedStar.Amounts\RedStar.Amounts\RedStar.Amounts.csproj", "{3F327DEE-62D0-2F3D-E731-BF4EA35ED194}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedStar.Amounts.StandardUnits", "src\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits.csproj", "{2221B112-1FCB-3602-B995-1E95923AF9EA}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "weather-station-units", "src\weather-station-units\weather-station-units.csproj", "{4A52024A-A885-456B-8DE8-934992838DFB}"
@@ -44,6 +42,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetWorksModels", "src\metworks_models\MetWorksModels.csproj", "{439E6E49-7A75-FFB5-EBA9-8998E787C6BE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constants", "src\Constants\Constants.csproj", "{50F306D1-F0E3-FDA4-8F97-7440385938FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedStar.Amounts.StandardUnits", "src\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits.csproj", "{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -212,18 +212,6 @@ Global
 		{3F327DEE-62D0-2F3D-E731-BF4EA35ED194}.Release|x64.Build.0 = Release|Any CPU
 		{3F327DEE-62D0-2F3D-E731-BF4EA35ED194}.Release|x86.ActiveCfg = Release|Any CPU
 		{3F327DEE-62D0-2F3D-E731-BF4EA35ED194}.Release|x86.Build.0 = Release|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Debug|x64.Build.0 = Debug|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Debug|x86.Build.0 = Debug|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Release|x64.ActiveCfg = Release|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Release|x64.Build.0 = Release|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Release|x86.ActiveCfg = Release|Any CPU
-		{2221B112-1FCB-3602-B995-1E95923AF9EA}.Release|x86.Build.0 = Release|Any CPU
 		{4A52024A-A885-456B-8DE8-934992838DFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4A52024A-A885-456B-8DE8-934992838DFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A52024A-A885-456B-8DE8-934992838DFB}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -296,6 +284,18 @@ Global
 		{50F306D1-F0E3-FDA4-8F97-7440385938FC}.Release|x64.Build.0 = Release|Any CPU
 		{50F306D1-F0E3-FDA4-8F97-7440385938FC}.Release|x86.ActiveCfg = Release|Any CPU
 		{50F306D1-F0E3-FDA4-8F97-7440385938FC}.Release|x86.Build.0 = Release|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Debug|x64.Build.0 = Debug|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Debug|x86.Build.0 = Debug|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Release|x64.ActiveCfg = Release|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Release|x64.Build.0 = Release|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Release|x86.ActiveCfg = Release|Any CPU
+		{1CF41B58-2BD5-BE0C-603F-31D1F3D54B19}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

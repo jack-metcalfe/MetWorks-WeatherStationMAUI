@@ -6,6 +6,6 @@
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\..\RedStar.Amounts\RedStar.Amounts\RedStar.Amounts.csproj" />
+	  <ProjectReference Include="..\RedStar.Amounts\RedStar.Amounts\RedStar.Amounts.csproj" />
 	</ItemGroup>
 </Project>
