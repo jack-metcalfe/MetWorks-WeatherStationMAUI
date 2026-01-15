@@ -7,12 +7,6 @@
     <RootNamespace>MetWorksWeather.Services</RootNamespace>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <ServiceAssemblyOutputPath>..\..\ServiceAssemblies</ServiceAssemblyOutputPath>
-  </PropertyGroup>
-  <Target Name="CopyToServiceAssemblies" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ServiceAssemblyOutputPath)" SkipUnchangedFiles="false" />
-  </Target>
   <ItemGroup>
     <ProjectReference Include="..\Constants\Constants.csproj" />
     <ProjectReference Include="..\basic_event_relay\EventRelay.csproj" />

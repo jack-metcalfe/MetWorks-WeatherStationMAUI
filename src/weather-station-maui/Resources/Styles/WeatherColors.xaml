@@ -7,5 +7,6 @@
     <!-- Custom Weather Display Colors -->
     <Color x:Key="PurpleVikings">#4F2683</Color>
     <Color x:Key="GoldVikings">#FFC62F</Color>
+    <Color x:Key="WhiteVikings">White</Color>
 
 </ResourceDictionary>

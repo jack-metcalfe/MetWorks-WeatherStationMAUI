@@ -49,7 +49,7 @@
                     <Label
                         FontSize="20" 
                         Margin="0,10,0,0"
-                        TextColor="White"
+                        TextColor="{StaticResource WhiteVikings}"
                         Text="{Binding TemperatureUnit}"
                     />
                     <Label
@@ -60,9 +60,9 @@
                     />
                 </HorizontalStackLayout>
                 <Label 
-                    FontSize="200" 
-                    Margin="0,-30,0,0" 
-                    TextColor="White"
+                    FontSize="300" 
+                    Margin="0,0,0,0" 
+                    TextColor="{StaticResource WhiteVikings}"
                     Text="{Binding TemperatureValue}"
                 />
             </VerticalStackLayout>
@@ -79,23 +79,23 @@
                 Spacing="0" 
             >
                 <Label 
-                    FontSize="130"
-                    Margin="0,-40,0,0"
+                    FontSize="240"
+                    Margin="0,0,0,0"
                     TextColor="{StaticResource GoldVikings}" 
                     HorizontalTextAlignment="Center"
                     Text="{Binding TimeDayOfWeek}" 
                 />
                 <Label 
-                    FontSize="70"
-                    Margin="0,-40,0,0"
+                    FontSize="170"
+                    Margin="0,0,0,0"
                     TextColor="{StaticResource GoldVikings}"
                     HorizontalTextAlignment="Center" 
                     Text="{Binding TimeDateDisplay}"
                 />
                 <Label
-                    FontSize="100" 
-                    Margin="0,-20,0,0" 
-                    TextColor="White" 
+                    FontSize="200" 
+                    Margin="0,0,0,0" 
+                    TextColor="{StaticResource GoldVikings}" 
                     HorizontalTextAlignment="Center" 
                     Text="{Binding TimeDisplay}"
                 />
@@ -129,7 +129,7 @@
                     <Label
                         FontSize="20" 
                         Margin="0,10,0,0"
-                        TextColor="White"
+                        TextColor="{StaticResource WhiteVikings}"
                         Text="{Binding WindSpeedUnit}"
                     />
                     <Label
@@ -159,7 +159,7 @@
                     <Label
                         FontSize="20" 
                         Margin="0,-10,0,0" 
-                        TextColor="White"
+                        TextColor="{StaticResource WhiteVikings}"
                         Text="{Binding WindDirectionDegrees}" 
                     />
                     <Label
@@ -170,9 +170,9 @@
                     />
                 </HorizontalStackLayout>
                 <Label 
-                    FontSize="200" 
-                    Margin="0,-50,0,0" 
-                    TextColor="White"
+                    FontSize="300" 
+                    Margin="0,0,0,0" 
+                    TextColor="{StaticResource WhiteVikings}"
                     Text="{Binding WindSpeedValue}" 
                 />
             </VerticalStackLayout>
@@ -205,7 +205,7 @@
                     <Label
                         FontSize="20" 
                         Margin="0,10,0,0"
-                        TextColor="White"
+                        TextColor="{StaticResource WhiteVikings}"
                         Text="{Binding HumidityUnit}" 
                     />
                     <Label
@@ -216,9 +216,9 @@
                     />
                 </HorizontalStackLayout>
                 <Label 
-                    FontSize="200" 
-                    Margin="0,-50,0,0" 
-                    TextColor="White"
+                    FontSize="300" 
+                    Margin="0,0,0,0" 
+                    TextColor="{StaticResource WhiteVikings}"
                     Text="{Binding HumidityValue}"
                 />
             </VerticalStackLayout>
@@ -244,9 +244,9 @@
                     />
                 </HorizontalStackLayout>
                 <Label 
-                    FontSize="200" 
-                    Margin="0,-50,0,0" 
-                    TextColor="White"
+                    FontSize="300" 
+                    Margin="0,0,0,0" 
+                    TextColor="{StaticResource WhiteVikings}"
                     Text="{Binding UvIndexValue}"
                 />
             </VerticalStackLayout>

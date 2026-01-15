@@ -12,11 +12,4 @@
     <ProjectReference Include="..\interfaces\Interfaces.csproj" />
     <ProjectReference Include="..\utility\Utility.csproj" />
   </ItemGroup>
-
-	<PropertyGroup>
-		<ServiceAssemblyOutputPath>..\..\ServiceAssemblies</ServiceAssemblyOutputPath>
-	</PropertyGroup>
-	<Target Name="CopyToServiceAssemblies" AfterTargets="Build">
-		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ServiceAssemblyOutputPath)" SkipUnchangedFiles="false" />
-	</Target>
 </Project>
