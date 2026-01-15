@@ -23,9 +23,4 @@ public static class Settings
 
     public const string WindSpeedUnitOfMeasureSettingPath =
             $"{UnitOfMeasureBasePath}{UnitOfMeasure_windSpeed}{UnitOfMeasureSelectionPathSuffix}";
-
-    // UDP Settings
-    public const string UdpSettingsBasePath = "/services/UDPSettings/";
-    public const string UdpPreferredPortSettingPath = $"{UdpSettingsBasePath}PreferredPort";
-    public const string UdpAlternatePortSettingPath = $"{UdpSettingsBasePath}AlternatePort";
 }
