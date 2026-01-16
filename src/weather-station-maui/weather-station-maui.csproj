@@ -9,10 +9,6 @@
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 
-		<!-- Force output to Windows native file system to avoid WSL COM issues -->
-		<BaseOutputPath>C:\Temp\WeatherStation\bin\</BaseOutputPath>
-		<BaseIntermediateOutputPath>C:\Temp\WeatherStation\obj\</BaseIntermediateOutputPath>
-
 		<!-- Explicit usings and nullability -->
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
