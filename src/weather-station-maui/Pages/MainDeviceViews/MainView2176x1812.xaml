@@ -4,7 +4,7 @@
              xmlns:viewmodels="clr-namespace:MetWorksWeather.ViewModels"
              x:Class="MetWorksWeather.Pages.MainDeviceViews.MainView2176x1812"
              Title="Weather Station"
-             x:DataType="viewmodels:LargeFormatWeatherViewModel"
+             x:DataType="viewmodels:WeatherViewModel"
              BackgroundColor="{StaticResource PurpleVikings}">
 
     <Grid Margin="0" Padding="0">

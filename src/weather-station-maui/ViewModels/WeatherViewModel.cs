@@ -123,7 +123,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     {
         try
         {
-            _iLogger = StartupInitializer.Registry.GetTheLoggerFile();
+            _iLogger = StartupInitializer.Registry.GetTheDefaultLogger();
             _iEventRelayBasic = StartupInitializer.Registry.GetTheEventRelayBasic();
 
             if (_statusCheckTimer is not null)

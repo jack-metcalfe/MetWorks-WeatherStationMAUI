@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Assignments.Initializer
-// Generated On:        2026-01-15T03:06:48.6676207Z
+// Generated On:        2026-01-17T03:34:52.5041352Z
 #nullable enable
 using System.Threading.Tasks;
 
@@ -13,13 +13,13 @@ namespace ServiceRegistry
     // Per-instance async initializer.
     // Declared as partial to allow modularization if needed.
     // Only emitted for instances that have assignment-driven initialization.
-    internal static partial class TheLoggerFile_Initializer
+    internal static partial class TheDefaultLogger_Initializer
     {
-        public static async Task Initialize_TheLoggerFileAsync(Registry registry)
+        public static async Task Initialize_TheDefaultLoggerAsync(Registry registry)
         {
             // Step 1: retrieve the created instance from the registry.
             // Internal accessor ensures we always get the concrete class.
-            var instance = registry.GetTheLoggerFile_Internal();
+            var instance = registry.GetTheDefaultLogger_Internal();
 
             // Step 2: call its async initializer with assignment values.
             // All argument expressions are fully computed by the pipeline.

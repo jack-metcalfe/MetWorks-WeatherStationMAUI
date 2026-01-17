@@ -1,5 +1,10 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+using Npgsql;
 
 namespace RawPacketRecordTypedInPostgresOut;
 
@@ -61,6 +66,9 @@ public class ListenerSink : IBackgroundService
     PostgresConnectionFactory? PostgresConnectionFactory { get; set; }
     PostgresConnectionFactory PostgresConnectionFactorySafe => NullPropertyGuard.GetSafeClass(
         PostgresConnectionFactory, "Listener not initialized. Call InitializeAsync before using.");
+
+    // Protects creation/disposal/replacement of PostgresConnectionFactory
+    readonly SemaphoreSlim _connectionLock = new(1,1);
 
     public ListenerSink()
     {
@@ -130,51 +138,65 @@ public class ListenerSink : IBackgroundService
     
     private async Task<bool> TryEstablishConnectionAsync(string connectionString)
     {
+        // Prevent overlapping connection attempts
         if (_isInitializing)
         {
             ILogger.Debug("⏳ Connection attempt already in progress, skipping");
             return false;
         }
-        
+
         _isInitializing = true;
         _lastConnectionAttempt = DateTime.UtcNow;
         
+        await _connectionLock.WaitAsync();
         try
         {
             ILogger.Information("🔌 Attempting to establish PostgreSQL connection...");
             
             // Create the connection factory
-            PostgresConnectionFactory = await PostgresConnectionFactory.CreateAsync(
-                ILogger, connectionString);
-            
-            // Test the connection using the new async method
-            await using (var testConnection = await PostgresConnectionFactorySafe.CreateConnectionAsync())
+            var newFactory = await PostgresConnectionFactory.CreateAsync(ILogger, connectionString);
+
+            // Test the connection using the new async method (with short timeout)
+            using (var testCts = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+            await using (var testConnection = await newFactory.CreateConnectionAsync(testCts.Token))
             {
                 // Verify connection is working and get server info
                 await using var versionCommand = new NpgsqlCommand("SELECT version()", testConnection);
-                var version = await versionCommand.ExecuteScalarAsync();
-                
+                var version = await versionCommand.ExecuteScalarAsync(testCts.Token);
+
                 if (version != null)
                 {
-                    // Extract just the PostgreSQL version number for cleaner logging
                     var versionString = version.ToString() ?? "Unknown";
                     var versionShort = versionString.Split(' ').Take(2).ToArray();
                     ILogger.Information($"✅ Connected to {string.Join(" ", versionShort)}");
                 }
-                
+
                 // Verify we can query system tables
                 await using var testQuery = new NpgsqlCommand(
-                    "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'", 
+                    "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'",
                     testConnection);
-                var tableCount = await testQuery.ExecuteScalarAsync();
+                var tableCount = await testQuery.ExecuteScalarAsync(testCts.Token);
                 ILogger.Debug($"📊 Found {tableCount} tables in public schema");
             }
-            
-            // Initialize database schema (this creates its own connection)
-            ILogger.Information("🗄️ Initializing database schema...");
-            await PostgresInitializer.DatabaseInitializeAsync(
-                ILogger, PostgresConnectionFactorySafe.CreateConnection());
-            
+
+            // Replace the factory instance under lock (dispose old if supported)
+            var oldFactory = PostgresConnectionFactory;
+            PostgresConnectionFactory = newFactory;
+            try
+            {
+                // Initialize database schema (this creates its own connection async)
+                ILogger.Information("🗄️ Initializing database schema...");
+                // Give schema init a slightly larger timeout
+                using var initCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                await PostgresInitializer.DatabaseInitializeAsync(
+                    ILogger, await PostgresConnectionFactorySafe.CreateConnectionAsync(initCts.Token), initCts.Token);
+            }
+            catch (Exception exInit)
+            {
+                // If schema init fails, log and continue; connection is still usable in many cases
+                ILogger.Warning($"⚠️ Database initialization failed: {exInit.Message}");
+            }
+
             _isDatabaseAvailable = true;
             _failureCount = 0;
             _lastSuccessfulWrite = DateTime.UtcNow;
@@ -188,14 +210,22 @@ public class ListenerSink : IBackgroundService
                 ILogger.Information($"📦 Found {bufferedCount} buffered messages, starting processing...");
                 _ = Task.Run(() => ProcessBufferedMessagesAsync());
             }
+
+            // Attempt to dispose old factory if it implements IDisposable
+            try
+            {
+                (oldFactory as IDisposable)?.Dispose();
+            }
+            catch { /* swallow */ }
             
             return true;
         }
         catch (Npgsql.NpgsqlException npgsqlException)
         {
             _isDatabaseAvailable = false;
-            
-            // Provide detailed PostgreSQL-specific error information
+            _lastConnectionAttempt = DateTime.UtcNow;
+            _failureCount++;
+
             var errorDetails = $"ErrorCode: {npgsqlException.ErrorCode}";
             if (!string.IsNullOrWhiteSpace(npgsqlException.SqlState))
             {
@@ -205,7 +235,6 @@ public class ListenerSink : IBackgroundService
             ILogger.Warning(
                 $"⚠️ Failed to establish PostgreSQL connection: {npgsqlException.Message} ({errorDetails})");
             
-            // Log specific error hints
             if (npgsqlException.Message.Contains("timeout"))
             {
                 ILogger.Warning("   💡 Hint: Check network connectivity and firewall settings");
@@ -224,6 +253,8 @@ public class ListenerSink : IBackgroundService
         catch (TimeoutException timeoutException)
         {
             _isDatabaseAvailable = false;
+            _lastConnectionAttempt = DateTime.UtcNow;
+            _failureCount++;
             ILogger.Warning(
                 $"⚠️ Connection timeout: {timeoutException.Message}");
             ILogger.Warning("   💡 Hint: Database server may be unreachable or overloaded");
@@ -232,6 +263,8 @@ public class ListenerSink : IBackgroundService
         catch (Exception exception)
         {
             _isDatabaseAvailable = false;
+            _lastConnectionAttempt = DateTime.UtcNow;
+            _failureCount++;
             ILogger.Warning($"⚠️ Failed to establish PostgreSQL connection: {exception.Message}");
             ILogger.Debug($"   Exception type: {exception.GetType().Name}");
             ILogger.Debug($"   Stack trace: {exception.StackTrace}");
@@ -240,6 +273,7 @@ public class ListenerSink : IBackgroundService
         finally
         {
             _isInitializing = false;
+            _connectionLock.Release();
         }
     }
     
@@ -314,7 +348,6 @@ public class ListenerSink : IBackgroundService
             
             if (_isDatabaseAvailable)
             {
-                // Database is up - check for stale writes
                 if (timeSinceLastWrite > TimeSpan.FromMinutes(5) && _lastSuccessfulWrite != DateTime.MinValue)
                 {
                     ILogger.Warning(
@@ -330,7 +363,6 @@ public class ListenerSink : IBackgroundService
             }
             else
             {
-                // Database is down
                 var timeSinceLastAttempt = DateTime.UtcNow - _lastConnectionAttempt;
                 ILogger.Warning(
                     $"🔶 PostgreSQL [{status}] Unavailable - Last attempt: {timeSinceLastAttempt.TotalSeconds:F0}s ago. " +
@@ -338,7 +370,6 @@ public class ListenerSink : IBackgroundService
                     $"Failures: {_failureCount}");
             }
             
-            // If too many consecutive failures, mark as unavailable
             if (_failureCount >= MaxConsecutiveFailures && _isDatabaseAvailable)
             {
                 ILogger.Error(
@@ -358,7 +389,6 @@ public class ListenerSink : IBackgroundService
         if (_isDatabaseAvailable)
             return;
         
-        // Don't retry too frequently
         var timeSinceLastAttempt = DateTime.UtcNow - _lastConnectionAttempt;
         if (timeSinceLastAttempt < TimeSpan.FromSeconds(ReconnectionIntervalSeconds - 5))
             return;
@@ -460,19 +490,18 @@ public class ListenerSink : IBackgroundService
         catch (Npgsql.NpgsqlException npgsqlException)
         {
             _failureCount++;
-            
+            _lastConnectionAttempt = DateTime.UtcNow;
+
             ILogger.Error(
                 $"❌ PostgreSQL error writing to '{tableString}' (failure #{_failureCount}): " +
                 $"{npgsqlException.Message} (ErrorCode: {npgsqlException.ErrorCode})");
             
-            // NEW: Record error in provenance
             ProvenanceTracker?.RecordError(
                 iRawPacketRecordTyped.Id,
                 "ListenerSink",
                 "Database Write",
                 npgsqlException);
             
-            // Check for specific PostgreSQL errors
             if (npgsqlException.SqlState == "23505") // Unique violation
             {
                 ILogger.Warning($"   💡 Duplicate key violation - message may have been processed already");
@@ -481,44 +510,89 @@ public class ListenerSink : IBackgroundService
             {
                 ILogger.Warning($"   💡 Connection lost - marking database as unavailable");
                 _isDatabaseAvailable = false;
+                // Dispose/clear factory so reconnection will create a fresh one
+                await ClearConnectionFactoryAsync();
             }
-            
+
             // If buffering enabled and failures mounting, buffer this message
-            if (_bufferingEnabled && _messageBuffer != null && _failureCount >= 3)
+            if (_bufferingEnabled && _messageBuffer != null)
             {
                 if (_messageBuffer.Count < MaxBufferSize)
                 {
                     _messageBuffer.Enqueue(iRawPacketRecordTyped);
                     ILogger.Warning($"📦 Message moved to buffer after failure (buffer size: {_messageBuffer.Count})");
                 }
+                else
+                {
+                    ILogger.Warning($"⚠️ Buffer full - dropping message after failure: {iRawPacketRecordTyped.Id}");
+                }
             }
         }
         catch (TimeoutException)
         {
             _failureCount++;
+            _lastConnectionAttempt = DateTime.UtcNow;
             ILogger.Error($"⏱️ Database write timeout (failure #{_failureCount})");
             
-            // NEW: Record timeout error in provenance
             ProvenanceTracker?.RecordError(
                 iRawPacketRecordTyped.Id,
                 "ListenerSink",
                 "Database Write",
                 new TimeoutException($"Database write timeout (failure #{_failureCount})"));
+
+            // On timeout treat as transient but consider buffering
+            if (_bufferingEnabled && _messageBuffer != null && _messageBuffer.Count < MaxBufferSize)
+            {
+                _messageBuffer.Enqueue(iRawPacketRecordTyped);
+                ILogger.Warning($"📦 Message buffered due to timeout (buffer size: {_messageBuffer.Count})");
+            }
         }
         catch (Exception exception)
         {
             _failureCount++;
+            _lastConnectionAttempt = DateTime.UtcNow;
             
             ILogger.Error(
                 $"❌ Failed to write to PostgreSQL '{tableString}' (failure #{_failureCount}): " +
                 $"{exception.GetType().Name}: {exception.Message}");
             
-            // NEW: Record generic error in provenance
             ProvenanceTracker?.RecordError(
                 iRawPacketRecordTyped.Id,
                 "ListenerSink",
                 "Database Write",
                 exception);
+
+            // Buffer as a fallback if configured
+            if (_bufferingEnabled && _messageBuffer != null && _messageBuffer.Count < MaxBufferSize)
+            {
+                _messageBuffer.Enqueue(iRawPacketRecordTyped);
+                ILogger.Warning($"📦 Message buffered after unknown error (buffer size: {_messageBuffer.Count})");
+            }
+            else
+            {
+                // On unknown fatal errors mark DB unavailable to trigger reconnection attempts
+                _isDatabaseAvailable = false;
+                await ClearConnectionFactoryAsync();
+            }
+        }
+    }
+
+    // Safely clears/disposes the connection factory so reconnection creates a new one
+    private async Task ClearConnectionFactoryAsync()
+    {
+        await _connectionLock.WaitAsync();
+        try
+        {
+            try
+            {
+                (PostgresConnectionFactory as IDisposable)?.Dispose();
+            }
+            catch { /* swallow */ }
+            PostgresConnectionFactory = null;
+        }
+        finally
+        {
+            _connectionLock.Release();
         }
     }
     
@@ -575,6 +649,8 @@ public class ListenerSink : IBackgroundService
         _reconnectionTimer = null;
 
         IEventRelayBasic.Unregister<IRawPacketRecordTyped>(this);
+
+        await ClearConnectionFactoryAsync();
 
         ILogger.Information("🧹 PostgreSQL listener disposed");
         await Task.CompletedTask;

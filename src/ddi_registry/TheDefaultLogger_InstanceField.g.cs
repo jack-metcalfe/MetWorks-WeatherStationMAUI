@@ -4,13 +4,13 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Instance.Field
-// Generated On:        2026-01-15T03:06:48.6676207Z
+// Generated On:        2026-01-17T03:34:52.5041352Z
 #nullable enable
 
 namespace ServiceRegistry
 {
     public partial class Registry
     {
-        private Logging.LoggerFile _TheLoggerFileInstance;
+        private Logging.LoggerPostgreSQL _TheDefaultLoggerInstance;
     }
 }

@@ -140,6 +140,40 @@ definitions:
       - false
     isSecret: false
 
+  - path: "/services/logging/loggerPostgreSQL/connectionString"
+    defaultValue: "Host=192.168.8.9;Port=5432;Database=weather;Username=weather;Password=Sylvia3927"
+    description: "Logging Connection string for PostgreSQL database"
+    expectedValueType: "String"
+    allowableValues: []
+    isSecret: true
+
+  - path: /services/logging/loggerPostgreSQL/tableName
+    defaultValue: "log"
+    description: "Table name for PostgreSQL logging"
+    expectedValueType: "String"
+    allowableValues: []
+    isSecret: false
+
+  - path: /services/logging/loggerPostgreSQL/minimumLevel
+    defaultValue: "Information"
+    description: "Minimum log level for PostgreSQL logging"
+    expectedValueType: "String"
+    allowableValues:
+      - "Verbose"
+      - "Debug"
+      - "Information"
+      - "Warning"
+      - "Error"
+      - "Fatal"
+    isSecret: false
+
+  - path: /services/logging/loggerPostgreSQL/autoCreateTable
+    defaultValue: true
+    description: "Auto create table for PostgreSQL logging"
+    expectedValueType: "Boolean"
+    allowableValues: []
+    isSecret: false
+
   - path: /services/udpListener/preferredPort
     defaultValue: "50222"
     description: "UDP Port for listening for readings from Tempest Weather Station"

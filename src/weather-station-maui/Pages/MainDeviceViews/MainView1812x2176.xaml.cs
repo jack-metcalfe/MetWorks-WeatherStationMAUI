@@ -4,12 +4,12 @@ namespace MetWorksWeather.Pages.MainDeviceViews;
 
 public partial class MainView1812x2176 : ContentPage
 {
-    private readonly LargeFormatWeatherViewModel _viewModel;
+    private readonly WeatherViewModel _viewModel;
 
     public MainView1812x2176()
     {
         InitializeComponent();
-        _viewModel = new LargeFormatWeatherViewModel();
+        _viewModel = new ();
         BindingContext = _viewModel;
     }
 

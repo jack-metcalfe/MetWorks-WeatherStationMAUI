@@ -100,9 +100,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<MauiXaml Update="Pages\LargeFormatWeatherView.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
 		<MauiXaml Update="Pages\MainDeviceViews\MainView1920x1200.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

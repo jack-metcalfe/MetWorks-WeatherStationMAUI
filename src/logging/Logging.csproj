@@ -19,9 +19,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" />
+		<PackageReference Include="Npgsql" />
 		<PackageReference Include="Serilog" />
 		<PackageReference Include="Serilog.Sinks.File" />
-		<PackageReference Include="Serilog.Sinks.Postgresql.Alternative" />
 	</ItemGroup>
 
 	<ItemGroup>

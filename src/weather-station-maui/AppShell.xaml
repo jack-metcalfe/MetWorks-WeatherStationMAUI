@@ -8,7 +8,7 @@
 
     <ShellContent
         Title="Weather"
-        ContentTemplate="{DataTemplate pages:LargeFormatWeatherView}"
-        Route="LargeFormatWeatherView" />
+        ContentTemplate="{DataTemplate pages:WeatherPage}"
+        Route="WeatherPage" />
 
 </Shell>

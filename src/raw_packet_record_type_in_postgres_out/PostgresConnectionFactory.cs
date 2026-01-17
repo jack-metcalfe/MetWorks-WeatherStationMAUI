@@ -1,5 +1,9 @@
 ﻿namespace RawPacketRecordTypedInPostgresOut;
 
+using System.Threading;
+using Npgsql;
+using System.Data;
+
 /// <summary>
 /// Creates a PostgreSQL connection using the configured connection string.
 /// Supports both synchronous and asynchronous connection creation.
@@ -9,22 +13,22 @@ internal class PostgresConnectionFactory
     ILogger? IFileLogger { get; set; }
     ILogger IFileLoggerSafe => NullPropertyGuard.GetSafeClass(
         IFileLogger, "PostgresConnectionFactory not initialized. Call InitializeAsync before using.");
-    
+
     string? ConnectionString { get; set; }
     string ConnectionStringSafe => NullPropertyGuard.GetSafeClass(
         ConnectionString, "PostgresConnectionFactory not initialized. Call InitializeAsync before using.", IFileLoggerSafe);
-    
+
     PostgresConnectionFactory()
     {
     }
-    
+
     async Task<bool> InitializeAsync(ILogger iFileLogger, string connectionString)
     {
         IFileLogger = iFileLogger;
         ConnectionString = connectionString;
         return await Task.FromResult(true);
     }
-    
+
     public static async Task<PostgresConnectionFactory> CreateAsync(
         ILogger iFileLogger, string connectionString)
     {
@@ -34,7 +38,7 @@ internal class PostgresConnectionFactory
 
         throw new InvalidOperationException("Failed to initialize PostgresConnectionFactory.");
     }
-    
+
     /// <summary>
     /// Creates a new connection and opens it synchronously.
     /// Use this for backward compatibility or when you need a synchronously-opened connection.
@@ -55,7 +59,7 @@ internal class PostgresConnectionFactory
                     "Failed to create and open PostgreSQL connection.", exception));
         }
     }
-    
+
     /// <summary>
     /// Creates a new connection WITHOUT opening it.
     /// Caller is responsible for opening the connection.
@@ -76,41 +80,26 @@ internal class PostgresConnectionFactory
                     "Failed to create PostgreSQL connection.", exception));
         }
     }
-    
+
     /// <summary>
     /// Creates a new connection and opens it asynchronously.
     /// Preferred method for async operations - more efficient than CreateConnection().
+    /// This overload does not accept cancellation.
     /// </summary>
     public async Task<NpgsqlConnection> CreateConnectionAsync()
-    {
-        try
-        {
-            var connection = new NpgsqlConnection(ConnectionStringSafe);
-            await connection.OpenAsync();
-            IFileLoggerSafe.Debug($"🔌 Connection opened (async): {connection.State}");
-            return connection;
-        }
-        catch (Exception exception)
-        {
-            throw IFileLoggerSafe.LogExceptionAndReturn(
-                new InvalidOperationException(
-                    "Failed to create and open PostgreSQL connection asynchronously.", exception));
-        }
-    }
+        => await CreateConnectionAsync(CancellationToken.None).ConfigureAwait(false);
 
     /// <summary>
     /// Creates a new connection and opens it asynchronously with cancellation support.
     /// Use this when you need to support cancellation of the connection attempt.
     /// </summary>
-    /// ToDo: This is a good idea and we need to add Cancellation support elsewhere as well
-#if DONOTDELETE
     public async Task<NpgsqlConnection> CreateConnectionAsync(CancellationToken cancellationToken)
     {
         try
         {
             var connection = new NpgsqlConnection(ConnectionStringSafe);
-            await connection.OpenAsync(cancellationToken);
-            IFileLoggerSafe.Debug($"🔌 Connection opened (async with cancellation): {connection.State}");
+            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+            IFileLoggerSafe.Debug($"🔌 Connection opened (async): {connection.State}");
             return connection;
         }
         catch (OperationCanceledException)
@@ -125,21 +114,27 @@ internal class PostgresConnectionFactory
                     "Failed to create and open PostgreSQL connection asynchronously.", exception));
         }
     }
-#endif    
+
     /// <summary>
     /// Tests the connection by opening it and running a simple query.
     /// Returns true if successful, false otherwise.
+    /// Accepts an optional cancellation token for the test operation.
     /// </summary>
-    public async Task<bool> TestConnectionAsync()
+    public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            await using var connection = await CreateConnectionAsync();
+            await using var connection = await CreateConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = new NpgsqlCommand("SELECT 1", connection);
-            var result = await command.ExecuteScalarAsync();
-            
+            var result = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
+
             IFileLoggerSafe.Debug($"✅ Connection test successful: SELECT 1 returned {result}");
             return result != null && result.ToString() == "1";
+        }
+        catch (OperationCanceledException)
+        {
+            IFileLoggerSafe.Warning("⚠️ Connection test canceled");
+            return false;
         }
         catch (Exception exception)
         {
@@ -147,7 +142,7 @@ internal class PostgresConnectionFactory
             return false;
         }
     }
-    
+
     /// <summary>
     /// Gets the PostgreSQL server version.
     /// Useful for diagnostics and logging.
@@ -156,10 +151,10 @@ internal class PostgresConnectionFactory
     {
         try
         {
-            await using var connection = await CreateConnectionAsync();
+            await using var connection = await CreateConnectionAsync().ConfigureAwait(false);
             await using var command = new NpgsqlCommand("SELECT version()", connection);
             var version = await command.ExecuteScalarAsync();
-            
+
             return version?.ToString();
         }
         catch (Exception exception)

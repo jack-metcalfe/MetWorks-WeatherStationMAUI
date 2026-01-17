@@ -57,6 +57,15 @@ namespace:
           - name: "iSettingRepository"
             class: null
             interface: "Interfaces.ISettingRepository"
+      - name: "LoggerPostgreSQL"
+        interface: Interfaces.ILogger
+        parameter:
+          - name: "iLogger"
+            class: null
+            interface: "Interfaces.ILogger"
+          - name: "iSettingRepository"
+            class: null
+            interface: "Interfaces.ISettingRepository"
 
   - name: "Settings"
     interface: []
@@ -76,6 +85,9 @@ namespace:
           - name: "iSettingProvider"
             class: null
             interface: "Interfaces.ISettingProvider"
+          - name: "iEventRelayPath"
+            class: null
+            interface: "Interfaces.IEventRelayPath"
 
   - name: "RedStar.Amounts.WeatherExtensions"
     interface: []
@@ -108,6 +120,9 @@ namespace:
           - name: "iEventRelayBasic"
             class: null
             interface: "Interfaces.IEventRelayBasic"
+          - name: "iEventRelayPath"
+            class: null
+            interface: "Interfaces.IEventRelayPath"
           - name: "provenanceTracker"
             class: "MetWorksServices.ProvenanceTracker"
             interface: null
@@ -124,6 +139,9 @@ namespace:
           - name: "iSettingRepository"
             class: null
             interface: "Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "Interfaces.IEventRelayBasic"
           - name: "externalCancellationTokenSource"
             class: "System.Threading.CancellationTokenSource"
             interface: null
@@ -143,6 +161,9 @@ namespace:
           - name: "iSettingRepository"
             class: null
             interface: "Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "Interfaces.IEventRelayBasic"
           - name: "provenanceTracker"
             class: "MetWorksServices.ProvenanceTracker"
             interface: null
@@ -177,7 +198,7 @@ instance:
     element: []
 
   - name: "TheSettingRepository"
-    class: "Setting.SettingRepository"
+    class: "Settings.SettingRepository"
     assignment:
       - name: "iLogger"
         literal: null
@@ -185,13 +206,13 @@ instance:
       - name: "iSettingProvider"
         literal: null
         instance: "TheSettingProvider"
-      - name: "iEventRelayBasic"
+      - name: "iEventRelayPath"
         literal: null
-        instance: "TheEventRelayBasic"
+        instance: "TheEventRelayPath"
     element: []
 
-  - name: "TheLoggerFile"
-    class: "Logging.LoggerFile"
+  - name: "TheDefaultLogger"
+    class: "Logging.LoggerPostgreSQL"
     assignment:
       - name: "iLogger"
         literal: null
@@ -206,21 +227,33 @@ instance:
     assignment:
       - name: "iLogger"
         literal: null
-        instance: "TheLoggerFile"
+        instance: "TheDefaultLogger"
     element: []
+
+  - name: "TheUnitsOfMeasureInitializer"
+    class: "RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer"
+    assignment:
+      - name: "iLogger"
+        literal: null
+        instance: "TheDefaultLogger"
+    element: []
+
 
   - name: "TheWeatherDataTransformer"
     class: "MetWorksServices.WeatherDataTransformer"
     assignment:
       - name: "iLogger"
         literal: null
-        instance: "TheLoggerFile"
+        instance: "TheDefaultLogger"
       - name: "iSettingRepository"
         literal: null
         instance: "TheSettingRepository"
       - name: "iEventRelayBasic"
         literal: null
         instance: "TheEventRelayBasic"
+      - name: "iEventRelayPath"
+        literal: null
+        instance: "TheEventRelayPath"
       - name: "provenanceTracker"
         literal: null
         instance: "TheProvenanceTracker"
@@ -231,10 +264,13 @@ instance:
     assignment:
       - name: "iLogger"
         literal: null
-        instance: "TheLoggerFile"
+        instance: "TheDefaultLogger"
       - name: "iSettingRepository"
         literal: null
-        instance: "TheUDPSettingRepository"
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
       - name: "externalCancellationTokenSource"
         literal: null
         instance: "RootCancellationTokenSource"
@@ -248,10 +284,13 @@ instance:
     assignment:
       - name: "iLogger"
         literal: null
-        instance: "TheLoggerFile"
+        instance: "TheDefaultLogger"
       - name: "iSettingRepository"
         literal: null
         instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
       - name: "provenanceTracker"
         literal: null
         instance: "TheProvenanceTracker"

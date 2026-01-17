@@ -62,7 +62,7 @@ public class StartupInitializer
                 await _appRegistry.InitializeAllAsync().ConfigureAwait(false);
 
                 // Step 3: Cache logger after initialization
-                _fileLogger = _appRegistry.GetTheLoggerFile();
+                _fileLogger = _appRegistry.GetTheDefaultLogger();
                 _fileLogger?.Information("✅ All services initialized successfully");
 
                 // Step 4: Verify critical services
@@ -115,7 +115,7 @@ public class StartupInitializer
         try
         {
             // Verify logger is available (CRITICAL - must have)
-            var logger = _appRegistry.GetTheLoggerFile();
+            var logger = _appRegistry.GetTheDefaultLogger();
             if (logger is null)
                 throw new InvalidOperationException("File logger failed to initialize");
             

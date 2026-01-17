@@ -20,7 +20,6 @@ public record GroupSettingDefinition
         SettingNames = settingNames;
     }
 }
-
 public static class GroupSettingDefinitions
 {
     public const string Section = "settingDefinitions";
@@ -42,6 +41,12 @@ public static class GroupSettingDefinitions
     public const string XMLToPostgreSQL_groupName = "xmlToPostgreSQL";
     public const string XMLToPostgreSQL_connectionString = "connectionString";
     public const string XMLToPostgreSQL_enableBuffering = "enableBuffering";
+
+    public const string LoggerPostgreSQL_groupName = "Logging.LoggerPostgreSQL";
+    public const string LoggerPostgreSQL_connectionString = "connectionString";
+    public const string LoggerPostgreSQL_tableName = "tableName";
+    public const string LoggerPostgreSQL_minimumLevel = "minimumLevel";
+    public const string LoggerPostgreSQL_autoCreateTable = "autoCreateTable";
 
     static readonly GroupSettingDefinition[] Definitions =
     [
@@ -87,7 +92,18 @@ public static class GroupSettingDefinitions
                 XMLToPostgreSQL_connectionString,
                 XMLToPostgreSQL_enableBuffering
             ]
-        )
+        ),
+        new GroupSettingDefinition(
+                groupName: LoggerPostgreSQL_groupName,
+                groupBasePath: "/services/logging/loggerPostgreSQL/",
+                settingNames:
+                [
+                    LoggerPostgreSQL_connectionString,
+                    LoggerPostgreSQL_tableName,
+                    LoggerPostgreSQL_minimumLevel,
+                    LoggerPostgreSQL_autoCreateTable
+                ]
+            )
     ];
     public static Dictionary<string, GroupSettingDefinition> DefinitionsDictionary
         => Definitions.ToDictionary(def => def.GroupName, def => def);
@@ -99,4 +115,6 @@ public static class GroupSettingDefinitions
         => DefinitionsDictionary[UdpListener_groupName];
     public static GroupSettingDefinition XMLToPostgreSQLGroupSettingsDefinition
         => DefinitionsDictionary[XMLToPostgreSQL_groupName];
+    public static GroupSettingDefinition LoggerPostgreSQLGroupSettingsDefinition
+        => DefinitionsDictionary[LoggerPostgreSQL_groupName];
 }

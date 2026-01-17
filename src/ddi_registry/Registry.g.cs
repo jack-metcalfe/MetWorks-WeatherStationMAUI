@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Registry
-// Generated On:        2026-01-15T03:06:48.6676207Z
+// Generated On:        2026-01-17T03:34:52.5041352Z
 #nullable enable
 using System.Threading.Tasks;
 
@@ -27,7 +27,7 @@ namespace ServiceRegistry
             TheLoggerStub_InstanceFactory.Create(this);
             TheSettingProvider_InstanceFactory.Create(this);
             TheSettingRepository_InstanceFactory.Create(this);
-            TheLoggerFile_InstanceFactory.Create(this);
+            TheDefaultLogger_InstanceFactory.Create(this);
             TheProvenanceTracker_InstanceFactory.Create(this);
             TheUnitsOfMeasureInitializer_InstanceFactory.Create(this);
             TheWeatherDataTransformer_InstanceFactory.Create(this);
@@ -42,7 +42,7 @@ namespace ServiceRegistry
         {
             await TheSettingProvider_Initializer.Initialize_TheSettingProviderAsync(this);
             await TheSettingRepository_Initializer.Initialize_TheSettingRepositoryAsync(this);
-            await TheLoggerFile_Initializer.Initialize_TheLoggerFileAsync(this);
+            await TheDefaultLogger_Initializer.Initialize_TheDefaultLoggerAsync(this);
             await TheProvenanceTracker_Initializer.Initialize_TheProvenanceTrackerAsync(this);
             await TheUnitsOfMeasureInitializer_Initializer.Initialize_TheUnitsOfMeasureInitializerAsync(this);
             await TheWeatherDataTransformer_Initializer.Initialize_TheWeatherDataTransformerAsync(this);

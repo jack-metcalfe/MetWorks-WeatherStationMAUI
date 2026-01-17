@@ -9,7 +9,7 @@ public partial class MainView1920x1200 : ContentPage
     public MainView1920x1200()
     {
         InitializeComponent();
-        _viewModel = new WeatherViewModel();
+        _viewModel = new();
         BindingContext = _viewModel;
     }
 

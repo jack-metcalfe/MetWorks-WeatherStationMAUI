@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-01-15T03:06:48.6676207Z
+// Generated On:        2026-01-17T03:34:52.5041352Z
 #nullable enable
 
 namespace ServiceRegistry
@@ -110,16 +110,16 @@ namespace ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheLoggerFile(Logging.LoggerFile instance) =>
-            _TheLoggerFileInstance = instance;
+        public void RegisterTheDefaultLogger(Logging.LoggerPostgreSQL instance) =>
+            _TheDefaultLoggerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public Interfaces.ILogger GetTheLoggerFile() =>
-            _TheLoggerFileInstance;
+        public Interfaces.ILogger GetTheDefaultLogger() =>
+            _TheDefaultLoggerInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal Logging.LoggerFile GetTheLoggerFile_Internal() =>
-            _TheLoggerFileInstance;
+        internal Logging.LoggerPostgreSQL GetTheDefaultLogger_Internal() =>
+            _TheDefaultLoggerInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
@@ -174,7 +174,7 @@ namespace ServiceRegistry
             _TheUdpListenerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public Interfaces.IBackgroundService GetTheUdpListener() =>
+        public UdpInRawPacketRecordTypedOut.Transformer GetTheUdpListener() =>
             _TheUdpListenerInstance;
 
         // Internal accessor: always returns the concrete class.
@@ -189,7 +189,7 @@ namespace ServiceRegistry
             _TheRawPacketRecordTypedInPostgresOutInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public Interfaces.IBackgroundService GetTheRawPacketRecordTypedInPostgresOut() =>
+        public RawPacketRecordTypedInPostgresOut.ListenerSink GetTheRawPacketRecordTypedInPostgresOut() =>
             _TheRawPacketRecordTypedInPostgresOutInstance;
 
         // Internal accessor: always returns the concrete class.

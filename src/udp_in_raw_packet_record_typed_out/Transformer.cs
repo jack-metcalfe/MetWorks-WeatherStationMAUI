@@ -1,4 +1,6 @@
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Threading;
 
 namespace UdpInRawPacketRecordTypedOut;
 
@@ -47,11 +49,13 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
     private long _totalPacketErrors = 0;
     private int _consecutiveErrors = 0;
     private const int MaxConsecutiveErrors = 10;
-    
     UdpClient? UdpClient { get; set; }
     UdpClient UdpClientSafe => NullPropertyGuard.GetSafeClass(
         UdpClient, "Listener not initialized. Call InitializeAsync before using.", ILogger);
-    
+
+    // Lock to protect replacement of the UdpClient instance
+    private readonly SemaphoreSlim _udpClientLock = new(1, 1);
+
     CancellationTokenSource LocalCancellationTokenSource { get; set; } = new ();
     CancellationTokenSource LocalCancellationTokenSourceSafe => NullPropertyGuard.GetSafeClass(
         LocalCancellationTokenSource, "Listener not initialized. Call InitializeAsync before using.", ILogger);
@@ -60,7 +64,6 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
     CancellationTokenSource? LinkedCancellationTokenSource { get; set; }
     CancellationTokenSource LinkedCancellationTokenSourceSafe => NullPropertyGuard.GetSafeClass(
         LinkedCancellationTokenSource, "Listener not initialized. Call InitializeAsync before using.", ILogger);
-    
     ProvenanceTracker? ProvenanceTracker { get; set; }    
     public Transformer()
     {
@@ -89,8 +92,12 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
             LinkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
                 externalCancellationTokenSource.Token, LocalCancellationTokenSafe
             );
+
             // Log network interfaces for diagnostics
             LogNetworkInterfaces();
+
+            // Subscribe to network events so we can rebind when connectivity changes
+            SubscribeToNetworkEvents();
 
             if (!await SetupAsync().ConfigureAwait(false))
             {
@@ -175,12 +182,39 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
         {
             try
             {
-                // Bind to all interfaces (0.0.0.0) to receive from any network
-                UdpClient = new UdpClient(new System.Net.IPEndPoint(System.Net.IPAddress.Any, port));
+                // Create UdpClient without binding so we can set socket options first
+                var client = new UdpClient(AddressFamily.InterNetwork);
                 
-                if (UdpClient == null)
+                // Allow reuse of address on platforms that support it so rebind is more resilient
+                try
+                {
+                    client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                }
+                catch
+                {
+                    // Not critical if platform doesn't allow this; log for diagnostics
+                    ILogger.Debug("Could not set SO_REUSEADDR on UdpClient (platform may not support it)");
+                }
+
+                // Bind explicitly (so exceptions are thrown here)
+                client.Client.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Any, port));
+                
+                if (client == null)
                 {
                     throw new InvalidOperationException("UdpClient instantiation returned null");
+                }
+
+                // Swap in new client under lock and dispose old
+                await _udpClientLock.WaitAsync(LocalCancellationTokenSafe);
+                try
+                {
+                    var old = UdpClient;
+                    UdpClient = client;
+                    old?.Dispose();
+                }
+                finally
+                {
+                    _udpClientLock.Release();
                 }
                 
                 var endpoint = UdpClient.Client.LocalEndPoint?.ToString() ?? "(unbound)";
@@ -199,7 +233,7 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                         $"⚠️ Attempt {attempt}/{MaxRetryAttempts}: Port {port} unavailable " +
                         $"({socketException.SocketErrorCode}). Retrying in {RetryDelaySeconds}s...");
                     
-                    await Task.Delay(TimeSpan.FromSeconds(RetryDelaySeconds));
+                    await Task.Delay(TimeSpan.FromSeconds(RetryDelaySeconds), LocalCancellationTokenSafe);
                 }
                 else
                 {
@@ -215,6 +249,34 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
             }
         }
         
+        return false;
+    }
+
+    // Called to attempt a rebind when we detect network issues or events
+    private async Task<bool> TryRebindIfNeededAsync()
+    {
+        if (LocalCancellationTokenSafe.IsCancellationRequested)
+            return false;
+
+        var preferredPort = ISettingRepository.GetValueOrDefault<int>(
+            UdpListenerGroupSettingsDefinition.BuildSettingPath(UdpListener_preferredPort)
+        );
+
+        ILogger.Information("🔁 Attempting to rebind UDP listener after connectivity change...");
+        // Attempt preferred then alternates (same as SetupAsync)
+        if (await TryBindToPortAsync(preferredPort))
+            return true;
+
+        for (int port = preferredPort + 1; port < preferredPort + 10; port++)
+        {
+            if (await TryBindToPortAsync(port))
+            {
+                ILogger.Information($"✅ Successfully rebound to alternate port {port}");
+                return true;
+            }
+        }
+
+        ILogger.Warning("⚠️ Rebind attempts failed");
         return false;
     }
     
@@ -254,7 +316,19 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                 try
                 {
                     // CRITICAL: This is the blocking call that waits for UDP packets
-                    UdpReceiveResult result = await UdpClientSafe.ReceiveAsync(linkedCts.Token);
+                    UdpReceiveResult result;
+                    // Acquire a snapshot of the client under lock to avoid race with rebind
+                    await _udpClientLock.WaitAsync(LocalCancellationTokenSafe);
+                    try
+                    {
+                        if (UdpClient == null)
+                            throw new InvalidOperationException("UdpClient is not initialized");
+                        result = await UdpClient.ReceiveAsync(linkedCts.Token);
+                    }
+                    finally
+                    {
+                        _udpClientLock.Release();
+                    }
                     
                     // Packet received successfully
                     _lastPacketReceived = DateTime.UtcNow;
@@ -310,6 +384,29 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                     $"⚠️ Socket error in UDP receive loop (#{_consecutiveErrors}): " +
                     $"{socketException.Message} (ErrorCode: {socketException.SocketErrorCode})");
                 
+                // If error is likely due to network/interface going away, attempt to rebind
+                if (socketException.SocketErrorCode == SocketError.NetworkDown ||
+                    socketException.SocketErrorCode == SocketError.NetworkReset ||
+                    socketException.SocketErrorCode == SocketError.ConnectionReset ||
+                    socketException.SocketErrorCode == SocketError.HostDown ||
+                    socketException.SocketErrorCode == SocketError.NetworkUnreachable)
+                {
+                    ILogger.Warning("🔁 Detected network-related socket error; attempting to rebind UdpClient...");
+                    try
+                    {
+                        var rebound = await TryRebindIfNeededAsync();
+                        if (rebound)
+                        {
+                            _consecutiveErrors = 0;
+                            continue; // Try receiving again with new client
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ILogger.Warning($"⚠️ Rebind attempt threw: {ex.Message}");
+                    }
+                }
+
                 // If too many consecutive errors, something is seriously wrong
                 if (_consecutiveErrors >= MaxConsecutiveErrors)
                 {
@@ -318,12 +415,20 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                         "UDP listener may be in a bad state. Consider restarting the application.");
                     
                     // Don't break - keep trying, but throttle retries
-                    await Task.Delay(TimeSpan.FromSeconds(30), LocalCancellationTokenSafe);
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(30), LocalCancellationTokenSafe);
+                    }
+                    catch (OperationCanceledException) { /* shutting down */ }
                 }
                 else
                 {
                     // Brief delay before retrying
-                    await Task.Delay(TimeSpan.FromSeconds(1), LocalCancellationTokenSafe);
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(1), LocalCancellationTokenSafe);
+                    }
+                    catch (OperationCanceledException) { /* shutting down */ }
                 }
             }
             catch (Exception exception)
@@ -343,12 +448,20 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                 {
                     ILogger.Error(
                         $"❌ Too many consecutive errors ({_consecutiveErrors}). Throttling receive loop.");
-                    await Task.Delay(TimeSpan.FromSeconds(30), LocalCancellationTokenSafe);
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(30), LocalCancellationTokenSafe);
+                    }
+                    catch (OperationCanceledException) { /* shutting down */ }
                 }
                 else
                 {
                     // Brief delay to avoid tight error loop
-                    await Task.Delay(TimeSpan.FromMilliseconds(100), LocalCancellationTokenSafe);
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromMilliseconds(100), LocalCancellationTokenSafe);
+                    }
+                    catch (OperationCanceledException) { /* shutting down */ }
                 }
             }
         }
@@ -410,12 +523,78 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                 $"{System.Text.Encoding.UTF8.GetString(result.Buffer).Substring(0, Math.Min(100, result.Buffer.Length))}...");
         }
     }
+
+    // Subscribe to OS network events to trigger rebind attempts when connectivity changes
+    private void SubscribeToNetworkEvents()
+    {
+        try
+        {
+            NetworkChange.NetworkAddressChanged += OnNetworkAddressChanged;
+            NetworkChange.NetworkAvailabilityChanged += OnNetworkAvailabilityChanged;
+        }
+        catch (Exception ex)
+        {
+            ILogger.Warning($"⚠️ Failed to subscribe to network change events: {ex.Message}");
+        }
+    }
+
+    private void UnsubscribeFromNetworkEvents()
+    {
+        try
+        {
+            NetworkChange.NetworkAddressChanged -= OnNetworkAddressChanged;
+            NetworkChange.NetworkAvailabilityChanged -= OnNetworkAvailabilityChanged;
+        }
+        catch (Exception ex)
+        {
+            ILogger.Warning($"⚠️ Failed to unsubscribe from network change events: {ex.Message}");
+        }
+    }
+
+    private void OnNetworkAddressChanged(object? sender, EventArgs e)
+    {
+        // Fire-and-forget rebind attempt (do not block the event thread)
+        _ = Task.Run(async () =>
+        {
+            ILogger.Information("🔔 Network address change detected, attempting rebind...");
+            try
+            {
+                await TryRebindIfNeededAsync();
+            }
+            catch (Exception ex)
+            {
+                ILogger.Warning($"⚠️ Rebind on address change failed: {ex.Message}");
+            }
+        });
+    }
+
+    private void OnNetworkAvailabilityChanged(object? sender, NetworkAvailabilityEventArgs e)
+    {
+        _ = Task.Run(async () =>
+        {
+            ILogger.Information($"🔔 Network availability changed: Available={e.IsAvailable}. Attempting rebind if available...");
+            if (e.IsAvailable)
+            {
+                try
+                {
+                    await TryRebindIfNeededAsync();
+                }
+                catch (Exception ex)
+                {
+                    ILogger.Warning($"⚠️ Rebind on availability change failed: {ex.Message}");
+                }
+            }
+        });
+    }
     
     public async ValueTask DisposeAsync()
     {
         try
         {
             ILogger.Information("🧹 Disposing UDP listener...");
+
+            // Unsubscribe network events
+            UnsubscribeFromNetworkEvents();
             
             // Cancel the receive loop
             LocalCancellationTokenSource?.Cancel();
@@ -434,8 +613,18 @@ public sealed partial class Transformer : IAsyncDisposable, IBackgroundService
                 }
             }
             
-            // Dispose resources
-            UdpClient?.Dispose();
+            // Dispose resources under lock to avoid race with receive loop
+            await _udpClientLock.WaitAsync();
+            try
+            {
+                UdpClient?.Dispose();
+                UdpClient = null;
+            }
+            finally
+            {
+                _udpClientLock.Release();
+            }
+
             LinkedCancellationTokenSource?.Dispose();
             LocalCancellationTokenSource?.Dispose();
             
