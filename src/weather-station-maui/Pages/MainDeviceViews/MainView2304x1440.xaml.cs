@@ -1,10 +1,21 @@
-//namespace TempestMonitor.Views.MainDeviceViews;
+using MetWorksWeather.ViewModels;
 
-//public partial class MainView2304x1440 : ContentView
-//{
-//	public MainView2304x1440(IServiceProvider serviceProvider)
-//    {
-//        BindingContext = serviceProvider.GetRequiredService<MainViewModel>();
-//        InitializeComponent();
-//    }
-//}
+namespace MetWorksWeather.Pages.MainDeviceViews;
+
+public partial class MainView2304x1440 : ContentPage
+{
+    private readonly WeatherViewModel _viewModel;
+
+    public MainView2304x1440()
+    {
+        InitializeComponent();
+        _viewModel = new WeatherViewModel();
+        BindingContext = _viewModel;
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _viewModel?.Dispose();
+    }
+}

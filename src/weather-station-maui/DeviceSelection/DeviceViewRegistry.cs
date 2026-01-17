@@ -14,6 +14,30 @@ public static class DeviceViewRegistry
     {
         new DeviceProfile
         {
+            DeviceName = "Galaxy Tab S9 FE (Landscape)",
+            WidthPixels = 2304,
+            HeightPixels = 1440,
+            Density = 1.75,
+            Platform = "Android",
+            DeviceModel = "SM-X518U",
+            Manufacturer = "samsung",
+            ViewTypeName = "MainView2304x1440",
+            PreferredOrientation = "Landscape"
+        },
+        new DeviceProfile
+        {
+            DeviceName = "Galaxy Tab S9 FE (Portrait)",
+            WidthPixels = 1440,
+            HeightPixels = 2304,
+            Density = 1.75,
+            Platform = "Android",
+            DeviceModel = "SM-X518U",
+            Manufacturer = "samsung",
+            ViewTypeName = "MainView1440x2304",
+            PreferredOrientation = "Portrait"
+        },
+        new DeviceProfile
+        {
             DeviceName = "Z Fold 4 (Portrait)",
             WidthPixels = 1812,
             HeightPixels = 2176,

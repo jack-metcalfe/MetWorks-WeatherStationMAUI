@@ -57,8 +57,6 @@
 
 	<ItemGroup>
 		<Compile Remove="Pages\MainDeviceViews\MainView1080x2400 .xaml.cs" />
-		<Compile Remove="Pages\MainDeviceViews\MainView1440x2304.xaml.cs" />
-		<Compile Remove="Pages\MainDeviceViews\MainView2304x1440.xaml.cs" />
 		<Compile Remove="Pages\MainDeviceViews\MainView2400x1080.xaml.cs" />
 		<Compile Remove="Pages\MainDeviceViews\MainVIew2485x970.xaml.cs" />
 		<Compile Remove="Pages\MainDeviceViews\MainView970x2485.xaml.cs" />
@@ -66,8 +64,6 @@
 
 	<ItemGroup>
 		<MauiXaml Remove="Pages\MainDeviceViews\MainView1080x2400 .xaml" />
-		<MauiXaml Remove="Pages\MainDeviceViews\MainView1440x2304.xaml" />
-		<MauiXaml Remove="Pages\MainDeviceViews\MainView2304x1440.xaml" />
 		<MauiXaml Remove="Pages\MainDeviceViews\MainView2400x1080.xaml" />
 		<MauiXaml Remove="Pages\MainDeviceViews\MainVIew2485x970.xaml" />
 		<MauiXaml Remove="Pages\MainDeviceViews\MainView970x2485.xaml" />
@@ -94,13 +90,25 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Pages\MainDeviceViews\MainView1440x2304.xaml.cs">
+	    <DependentUpon>MainView1440x2304.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Pages\MainDeviceViews\MainView1920x1200.xaml.cs">
 	    <DependentUpon>MainView1920x1200.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\MainDeviceViews\MainView2304x1440.xaml.cs">
+	    <DependentUpon>MainView2304x1440.xaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
+		<MauiXaml Update="Pages\MainDeviceViews\MainView1440x2304.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Pages\MainDeviceViews\MainView1920x1200.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\MainDeviceViews\MainView2304x1440.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Pages\WeatherPage.xaml">

@@ -1,248 +1,246 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<ContentView
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:sys="clr-namespace:System;assembly=netstandard"
-    x:Class="TempestMonitor.Views.MainDeviceViews.MainView2304x1440"
-    xmlns:exe="clr-namespace:TempestMonitor.ViewModels;assembly=TempestMonitor"
-    x:DataType="exe:MainViewModel"
->
-    <Grid 
-        BackgroundColor="{StaticResource PurpleVikings}"
-        Margin="0,0,0,0"
-        Padding="0,0,0,0"
-    >
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MetWorksWeather.ViewModels"
+             x:Class="MetWorksWeather.Pages.MainDeviceViews.MainView2304x1440"
+             Title="Weather Station"
+             x:DataType="viewmodels:WeatherViewModel"
+             BackgroundColor="{StaticResource PurpleVikings}">
+
+    <Grid Margin="0" Padding="0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height=".5*"/>
-            <RowDefinition Height=".5*"/>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="0.5*"/>
             <RowDefinition Height="2*"/>
-            <RowDefinition Height=".5*"/>
-            <RowDefinition Height="2*"/>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="2.5*"/>
         </Grid.RowDefinitions>
-        <Border
-            Grid.Row="0"
-            Grid.Column="0"
-            StrokeThickness="0"
+
+        <Border 
+            Grid.Row="0" 
+            Grid.Column="0" 
+            Grid.RowSpan="6" 
+            StrokeThickness="1"
         >
-            <Label
-                FontSize="45"
-                TextColor="{StaticResource GoldVikings}"
-                VerticalTextAlignment="End"
-                HorizontalTextAlignment="Center"
-                Text="Temp"
-            />
-        </Border>
-        <Border
-            Grid.Row="0"
-            Grid.Column="1"
-            StrokeThickness="0"
-        >
-            <Label 
-                FontSize="45"
-                TextColor="{StaticResource GoldVikings}" 
-                VerticalTextAlignment="End"
-                HorizontalTextAlignment="Center"
-                Text="{Binding CurrentDateTime, StringFormat='{0:ddd M/d/yy}'}"
-            />
-        </Border>
-        <Border
-            Grid.Row="0"
-            Grid.Column="2"
-            StrokeThickness="0"
-        >
-            <Label 
-                FontSize="45"
-                TextColor="{StaticResource GoldVikings}" 
-                VerticalTextAlignment="End"
-                HorizontalTextAlignment="Center" 
-                Text="Wind"
-            />
-        </Border>
-        <Border
-            Grid.Row="1"
-            Grid.Column="0"
-            Grid.RowSpan="2"
-            StrokeThickness="0"
-            Margin="0,-95,0,0"
-        >
-            <HorizontalStackLayout
-                HorizontalOptions="Center">
-                <Label 
-                    FontSize="320"
-                    VerticalTextAlignment="Start"
-                    HorizontalTextAlignment="Start" 
-                    TextColor="{StaticResource GoldVikings}"                    
-                    Text="{Binding ObservableVW_Observation.air_temperature, StringFormat='{0:##}'}"
-                />
-                <Label 
-                    FontSize="32"
-                    TranslationY="105"
-                    VerticalTextAlignment="Start"
-                    HorizontalTextAlignment="Start" 
-                    TextColor="{StaticResource GoldVikings}"                    
-                    Text="{Binding TemperatureUnitSymbol}"
-                />
-            </HorizontalStackLayout>
-        </Border>
-        <Border
-            Grid.Row="1"
-            Grid.Column="1"
-            Grid.RowSpan="2"
-            StrokeThickness="0"
-        >
-            <Label
-                FontSize="280"
-                Margin="0,-40,0,0"
-                TextColor="White" 
-                VerticalTextAlignment="Start"
-                HorizontalTextAlignment="Center" 
-                Text="{Binding CurrentDateTimeHour, StringFormat='{0}'}"/>
-        </Border>
-        <Border
-            Grid.Row="1"
-            Grid.Column="2"
-            StrokeThickness="0"
-        >
-            <HorizontalStackLayout HorizontalOptions="Center">
-                <Label 
-                    FontSize="45"
-                    TextColor="{StaticResource GoldVikings}"
-                    VerticalTextAlignment="End"
-                    HorizontalTextAlignment="Center" 
-                    Text="{Binding ObservableVW_WindModel.wind_direction_short_cardinal, StringFormat='{0}'}"
-                />
-                <Label 
-                    FontSize="45"
-                    TextColor="{StaticResource GoldVikings}"
-                    VerticalTextAlignment="End"
-                    HorizontalTextAlignment="Center" 
-                    Text="  ("
-                />
-                <Label 
-                    FontSize="45"
-                    TextColor="{StaticResource GoldVikings}"
-                    VerticalTextAlignment="End"
-                    HorizontalTextAlignment="Center" 
-                    Text="{Binding ObservableVW_WindModel.wind_direction, StringFormat='{0}'}"
-                />
-                <Label 
-                    FontSize="45"
-                    TextColor="{StaticResource GoldVikings}"
-                    VerticalTextAlignment="End"
-                    HorizontalTextAlignment="Center" 
-                    Text="°)"
-                />
-            </HorizontalStackLayout>
-        </Border>
-        <Border
-            Grid.Row="2"
-            Grid.Column="2"
-            Grid.RowSpan="1"
-            StrokeThickness="0"
-            HorizontalOptions="Center"
-            Margin="0,-95,0,0"
-        >
-            <HorizontalStackLayout>
-                <Label 
-                    FontSize="280"
-                    TextColor="{StaticResource GoldVikings}" 
-                    VerticalTextAlignment="Center" 
-                    HorizontalTextAlignment="Center" 
-                    Text="{Binding ObservableVW_WindModel.wind_speed, StringFormat='{0:#0}'}"
-                />
-                <Label 
-                    FontSize="32"
-                    TranslationY="90"
-                    VerticalTextAlignment="Start"
-                    HorizontalTextAlignment="Start" 
-                    TextColor="{StaticResource GoldVikings}"                    
-                    Text="{Binding WindspeedUnitSymbol}"
-                />
-            </HorizontalStackLayout>
-        </Border>
-        <Border
-            Grid.Row="3"
-            Grid.Column="0"
-            StrokeThickness="0"
-        >
-            <Label 
-                FontSize="45"
-                TextColor="{StaticResource GoldVikings}"  
-                VerticalTextAlignment="End"
-                HorizontalTextAlignment="Center"
-                Text="Humidity"
-            />
-        </Border>
-        <Border
-            Grid.Row="3"
-            Grid.Column="2"
-            StrokeThickness="0"
-        >
-            <Label 
-                FontSize="45"
-                TextColor="{StaticResource GoldVikings}"  
-                VerticalTextAlignment="Center"
-                HorizontalTextAlignment="Center"
-                Text="UV"
-            />
-        </Border>
-        <Border
-            Grid.Row="4"
-            Grid.Column="0"
-            StrokeThickness="0"
-            Margin="0,-80,0,0"
+            <VerticalStackLayout
+                Spacing="0"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
             >
-            <HorizontalStackLayout
-                HorizontalOptions="Center">
+                <VerticalStackLayout>
+                    <HorizontalStackLayout
+                        HorizontalOptions="Center"
+                    >
+                        <Label 
+                            FontSize="50"
+                            TextColor="{StaticResource GoldVikings}"
+                            Text="Temp" 
+                        />
+                        <Label
+                            FontSize="50" 
+                            TextColor="{StaticResource GoldVikings}"
+                            Text=" ("
+                        />
+                        <Label
+                            FontSize="50" 
+                            TextColor="White"
+                            Text="{Binding TemperatureUnit}"
+                        />
+                        <Label
+                            FontSize="50" 
+                            TextColor="{StaticResource GoldVikings}"
+                            Text=")"
+                        />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout
+                        HorizontalOptions="Center"
+                    >
+                        <Label 
+                            FontSize="250" 
+                            Margin="0,-50,0,0" 
+                            TextColor="White"
+                            Text="{Binding TemperatureValue}"
+                        />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+                <VerticalStackLayout>
+                    <HorizontalStackLayout
+                        HorizontalOptions="Center"
+                    >
+                        <Label 
+                            FontSize="50"
+                            TextColor="{StaticResource GoldVikings}"
+                            Text="Humidity" 
+                        />
+                        <Label
+                            FontSize="50" 
+                            TextColor="{StaticResource GoldVikings}"
+                            Text=" ("
+                        />
+                        <Label
+                            FontSize="50" 
+                            TextColor="White"
+                            Text="{Binding HumidityUnit}" 
+                        />
+                        <Label
+                            FontSize="50" 
+                            TextColor="{StaticResource GoldVikings}"
+                            Text=")"
+                        />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout
+                        HorizontalOptions="Center"
+                    >
+                        <Label 
+                            FontSize="250" 
+                            Margin="0,-70,0,0" 
+                            TextColor="White"
+                            Text="{Binding HumidityValue}"
+                        />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <Border 
+            Grid.Row="0" 
+            Grid.Column="1" 
+            Grid.RowSpan="6" 
+            StrokeThickness="1"
+        >
+            <VerticalStackLayout 
+                HorizontalOptions="Center" 
+                VerticalOptions="Center"
+                Spacing="0" 
+            >
                 <Label 
-                    FontSize="265"
+                    FontSize="200"
+                    Margin="0,0,0,0"
                     TextColor="{StaticResource GoldVikings}" 
-                    VerticalTextAlignment="Center"
-                    HorizontalTextAlignment="Center" 
-                    Text="{Binding ObservableVW_Observation.relative_humidity, StringFormat='{0:##}'}"/>
-                <Label 
-                    FontSize="32"
-                    TranslationY="90"
-                    VerticalTextAlignment="Start"
-                    HorizontalTextAlignment="Start" 
-                    TextColor="{StaticResource GoldVikings}"                    
-                    Text="%"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding TimeDayOfWeek}" 
                 />
-            </HorizontalStackLayout>
+                <Label 
+                    FontSize="140"
+                    Margin="0,0,0,0"
+                    TextColor="{StaticResource GoldVikings}"
+                    HorizontalTextAlignment="Center" 
+                    Text="{Binding TimeDateDisplay}"
+                />
+                <Label
+                    FontSize="160" 
+                    Margin="0,0,0,0"
+                    TextColor="White" 
+                    HorizontalTextAlignment="Center" 
+                    Text="{Binding TimeDisplay}"
+                />
+            </VerticalStackLayout>
         </Border>
-        <Border
-            Grid.Row="3"
-            Grid.Column="1"
-            Grid.RowSpan="2"
-            StrokeThickness="0"
+
+        <Border 
+            Grid.Row="0" 
+            Grid.Column="2" 
+            Grid.RowSpan="6" 
+            StrokeThickness="1"
         >
-            <Label
-                FontSize="328"
-                Margin="{OnPlatform WinUI='0,0,0,0', Android='0,-95,0,0'}"
-                TextColor="White" 
-                VerticalTextAlignment="Center"
-                HorizontalTextAlignment="Center" 
-                Text="{Binding CurrentDateTime, StringFormat='{0:mm}'}"
-            />
-        </Border>
-        <Border
-            Grid.Row="4"
-            Grid.Column="2"
-            StrokeThickness="0"
-        >
-            <Label 
-                FontSize="{OnPlatform WinUI=265, Android=275}"
-                Margin="{OnPlatform WinUI='0,0,0,0', Android='0,-95,0,0'}"
-                TextColor="{StaticResource GoldVikings}" 
-                VerticalTextAlignment="Center" 
-                HorizontalTextAlignment="Center" 
-                Text="{Binding ObservableVW_Observation.uv, StringFormat='{0:#0}'}"
-            />
+            <VerticalStackLayout
+                Spacing="0"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+            >
+                <VerticalStackLayout>
+                    <HorizontalStackLayout
+                        HorizontalOptions="Center"
+                    >
+                        <Label 
+                            FontSize="50"
+                            TextColor="{StaticResource GoldVikings}"
+                            Text="Wind" 
+                        />
+                        <Label
+                            FontSize="50" 
+                            TextColor="{StaticResource GoldVikings}"
+                            Text=" ("
+                        />
+                        <Label
+                            FontSize="50" 
+                            TextColor="White"
+                            Text="{Binding WindSpeedUnit}"
+                        />
+                        <Label
+                            FontSize="50" 
+                            TextColor="{StaticResource GoldVikings}"
+                            Text=")"
+                        />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout
+                        HorizontalOptions="Center"
+                    >
+                        <Label 
+                            FontSize="50" 
+                            Margin="0,-20,0,0" 
+                            TextColor="{StaticResource GoldVikings}"
+                            Text="{Binding WindDirectionCardinal}" 
+                        />
+                        <Label
+                            FontSize="50" 
+                            Margin="0,-20,0,0"
+                            TextColor="{StaticResource GoldVikings}"
+                            Text=" ("
+                        />
+                        <Label
+                            FontSize="50" 
+                            Margin="0,-20,0,0" 
+                            TextColor="White"
+                            Text="{Binding WindDirectionDegrees}" 
+                        />
+                        <Label
+                            FontSize="50" 
+                            Margin="0,-20,0,0"
+                            TextColor="{StaticResource GoldVikings}"
+                            Text=")"
+                        />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout
+                        HorizontalOptions="Center"
+                    >
+                        <Label 
+                            FontSize="250" 
+                            Margin="0,-70,0,0" 
+                            TextColor="White"
+                            Text="{Binding WindSpeedValue}" 
+                        />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+                <VerticalStackLayout>
+                    <HorizontalStackLayout
+                        HorizontalOptions="Center"
+                    >
+                        <Label 
+                            FontSize="50"
+                            Margin="0,0,0,0" 
+                            TextColor="{StaticResource GoldVikings}"  
+                            Text="UV Index"
+                        />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout
+                        HorizontalOptions="Center"
+                    >
+                        <Label 
+                            FontSize="250" 
+                            Margin="0,-70,0,0" 
+                            TextColor="White"
+                            Text="{Binding UvIndexValue}"
+                        />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
         </Border>
     </Grid>
-</ContentView>
+</ContentPage>

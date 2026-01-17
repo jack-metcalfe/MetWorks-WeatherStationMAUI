@@ -109,12 +109,36 @@ public class LoggerPostgreSQL : ILogger
         return await Task.FromResult(true);
     }
 
-    public void Information(string message) => ILogger.Information(message);
-    public void Warning(string message) => ILogger.Warning(message);
-    public void Error(string message, Exception exception) => ILogger.Error(message, exception);
-    public void Error(string message) => ILogger.Error(message);
-    public void Debug(string message) => ILogger.Debug(message);
-    public void Trace(string message) => ILogger.Verbose(message);
+    public void Information(string message)
+    {
+        SysDiagDebug.WriteLine(message);
+        ILogger.Information(message);
+    }
+    public void Warning(string message)
+    {
+        SysDiagDebug.WriteLine(message);
+        ILogger.Warning(message);
+    }
+    public void Error(string message, Exception exception)
+    {
+        SysDiagDebug.WriteLine(message);
+        ILogger.Error(message, exception);
+    }
+    public void Error(string message)
+    {
+        SysDiagDebug.WriteLine(message);
+        ILogger.Error(message);
+    }
+    public void Debug(string message)
+    {
+        SysDiagDebug.WriteLine(message);
+        ILogger.Debug(message);
+    }
+    public void Trace(string message)
+    {
+        SysDiagDebug.WriteLine(message);
+        ILogger.Verbose(message);
+    }
 
     private static LogEventLevel ParseLevel(string level) =>
         Enum.TryParse<LogEventLevel>(level, true, out var parsed)

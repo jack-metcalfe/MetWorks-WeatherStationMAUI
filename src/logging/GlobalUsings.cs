@@ -19,3 +19,5 @@ global using Utility;
 global using static Constants.Settings.Paths.GroupSettingDefinitions;
 
 global using ILogger = Interfaces.ILogger;
+
+global using SysDiagDebug = System.Diagnostics.Debug;
