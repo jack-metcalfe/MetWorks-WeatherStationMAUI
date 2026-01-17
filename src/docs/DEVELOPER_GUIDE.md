@@ -1,4 +1,4 @@
-# DEVELOPER GUIDE
+﻿# DEVELOPER GUIDE
 
 Audience: developers who will build, debug, extend, and maintain the WeatherStation MAUI service.
 

@@ -1,4 +1,4 @@
-# ARCHITECTURE
+﻿# ARCHITECTURE
 
 This document is the authoritative developer-facing architecture overview for the WeatherStation MAUI service.
 
