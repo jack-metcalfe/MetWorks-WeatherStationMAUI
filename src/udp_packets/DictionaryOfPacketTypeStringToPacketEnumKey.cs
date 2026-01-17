@@ -1,7 +1,7 @@
 ﻿namespace UdpPackets;
 internal class DictionaryOfPacketTypeStringToPacketEnumKey
 {
-    internal const string LightningPacketKeyString = "evt_strke";
+    internal const string LightningPacketKeyString = "evt_strike";
     internal const string ObservationPacketKeyString = "obs_st";
     internal const string PrecipitationPacketKeyString = "evt_precip";
     internal const string WindPacketKeyString = "rapid_wind";
