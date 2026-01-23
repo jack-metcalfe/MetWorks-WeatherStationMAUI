@@ -1,9 +1,4 @@
-﻿namespace RawPacketRecordTypedInPostgresOut;
-
-using System.Threading;
-
-using Npgsql;
-
+﻿namespace MetWorks.Ingest.Postgres;
 /// <summary>
 /// Applies DDL scripts to initialize the schema.  Designed to be tolerant of transient failures:
 /// - each script is attempted and failures are logged but do not abort the whole initialization.
@@ -19,7 +14,6 @@ internal class PostgresInitializer
         "precipitation.sql",
         "wind.sql"
     };
-
     internal static async Task<bool> DatabaseInitializeAsync(
         ILogger iFileLogger,
         NpgsqlConnection npgSqlConnection,
@@ -58,8 +52,8 @@ internal class PostgresInitializer
 
             try
             {
-                var scriptPath = Path.Combine(typeof(ListenerSink).Name, scriptFilename);
-                var script = IStaticDataStore.GetString(scriptPath.Replace('\\', '/'));
+                var scriptPath = Path.Combine(typeof(RawPacketIngestor).Name, scriptFilename);
+                var script = IResourceProvider.GetString(scriptPath.Replace('\\', '/'));
                 if (string.IsNullOrEmpty(script))
                 {
                     iFileLogger.Warning($"⚠️ PostgreSQL script {scriptPath} not found in string provider; skipping.");

@@ -1,0 +1,19 @@
+UdpInRawPacketRecordTypedOut
+	Transformer
+	
+	Udp packet -> IRawPacketRecordTyped
+	
+RawPacketRecordTypedInPostgresOut
+	ListenerSink
+
+	IRawPacketRecordTyped -> PostgreSQL
+	
+MetWorksServices
+	WeatherDataTransformer
+	
+	IRawPacketRecordTyped -> IObservationReading, IWindReading, IPrecipitationReading, ILightningReading
+	
+WeatherStationMaui.ViewModels
+	WeatherViewModel
+	
+	IWindReading, IObservationReading -> UI OnPropertyChanged()

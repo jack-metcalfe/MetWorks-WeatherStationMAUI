@@ -1,7 +1,4 @@
-﻿using Microsoft.Maui.ApplicationModel;
-
-namespace MetWorksWeather;
-
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui;
 public partial class App : Application
 {
     private Task? _initializationTask;
@@ -24,19 +21,6 @@ public partial class App : Application
         var mainPage = DeviceViewSelector.GetViewForCurrentDevice();
         var window = new Window(mainPage);
 
-        window.Created += async (s, e) =>
-        {
-            try
-            {
-                _initializationTask = StartupInitializer.InitializeAsync();
-                await _initializationTask;
-            }
-            catch (Exception exception)
-            {
-                await ShowErrorAsync(window, exception);
-            }
-        };
-        
         // Cleanup on window destruction
         window.Destroying += (s, e) =>
         {

@@ -1,9 +1,6 @@
-﻿namespace Settings;
-
-using System.Dynamic;
+﻿namespace MetWorks.Common.Settings;
 using ISettingDefinitionDictionary = Dictionary<string, ISettingDefinition>;
 using ISettingValueDictionary = Dictionary<string, ISettingValue>;
-
 /// <summary>
 /// Central repository for settings definition, value, and override.
 /// Implements ISettingsRepository for DI integration.
@@ -22,44 +19,29 @@ public class SettingRepository : ISettingRepository
     }
 
     IEventRelayPath? _iEventRelayPath = null;
-    IEventRelayPath IEventRelayPath
-    {
-        get => NullPropertyGuard.Get(
-            _isInitialized, _iEventRelayPath, nameof(IEventRelayPath));
-        set => _iEventRelayPath = value;
-    }
-
-    ISettingDefinitionDictionary? _iSettingDefinitionDictionary;
-    ISettingDefinitionDictionary ISettingDefinitionDictionary
-    {
-        get => NullPropertyGuard.Get(
-            _isInitialized,
-            _iSettingDefinitionDictionary,
-            nameof(ISettingDefinitionDictionary)
+    public IEventRelayPath IEventRelayPath =>
+        NullPropertyGuard.Get(
+            _isInitialized, _iEventRelayPath, nameof(IEventRelayPath)
         );
-        set => _iSettingDefinitionDictionary = value;
-    }
 
-    ISettingValueDictionary? _iSettingValueDictionary;
-    ISettingValueDictionary ISettingValueDictionary
-    {
-        get => NullPropertyGuard.Get(
-            _isInitialized,
-            _iSettingValueDictionary,
-            nameof(ISettingValueDictionary)
+    ISettingDefinitionDictionary ISettingDefinitionDictionary =>
+        NullPropertyGuard.Get(
+            _isInitialized, ISettingProvider.ISettingDefinitionDictionary, nameof(ISettingDefinitionDictionary)
         );
-        set => _iSettingValueDictionary = value;
-    }
 
-    ISettingProvider? iSettingProvider;
+    ISettingValueDictionary ISettingValueDictionary =>
+        NullPropertyGuard.Get(
+            _isInitialized, ISettingProvider.ISettingValueDictionary, nameof(ISettingValueDictionary)
+        );
+
+    ISettingProvider? _iSettingProvider;
     ISettingProvider ISettingProvider
     {
         get => NullPropertyGuard.Get(
             _isInitialized,
-            iSettingProvider,
+            _iSettingProvider,
             nameof(ISettingProvider)
         );
-        set => iSettingProvider = value;
     }
 
     public SettingRepository() { }
@@ -69,26 +51,21 @@ public class SettingRepository : ISettingRepository
     /// </summary>
     public async Task<bool> InitializeAsync(
         ILogger iLogger,
-        ISettingProvider iSettingProvider,
-        IEventRelayPath iEventRelayPath
+        ISettingProvider iSettingProvider
     )
     {
         try
         {
             _iLogger = iLogger;
-            ISettingProvider = iSettingProvider;
-            IEventRelayPath = iEventRelayPath;
-
-            _isInitialized = true;
-
-            ISettingDefinitionDictionary = iSettingProvider.SettingDefinitions;
-            ISettingValueDictionary = iSettingProvider.SettingValues;
+            _iSettingProvider = iSettingProvider;
+            _iEventRelayPath = new EventRelayPath();
         }
         catch (Exception exception)
         {
             ILogger.Error("Failed to initialize", exception);
         }
 
+        _isInitialized = true;
         return _isInitialized;
     }
     public void RegisterForSettingChangeMessages(string path, Action<ISettingValue> handler)

@@ -4,10 +4,10 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-01-17T03:34:52.5041352Z
+// Generated On:        2026-01-22T04:50:43.7490342Z
 #nullable enable
 
-namespace ServiceRegistry
+namespace MetWorks.ServiceRegistry
 {
     // The Registry class provides dual accessors for each named instance.
     // External accessors return interfaces when available, ensuring API safety.
@@ -35,165 +35,165 @@ namespace ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheEventRelayBasic(EventRelay.EventRelayBasic instance) =>
+        public void RegisterTheEventRelayBasic(MetWorks.EventRelay.EventRelayBasic instance) =>
             _TheEventRelayBasicInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public Interfaces.IEventRelayBasic GetTheEventRelayBasic() =>
+        public MetWorks.Interfaces.IEventRelayBasic GetTheEventRelayBasic() =>
             _TheEventRelayBasicInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal EventRelay.EventRelayBasic GetTheEventRelayBasic_Internal() =>
+        internal MetWorks.EventRelay.EventRelayBasic GetTheEventRelayBasic_Internal() =>
             _TheEventRelayBasicInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheEventRelayPath(EventRelay.EventRelayPath instance) =>
+        public void RegisterTheEventRelayPath(MetWorks.EventRelay.EventRelayPath instance) =>
             _TheEventRelayPathInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public Interfaces.IEventRelayPath GetTheEventRelayPath() =>
+        public MetWorks.Interfaces.IEventRelayPath GetTheEventRelayPath() =>
             _TheEventRelayPathInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal EventRelay.EventRelayPath GetTheEventRelayPath_Internal() =>
+        internal MetWorks.EventRelay.EventRelayPath GetTheEventRelayPath_Internal() =>
             _TheEventRelayPathInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheLoggerStub(Logging.LoggerStub instance) =>
+        public void RegisterTheLoggerStub(MetWorks.Common.Logging.LoggerStub instance) =>
             _TheLoggerStubInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public Interfaces.ILogger GetTheLoggerStub() =>
+        public MetWorks.Interfaces.ILogger GetTheLoggerStub() =>
             _TheLoggerStubInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal Logging.LoggerStub GetTheLoggerStub_Internal() =>
+        internal MetWorks.Common.Logging.LoggerStub GetTheLoggerStub_Internal() =>
             _TheLoggerStubInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheSettingProvider(Settings.SettingProvider instance) =>
+        public void RegisterTheSettingProvider(MetWorks.Common.Settings.SettingProvider instance) =>
             _TheSettingProviderInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public Interfaces.ISettingProvider GetTheSettingProvider() =>
+        public MetWorks.Interfaces.ISettingProvider GetTheSettingProvider() =>
             _TheSettingProviderInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal Settings.SettingProvider GetTheSettingProvider_Internal() =>
+        internal MetWorks.Common.Settings.SettingProvider GetTheSettingProvider_Internal() =>
             _TheSettingProviderInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheSettingRepository(Settings.SettingRepository instance) =>
+        public void RegisterTheSettingRepository(MetWorks.Common.Settings.SettingRepository instance) =>
             _TheSettingRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public Interfaces.ISettingRepository GetTheSettingRepository() =>
+        public MetWorks.Interfaces.ISettingRepository GetTheSettingRepository() =>
             _TheSettingRepositoryInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal Settings.SettingRepository GetTheSettingRepository_Internal() =>
+        internal MetWorks.Common.Settings.SettingRepository GetTheSettingRepository_Internal() =>
             _TheSettingRepositoryInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheDefaultLogger(Logging.LoggerPostgreSQL instance) =>
-            _TheDefaultLoggerInstance = instance;
+        public void RegisterTheLoggerFile(MetWorks.Common.Logging.LoggerFile instance) =>
+            _TheLoggerFileInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public Interfaces.ILogger GetTheDefaultLogger() =>
-            _TheDefaultLoggerInstance;
+        public MetWorks.Interfaces.ILogger GetTheLoggerFile() =>
+            _TheLoggerFileInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal Logging.LoggerPostgreSQL GetTheDefaultLogger_Internal() =>
-            _TheDefaultLoggerInstance;
+        internal MetWorks.Common.Logging.LoggerFile GetTheLoggerFile_Internal() =>
+            _TheLoggerFileInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheProvenanceTracker(MetWorksServices.ProvenanceTracker instance) =>
+        public void RegisterTheProvenanceTracker(MetWorks.Common.ProvenanceTracker instance) =>
             _TheProvenanceTrackerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorksServices.ProvenanceTracker GetTheProvenanceTracker() =>
+        public MetWorks.Common.ProvenanceTracker GetTheProvenanceTracker() =>
             _TheProvenanceTrackerInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal MetWorksServices.ProvenanceTracker GetTheProvenanceTracker_Internal() =>
+        internal MetWorks.Common.ProvenanceTracker GetTheProvenanceTracker_Internal() =>
             _TheProvenanceTrackerInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheUnitsOfMeasureInitializer(RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer instance) =>
+        public void RegisterTheUnitsOfMeasureInitializer(MetWorks.RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer instance) =>
             _TheUnitsOfMeasureInitializerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer GetTheUnitsOfMeasureInitializer() =>
+        public MetWorks.RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer GetTheUnitsOfMeasureInitializer() =>
             _TheUnitsOfMeasureInitializerInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer GetTheUnitsOfMeasureInitializer_Internal() =>
+        internal MetWorks.RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer GetTheUnitsOfMeasureInitializer_Internal() =>
             _TheUnitsOfMeasureInitializerInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheWeatherDataTransformer(MetWorksServices.WeatherDataTransformer instance) =>
-            _TheWeatherDataTransformerInstance = instance;
+        public void RegisterTheSensorReadingTransformer(MetWorks.Ingest.Transformer.SensorReadingTransformer instance) =>
+            _TheSensorReadingTransformerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorksServices.WeatherDataTransformer GetTheWeatherDataTransformer() =>
-            _TheWeatherDataTransformerInstance;
+        public MetWorks.Ingest.Transformer.SensorReadingTransformer GetTheSensorReadingTransformer() =>
+            _TheSensorReadingTransformerInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal MetWorksServices.WeatherDataTransformer GetTheWeatherDataTransformer_Internal() =>
-            _TheWeatherDataTransformerInstance;
+        internal MetWorks.Ingest.Transformer.SensorReadingTransformer GetTheSensorReadingTransformer_Internal() =>
+            _TheSensorReadingTransformerInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheUdpListener(UdpInRawPacketRecordTypedOut.Transformer instance) =>
+        public void RegisterTheUdpListener(MetWorks.Networking.Udp.Transformer.TempestPacketTransformer instance) =>
             _TheUdpListenerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public UdpInRawPacketRecordTypedOut.Transformer GetTheUdpListener() =>
+        public MetWorks.Networking.Udp.Transformer.TempestPacketTransformer GetTheUdpListener() =>
             _TheUdpListenerInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal UdpInRawPacketRecordTypedOut.Transformer GetTheUdpListener_Internal() =>
+        internal MetWorks.Networking.Udp.Transformer.TempestPacketTransformer GetTheUdpListener_Internal() =>
             _TheUdpListenerInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheRawPacketRecordTypedInPostgresOut(RawPacketRecordTypedInPostgresOut.ListenerSink instance) =>
-            _TheRawPacketRecordTypedInPostgresOutInstance = instance;
+        public void RegisterThePostgresRawPacketIngestor(MetWorks.Ingest.Postgres.RawPacketIngestor instance) =>
+            _ThePostgresRawPacketIngestorInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public RawPacketRecordTypedInPostgresOut.ListenerSink GetTheRawPacketRecordTypedInPostgresOut() =>
-            _TheRawPacketRecordTypedInPostgresOutInstance;
+        public MetWorks.Ingest.Postgres.RawPacketIngestor GetThePostgresRawPacketIngestor() =>
+            _ThePostgresRawPacketIngestorInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal RawPacketRecordTypedInPostgresOut.ListenerSink GetTheRawPacketRecordTypedInPostgresOut_Internal() =>
-            _TheRawPacketRecordTypedInPostgresOutInstance;
+        internal MetWorks.Ingest.Postgres.RawPacketIngestor GetThePostgresRawPacketIngestor_Internal() =>
+            _ThePostgresRawPacketIngestorInstance;
     }
 }

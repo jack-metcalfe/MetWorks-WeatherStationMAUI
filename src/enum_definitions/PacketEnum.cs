@@ -1,4 +1,4 @@
-﻿namespace EnumDefinition;
+﻿namespace MetWorks.EnumDefinitions;
 public enum PacketEnum
 {
     Lightning = 4,

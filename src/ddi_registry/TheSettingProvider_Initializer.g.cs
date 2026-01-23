@@ -4,11 +4,11 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Assignments.Initializer
-// Generated On:        2026-01-17T03:34:52.5041352Z
+// Generated On:        2026-01-22T04:50:43.7490342Z
 #nullable enable
 using System.Threading.Tasks;
 
-namespace ServiceRegistry
+namespace MetWorks.ServiceRegistry
 {
     // Per-instance async initializer.
     // Declared as partial to allow modularization if needed.

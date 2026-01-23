@@ -1,4 +1,4 @@
-﻿namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 internal class PacketDtoBase : IPacketDtoBase
 {
     [JsonPropertyName("serial_number")] public required string SerialNumber { get; init; }

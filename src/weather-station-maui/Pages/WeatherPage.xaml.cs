@@ -1,6 +1,4 @@
-using MetWorksWeather.ViewModels;
-
-namespace MetWorksWeather.Pages;
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages;
 
 public partial class WeatherPage : ContentPage
 {

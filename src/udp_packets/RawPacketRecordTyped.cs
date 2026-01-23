@@ -1,4 +1,4 @@
-﻿namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 
 internal sealed record RawPacketRecordTyped(
     Guid Id,                                    // COMB GUID

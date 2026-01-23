@@ -1,0 +1,120 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<!-- Multi-platform targeting: Windows and Android -->
+		<TargetFrameworks>net10.0-android;net10.0-windows10.0.19041.0</TargetFrameworks>
+
+		<OutputType>Exe</OutputType>
+		<RootNamespace>WeatherStationMaui</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+
+		<!-- Explicit usings and nullability -->
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+		<!-- Opt into preview features -->
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+
+		<!-- Optional: enforce consistent language version -->
+		<LangVersion>preview</LangVersion>
+
+		<!-- App metadata -->
+		<ApplicationTitle>WeatherStationMaui</ApplicationTitle>
+		<ApplicationId>biz.metworks.weather_station_maui</ApplicationId>
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<!-- Windows packaging -->
+		<WindowsPackageType>None</WindowsPackageType>
+
+		<NoWarn>$(NoWarn);NU1603</NoWarn>
+
+		<!-- Platform support -->
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</TargetPlatformMinVersion>
+	  <UserSecretsId>94164f6e-e905-4cf6-a6cc-88db8b8b3d35</UserSecretsId>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+
+		<!-- Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Remove="Pages\MainDeviceViews\MainView1080x2400 .xaml.cs" />
+		<Compile Remove="Pages\MainDeviceViews\MainView1080x2400.xaml.cs" />
+		<Compile Remove="Pages\MainDeviceViews\MainView2400x1080.xaml.cs" />
+		<Compile Remove="Pages\MainDeviceViews\MainVIew2485x970.xaml.cs" />
+		<Compile Remove="Pages\MainDeviceViews\MainView970x2485.xaml.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<MauiXaml Remove="Pages\MainDeviceViews\MainView1080x2400.xaml" />
+		<MauiXaml Remove="Pages\MainDeviceViews\MainView2400x1080.xaml" />
+		<MauiXaml Remove="Pages\MainDeviceViews\MainVIew2485x970.xaml" />
+		<MauiXaml Remove="Pages\MainDeviceViews\MainView970x2485.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Use latest preview versions explicitly -->
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" />
+		<PackageReference Include="Microsoft.Maui.Controls" />
+		<PackageReference Include="System.Reactive" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ddi_registry\MetWorks.DdiRegistry.csproj" />
+	  <ProjectReference Include="..\interfaces\MetWorks.Interfaces.csproj" />
+	  <ProjectReference Include="..\MetWorks.Common\MetWorks.Common.csproj" />
+	  <ProjectReference Include="..\metworks_models\MetWorks.Models.Observables.csproj" />
+	  <ProjectReference Include="..\RedStar.Amounts.StandardUnits\RedStar.Amounts.StandardUnits.csproj" />
+	  <ProjectReference Include="..\RedStar.Amounts\RedStar.Amounts\RedStar.Amounts.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Pages\MainDeviceViews\MainView1440x2304.xaml.cs">
+	    <DependentUpon>MainView1440x2304.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\MainDeviceViews\MainView1920x1200.xaml.cs">
+	    <DependentUpon>MainView1920x1200.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\MainDeviceViews\MainView2304x1440.xaml.cs">
+	    <DependentUpon>MainView2304x1440.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<MauiXaml Update="Pages\MainDeviceViews\MainView1440x2304.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\MainDeviceViews\MainView1920x1200.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\MainDeviceViews\MainView2304x1440.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\WeatherPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Resources\Styles\WeatherColors.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+	</ItemGroup>
+</Project>
+

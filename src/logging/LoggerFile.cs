@@ -1,6 +1,4 @@
-﻿namespace Logging;
-
-using Serilog.Core;
+﻿namespace MetWorks.Common.Logging;
 public class LoggerFile : ILogger
 {
     bool _isInitialized = false;

@@ -1,6 +1,6 @@
-﻿namespace Constants.Settings.Paths;
+﻿namespace MetWorks.Constants.Settings.Paths;
 
-using static Constants.Measurement.MeasurementHelper;
+using static MetWorks.Constants.Measurement.MeasurementHelper;
 public static class Settings
 {
     public const string Section = "settings";

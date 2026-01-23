@@ -4,10 +4,10 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Instance.Factory
-// Generated On:        2026-01-17T03:34:52.5041352Z
+// Generated On:        2026-01-22T04:50:43.7490342Z
 #nullable enable
 
-namespace ServiceRegistry
+namespace MetWorks.ServiceRegistry
 {
     // The InstanceFactory encapsulates per-instance creation logic.
     // Declared as partial to allow modularization if needed.
@@ -15,11 +15,11 @@ namespace ServiceRegistry
     // and immediately registers the created instance with the Registry.
     internal static partial class TheSettingProvider_InstanceFactory
     {
-        public static Settings.SettingProvider Create(Registry registry)
+        public static MetWorks.Common.Settings.SettingProvider Create(Registry registry)
         {
             // Assignment-driven instance: construct with new().
             // This is always valid because ContainerClass is a concrete class.
-            var instance = new Settings.SettingProvider();
+            var instance = new MetWorks.Common.Settings.SettingProvider();
 
             // Register immediately so other instances can reference it.
             registry.RegisterTheSettingProvider(instance);

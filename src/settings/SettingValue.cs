@@ -1,4 +1,4 @@
-namespace Settings;
+﻿namespace MetWorks.Common.Settings;
 public class SettingValue : ISettingValue
 {
     public string Path { get; set; }

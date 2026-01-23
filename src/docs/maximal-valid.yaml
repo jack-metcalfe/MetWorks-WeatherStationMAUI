@@ -131,7 +131,7 @@ namespace:
     interface: []
     class:
       - name: "Transformer"
-        interface: Interfaces.IBackgroundService
+        interface: null
         parameter:
           - name: "iLogger"
             class: null
@@ -153,7 +153,7 @@ namespace:
     interface: []
     class:
       - name: "ListenerSink"
-        interface: Interfaces.IBackgroundService
+        interface: null
         parameter:
           - name: "iLogger"
             class: null

@@ -1,4 +1,4 @@
-﻿namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 public interface IRawPacketRecordTypedFactory
 {
     static IRawPacketRecordTyped Create(ReadOnlyMemory<char> rawPacketJsonAsReadOnlyMemoryOfChar)

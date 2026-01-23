@@ -1,15 +1,5 @@
-namespace Logging;
+﻿namespace MetWorks.Common.Logging;
 
-using System;
-using System.Collections.Generic;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using Npgsql;
-using Serilog.Core;
-using Serilog.Debugging;
-using Serilog.Events;
 using Logger = Serilog.Core.Logger;
 using ILogEventSink = Serilog.Core.ILogEventSink;
 
@@ -222,7 +212,7 @@ public class LoggerPostgreSQL : ILogger
 
                 cmd.ExecuteNonQuery();
 
-                // Write succeeded � mark healthy
+                // Write succeeded — mark healthy
                 try { _setHealth?.Invoke(true); } catch { /* ignore */ }
             }
             catch (Exception ex)

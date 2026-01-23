@@ -4,10 +4,10 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Instance.Field
-// Generated On:        2026-01-17T03:34:52.5041352Z
+// Generated On:        2026-01-22T04:50:43.7490342Z
 #nullable enable
 
-namespace ServiceRegistry
+namespace MetWorks.ServiceRegistry
 {
     public partial class Registry
     {

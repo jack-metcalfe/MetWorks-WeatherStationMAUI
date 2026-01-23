@@ -1,4 +1,4 @@
-﻿namespace Interfaces;
+﻿namespace MetWorks.Interfaces;
 public interface IEventRelayPath
 {
     void Register(string path, Action<ISettingValue> handler);

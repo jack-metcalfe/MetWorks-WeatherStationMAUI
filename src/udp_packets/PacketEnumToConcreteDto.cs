@@ -1,4 +1,4 @@
-﻿namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 internal class PacketEnumToConcreteDto
 {
     internal static Dictionary<PacketEnum, Func<ReadOnlyMemory<char>, PacketDtoBase>> PacketHandlers = new()

@@ -1,5 +1,4 @@
-﻿namespace RedStar.Amounts.WeatherExtensions;
-
+﻿namespace MetWorks.RedStar.Amounts.WeatherExtensions;
 public class UnitsOfMeasureInitializer
 {
     bool isInitialized = false;

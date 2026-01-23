@@ -1,8 +1,8 @@
 ﻿<maui:MauiWinUIApplication
-    x:Class="MetWorksWeather.WinUI.App"
+    x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.WinUI.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:maui="using:Microsoft.Maui"
-    xmlns:local="using:MetWorksWeather.WinUI">
+    xmlns:local="using:MetWorks.Apps.MAUI.WeatherStationMaui.WinUI">
 
 </maui:MauiWinUIApplication>

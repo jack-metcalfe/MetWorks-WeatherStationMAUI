@@ -1,6 +1,6 @@
-﻿namespace Interfaces;
+﻿namespace MetWorks.Interfaces;
 public interface ISettingProvider
 {
-    Dictionary<string, ISettingDefinition> SettingDefinitions { get; }
-    Dictionary<string, ISettingValue> SettingValues { get; }
+    Dictionary<string, ISettingDefinition> ISettingDefinitionDictionary { get; }
+    Dictionary<string, ISettingValue> ISettingValueDictionary { get; }
 }

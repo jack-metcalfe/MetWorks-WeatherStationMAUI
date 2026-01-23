@@ -1,5 +1,4 @@
-namespace Interfaces;
-
+﻿namespace MetWorks.Interfaces;
 public interface IEventRelayBasic
 {
     void Send<TMessage>(TMessage message) where TMessage : class;

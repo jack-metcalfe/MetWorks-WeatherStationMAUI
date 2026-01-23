@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>preview</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Dapper" />
+		<PackageReference Include="Npgsql" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\basic_event_relay\MetWorks.EventRelay.csproj" />
+	  <ProjectReference Include="..\Constants\MetWorks.Constants.csproj" />
+	  <ProjectReference Include="..\enum_definitions\MetWorks.EnumDefinitions.csproj" />
+	  <ProjectReference Include="..\interfaces\MetWorks.Interfaces.csproj" />
+	  <ProjectReference Include="..\MetWorks.Common\MetWorks.Common.csproj" />
+	  <ProjectReference Include="..\metworks_services\MetWorks.Ingest.Transformer.csproj" />
+	  <ProjectReference Include="..\static_data_store\MetWorks.Resource.Store.csproj" />
+	  <ProjectReference Include="..\udp_packets\MetWorks.IoT.UDP.Tempest.csproj" />
+	</ItemGroup>
+
+</Project>

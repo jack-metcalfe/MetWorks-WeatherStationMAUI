@@ -1,4 +1,4 @@
-namespace MetWorksWeather.Services;
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.Services;
 
 /// <summary>
 /// Mock service that generates fake weather data for development/testing.
@@ -134,7 +134,6 @@ public class MockWeatherReadingService : IDisposable
             }
         };
     }
-
     /// <summary>
     /// Convert wind direction degrees to cardinal/intercardinal direction.
     /// Same logic as WeatherDataTransformer.
@@ -166,7 +165,6 @@ public class MockWeatherReadingService : IDisposable
             _ => "N"
         };
     }
-
     public void Dispose()
     {
         Stop();

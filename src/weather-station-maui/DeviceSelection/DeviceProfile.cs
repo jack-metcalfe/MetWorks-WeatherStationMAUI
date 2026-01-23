@@ -1,4 +1,4 @@
-namespace MetWorksWeather.DeviceSelection;
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;
 
 /// <summary>
 /// Represents a specific device profile with detailed display characteristics.

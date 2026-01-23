@@ -1,5 +1,4 @@
-﻿using Interfaces;
-namespace Settings;
+﻿namespace MetWorks.Common.Settings;
 
 public record SettingModel
 {

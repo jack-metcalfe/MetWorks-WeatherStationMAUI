@@ -1,5 +1,4 @@
-﻿namespace Settings;
-
+﻿namespace MetWorks.Common.Settings;
 using static Constants.Settings.SettingProvider;
 using ISettingDefinitionDictionary = Dictionary<string, ISettingDefinition>;
 using ISettingValueDictionary = Dictionary<string, ISettingValue>;
@@ -13,26 +12,23 @@ public class SettingProvider : ISettingProvider
         get => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
         set => _iLogger = value;
     }
-    ISettingDefinitionDictionary? _iSettingDefinitions;
-    public ISettingDefinitionDictionary SettingDefinitions
+    ISettingDefinitionDictionary? _iSettingDefinitionDictionary;
+    public ISettingDefinitionDictionary ISettingDefinitionDictionary
     {
         get => NullPropertyGuard.Get(
             _isInitialized,
-            _iSettingDefinitions,
-            nameof(SettingDefinitions)
+            _iSettingDefinitionDictionary,
+            nameof(ISettingDefinitionDictionary)
         );
-        private set => _iSettingDefinitions = value;
     }
-
-    ISettingValueDictionary? _iSettingValues;
-    public ISettingValueDictionary SettingValues
+    ISettingValueDictionary? _iSettingValueDictionary;
+    public ISettingValueDictionary ISettingValueDictionary
     {
         get => NullPropertyGuard.Get(
             _isInitialized,
-            _iSettingValues,
-            nameof(SettingValues)
+            _iSettingValueDictionary,
+            nameof(ISettingValueDictionary)
         );
-        private set => _iSettingValues = value;
     }
     public SettingProvider() {}
     public async Task<bool> InitializeAsync(
@@ -43,22 +39,32 @@ public class SettingProvider : ISettingProvider
         {
             ILogger = iLogger;
             var settingModel = Load();
-            if (settingModel != null)
+            if (settingModel is not null)
             {
-                SettingDefinitions = settingModel.Definitions.ToDictionary(def => def.Path, def => (ISettingDefinition)def);
-                SettingValues = settingModel.Values.ToDictionary(val => val.Path, val => (ISettingValue)val);
+                _iSettingDefinitionDictionary = settingModel.Definitions.ToDictionary(def => def.Path, def => (ISettingDefinition)def);
+                _iSettingValueDictionary = settingModel.Values.ToDictionary(val => val.Path, val => (ISettingValue)val);
+
+                foreach (var def in _iSettingDefinitionDictionary.Values)
+                {
+                    if (!_iSettingValueDictionary.ContainsKey(def.Path))
+                    {
+                        _iSettingValueDictionary[def.Path] = new SettingValue
+                        {
+                            Path = def.Path,
+                            Value = def.DefaultValue
+                        };
+                    }
+                }
                 _isInitialized = true;
             }
         }
-
         catch(Exception exception)
         {
             ILogger.Error("Failed to initialize SettingProvider.", exception);
         }
-
         return _isInitialized;
     }
-    public SettingModel? Load()
+    SettingModel? Load()
     {
         try
         {
@@ -66,10 +72,9 @@ public class SettingProvider : ISettingProvider
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
             var settingModelString = NullPropertyGuard
-                .Get(true, StaticData.GetString(Filename), Filename);
+                .Get(true, ResourceProvider.GetString(Filename), Filename);
 
-            var settingModel = deserializer.Deserialize<SettingModel>(settingModelString);
-            return settingModel;
+            return deserializer.Deserialize<SettingModel>(settingModelString);
         }
         catch (Exception exception)
         {

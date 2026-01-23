@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 internal static class RawPacketRecordTypedFactory
 {
     internal static IRawPacketRecordTyped Create(ReadOnlyMemory<char> rawPacketJsonAsReadOnlyMemoryOfChar)

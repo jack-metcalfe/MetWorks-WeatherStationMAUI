@@ -1,4 +1,4 @@
-﻿namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 public interface IObservationReadingDto
 {
     long EpochTimestampUtc { get; }

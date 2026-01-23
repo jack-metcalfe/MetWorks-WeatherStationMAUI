@@ -1,4 +1,4 @@
-﻿namespace Utility;
+﻿namespace MetWorks.Common.Utility;
 public static class ArrayExtensions
 {
     public static bool IsNullOrEmpty<T>(this T[]? array) =>

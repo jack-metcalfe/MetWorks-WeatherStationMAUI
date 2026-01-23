@@ -4,10 +4,10 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Instance.Factory
-// Generated On:        2026-01-17T03:34:52.5041352Z
+// Generated On:        2026-01-22T04:50:43.7490342Z
 #nullable enable
 
-namespace ServiceRegistry
+namespace MetWorks.ServiceRegistry
 {
     // The InstanceFactory encapsulates per-instance creation logic.
     // Declared as partial to allow modularization if needed.
@@ -15,11 +15,11 @@ namespace ServiceRegistry
     // and immediately registers the created instance with the Registry.
     internal static partial class TheUnitsOfMeasureInitializer_InstanceFactory
     {
-        public static RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer Create(Registry registry)
+        public static MetWorks.RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer Create(Registry registry)
         {
             // Assignment-driven instance: construct with new().
             // This is always valid because ContainerClass is a concrete class.
-            var instance = new RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer();
+            var instance = new MetWorks.RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer();
 
             // Register immediately so other instances can reference it.
             registry.RegisterTheUnitsOfMeasureInitializer(instance);

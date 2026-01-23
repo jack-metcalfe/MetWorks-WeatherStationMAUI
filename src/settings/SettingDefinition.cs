@@ -1,5 +1,4 @@
-namespace Settings;
-
+﻿namespace MetWorks.Common.Settings;
 /// <summary>
 /// Immutable schema/metadata for a setting.
 /// Used for validation, UI generation, and documentation.

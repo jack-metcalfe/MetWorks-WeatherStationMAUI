@@ -1,10 +1,8 @@
-﻿namespace MetWorksWeather
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui;
+public partial class AppShell : Shell
 {
-    public partial class AppShell : Shell
+    public AppShell()
     {
-        public AppShell()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 internal class DictionaryOfPacketTypeStringToPacketEnumKey
 {
     internal const string LightningPacketKeyString = "evt_strike";

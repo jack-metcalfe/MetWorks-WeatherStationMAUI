@@ -3,7 +3,7 @@
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace MetWorksWeather.WinUI
+namespace MetWorks.Apps.MAUI.WeatherStationMaui.WinUI
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.

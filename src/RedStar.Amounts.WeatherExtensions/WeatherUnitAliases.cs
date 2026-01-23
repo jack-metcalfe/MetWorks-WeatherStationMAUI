@@ -1,5 +1,4 @@
-namespace RedStar.Amounts.WeatherExtensions;
-
+﻿namespace MetWorks.RedStar.Amounts.WeatherExtensions;
 /// <summary>
 /// Registers weather-specific unit aliases with RedStar.Amounts UnitManager.
 /// Maps YAML configuration values (e.g., "mile/hour", "mph") to RedStar Unit instances.

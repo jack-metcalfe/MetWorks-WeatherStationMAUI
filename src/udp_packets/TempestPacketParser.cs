@@ -1,4 +1,4 @@
-namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 
 /// <summary>
 /// Public API for parsing Tempest weather station UDP packets.

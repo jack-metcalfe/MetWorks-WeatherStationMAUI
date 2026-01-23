@@ -1,7 +1,4 @@
-﻿namespace Constants.Settings.Paths;
-
-using static Constants.Measurement.MeasurementHelper;
-
+﻿namespace MetWorks.Constants.Settings.Paths;
 public record GroupSettingDefinition
 {
     public string GroupName { get; }
@@ -69,11 +66,11 @@ public static class GroupSettingDefinitions
             groupBasePath: "/services/unitOfMeasure/",
             settingNames:
             [
-                UnitOfMeasure_airPressure,
-                UnitOfMeasure_airTemperature,
-                UnitOfMeasure_lightningDistance,
-                UnitOfMeasure_precipitationAmount,
-                UnitOfMeasure_windSpeed
+                MeasurementHelper.UnitOfMeasure_airPressure,
+                MeasurementHelper.UnitOfMeasure_airTemperature,
+                MeasurementHelper.UnitOfMeasure_lightningDistance,
+                MeasurementHelper.UnitOfMeasure_precipitationAmount,
+                MeasurementHelper.UnitOfMeasure_windSpeed
             ]
         ),
         new GroupSettingDefinition(

@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace MetWorksWeather
+namespace MetWorks.Apps.MAUI.WeatherStationMaui
 {
     [Application]
     public class MainApplication : MauiApplication

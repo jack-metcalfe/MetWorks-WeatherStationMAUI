@@ -1,4 +1,4 @@
-﻿namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 internal sealed class ObservationReadingDto : IObservationReadingDto
 {
     public long EpochTimestampUtc { get; init; }

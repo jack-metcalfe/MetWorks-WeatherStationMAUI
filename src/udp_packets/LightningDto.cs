@@ -1,4 +1,4 @@
-﻿namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 internal sealed class LightningDto : PacketDtoBase, ILightningDto
 {
     [JsonIgnore] public long DeviceReceivedUtcTimestampEpoch { get; init; }

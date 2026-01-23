@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\interfaces\MetWorks.Interfaces.csproj" />
+    <ProjectReference Include="..\..\logging\MetWorks.Common.Logging.csproj" />
+    <ProjectReference Include="..\..\MetWorks.Common\MetWorks.Common.csproj" />
+  </ItemGroup>
+
+</Project>

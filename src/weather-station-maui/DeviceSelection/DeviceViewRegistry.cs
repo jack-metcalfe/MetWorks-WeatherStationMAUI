@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace MetWorksWeather.DeviceSelection;
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;
 
 /// <summary>
 /// Registry of known device profiles mapped to specific view implementations.

@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <!-- enable central package management -->
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>

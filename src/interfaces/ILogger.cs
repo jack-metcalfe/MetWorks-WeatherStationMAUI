@@ -1,4 +1,4 @@
-﻿namespace Interfaces;
+﻿namespace MetWorks.Interfaces;
 public interface ILogger
 {
     void Information(string message);

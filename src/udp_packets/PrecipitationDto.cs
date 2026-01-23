@@ -1,4 +1,4 @@
-﻿namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 internal sealed class PrecipitationDto : PacketDtoBase, IPrecipitationDto
 {
     [JsonPropertyName("firmware_revision")] public int FirmwareRevision { get; init; }

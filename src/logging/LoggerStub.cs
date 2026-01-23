@@ -1,5 +1,4 @@
-namespace Logging;
-
+﻿namespace MetWorks.Common.Logging;
 /// <summary>
 /// Stub implementation of IFileLogger that discards all log messages.
 /// Used during bootstrap phase before the real logger is initialized.

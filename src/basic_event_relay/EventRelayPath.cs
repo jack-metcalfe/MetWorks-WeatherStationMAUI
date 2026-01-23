@@ -1,5 +1,4 @@
-namespace EventRelay;
-
+﻿namespace MetWorks.EventRelay;
 public class EventRelayPath : IEventRelayPath
 {
     private readonly IMessenger _messenger = new WeakReferenceMessenger();

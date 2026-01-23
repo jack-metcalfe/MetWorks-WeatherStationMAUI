@@ -1,4 +1,4 @@
-﻿namespace Constants.Measurement;
+﻿namespace MetWorks.Constants.Measurement;
 public class MeasurementHelper
 {
     public const string UnitOfMeasure_airPressure = "airPressure";

@@ -1,4 +1,4 @@
-﻿namespace UdpPackets;
+﻿namespace MetWorks.IoT.UDP.Tempest;
 internal sealed class WindDto : PacketDtoBase, IWindDto
 {
     [JsonPropertyName("ob")] public required JsonElement Measurements { get; init; }
