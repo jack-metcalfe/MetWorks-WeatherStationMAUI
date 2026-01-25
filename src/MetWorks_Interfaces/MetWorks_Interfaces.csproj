@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<LangVersion>preview</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net10.0</TargetFramework>
+		<RootNamespace>MetWorks.Interfaces</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="JsonSchema.Net" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\MetWorks_EnumDefinitions\MetWorks_EnumDefinitions.csproj" />
+	  <ProjectReference Include="..\RedStar_Amounts\RedStar_Amounts.csproj" />
+	</ItemGroup>
+</Project>

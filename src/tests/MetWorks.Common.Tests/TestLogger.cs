@@ -1,4 +1,6 @@
-﻿namespace MetWorks.Models.Observables.Provenance.Common.Tests;
+﻿using MetWorks.Common.Tests;
+
+namespace MetWorks.Models.Observables.Provenance.Common.Tests;
 class TestLogger : ILogger
 {
     public readonly ConcurrentQueue<string> Messages = new();
@@ -18,7 +20,10 @@ public class LoggerResilientTests
     [Fact]
     public async Task Buffers_When_No_Loggers_And_Flushes_When_Added()
     {
-        var resilient = new LoggerResilient(maxBufferSize: 100);
+        var resilient = new LoggerResilient();
+        // initialize to match previous behavior
+        var eventRelay = new MetWorks.EventRelay.EventRelayBasic();
+        await resilient.InitializeAsync(new TestLogger(), new InMemorySettingRepository(new System.Collections.Generic.Dictionary<string,string>()), eventRelay, maxBufferSize: 100);
         resilient.Information("one");
         resilient.Warning("two");
 

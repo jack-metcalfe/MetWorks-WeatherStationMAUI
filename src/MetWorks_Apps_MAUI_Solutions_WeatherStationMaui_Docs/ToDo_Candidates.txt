@@ -1,0 +1,69 @@
+﻿ToDo Candidates (MetWorks-WeatherStationMAUI)
+=====================================
+
+1) Make custom DI / initialization less synchronous
+- Goal: Let MAUI start without blocking on full DDI registry initialization.
+- Approach candidates:
+  - Two-phase startup: Create services synchronously; initialize asynchronously after UI is up.
+  - Per-service readiness gates (Task-based readiness) instead of global "all initialized" gate.
+  - AsyncLazy / single-flight initialization for named instances.
+  - Proxy/buffering components for optional dependencies (network/DB) to avoid startup failures.
+  - Defer expensive I/O (Postgres connect/schema init) or run in degraded mode until ready.
+
+2) Reduce sync-over-async in MAUI startup
+- Goal: Minimize or eliminate usages of .GetAwaiter().GetResult() in CreateMauiApp.
+- Approach candidates:
+  - Move initialization to App/AppShell startup path and present a loading UI.
+  - Ensure library/service initialization paths use ConfigureAwait(false) when sync blocking is unavoidable.
+
+3) Standardize async guidance across services
+- Goal: Avoid deadlocks and brittle startup by consistent patterns.
+- Candidates:
+  - Use ConfigureAwait(false) in non-UI / library code paths.
+  - Ensure every async I/O call has timeout + cancellation token passed through.
+  - Keep async init idempotent with Interlocked guards.
+
+4) MAUI constructor DI for Pages/ViewModels
+- Goal: Stop new'ing ViewModels directly; let MAUI DI create Pages and ViewModels.
+- Candidates:
+  - Register Page/ViewModel pairs with desired lifetimes.
+  - Adopt navigation/route strategy that resolves pages from IServiceProvider.
+
+5) Postgres init hardening
+- Goal: Postgres is optional at startup; app should run degraded and later recover.
+- Candidates:
+  - Keep connect/query timeouts explicit.
+  - Keep schema init tolerant.
+  - Improve observability (timing + where it blocks).
+
+6) DDI-generated code and tokens
+- Goal: Generated code should pass CancellationToken (not CTS) and support property definitions on class declarations.
+- Reference: MetWorks-DeclarativeDI repo modernization items.
+
+7) Automated testing
+- Goal: Add automated tests and CI to validate core behaviors across ViewModels, services, initializers, and persistence.
+- Approach candidates:
+  - Add unit and integration tests using the test framework already in the repo (prefer xUnit if present). Create a dedicated test project `WeatherStation.Tests` that mirrors critical surface area (ViewModels, Services, persistence adapters).
+  - Add CI pipeline that runs tests on push/PR and reports results; include a job for integration tests that can run in an emulated or in-memory mode.
+  - Prefer integration tests that exercise the real event-driven path (`IEventRelayBasic`) rather than adding test-only interfaces.
+
+8) Live settings publish/subscribe
+- Goal: Complete runtime support so setting changes are published to subscribers and applied live (example: Celsius/Fahrenheit toggle updates UI and conversions instantly).
+- Approach candidates:
+  - Use the existing `IEventRelayBasic` as the canonical messaging surface; ensure setting change messages carry typed payloads and a source/actor id.
+  - Ensure subscribers apply updates immediately, accept a `CancellationToken`, and are idempotent. Verify handlers use ConfigureAwait(false) where appropriate.
+  - Add unit/integration tests that assert subscribers receive and apply changes and that UI-bound ViewModels update correctly.
+
+9) Local SQLite caching and remote flush
+- Goal: Cache sensor readings to a local SQLite store and flush them to a remote DB (Postgres) when connectivity is available, without blocking the UI.
+- Approach candidates:
+  - Implement a local SQLite persistence adapter with durable writes and consumption semantics (FIFO or timestamp-ordered). Keep schema simple and versioned.
+  - Add a background flusher service (prefer `ServiceBase` patterns) that reads batches, writes to remote DB with timeouts and batching, and retries with exponential backoff on transient failures.
+  - Make remote writes resilient: non-blocking, bounded concurrency, and observability (metrics/logging). Add tests that simulate offline mode and verify no data-loss when flushing succeeds.
+
+10) Type-aware settings editor UI
+- Goal: Allow changing settings via UI using Setting metadata so editors validate and serialize values by type (numbers, enums, booleans, strings) and enforce ranges/choices.
+- Approach candidates:
+  - Expose a `SettingsManager` that stores setting metadata (type, range, enum values, display name, description) and emits typed change events via `IEventRelayBasic`.
+  - Build a small type-driven editor UI that renders the appropriate control for each setting and performs client-side validation before publishing changes.
+  - Add tests for the SettingsManager and ViewModels that validate metadata-driven editing, validation errors, and round-trip serialization of values.

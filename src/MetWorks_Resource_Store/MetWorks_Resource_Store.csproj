@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<LangVersion>preview</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net10.0</TargetFramework>
+		<RootNamespace>MetWorks.Resource.Store</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="ListenerSink\lightning.sql" />
+		<EmbeddedResource Include="ListenerSink\lightning.sql">
+			<LogicalName>ListenerSink.lightning.sql</LogicalName>
+		</EmbeddedResource>
+		<None Remove="ListenerSink\observation.sql" />
+		<EmbeddedResource Include="ListenerSink\observation.sql">
+			<LogicalName>ListenerSink.observation.sql</LogicalName>
+		</EmbeddedResource>
+		<None Remove="ListenerSink\precipitation.sql" />
+		<EmbeddedResource Include="ListenerSink\precipitation.sql">
+			<LogicalName>ListenerSink.precipitation.sql</LogicalName>
+		</EmbeddedResource>
+		<None Remove="ListenerSink\wind.sql" />
+		<EmbeddedResource Include="ListenerSink\wind.sql">
+			<LogicalName>ListenerSink.wind.sql</LogicalName>
+		</EmbeddedResource>
+		<None Remove="data\settings.yaml" />
+		<EmbeddedResource Include="data\settings.yaml">
+			<LogicalName>data.settings.yaml</LogicalName>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\MetWorks_Common\MetWorks_Common.csproj" />
+	</ItemGroup>
+</Project>

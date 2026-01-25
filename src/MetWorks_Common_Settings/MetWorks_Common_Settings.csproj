@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<LangVersion>preview</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net10.0</TargetFramework>
+		<RootNamespace>MetWorks.Common.Settings</RootNamespace>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<LangVersion>preview</LangVersion>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="YamlDotNet" />
+		<PackageReference Include="Microsoft.Maui.Controls" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\MetWorks_Common_Utility\MetWorks_Common_Utility.csproj" />
+	  <ProjectReference Include="..\MetWorks_Constants\MetWorks_Constants.csproj" />
+	  <ProjectReference Include="..\MetWorks_EventRelay\MetWorks_EventRelay.csproj" />
+	  <ProjectReference Include="..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
+	  <ProjectReference Include="..\MetWorks_Resource_Store\MetWorks_Resource_Store.csproj" />
+	</ItemGroup>
+</Project>

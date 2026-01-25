@@ -1,0 +1,50 @@
+﻿Review: MetWorks.Common.Logging (LoggerFile changes)
+===============================================
+
+Summary
+- Introducing `IPlatformPaths` and wiring `LoggerFile` to accept an optional override is a good move: removes MAUI coupling and improves testability. The added unit test demonstrating override is useful.
+
+High-priority change candidates
+1) Add CancellationToken to `InitializeAsync`
+   - Signature: `Task<bool> InitializeAsync(ILogger iLogger, ISettingRepository settings, IPlatformPaths? platformPaths = null, CancellationToken cancellationToken = default)`
+   - Pass token through and honor cancellation for long-running work. Update generated initializers if required.
+
+2) Ensure target directory exists and sanitize path
+   - Call `Directory.CreateDirectory(Path.GetDirectoryName(absoluteLogFilePath)!)` before configuring Serilog.
+   - Validate `relativeLogPath` to avoid path traversal escaping intended root.
+
+3) Defensive argument checking and clear exceptions
+   - `ArgumentNullException.ThrowIfNull(iLogger)` and `iSettingRepository` at method entry.
+   - Use precise exception types and keep original exception as InnerException when rethrowing.
+
+4) Remove pointless async/ConfigureAwait
+   - If `InitializeAsync` has no awaits, remove `async` and return `Task.FromResult(true)` (or make it synchronous).
+   - If awaits are added, use `ConfigureAwait(false)` in library code.
+
+Medium-priority candidates
+5) Provide MAUI-specific implementation in app project
+   - Add `MauiPlatformPaths` returning `FileSystem.AppDataDirectory` in the MAUI app and register in DI to preserve runtime parity.
+
+6) Serilog parsing and robustness
+   - Use `Enum.TryParse` for `RollingInterval` with fallback.
+   - Consider defensive logging when parsing fails; fail-safe defaults.
+
+7) Tests: scope and stability
+   - Keep tests isolated and avoid brittle disk I/O: generate unique temp paths, avoid deleting on failure, and add tests for missing/invalid settings and directory creation.
+
+8) Project packaging notes
+   - Centralized package versions are fine (Directory.Packages.props). Consider `PrivateAssets="all"` for sinks only meant for runtime if you want to avoid propagating them to consumers.
+
+Low-priority / style
+9) Add XML docs for public members in logging assembly.
+10) Consider `Deterministic`/CI flags if you want stricter builds (optional).
+
+Rationale
+- These changes improve testability, make initialization cancellable, harden I/O, and keep the logging library platform-agnostic while allowing MAUI to opt into exact semantics.
+
+Next steps I can implement
+- Add `CancellationToken` to `LoggerFile.InitializeAsync` and update generated initializer.
+- Add directory creation and path sanitization.
+- Add `MauiPlatformPaths` example and DI registration in `MauiProgram`.
+
+

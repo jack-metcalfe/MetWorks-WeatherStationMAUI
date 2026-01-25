@@ -11,10 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\basic_event_relay\MetWorks.EventRelay.csproj" />
     <ProjectReference Include="..\..\interfaces\MetWorks.Interfaces.csproj" />
     <ProjectReference Include="..\..\logging\MetWorks.Common.Logging.csproj" />
-    <ProjectReference Include="..\..\MetWorks.Common\MetWorks.Common.csproj" />
   </ItemGroup>
 
 </Project>

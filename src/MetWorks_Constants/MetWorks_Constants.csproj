@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<LangVersion>preview</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net10.0</TargetFramework>
+		<RootNamespace>MetWorks.Constants</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\MetWorks_EnumDefinitions\MetWorks_EnumDefinitions.csproj" />
+	  <ProjectReference Include="..\RedStar_Amounts\RedStar_Amounts.csproj" />
+	  <ProjectReference Include="..\RedStar_Amounts_StandardUnits\RedStar_Amounts_StandardUnits.csproj" />
+	</ItemGroup>
+</Project>

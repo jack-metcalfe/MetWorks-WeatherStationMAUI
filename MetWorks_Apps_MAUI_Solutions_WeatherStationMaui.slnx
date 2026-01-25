@@ -1,0 +1,24 @@
+<Solution>
+  <Project Path="src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs.csproj" />
+  <Project Path="src/MetWorks_Apps_MAUI_WeatherStationMaui/MetWorks_Apps_MAUI_WeatherStationMaui.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="src/MetWorks_Common/MetWorks_Common.csproj" />
+  <Project Path="src/MetWorks_Common_Logging/MetWorks_Common_Logging.csproj" />
+  <Project Path="src/MetWorks_Common_Settings/MetWorks_Common_Settings.csproj" />
+  <Project Path="src/MetWorks_Common_Utility/MetWorks_Common_Utility.csproj" />
+  <Project Path="src/MetWorks_Constants/MetWorks_Constants.csproj" />
+  <Project Path="src/MetWorks_DdiRegistry/MetWorks_DdiRegistry.csproj" />
+  <Project Path="src/MetWorks_EnumDefinitions/MetWorks_EnumDefinitions.csproj" />
+  <Project Path="src/MetWorks_EventRelay/MetWorks_EventRelay.csproj" />
+  <Project Path="src/MetWorks_Ingest_Postgres/MetWorks_Ingest_Postgres.csproj" />
+  <Project Path="src/MetWorks_Ingest_Transformer/MetWorks_Ingest_Transformer.csproj" />
+  <Project Path="src/MetWorks_Interfaces/MetWorks_Interfaces.csproj" />
+  <Project Path="src/MetWorks_IoT_UDP_Tempest/MetWorks_IoT_UDP_Tempest.csproj" />
+  <Project Path="src/MetWorks_Models_Observables/MetWorks_Models_Observables.csproj" />
+  <Project Path="src/MetWorks_Networking_Udp_Transformer/MetWorks_Networking_Udp_Transformer.csproj" />
+  <Project Path="src/MetWorks_Resource_Store/MetWorks_Resource_Store.csproj" />
+  <Project Path="src/RedStar_Amounts/RedStar_Amounts.csproj" />
+  <Project Path="src/RedStar_Amounts_StandardUnits/RedStar_Amounts_StandardUnits.csproj" />
+  <Project Path="src/RedStar_Amounts_WeatherExtensions/RedStar_Amounts_WeatherExtensions.csproj" />
+</Solution>

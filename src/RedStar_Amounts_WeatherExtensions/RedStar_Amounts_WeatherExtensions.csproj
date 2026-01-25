@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<LangVersion>preview</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net10.0</TargetFramework>
+		<RootNamespace>RedStar.Amounts.WeatherExtensions</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\MetWorks_Common_Utility\MetWorks_Common_Utility.csproj" />
+	  <ProjectReference Include="..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
+	  <ProjectReference Include="..\RedStar_Amounts\RedStar_Amounts.csproj" />
+	  <ProjectReference Include="..\RedStar_Amounts_StandardUnits\RedStar_Amounts_StandardUnits.csproj" />
+	</ItemGroup>
+</Project>

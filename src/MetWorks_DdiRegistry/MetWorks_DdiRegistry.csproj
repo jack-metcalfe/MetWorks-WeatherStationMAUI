@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<LangVersion>preview</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net10.0</TargetFramework>
+		<RootNamespace>MetWorks.DdiRegistry</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\MetWorks_Common\MetWorks_Common.csproj" />
+	  <ProjectReference Include="..\MetWorks_Common_Logging\MetWorks_Common_Logging.csproj" />
+	  <ProjectReference Include="..\MetWorks_Common_Settings\MetWorks_Common_Settings.csproj" />
+	  <ProjectReference Include="..\MetWorks_Ingest_Postgres\MetWorks_Ingest_Postgres.csproj" />
+	  <ProjectReference Include="..\MetWorks_Ingest_Transformer\MetWorks_Ingest_Transformer.csproj" />
+	  <ProjectReference Include="..\MetWorks_Networking_Udp_Transformer\MetWorks_Networking_Udp_Transformer.csproj" />
+	  <ProjectReference Include="..\RedStar_Amounts_WeatherExtensions\RedStar_Amounts_WeatherExtensions.csproj" />
+	</ItemGroup>
+</Project>
