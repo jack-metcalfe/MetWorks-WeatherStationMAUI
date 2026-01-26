@@ -1,8 +1,6 @@
 ﻿namespace MetWorks.Common.Logging;
-
 using Logger = Serilog.Core.Logger;
 using ILogEventSink = Serilog.Core.ILogEventSink;
-
 /// <summary>
 /// Logger that writes to PostgreSQL using a lightweight custom Serilog sink (no third-party Serilog sink).
 /// - Initialization succeeds even if DB/network is unavailable.
@@ -12,45 +10,76 @@ using ILogEventSink = Serilog.Core.ILogEventSink;
 /// </summary>
 public class LoggerPostgreSQL : ILogger
 {
-    public async Task<bool> InitializeAsync(
+    public Task<bool> InitializeAsync(
         ILogger iLogger,
-        ISettingRepository iSettingRepository
+        ISettingRepository iSettingRepository,
+        IInstanceIdentifier iInstanceIdentifier,
+        CancellationToken cancellationToken = default
     )
     {
+        ArgumentNullException.ThrowIfNull(iLogger);
+        ArgumentNullException.ThrowIfNull(iSettingRepository);
+
         if (_isInitialized)
-            throw new InvalidOperationException("Logger is already initialized.");
+            throw new InvalidOperationException($"{nameof(LoggerPostgreSQL)} is already initialized.");
+
+        if (cancellationToken.IsCancellationRequested) return Task.FromResult(false);
 
         try
         {
             var connectionString = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerPostgreSQL_connectionString)
+                LookupDictionaries.LoggerPostgreSQLGroupSettingsDefinition.BuildSettingPath(
+                    SettingConstants.LoggerPostgreSQL_connectionString
+                )
             );
 
             var tableName = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerPostgreSQL_tableName)
+                LookupDictionaries.LoggerPostgreSQLGroupSettingsDefinition.BuildSettingPath(
+                    SettingConstants.LoggerPostgreSQL_tableName
+                )
             );
 
             var minimumLevel = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerPostgreSQL_minimumLevel)
+                LookupDictionaries.LoggerPostgreSQLGroupSettingsDefinition.BuildSettingPath(
+                    SettingConstants.LoggerPostgreSQL_minimumLevel
+                )
             );
 
             var autoCreateTable = iSettingRepository.GetValueOrDefault<bool>(
-                LookupDictionaries.LoggerPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerPostgreSQL_autoCreateTable)
+                LookupDictionaries.LoggerPostgreSQLGroupSettingsDefinition.BuildSettingPath(
+                    SettingConstants.LoggerPostgreSQL_autoCreateTable
+                )
             );
 
             // Keep settings visible on the instance
-            ConnectionString = connectionString;
-            TableName = tableName;
+            _connectionString = connectionString;
+            _tableName = tableName;
 
             // Build Serilog logger with our custom sink.
+            // Enrich with installation id when available to match LoggerFile behavior.
+            var loggerCfg = new LoggerConfiguration()
+                .MinimumLevel.Is(ParseLevel(minimumLevel));
+
+            try
+            {
+                var installationId = iInstanceIdentifier?.GetOrCreateInstallationId();
+                if (!string.IsNullOrWhiteSpace(installationId))
+                {
+                    loggerCfg = loggerCfg.Enrich.WithProperty("InstallationId", installationId);
+                }
+            }
+            catch
+            {
+                // Ignore enrichment failures - logging should not block initialization
+            }
+
             // Pass a health callback so the outer class can expose a health flag.
-            ILogger = new LoggerConfiguration()
-                .MinimumLevel.Is(ParseLevel(minimumLevel))
+            _iLogger = loggerCfg
                 .WriteTo.Sink(new PostgresSink(connectionString, tableName, autoCreateTable, SetHealth))
                 .CreateLogger();
 
             _isInitialized = true;
-            ILogger.Information("PostgreSQL logger initialized for table {TableName}", tableName);
+            _iLogger.Information("PostgreSQL logger initialized for table {TableName}", tableName);
         }
         catch (Exception exception)
         {
@@ -58,32 +87,15 @@ public class LoggerPostgreSQL : ILogger
             throw new InvalidOperationException("Failed to read settings configuration for PostgreSQL logger.", exception);
         }
 
-        return await Task.FromResult(true);
+        return Task.FromResult(true);
     }
-
     bool _isInitialized = false;
-
     Logger? _iLogger = null;
-    Logger ILogger
-    {
-        get => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
-        set => _iLogger = value;
-    }
-
+    Logger ILogger => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
     string? _connectionString = null;
-    public string ConnectionString
-    {
-        get => NullPropertyGuard.Get(_isInitialized, _connectionString, nameof(ConnectionString));
-        private set => _connectionString = value;
-    }
-
+    public string ConnectionString => NullPropertyGuard.Get(_isInitialized, _connectionString, nameof(ConnectionString));
     string? _tableName = null;
-    public string TableName
-    {
-        get => NullPropertyGuard.Get(_isInitialized, _tableName, nameof(TableName));
-        private set => _tableName = value;
-    }
-
+    public string TableName => NullPropertyGuard.Get(_isInitialized, _tableName, nameof(TableName));
     // Health flag backing store (0 = false, 1 = true) to make updates atomic.
     int _isHealthy = 1;
     /// <summary>
@@ -92,13 +104,10 @@ public class LoggerPostgreSQL : ILogger
     /// Consumers may observe IsHealthy and optionally route logs to a local store (SQLite) when false.
     /// </summary>
     public bool IsHealthy => Interlocked.CompareExchange(ref _isHealthy, 1, 1) == 1;
-
     void SetHealth(bool healthy) => Interlocked.Exchange(ref _isHealthy, healthy ? 1 : 0);
-
     public LoggerPostgreSQL()
     {
     }
-
     public void Information(string message)
     {
         SysDiagDebug.WriteLine(message);
@@ -129,12 +138,10 @@ public class LoggerPostgreSQL : ILogger
         SysDiagDebug.WriteLine(message);
         ILogger.Verbose(message);
     }
-
     private static LogEventLevel ParseLevel(string level) =>
         Enum.TryParse<LogEventLevel>(level, true, out var parsed)
             ? parsed
             : LogEventLevel.Information;
-
     public Exception LogExceptionAndReturn(Exception exception)
     {
         ILogger.Error("An error occurred", exception);
@@ -145,7 +152,6 @@ public class LoggerPostgreSQL : ILogger
         ILogger.Error(message, exception);
         return exception;
     }
-
     #region Lightweight Postgres sink
 
     class PostgresSink : ILogEventSink, IDisposable
@@ -196,8 +202,8 @@ public class LoggerPostgreSQL : ILogger
 
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = $@"
-                    INSERT INTO ""{_tableName}"" (timestamp, level, message, exception, properties)
-                    VALUES (@ts, @level, @message, @exception, @properties::jsonb)";
+                    INSERT INTO ""{_tableName}"" (timestamp, level, message, exception, properties, installation_id)
+                    VALUES (@ts, @level, @message, @exception, @properties::jsonb, @installation_id)";
 
                 cmd.Parameters.AddWithValue("ts", logEvent.Timestamp.UtcDateTime);
                 cmd.Parameters.AddWithValue("level", logEvent.Level.ToString());
@@ -205,10 +211,39 @@ public class LoggerPostgreSQL : ILogger
                 cmd.Parameters.AddWithValue("message", rendered ?? string.Empty);
                 cmd.Parameters.AddWithValue("exception", logEvent.Exception?.ToString() ?? (object)DBNull.Value);
 
-                // Serialize properties to JSON (simple form)
+                // Extract installation id from properties if present, then serialize remaining properties to JSON.
+                string? installationIdStr = null;
+                if (logEvent.Properties.TryGetValue("InstallationId", out var installProp))
+                {
+                    try
+                    {
+                        if (installProp is Serilog.Events.ScalarValue sv)
+                        {
+                            if (sv.Value is Guid g) installationIdStr = g.ToString();
+                            else if (sv.Value is string s) installationIdStr = s;
+                            else installationIdStr = sv.ToString()?.Trim('"');
+                        }
+                        else
+                        {
+                            installationIdStr = installProp.ToString()?.Trim('"');
+                        }
+                    }
+                    catch { installationIdStr = installProp.ToString()?.Trim('"'); }
+                }
+
                 var props = PropertiesToDictionary(logEvent);
+                if (props.ContainsKey("InstallationId")) props.Remove("InstallationId");
                 var propsJson = JsonSerializer.Serialize(props, _jsonOptions);
                 cmd.Parameters.AddWithValue("properties", propsJson);
+
+                if (!string.IsNullOrWhiteSpace(installationIdStr) && Guid.TryParse(installationIdStr, out var instGuid))
+                {
+                    cmd.Parameters.AddWithValue("installation_id", NpgsqlTypes.NpgsqlDbType.Uuid, instGuid);
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("installation_id", DBNull.Value);
+                }
 
                 cmd.ExecuteNonQuery();
 
@@ -265,7 +300,8 @@ public class LoggerPostgreSQL : ILogger
                     level text NOT NULL,
                     message text,
                     exception text,
-                    properties jsonb
+                    properties jsonb,
+                    installation_id uuid NULL
                 );";
             cmd.ExecuteNonQuery();
         }

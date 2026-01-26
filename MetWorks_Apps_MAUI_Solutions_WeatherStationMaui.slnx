@@ -13,6 +13,7 @@
   <Project Path="src/MetWorks_EventRelay/MetWorks_EventRelay.csproj" />
   <Project Path="src/MetWorks_Ingest_Postgres/MetWorks_Ingest_Postgres.csproj" />
   <Project Path="src/MetWorks_Ingest_Transformer/MetWorks_Ingest_Transformer.csproj" />
+  <Project Path="src/MetWorks_InstanceIdentifier/MetWorks_InstanceIdentifier.csproj" />
   <Project Path="src/MetWorks_Interfaces/MetWorks_Interfaces.csproj" />
   <Project Path="src/MetWorks_IoT_UDP_Tempest/MetWorks_IoT_UDP_Tempest.csproj" />
   <Project Path="src/MetWorks_Models_Observables/MetWorks_Models_Observables.csproj" />

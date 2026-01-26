@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS public.precipitation
+﻿CREATE TABLE IF NOT EXISTS public.precipitation
     (
         id TEXT PRIMARY KEY -- COMB-style GUID from C# supplied by SQLite sync or C# writer
         -- Timestamps (all UTC)
@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS public.precipitation
         -- JSON derived fields
         , device_received_utc_timestamp_epoch BIGINT GENERATED ALWAYS AS ( (json_document_original -> 'evt' ->> 0)::BIGINT ) STORED
         , device_received_utc_timestampz TIMESTAMPTZ GENERATED ALWAYS AS ( to_timestamp((json_document_original -> 'evt' ->> 0)::DOUBLE PRECISION) ) STORED
+        -- Per-installation identifier to distinguish records from different app installs
+        , installation_id UUID NULL
     )
 ;
 ALTER TABLE public.precipitation OWNER TO weather;
@@ -18,4 +20,11 @@ NOT EXISTS idx_precipitation_device_received_utc_timestampz ON public.precipitat
     (
         device_received_utc_timestampz
     )
+;
+CREATE INDEX IF
+NOT EXISTS idx_precipitation_installation_id ON public.precipitation
+    (
+        installation_id
+    )
+;
 ;

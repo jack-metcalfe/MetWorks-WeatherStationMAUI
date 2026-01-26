@@ -1,14 +1,11 @@
-﻿namespace MetWorks.RedStar.Amounts.WeatherExtensions;
+﻿using System.Reflection;
+namespace MetWorks.RedStar.Amounts.WeatherExtensions;
 public class UnitsOfMeasureInitializer
 {
     bool isInitialized = false;
 
     ILogger? _iLogger = null;
-    ILogger ILogger
-    {
-        get => NullPropertyGuard.Get(isInitialized, _iLogger, nameof(ILogger));
-        set => _iLogger = value;
-    }
+    ILogger ILogger => NullPropertyGuard.Get(isInitialized, _iLogger, nameof(ILogger));
     public UnitsOfMeasureInitializer()
     {
     }
@@ -16,27 +13,51 @@ public class UnitsOfMeasureInitializer
         ILogger iLogger
     )
     {
-        bool result;
+        _iLogger = iLogger ?? throw new ArgumentNullException(nameof(iLogger));
         try
         {
-            ILogger = iLogger;
-            Debug.WriteLine("📐 Registering RedStar.Amounts units...");
-            UnitManager.RegisterByAssembly(typeof(TemperatureUnits).Assembly);
-            Debug.WriteLine("✅ RedStar.Amounts units registered");
+            _iLogger.Information("📐 Registering RedStar.Amounts units...");
+            var asm = typeof(TemperatureUnits).Assembly;
+            try
+            {
+                var exported = asm.GetExportedTypes();
+                _iLogger.Debug($"Unit assembly: {asm.FullName}, exported types: {exported.Length}");
+            }
+            catch (ReflectionTypeLoadException rtle)
+            {
+                _iLogger.Error("Failed to enumerate exported types for unit assembly.", rtle);
+                foreach (var le in rtle.LoaderExceptions ?? Array.Empty<Exception>())
+                {
+                    _iLogger.Error("Loader exception enumerating unit assembly types.", le);
+                }
+                // Rethrow to be handled by outer handler
+                throw;
+            }
 
-            Debug.WriteLine("🌤️ Registering weather unit aliases...");
+            UnitManager.RegisterByAssembly(asm);
+            _iLogger.Information("✅ RedStar.Amounts units registered");
+
+            _iLogger.Information("🌤️ Registering weather unit aliases...");
             WeatherUnitAliases.Register();
-            Debug.WriteLine("✅ Weather unit aliases registered");
+            _iLogger.Information("✅ Weather unit aliases registered");
 
-            result = true;
+            isInitialized = true;
+            return await Task.FromResult(true).ConfigureAwait(false);
         }
-
-        catch (Exception exception)
+        catch (ReflectionTypeLoadException rtle)
         {
-            Debug.WriteLine($"❌ Error during units of measure initialization: {exception}");
-            result = false;
+            // ReflectionTypeLoadException contains loader exceptions with useful details
+            try { _iLogger.Error("Failed to register unit types - reflection load error.", rtle); } catch { }
+            foreach (var le in rtle.LoaderExceptions ?? Array.Empty<Exception>())
+            {
+                try { _iLogger.Error("LoaderException during unit registration.", le); } catch { }
+            }
+            return await Task.FromResult(false).ConfigureAwait(false);
         }
-
-        return await Task.FromResult(result);
+        catch (Exception ex)
+        {
+            try { _iLogger.Error("Error during units of measure initialization.", ex); } catch { }
+            return await Task.FromResult(false).ConfigureAwait(false);
+        }
     }
 }

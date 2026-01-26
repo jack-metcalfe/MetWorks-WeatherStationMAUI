@@ -9,17 +9,11 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
 {
     bool _isInitialized = false;
     ILogger? _iLogger = null;
-    ILogger ILogger
-    {
-        get => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
-        set => _iLogger = value;
-    }
+    ILogger ILogger => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
+    ISettingRepository? _iSettingRepository = null;
+    ISettingRepository ISettingRepository => NullPropertyGuard.Get(_isInitialized, _iSettingRepository, nameof(ISettingRepository));
     IEventRelayBasic? _iEventRelayBasic = null;
-    IEventRelayBasic IEventRelayBasic
-    {
-        get => NullPropertyGuard.Get(_isInitialized, _iEventRelayBasic, nameof(IEventRelayBasic));
-        set => _iEventRelayBasic = value;
-    }
+    IEventRelayBasic IEventRelayBasic => NullPropertyGuard.Get(_isInitialized, _iEventRelayBasic, nameof(IEventRelayBasic));
     IWindReading? _currentWind;
     IObservationReading? _currentObservation;
     SystemTimer? _clockTimer;
@@ -86,8 +80,15 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     public string TimeDayOfWeek => _currentTime.ToString("ddd");
     public string TimeDateDisplay => _currentTime.ToString("MMM dd");
     public string TimeDisplay => _currentTime.ToString("HH:mm");
-    public WeatherViewModel()
+    public WeatherViewModel(
+        ILogger iLogger,
+        ISettingRepository iSettingRepository,
+        IEventRelayBasic iEventRelayBasic
+    )
     {
+        _iLogger = iLogger;
+        _iSettingRepository = iSettingRepository;
+        _iEventRelayBasic = iEventRelayBasic;
         StartServiceStatusMonitoring();
     }
     private void StartServiceStatusMonitoring()
@@ -130,11 +131,11 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     public async Task<bool> InitializeAsync()
     {
         // Quick check: if already marked initialized return true
-        if (System.Threading.Interlocked.CompareExchange(ref _initializeState, 2, 2) == 2)
+        if (Interlocked.CompareExchange(ref _initializeState, 2, 2) == 2)
             return await Task.FromResult(true);
 
         // Try to transition from 0 -> 1 (not started -> initializing)
-        var prior = System.Threading.Interlocked.CompareExchange(ref _initializeState, 1, 0);
+        var prior = Interlocked.CompareExchange(ref _initializeState, 1, 0);
         if (prior == 1)
         {
             // someone else is initializing
@@ -149,8 +150,6 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         try
         {
             // Acquire dependencies using registry (existing pattern)
-            _iLogger = StartupInitializer.Registry.GetTheLoggerFile();
-            _iEventRelayBasic = StartupInitializer.Registry.GetTheEventRelayBasic();
             var iExternalCancellationToken = StartupInitializer.Registry.GetRootCancellationTokenSource().Token;
 
             // Create local and linked cancellation sources so we can honor external cancellation if provided.
@@ -159,7 +158,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
 
             // Mark initialized so NullPropertyGuard does not throw when used by callbacks.
             _isInitialized = true;
-            System.Threading.Interlocked.Exchange(ref _initializeState, 2);
+            Interlocked.Exchange(ref _initializeState, 2);
 
             // Stop status checks once we begin real initialization
             if (_statusCheckTimer is not null)
@@ -179,7 +178,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         catch (Exception exception)
         {
             // Reset init state so caller can retry later
-            System.Threading.Interlocked.Exchange(ref _initializeState, 0);
+            Interlocked.Exchange(ref _initializeState, 0);
             _isInitialized = false;
 
             // Use backing logger field — property might throw if initialization failed earlier

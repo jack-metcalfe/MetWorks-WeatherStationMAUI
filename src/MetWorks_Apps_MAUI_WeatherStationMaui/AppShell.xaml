@@ -7,7 +7,7 @@
 
     <ShellContent
         Title="Weather"
-        ContentTemplate="{DataTemplate pages:WeatherPage}"
+        ContentTemplate="{DataTemplate pages:MainDeviceViews.MainView1920x1200}"
         Route="WeatherPage" />
 
 </Shell>

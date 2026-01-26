@@ -1,10 +1,10 @@
-﻿// Template:            Registry
+// Template:            Registry
 // Version:             1.1
 // Template Requested:  Registry
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Registry
-// Generated On:        2026-01-22T04:50:43.7490342Z
+// Generated On:        2026-01-26T05:32:30.5671217Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -26,7 +26,9 @@ namespace MetWorks.ServiceRegistry
             TheLoggerStub_InstanceFactory.Create(this);
             TheSettingProvider_InstanceFactory.Create(this);
             TheSettingRepository_InstanceFactory.Create(this);
+            TheInstanceIdentifier_InstanceFactory.Create(this);
             TheLoggerFile_InstanceFactory.Create(this);
+            TheLoggerPostgreSQL_InstanceFactory.Create(this);
             TheProvenanceTracker_InstanceFactory.Create(this);
             TheUnitsOfMeasureInitializer_InstanceFactory.Create(this);
             TheSensorReadingTransformer_InstanceFactory.Create(this);
@@ -41,7 +43,9 @@ namespace MetWorks.ServiceRegistry
         {
             await TheSettingProvider_Initializer.Initialize_TheSettingProviderAsync(this).ConfigureAwait(false);
             await TheSettingRepository_Initializer.Initialize_TheSettingRepositoryAsync(this).ConfigureAwait(false);
+            await TheInstanceIdentifier_Initializer.Initialize_TheInstanceIdentifierAsync(this).ConfigureAwait(false);
             await TheLoggerFile_Initializer.Initialize_TheLoggerFileAsync(this).ConfigureAwait(false);
+            await TheLoggerPostgreSQL_Initializer.Initialize_TheLoggerPostgreSQLAsync(this).ConfigureAwait(false);
             await TheProvenanceTracker_Initializer.Initialize_TheProvenanceTrackerAsync(this).ConfigureAwait(false);
             await TheUnitsOfMeasureInitializer_Initializer.Initialize_TheUnitsOfMeasureInitializerAsync(this).ConfigureAwait(false);
             await TheSensorReadingTransformer_Initializer.Initialize_TheSensorReadingTransformerAsync(this).ConfigureAwait(false);

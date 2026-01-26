@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Assignments.Initializer
-// Generated On:        2026-01-22T04:50:43.7490342Z
+// Generated On:        2026-01-26T05:32:30.5671217Z
 #nullable enable
 using System.Threading.Tasks;
 
@@ -24,9 +24,8 @@ namespace MetWorks.ServiceRegistry
             // Step 2: call its async initializer with assignment values.
             // All argument expressions are fully computed by the pipeline.
             await instance.InitializeAsync(
-                // Parameter: iLogger: registry.GetTheLoggerFile()
-                iLogger: registry.GetTheLoggerFile()
-            );
+                iLogger: registry.GetTheLoggerPostgreSQL()
+            ).ConfigureAwait(false);
         }
     }
 }

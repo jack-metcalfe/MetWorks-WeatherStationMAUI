@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-01-22T04:50:43.7490342Z
+// Generated On:        2026-01-26T05:32:30.5671217Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -110,6 +110,21 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheInstanceIdentifier(MetWorks.InstanceIdentifier.InstanceIdentifier instance) =>
+            _TheInstanceIdentifierInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.InstanceIdentifier.InstanceIdentifier GetTheInstanceIdentifier() =>
+            _TheInstanceIdentifierInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.InstanceIdentifier.InstanceIdentifier GetTheInstanceIdentifier_Internal() =>
+            _TheInstanceIdentifierInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
         public void RegisterTheLoggerFile(MetWorks.Common.Logging.LoggerFile instance) =>
             _TheLoggerFileInstance = instance;
 
@@ -120,6 +135,21 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Logging.LoggerFile GetTheLoggerFile_Internal() =>
             _TheLoggerFileInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheLoggerPostgreSQL(MetWorks.Common.Logging.LoggerPostgreSQL instance) =>
+            _TheLoggerPostgreSQLInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Interfaces.ILogger GetTheLoggerPostgreSQL() =>
+            _TheLoggerPostgreSQLInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.Logging.LoggerPostgreSQL GetTheLoggerPostgreSQL_Internal() =>
+            _TheLoggerPostgreSQLInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors

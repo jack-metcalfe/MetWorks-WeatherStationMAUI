@@ -40,7 +40,7 @@ public class SensorReadingTransformer : ServiceBase
             );
             iLogger.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")} enabled for sensor readings");
             // Load current unit preferences from settings
-            if (!LoadUnitPreference(iSettingRepository, iLogger))
+            if (!LoadUnitPreference(iLogger, iSettingRepository))
             {
                 iLogger.Error("Failed to load unit preferences during initialization");
                 return false;
@@ -48,8 +48,11 @@ public class SensorReadingTransformer : ServiceBase
             iLogger.Information("🌡️ WeatherDataTransformer initialized successfully");
             foreach(var unitKVP in _preferredUnits)
                 iLogger.Information($"   {unitKVP.Key}: {unitKVP.Value.Name}");
-            // Subscribe to unit setting changes (wildcard pattern)
-            IEventRelayPath.Register(LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.GroupBasePath, OnUnitSettingChanged);
+            // Subscribe to unit setting changes for the whole group (prefix match).
+            // Use the GroupSettingDefinition to build the canonical settings path prefix
+            // so the value is not hard-coded (DRY).
+            var unitGroupPrefix = LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildGroupPath();
+            IEventRelayPath.Register(unitGroupPrefix, OnUnitSettingChanged);
             // Subscribe to raw packet events
             IEventRelayBasic.Register<IRawPacketRecordTyped>(this, OnRawPacketReceived);
             return await Task.FromResult(true);
@@ -67,31 +70,34 @@ public class SensorReadingTransformer : ServiceBase
     // Unit Preference Management
     // ========================================
     Dictionary<MeasurementTypeEnum, Unit> _preferredUnits = new();
-    bool LoadUnitPreference(ISettingRepository iSettingsRepository, ILogger iLogger)
+    bool LoadUnitPreference(
+        ILogger iLogger,
+        ISettingRepository iSettingRepository
+    )
     {
         try
         {
-            var unitOfMeasure_airPressure = iSettingsRepository.GetValueOrDefault<string>(
+            var unitOfMeasure_airPressure = iSettingRepository.GetValueOrDefault<string>(
                     LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_airPressure)
                 );
             _preferredUnits[MeasurementTypeEnum.AirPressure] = Unit.Parse(unitOfMeasure_airPressure);
 
-            var unitOfMeasure_airTemperature = iSettingsRepository.GetValueOrDefault<string>(
+            var unitOfMeasure_airTemperature = iSettingRepository.GetValueOrDefault<string>(
                     LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_airTemperature)
                 );
             _preferredUnits[MeasurementTypeEnum.AirTemperature] = Unit.Parse(unitOfMeasure_airTemperature);
 
-            var unitOfMeasure_lightningDistance = iSettingsRepository.GetValueOrDefault<string>(
+            var unitOfMeasure_lightningDistance = iSettingRepository.GetValueOrDefault<string>(
                     LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_lightningDistance)
                 );
             _preferredUnits[MeasurementTypeEnum.LightningDistance] = Unit.Parse(unitOfMeasure_lightningDistance);
 
-            var unitOfMeasure_precipitationAmount = iSettingsRepository.GetValueOrDefault<string>(
+            var unitOfMeasure_precipitationAmount = iSettingRepository.GetValueOrDefault<string>(
                     LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_precipitationAmount)
                 );
             _preferredUnits[MeasurementTypeEnum.PrecipitationAmount] = Unit.Parse(unitOfMeasure_precipitationAmount);
 
-            var unitOfMeasure_windSpeed = iSettingsRepository.GetValueOrDefault<string>(
+            var unitOfMeasure_windSpeed = iSettingRepository.GetValueOrDefault<string>(
                     LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_windSpeed)
                 );
             _preferredUnits[MeasurementTypeEnum.WindSpeed] = Unit.Parse(unitOfMeasure_windSpeed);
@@ -120,7 +126,7 @@ public class SensorReadingTransformer : ServiceBase
             try
             {
                 ILogger.Information($"🔄 Unit setting changed");
-                LoadUnitPreference(ISettingRepository, ILogger);
+                LoadUnitPreference(ILogger, ISettingRepository);
 
                 // Schedule retransformation in background (tracked by ServiceBase)
                 StartBackground(innerToken =>
@@ -366,7 +372,10 @@ public class SensorReadingTransformer : ServiceBase
             return null;
         }
     }
-    private IPrecipitationReading? ParsePrecipitation(IRawPacketRecordTyped rawPacket, bool isRetransformation)
+    private IPrecipitationReading? ParsePrecipitation(
+        IRawPacketRecordTyped rawPacket, 
+        bool isRetransformation
+    )
     {
         try
         {
@@ -492,7 +501,7 @@ public class SensorReadingTransformer : ServiceBase
         {
             // Unregister event handlers (use backing fields to avoid NullPropertyGuard issues if Dispose called early)
             try { IEventRelayBasic?.Unregister<IRawPacketRecordTyped>(this); } catch { /* swallow */ }
-            try { IEventRelayPath?.Unregister(LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.GroupBasePath, OnUnitSettingChanged); } catch { /* swallow */ }
+            try { IEventRelayPath?.Unregister(LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildGroupPath(), OnUnitSettingChanged); } catch { /* swallow */ }
 
             ILogger.Information("🛑 WeatherDataTransformer disposing");
         }

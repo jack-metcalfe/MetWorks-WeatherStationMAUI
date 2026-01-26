@@ -11,9 +11,10 @@
 		<PackageReference Include="Npgsql" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\MetWorks_Common\MetWorks_Common.csproj" />
-	  <ProjectReference Include="..\MetWorks_Constants\MetWorks_Constants.csproj" />
-	  <ProjectReference Include="..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
-	  <ProjectReference Include="..\MetWorks_Resource_Store\MetWorks_Resource_Store.csproj" />
+		<ProjectReference Include="..\MetWorks_Common\MetWorks_Common.csproj" />
+		<ProjectReference Include="..\MetWorks_Constants\MetWorks_Constants.csproj" />
+		<ProjectReference Include="..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
+		<ProjectReference Include="..\MetWorks_Resource_Store\MetWorks_Resource_Store.csproj" />
+		<ProjectReference Include="..\MetWorks_InstanceIdentifier\MetWorks_InstanceIdentifier.csproj" />
 	</ItemGroup>
 </Project>

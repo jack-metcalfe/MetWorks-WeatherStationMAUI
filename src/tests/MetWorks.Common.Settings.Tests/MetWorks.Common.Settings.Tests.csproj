@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.collector" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MetWorks_Common_Settings\MetWorks_Common_Settings.csproj" />
+    <ProjectReference Include="..\..\src\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
+    <ProjectReference Include="..\..\src\MetWorks_Constants\MetWorks_Constants.csproj" />
+    <ProjectReference Include="..\..\src\MetWorks_InstanceIdentifier\MetWorks_InstanceIdentifier.csproj" />
+  </ItemGroup>
+</Project>

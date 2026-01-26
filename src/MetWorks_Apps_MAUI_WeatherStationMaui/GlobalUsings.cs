@@ -11,6 +11,7 @@ global using System.Timers;
 global using MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;
 global using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
 global using MetWorks.Common;
+global using MetWorks.Common.Utility;
 global using MetWorks.Interfaces;
 global using MetWorks.Models.Observables.Weather;
 global using MetWorks.ServiceRegistry;
@@ -25,8 +26,6 @@ global using Microsoft.Maui.Hosting;
 
 global using RedStar.Amounts;
 global using RedStar.Amounts.StandardUnits;
-
-global using MetWorks.Common.Utility;
 
 global using ILogger = MetWorks.Interfaces.ILogger;
 global using SystemTimer = System.Timers.Timer;

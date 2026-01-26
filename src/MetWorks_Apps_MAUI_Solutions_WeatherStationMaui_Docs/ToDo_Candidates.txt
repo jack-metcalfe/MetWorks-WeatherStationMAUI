@@ -67,3 +67,25 @@
   - Expose a `SettingsManager` that stores setting metadata (type, range, enum values, display name, description) and emits typed change events via `IEventRelayBasic`.
   - Build a small type-driven editor UI that renders the appropriate control for each setting and performs client-side validation before publishing changes.
   - Add tests for the SettingsManager and ViewModels that validate metadata-driven editing, validation errors, and round-trip serialization of values.
+
+11) Per-installation instance identifier (GUID)
+- Goal: Create and persist a stable GUID the first time the app runs to uniquely identify this installation when writing shared persistence (Postgres, remote telemetry) so entries from different installations can be differentiated.
+- Approach candidates:
+  - On first run generate a `Guid` and persist it in a platform-appropriate local store (Preferences, secure storage, or a local file in app data). Expose via a `IInstanceIdentifier` or `InstanceIdentifier` singleton.
+  - Ensure reads are synchronous-safe during startup (provide a lightweight cached accessor) and generation is idempotent (use file/atomic write or Preferences.TryGet/Set semantics).
+  - Surface the instance id through telemetry/logging and include when writing DB entries. Allow migration/rotation via a dev-only command or settings UI.
+  - Add unit/integration tests that verify generation-on-first-run, persistence across restarts, and inclusion in outgoing persistence operations.
+
+  Implementation notes (current):
+  - Reuse the existing settings mechanism. Added a non-editable definition at `/services/instance/installationId` in the resource `data.settings.yaml`.
+  - Extend `ISettingProvider` with `SaveValueOverride(string path, string value)` and implement it in `SettingProvider` to persist overrides to a YAML file under `%LocalAppData%/MetWorks-WeatherStationMAUI/data.settings.yaml` (atomic temp-file write + move).
+  - Add an `InstanceIdentifier` service that reads the setting value (in-memory provider values or definition) and, if missing, generates a new GUID, persists it via `SaveValueOverride`, and caches it for synchronous access.
+  - Register `InstanceIdentifier` into MAUI DI after the DDI-generated registry has registered its singletons so other components can resolve it. Prefer resolving via DI and call `GetOrCreateInstallationId()`.
+  - The persistence approach keeps settings usage consistent and avoids adding a separate storage subsystem. Writes are atomic and failures fall back to a transient GUID while logging warnings.
+
+  Next work / tests:
+  - Add unit tests for the new provider save logic and `InstanceIdentifier` behavior (generation, persistence, caching, and restart semantics).
+  - Expose a helper command to rotate or reset the installation id (dev-only) so operators can migrate an installation id when required.
+  - Documentation: update docs to reference `LookupDictionaries.<Group>GroupSettingsDefinition.BuildSettingPath(name)` for reading specific settings and `BuildGroupPath()` for registering prefix handlers with `IEventRelayPath` rather than using hard-coded `/services/...` string literals.
+  - Docs sweep: replace textual references in repository docs that hard-code `/services/...` with canonical API examples and guidance.
+  - Prepare PR summary and changelog entry describing these changes (settings override persistence, InstanceIdentifier service, tests, and docs updates).

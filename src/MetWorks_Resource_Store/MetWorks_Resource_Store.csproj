@@ -7,21 +7,21 @@
 		<RootNamespace>MetWorks.Resource.Store</RootNamespace>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Remove="ListenerSink\lightning.sql" />
-		<EmbeddedResource Include="ListenerSink\lightning.sql">
-			<LogicalName>ListenerSink.lightning.sql</LogicalName>
+		<None Remove="RawPacketIngestor\lightning.sql" />
+		<EmbeddedResource Include="RawPacketIngestor\lightning.sql">
+			<LogicalName>RawPacketIngestor.lightning.sql</LogicalName>
 		</EmbeddedResource>
-		<None Remove="ListenerSink\observation.sql" />
-		<EmbeddedResource Include="ListenerSink\observation.sql">
-			<LogicalName>ListenerSink.observation.sql</LogicalName>
+		<None Remove="RawPacketIngestor\observation.sql" />
+		<EmbeddedResource Include="RawPacketIngestor\observation.sql">
+			<LogicalName>RawPacketIngestor.observation.sql</LogicalName>
 		</EmbeddedResource>
-		<None Remove="ListenerSink\precipitation.sql" />
-		<EmbeddedResource Include="ListenerSink\precipitation.sql">
-			<LogicalName>ListenerSink.precipitation.sql</LogicalName>
+		<None Remove="RawPacketIngestor\precipitation.sql" />
+		<EmbeddedResource Include="RawPacketIngestor\precipitation.sql">
+			<LogicalName>RawPacketIngestor.precipitation.sql</LogicalName>
 		</EmbeddedResource>
-		<None Remove="ListenerSink\wind.sql" />
-		<EmbeddedResource Include="ListenerSink\wind.sql">
-			<LogicalName>ListenerSink.wind.sql</LogicalName>
+		<None Remove="RawPacketIngestor\wind.sql" />
+		<EmbeddedResource Include="RawPacketIngestor\wind.sql">
+			<LogicalName>RawPacketIngestor.wind.sql</LogicalName>
 		</EmbeddedResource>
 		<None Remove="data\settings.yaml" />
 		<EmbeddedResource Include="data\settings.yaml">

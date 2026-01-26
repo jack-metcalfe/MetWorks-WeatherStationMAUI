@@ -1,9 +1,9 @@
 ﻿namespace MetWorks.Common.Settings;
 using ISettingDefinitionDictionary = Dictionary<string, ISettingDefinition>;
 using ISettingValueDictionary = Dictionary<string, ISettingValue>;
-
 public class SettingProvider : ISettingProvider
 {
+    private readonly string? _overridesBaseDirectory;
     bool _isInitialized = false;
     ILogger? _iLogger = null;
     ILogger ILogger
@@ -30,6 +30,12 @@ public class SettingProvider : ISettingProvider
         );
     }
     public SettingProvider() {}
+
+    // Constructor used for testing to inject a specific base directory for overrides
+    public SettingProvider(string? overridesBaseDirectory)
+    {
+        _overridesBaseDirectory = overridesBaseDirectory;
+    }
     public async Task<bool> InitializeAsync(
         ILogger iLogger
     )
@@ -70,15 +76,149 @@ public class SettingProvider : ISettingProvider
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
-            var settingModelString = NullPropertyGuard
-                .Get(true, ResourceProvider.GetString(SettingConstants.ProviderFilename), nameof(SettingConstants.ProviderFilename));
+            // Prefer an embedded template resource as the canonical source of definitions,
+            // then overlay any local overrides found in AppData so overrides only replace values.
+            var localDir = _overridesBaseDirectory ?? GetAppDataDirectory();
+            var overridePath = Path.Combine(localDir ?? string.Empty, SettingConstants.ProviderFilename);
 
-            return deserializer.Deserialize<SettingModel>(settingModelString);
+            // Load template from embedded resources first (preferred). Try common names.
+            var templateString = ResourceProvider.GetString(SettingConstants.ProviderFilename);
+
+            SettingModel templateModel = templateString is null
+                ? new SettingModel()
+                : deserializer.Deserialize<SettingModel>(templateString) ?? new SettingModel();
+
+            // If overrides exist, read and merge values over the template model
+            if (!string.IsNullOrWhiteSpace(localDir) && File.Exists(overridePath))
+            {
+                try
+                {
+                    var existing = File.ReadAllText(overridePath);
+                    var overrideModel = deserializer.Deserialize<SettingModel>(existing) ?? new SettingModel();
+
+                    // Merge definitions: add any missing definitions from overrides
+                    foreach (var def in overrideModel.Definitions)
+                    {
+                        if (!templateModel.Definitions.Any(d => d.Path == def.Path))
+                            templateModel.Definitions.Add(def);
+                    }
+
+                    // Merge values: overrides replace or add values
+                    foreach (var val in overrideModel.Values)
+                    {
+                        var found = templateModel.Values.FirstOrDefault(v => v.Path == val.Path);
+                        if (found is not null)
+                        {
+                            found.Value = val.Value;
+                        }
+                        else
+                        {
+                            templateModel.Values.Add(new SettingValue { Path = val.Path, Value = val.Value });
+                        }
+                    }
+
+                    return templateModel;
+                }
+                catch (Exception ex)
+                {
+                    // If override file can't be read/deserialized, log and fall back to template
+                    ILogger?.Warning($"Failed to read overrides file '{overridePath}', using embedded template: {ex.Message}");
+                    return templateModel;
+                }
+            }
+
+            // No overrides - return template (may be empty if no embedded resource found)
+            return templateModel;
         }
         catch (Exception exception)
         {
-            ILogger.Error("Failed to load override from AppData.", exception); 
+            ILogger.Error("Failed to load settings model from overrides or embedded resource.", exception);
             return null;
+        }
+    }
+
+    static string? GetAppDataDirectory()
+    {
+        // Prefer platform-specific AppData where available.
+#if MAUI
+        try
+        {
+            return FileSystem.AppDataDirectory;
+        }
+        catch
+        {
+            // fall through to other options
+        }
+#endif
+        try
+        {
+            var p = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (!string.IsNullOrWhiteSpace(p)) return Path.Combine(p, "MetWorks-WeatherStationMAUI");
+        }
+        catch { /* ignore */ }
+
+        try
+        {
+            var p = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (!string.IsNullOrWhiteSpace(p)) return Path.Combine(p, "MetWorks-WeatherStationMAUI");
+        }
+        catch { /* ignore */ }
+
+        // Last resort: temp directory
+        try { return Path.Combine(Path.GetTempPath(), "MetWorks-WeatherStationMAUI"); } catch { return null; }
+    }
+
+    /// <summary>
+    /// Persist a single value override to the LocalApplicationData overrides file.
+    /// Creates the overrides file if it does not exist. This method is idempotent for the same path/value.
+    /// </summary>
+    public bool SaveValueOverride(string path, string value)
+    {
+        try
+        {
+            var localDir = _overridesBaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MetWorks-WeatherStationMAUI");
+            Directory.CreateDirectory(localDir);
+            var overridePath = Path.Combine(localDir, SettingConstants.ProviderFilename);
+
+            SettingModel model;
+            if (File.Exists(overridePath))
+            {
+                var existing = File.ReadAllText(overridePath);
+                var deserializer = new DeserializerBuilder()
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                    .Build();
+                model = deserializer.Deserialize<SettingModel>(existing) ?? new SettingModel();
+            }
+            else
+            {
+                model = new SettingModel();
+            }
+
+            var existingVal = model.Values.FirstOrDefault(v => v.Path == path);
+            if (existingVal is not null)
+            {
+                existingVal.Value = value;
+            }
+            else
+            {
+                model.Values.Add(new SettingValue { Path = path, Value = value });
+            }
+
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            var yaml = serializer.Serialize(model);
+
+            var tmp = overridePath + ".tmp";
+            File.WriteAllText(tmp, yaml);
+            File.Move(tmp, overridePath, true);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            ILogger.Error($"Failed to save settings override.", ex);
+            return false;
         }
     }
 }

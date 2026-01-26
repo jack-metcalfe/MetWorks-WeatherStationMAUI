@@ -155,7 +155,7 @@ public class TempestPacketTransformer : ServiceBase
                 }
 
                 // Swap in new client under lock and dispose old
-                await _udpClientLock.WaitAsync(token);
+                        await _udpClientLock.WaitAsync(token).ConfigureAwait(false);
                 try
                 {
                     var old = UdpClient;
@@ -183,7 +183,7 @@ public class TempestPacketTransformer : ServiceBase
                         $"⚠️ Attempt {attempt}/{MaxRetryAttempts}: Port {port} unavailable " +
                         $"({socketException.SocketErrorCode}). Retrying in {RetryDelaySeconds}s...");
 
-                    await Task.Delay(TimeSpan.FromSeconds(RetryDelaySeconds), token);
+                    await Task.Delay(TimeSpan.FromSeconds(RetryDelaySeconds), token).ConfigureAwait(false);
                 }
                 else
                 {
@@ -273,12 +273,12 @@ public class TempestPacketTransformer : ServiceBase
                     // CRITICAL: This is the blocking call that waits for UDP packets
                     UdpReceiveResult result;
                     // Acquire a snapshot of the client under lock to avoid race with rebind
-                    await _udpClientLock.WaitAsync(token);
+                    await _udpClientLock.WaitAsync(token).ConfigureAwait(false);
                     try
                     {
                         if (UdpClient == null)
                             throw new InvalidOperationException("UdpClient is not initialized");
-                        result = await UdpClient.ReceiveAsync(linkedCts.Token);
+                        result = await UdpClient.ReceiveAsync(linkedCts.Token).ConfigureAwait(false);
                     }
                     finally
                     {
@@ -292,7 +292,7 @@ public class TempestPacketTransformer : ServiceBase
                     lastWarningTime = DateTime.MinValue; // Reset warning timer
 
                     // Process the packet
-                    await ProcessPacketAsync(result);
+                    await ProcessPacketAsync(result).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested &&
                                                           !token.IsCancellationRequested)
@@ -372,7 +372,7 @@ public class TempestPacketTransformer : ServiceBase
                     // Don't break - keep trying, but throttle retries
                     try
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(30), token);
+                        await Task.Delay(TimeSpan.FromSeconds(30), token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException) { /* shutting down */ }
                 }
@@ -381,7 +381,7 @@ public class TempestPacketTransformer : ServiceBase
                     // Brief delay before retrying
                     try
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(1), token);
+                        await Task.Delay(TimeSpan.FromSeconds(1), token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException) { /* shutting down */ }
                 }
@@ -405,7 +405,7 @@ public class TempestPacketTransformer : ServiceBase
                         $"❌ Too many consecutive errors ({_consecutiveErrors}). Throttling receive loop.");
                     try
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(30), token);
+                        await Task.Delay(TimeSpan.FromSeconds(30), token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException) { /* shutting down */ }
                 }
@@ -414,7 +414,7 @@ public class TempestPacketTransformer : ServiceBase
                     // Brief delay to avoid tight error loop
                     try
                     {
-                        await Task.Delay(TimeSpan.FromMilliseconds(100), token);
+                        await Task.Delay(TimeSpan.FromMilliseconds(100), token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException) { /* shutting down */ }
                 }

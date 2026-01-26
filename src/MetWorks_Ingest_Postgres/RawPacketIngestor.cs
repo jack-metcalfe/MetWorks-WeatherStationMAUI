@@ -27,15 +27,20 @@ public class RawPacketIngestor : ServiceBase
     Timer? _healthCheckTimer;
     Timer? _reconnectionTimer;
     string _connectionString = string.Empty;
+    IInstanceIdentifier? _instanceIdentifier;
+    Guid _installationIdGuid; // cached parsed installation id for DB writes
     // NOTE: PostgresConnectionFactory has been inlined into this class.
     // PostgresConnectionFactory remains in the repo for now but is unused.
     public RawPacketIngestor()
     {
     }
+
+    // No schema pre-checks. Any Postgres action that fails will be treated as a fatal initialization error.
     public async Task<bool> InitializeAsync(
         ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
+        IInstanceIdentifier iInstanceIdentifier,
         CancellationToken externalCancellation = default,
         ProvenanceTracker? provenanceTracker = null
     )
@@ -55,8 +60,8 @@ public class RawPacketIngestor : ServiceBase
             iLogger.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")}enabled for PostgreSQL listener");
 
             _bufferingEnabled = iSettingRepository.GetValueOrDefault<bool>(
-                        LookupDictionaries.XMLToPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.XMLToPostgreSQL_enableBuffering)
-                    );
+                LookupDictionaries.XMLToPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.XMLToPostgreSQL_enableBuffering)
+            );
 
             if (_bufferingEnabled)
             {
@@ -67,6 +72,20 @@ public class RawPacketIngestor : ServiceBase
             _connectionString = iSettingRepository.GetValueOrDefault<string>(
                 LookupDictionaries.XMLToPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.XMLToPostgreSQL_connectionString)
             );
+
+            // Store instance id for DB writes and cache parsed GUID (installation id should be stable)
+            _instanceIdentifier = iInstanceIdentifier;
+            if (_instanceIdentifier is null)
+            {
+                ILogger.Error("InstanceIdentifier is required for Postgres writes but was not provided. Aborting initialization.");
+                return false;
+            }
+            var iid = _instanceIdentifier.GetOrCreateInstallationId();
+            if (!Guid.TryParse(iid, out _installationIdGuid))
+            {
+                ILogger.Error($"Installation id '{iid}' is not a valid GUID. Aborting initialization.");
+                return false;
+            }
 
             if (string.IsNullOrWhiteSpace(_connectionString))
             {
@@ -80,16 +99,15 @@ public class RawPacketIngestor : ServiceBase
             var connected = await TryEstablishConnectionAsync(_connectionString).ConfigureAwait(false);
             iLogger.Information($"Back from calling TryEstablishConnectionAsync fom RawPacketIngestor.InitializeAsync() - thread={Environment.CurrentManagedThreadId}");
 
-            if (connected)
+            // Fail fast: if any Postgres action fails during initialization, abort startup.
+            if (!connected)
             {
-                iLogger.Information("✅ PostgreSQL listener initialized with active connection");
-                await StartAsync().ConfigureAwait(false);
+                iLogger.Error("❌ PostgreSQL initial connection failed during initialization. Aborting Postgres listener startup.");
+                return false;
             }
-            else
-            {
-                iLogger.Warning("⚠️ PostgreSQL initially unavailable. Starting in degraded mode with auto-reconnect.");
-                await StartDegradedAsync().ConfigureAwait(false);
-            }
+
+            iLogger.Information("✅ PostgreSQL listener initialized with active connection");
+            await StartAsync().ConfigureAwait(false);
 
             iLogger.Information($"RawPacketIngestor.InitializeAsync() completed, returning  - thread={Environment.CurrentManagedThreadId}");
             return true; // Always return true - we handle failures gracefully
@@ -182,7 +200,7 @@ public class RawPacketIngestor : ServiceBase
                         };
 
                         ILogger.Information("🧪 ExecuteScalarAsync starting: SELECT version() (CommandTimeout=5)");
-                        var version = await versionCommand.ExecuteScalarAsync(linkedTestCts.Token);
+                        var version = await versionCommand.ExecuteScalarAsync(linkedTestCts.Token).ConfigureAwait(false);
                         ILogger.Information("🧪 ExecuteScalarAsync completed: SELECT version()");
 
                         if (version is not null)
@@ -200,7 +218,7 @@ public class RawPacketIngestor : ServiceBase
                         };
 
                         ILogger.Information("🧪 ExecuteScalarAsync starting: information_schema.tables count (CommandTimeout=5)");
-                        var tableCount = await testQuery.ExecuteScalarAsync(linkedTestCts.Token);
+                        var tableCount = await testQuery.ExecuteScalarAsync(linkedTestCts.Token).ConfigureAwait(false);
                         ILogger.Information("🧪 ExecuteScalarAsync completed: information_schema.tables count");
                         ILogger.Debug($"📊 Found {tableCount} tables in public schema");
                     }
@@ -218,6 +236,8 @@ public class RawPacketIngestor : ServiceBase
                 ILogger.Information("🗄️ Initializing database schema...");
                 using var initCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
                 using var linkedInitCts = CancellationTokenSource.CreateLinkedTokenSource(initCts.Token, LinkedCancellationToken);
+                // Warm-check whether our tables support an installation_id column so writes can include it.
+                // No schema pre-checks. If any Postgres action fails (including missing columns), initialization will fail.
 
                 await using var schemaConnection = await CreateOpenConnectionAsync(connectionString, linkedInitCts.Token, pooling: false)
                     .ConfigureAwait(false);
@@ -225,11 +245,13 @@ public class RawPacketIngestor : ServiceBase
                 await PostgresInitializer.DatabaseInitializeAsync(
                     ILogger,
                     schemaConnection,
-                    linkedInitCts.Token);
+                    linkedInitCts.Token).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
-                ILogger.Warning($"⚠️ Database initialization failed: {exception.Message}");
+                // Fail initialization if DB schema/actions fail. Log full exception and return false.
+                ILogger.Error("❌ Database initialization failed.", exception);
+                return false;
             }
 
             _isDatabaseAvailable = true;
@@ -239,12 +261,12 @@ public class RawPacketIngestor : ServiceBase
             ILogger.Information("✅ PostgreSQL connection established successfully");
 
             // Process any buffered messages
-            if (_bufferingEnabled && _messageBuffer is not null && !_messageBuffer.IsEmpty)
-            {
-                var bufferedCount = _messageBuffer.Count;
-                ILogger.Information($"📦 Found {bufferedCount} buffered messages, starting processing...");
-                StartBackground(async token => await ProcessBufferedMessagesAsync());
-            }
+                if (_bufferingEnabled && _messageBuffer is not null && !_messageBuffer.IsEmpty)
+                {
+                    var bufferedCount = _messageBuffer.Count;
+                    ILogger.Information($"📦 Found {bufferedCount} buffered messages, starting processing...");
+                    StartBackground(async token => await ProcessBufferedMessagesAsync().ConfigureAwait(false));
+                }
 
             ILogger.Information($"Returning from TryEstablishConnectionAsync - thread={Environment.CurrentManagedThreadId}");
 
@@ -483,9 +505,15 @@ public class RawPacketIngestor : ServiceBase
     async Task WriteToDatabase(IRawPacketRecordTyped iRawPacketRecordTyped)
     {
         var tableString = PacketToTableDictionary[iRawPacketRecordTyped.PacketEnum];
-        var sql = $@"INSERT INTO public.""{tableString}"" "
+            var sql = $@"INSERT INTO public.""{tableString}"" "
             + " (id, json_document_original, application_received_utc_timestampz)"
             + " VALUES (@id, @json_document_original, to_timestamp(@application_received_utc_timestampz))";
+
+            // If the table supports an installation_id column, include it for multi-installation identification.
+            // installation_id column exists and is UUID (verified during InitializeAsync)
+            sql = $@"INSERT INTO public.""{tableString}"" "
+                    + " (id, json_document_original, application_received_utc_timestampz, installation_id)"
+                    + " VALUES (@id, @json_document_original, to_timestamp(@application_received_utc_timestampz), @installation_id)";
 
         try
         {
@@ -498,6 +526,9 @@ public class RawPacketIngestor : ServiceBase
                 = iRawPacketRecordTyped.RawPacketJson;
             npgsqlCommand.Parameters.AddWithValue(
                 "application_received_utc_timestampz", iRawPacketRecordTyped.ReceivedUtcUnixEpochSecondsAsLong);
+
+            // Use cached installation id GUID for writes (installation id is stable per-installation)
+            npgsqlCommand.Parameters.AddWithValue("installation_id", NpgsqlTypes.NpgsqlDbType.Uuid, _installationIdGuid);
 
             var rowsAffected = await npgsqlCommand.ExecuteNonQueryAsync(LinkedCancellationToken);
 

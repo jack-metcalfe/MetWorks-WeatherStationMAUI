@@ -1,6 +1,9 @@
-﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui;
+﻿using Microsoft.Extensions.DependencyInjection;
+namespace MetWorks.Apps.MAUI.WeatherStationMaui;
 public static class MauiProgram
 {
+    static bool _ddiRegistered = false;
+
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
@@ -23,77 +26,23 @@ public static class MauiProgram
         // we ask it to register singletons into MAUI's IServiceCollection.
         // This avoids the chicken-or-egg: CreateMauiApp -> registry calls happening
         // before StartupInitializer has created/initialized the registry.
+        // Startup initialization is started by the App at runtime to avoid blocking the UI thread here.
+        // The generated DDI registry will be registered if available; CreateMauiApp does not block on startup initialization.
+
+        // Create registry and register created (but not yet initialized) instances into MAUI DI.
+        // This performs the DDI "create" phase synchronously so builder.Services can be populated
+        // before the service provider is built. The longer async initialization runs later (in App).
         try
         {
-            if (!StartupInitializer.IsInitialized)
-            {
-                // This blocks startup to ensure DDI initialization happens before DI registrations.
-                // StartupInitializer.InitializeAsync is idempotent and safe to call multiple times.
-                try
-                {
-                    Debug.WriteLine("🔄 Running StartupInitializer.InitializeAsync() from CreateMauiApp...");
-                    var sw = System.Diagnostics.Stopwatch.StartNew();
-                    StartupInitializer.InitializeAsync().GetAwaiter().GetResult();
-                    sw.Stop();
-                    Debug.WriteLine($"🔁 StartupInitializer completed in {sw.Elapsed.TotalMilliseconds:n0} ms");
-                }
-                catch (Exception ex)
-                {
-                    // Don't crash the app here; log for diagnostics and continue - registry may still be available.
-                    try { Debug.WriteLine($"⚠️ StartupInitializer failed during CreateMauiApp: {ex.Message}"); } catch { }
-                }
-            }
+            StartupInitializer.CreateRegistryAndRegisterServices(builder.Services);
         }
         catch (Exception ex)
         {
-            try { Debug.WriteLine($"⚠️ Unexpected error while ensuring StartupInitializer: {ex.Message}"); } catch { }
+            try { Debug.WriteLine($"Failed to create/register DDI singletons at startup: {ex.Message}"); } catch { }
         }
 
-        // ---- Invoke generated DDI registry to create/initialize and register singletons ----
-        // This expects the generated registry to expose:
-        //   Task RegisterSingletonsAsync(IServiceCollection services, CancellationToken cancellationToken = default)
-        //
-        // The generated DDI remains responsible for creation + async initialization.
-        // Here we call into the generated registry to perform those steps and have it
-        // register instances directly into the MAUI IServiceCollection.
-        try
-        {
-            var registry = StartupInitializer.Registry;
-            if (registry != null)
-            {
-                // Prefer a meaningful external token if the registry exposes one; otherwise use None.
-                CancellationToken token = CancellationToken.None;
-                try
-                {
-                    // Many generated registries provide an accessor for the external cancellation token.
-                    // If present this will supply a token that follows application lifetime.
-                    token = registry.GetRootCancellationTokenSource().Token;
-                }
-                catch
-                {
-                    // ignore - fall back to CancellationToken.None
-                }
-
-                try
-                {
-                    // Block here because CreateMauiApp is synchronous; generated method performs async init.
-                    registry.RegisterSingletonsInMauiAsync(builder.Services, token).GetAwaiter().GetResult();
-                }
-                catch (Exception ex)
-                {
-                    // Avoid failing app startup on DDI registration errors; log for diagnostics.
-                    try { Debug.WriteLine($"DDI registration failed: {ex.Message}"); } catch { }
-                }
-            }
-            else
-            {
-                try { Debug.WriteLine("DDI registry not available at startup; skipping DDI registrations."); } catch { }
-            }
-        }
-        catch (Exception ex)
-        {
-            try { Debug.WriteLine($"Unexpected error while registering DDI singletons: {ex.Message}"); } catch { }
-        }
+        // Register AppShell so it can be resolved with injected services
+        builder.Services.AddSingleton<AppShell>();
 
         return builder.Build();
     }

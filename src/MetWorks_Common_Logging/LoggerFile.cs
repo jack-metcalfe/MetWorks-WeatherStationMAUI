@@ -4,6 +4,7 @@ public class LoggerFile : ILogger
     public Task<bool> InitializeAsync(
         ILogger iLogger,
         ISettingRepository iSettingRepository,
+        IInstanceIdentifier iInstanceIdentifier,
         IPlatformPaths? platformPaths = null,
         CancellationToken cancellationToken = default
     )
@@ -12,34 +13,51 @@ public class LoggerFile : ILogger
         ArgumentNullException.ThrowIfNull(iSettingRepository);
 
         if (_isInitialized)
-            throw new InvalidOperationException("Logger is already initialized.");
+            throw new InvalidOperationException($"{nameof(LoggerFile)} is already initialized.");
 
         if (cancellationToken.IsCancellationRequested) return Task.FromResult(false);
 
         try
         {
             var fileSizeLimitBytes = iSettingRepository.GetValueOrDefault<int>(
-                    LookupDictionaries.LoggerPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerFile_fileSizeLimitBytes)
-                );
-            var minimumLevel = iSettingRepository
-                .GetValueOrDefault<string>(
-                    LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerFile_minimumLevel)
-                );
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerFile_fileSizeLimitBytes)
+            );
+
+            var minimumLevel = iSettingRepository.GetValueOrDefault<string>(
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                    SettingConstants.LoggerFile_minimumLevel
+                )
+            );
+
             var outputTemplate = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerFile_outputTemplate)
-                );
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                    SettingConstants.LoggerFile_outputTemplate
+                )
+            );
+
             var relativeLogPath = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerFile_relativeLogPath)
-                );
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                    SettingConstants.LoggerFile_relativeLogPath
+                )
+            );
+
             var retainedFileCountLimit = iSettingRepository.GetValueOrDefault<int>(
-                    LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerFile_retainedFileCountLimit)
-                );
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                    SettingConstants.LoggerFile_retainedFileCountLimit
+                )
+            );
+
             var rollingInterval = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerFile_rollingInterval)
-                );
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                    SettingConstants.LoggerFile_rollingInterval
+                )
+            );
+
             var rollOnFileSizeLimit = iSettingRepository.GetValueOrDefault<bool>(
-                    LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerFile_rollOnFileSizeLimit)
-                );
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                    SettingConstants.LoggerFile_rollOnFileSizeLimit
+                )
+            );
 
             var paths = platformPaths ?? new DefaultPlatformPaths();
 
@@ -50,6 +68,7 @@ public class LoggerFile : ILogger
             var candidate = Path.Combine(paths.AppDataDirectory, relativeLogPath);
             var absoluteLogFilePath = Path.GetFullPath(candidate);
             var appDataFull = Path.GetFullPath(paths.AppDataDirectory);
+
             // Prevent path traversal escaping the app data directory
             if (!absoluteLogFilePath.StartsWith(appDataFull, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Resolved log path escapes the application data directory.");
@@ -58,17 +77,33 @@ public class LoggerFile : ILogger
             var dir = Path.GetDirectoryName(absoluteLogFilePath);
             if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
 
-            ILogger = new LoggerConfiguration()
-                .MinimumLevel.Is(ParseLevel(minimumLevel))
-                .WriteTo.File(
+            var loggerCfg = new LoggerConfiguration()
+                .MinimumLevel.Is(ParseLevel(minimumLevel));
+
+            // Enrich logs with installation id when available
+            try
+            {
+                var installationId = iInstanceIdentifier?.GetOrCreateInstallationId();
+                if (!string.IsNullOrWhiteSpace(installationId))
+                {
+                    loggerCfg = loggerCfg.Enrich.WithProperty("InstallationId", installationId);
+                }
+            }
+            catch
+            {
+                // Ignore enrichment failures - logging should not block initialization
+            }
+
+            loggerCfg = loggerCfg.WriteTo.File(
                     fileSizeLimitBytes: fileSizeLimitBytes,
                     outputTemplate: outputTemplate,
                     path: absoluteLogFilePath,
                     rollingInterval: Enum.TryParse<RollingInterval>(rollingInterval, true, out var parsedRolling) ? parsedRolling : RollingInterval.Day,
                     rollOnFileSizeLimit: rollOnFileSizeLimit,
                     retainedFileCountLimit: retainedFileCountLimit
-                )
-                .CreateLogger();
+                );
+
+            ILogger = loggerCfg.CreateLogger();
             AbsoluteLogFilePath = absoluteLogFilePath;
             _isInitialized = true;
             ILogger.Information(@"FileLogger initialized");

@@ -3,11 +3,6 @@
 /// Abstraction for platform-specific paths used by components that need
 /// an application data directory or other platform locations.
 /// </summary>
-public interface IPlatformPaths
-{
-    string AppDataDirectory { get; }
-}
-
 /// <summary>
 /// Default implementation that delegates to MAUI/Essentials FileSystem.
 /// </summary>

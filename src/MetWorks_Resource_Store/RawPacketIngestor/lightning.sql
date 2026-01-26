@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS public.lightning
+﻿CREATE TABLE IF NOT EXISTS public.lightning
     (
         id TEXT PRIMARY KEY -- COMB-style GUID supplied by SQLite sync or C# writer
         -- Timestamps (all UTC)
@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS public.lightning
         -- Type specific JSON derived fields
         , lightning_strike_distance_at_timestamp INTEGER GENERATED ALWAYS AS ((json_document_original -> 'evt' ->> 1)::INTEGER) STORED
         , relative_energy_content_at_timestamp   INTEGER GENERATED ALWAYS AS ((json_document_original -> 'evt' ->> 2)::INTEGER) STORED
+        -- Per-installation identifier to distinguish records from different app installs
+        , installation_id UUID NULL
     )
 ;
 CREATE INDEX IF
@@ -20,4 +22,11 @@ NOT EXISTS idx_lightning_device_received_utc_timestamp_epoch ON lightning
     (
         device_received_utc_timestamp_epoch
     )
+;
+CREATE INDEX IF
+NOT EXISTS idx_lightning_installation_id ON public.lightning
+    (
+        installation_id
+    )
+;
 ;

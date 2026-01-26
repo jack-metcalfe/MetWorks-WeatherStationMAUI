@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS public.observation
+﻿CREATE TABLE IF NOT EXISTS public.observation
     (
         id TEXT PRIMARY KEY -- COMB-style GUID supplied by SQLite sync or C# writer
         -- Timestamps (all UTC)
@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS public.observation
         , wind_speed_average_in_wind_sample_interval              REAL GENERATED ALWAYS AS ((json_document_original -> 'obs' -> 0 ->> 2)::REAL) STORED
         , wind_speed_gust_in_wind_sample_interval                 REAL GENERATED ALWAYS AS ((json_document_original -> 'obs' -> 0 ->> 3)::REAL) STORED
         , wind_speed_lull_in_wind_sample_interval                 REAL GENERATED ALWAYS AS ((json_document_original -> 'obs' -> 0 ->> 1)::REAL) STORED
+        -- Per-installation identifier to distinguish records from different app installs
+        , installation_id UUID NULL
     )
 ;
 ALTER TABLE public.observation OWNER TO weather;
@@ -35,4 +37,11 @@ NOT EXISTS idx_observation_device_received_utc_timestampz ON public.observation
     (
         device_received_utc_timestampz
     )
+;
+CREATE INDEX IF
+NOT EXISTS idx_observation_installation_id ON public.observation
+    (
+        installation_id
+    )
+;
 ;

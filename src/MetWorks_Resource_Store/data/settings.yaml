@@ -98,7 +98,7 @@ definitions:
     isSecret: false
 
   - path: /services/loggerFile/outputTemplate
-    defaultValue: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+    defaultValue: "[InstallationId: {InstallationId}{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
     description: "Serilog output template"
     expectedValueType: "String"
     allowableValues: []
@@ -180,4 +180,12 @@ definitions:
     expectedValueType: "Int32"
     allowableValues: []
     isEditable: true
+    isSecret: false
+
+  - path: /services/instance/installationId
+    defaultValue: ""
+    description: "Per-installation stable identifier (GUID). Generated on first run and persisted locally."
+    expectedValueType: "String"
+    allowableValues: []
+    isEditable: false
     isSecret: false
