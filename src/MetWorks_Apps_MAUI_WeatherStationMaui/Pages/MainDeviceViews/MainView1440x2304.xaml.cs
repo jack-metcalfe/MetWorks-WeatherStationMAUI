@@ -1,6 +1,6 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.MainDeviceViews;
 
-public partial class MainView1440x2304 : ContentPage
+public partial class MainView1440x2304 : ContentView
 {
     private readonly WeatherViewModel _viewModel;
 
@@ -11,11 +11,5 @@ public partial class MainView1440x2304 : ContentPage
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = _viewModel;
-    }
-
-    protected override void OnDisappearing()
-    {
-        base.OnDisappearing();
-        _viewModel?.Dispose();
     }
 }

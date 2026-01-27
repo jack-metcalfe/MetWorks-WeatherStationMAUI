@@ -257,6 +257,26 @@ public sealed class LoggerResilient : ServiceBase, ILoggerResilient
     public void Debug(string message) => BufferOrDispatch(new LogEntry(LogLevel.Debug, message ?? string.Empty, null));
     public void Trace(string message) => BufferOrDispatch(new LogEntry(LogLevel.Trace, message ?? string.Empty, null));
 
+    /// <summary>
+    /// Returns a logger that enriches all log entries with the provided context.
+    /// For the resilient fan-out logger this is implemented as a lightweight prefix wrapper
+    /// to avoid per-sink context fan-out complexity.
+    /// </summary>
+    public ILogger ForContext(string contextName, object? value)
+    {
+        if (string.IsNullOrWhiteSpace(contextName)) return this;
+        return new ContextualLogger(this, $"[{contextName}={value}] ");
+    }
+
+    /// <summary>
+    /// Returns a logger that enriches all log entries with the provided source type.
+    /// </summary>
+    public ILogger ForContext(Type sourceType)
+    {
+        ArgumentNullException.ThrowIfNull(sourceType);
+        return new ContextualLogger(this, $"[{sourceType.Name}] ");
+    }
+
     public Exception LogExceptionAndReturn(Exception exception)
     {
         if (exception == null) return new ArgumentNullException(nameof(exception));

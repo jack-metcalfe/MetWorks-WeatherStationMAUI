@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels"
+             x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.MainDeviceViews.DetailsContent"
+             x:DataType="viewmodels:WeatherViewModel">
+
+    <Grid Padding="30">
+        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="20">
+            <Label FontSize="48" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" Text="Details" />
+            <Label FontSize="28" TextColor="{StaticResource WhiteVikings}" HorizontalTextAlignment="Center" Text="More sensor data and charts can go here." />
+            <Label FontSize="20" TextColor="{StaticResource WhiteVikings}" Text="Temperature: {Binding TemperatureValue} {Binding TemperatureUnit}" />
+            <Label FontSize="20" TextColor="{StaticResource WhiteVikings}" Text="Humidity: {Binding HumidityValue} {Binding HumidityUnit}" />
+            <Label FontSize="20" TextColor="{StaticResource WhiteVikings}" Text="Wind: {Binding WindSpeedValue} {Binding WindSpeedUnit}" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentView>

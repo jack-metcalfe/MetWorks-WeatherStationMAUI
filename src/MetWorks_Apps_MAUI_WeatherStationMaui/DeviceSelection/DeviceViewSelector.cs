@@ -1,6 +1,11 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;
 using Microsoft.Extensions.DependencyInjection;
 
+using System;
+using Microsoft.Extensions.DependencyInjection;
+using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
+using Microsoft.Maui.Devices;
+
 /// <summary>
 /// Selects the appropriate view based on current device characteristics.
 /// Uses DeviceViewRegistry to find best matching view for the device.
@@ -14,8 +19,7 @@ public static class DeviceViewSelector
     {
         var displayInfo = DeviceDisplay.Current.MainDisplayInfo;
         var deviceInfo = DeviceInfo.Current;
-        
-        // Get physical characteristics
+
         var widthPixels = (int)displayInfo.Width;
         var heightPixels = (int)displayInfo.Height;
         var density = displayInfo.Density;
@@ -23,119 +27,142 @@ public static class DeviceViewSelector
         var deviceModel = deviceInfo.Model;
         var manufacturer = deviceInfo.Manufacturer;
 
-        // Find matching profile
         var profile = DeviceViewRegistry.FindBestMatch(
-            widthPixels: widthPixels, 
-            heightPixels: heightPixels, 
-            density: density, 
+            widthPixels: widthPixels,
+            heightPixels: heightPixels,
+            density: density,
             platform: platform,
             deviceModel: deviceModel,
             manufacturer: manufacturer
         );
-        
+
+        var viewTypeName = profile?.ViewTypeName;
+        if (string.IsNullOrWhiteSpace(viewTypeName))
+        {
+            Debug.WriteLine($"⚠️ No matching profile found for {widthPixels}x{heightPixels} @ {density:F1} DPI on {platform}");
+            viewTypeName = "MainView1920x1200";
+        }
+        else
+        {
+            Debug.WriteLine($"🎯 Matched device: {profile!.DeviceName} → {viewTypeName}");
+        }
+
+        var page = new Pages.MainDeviceViews.MainViewPage();
+        var view = CreateViewFromTypeNameView(viewTypeName);
+        page.SetContent(view);
+        return page;
+    }
+
+    /// <summary>
+    /// Get the appropriate ContentView (View) for the current device.
+    /// Preferred for embedding inside other containers.
+    /// </summary>
+    public static View GetViewForCurrentDevice()
+    {
+        var displayInfo = DeviceDisplay.Current.MainDisplayInfo;
+        var deviceInfo = DeviceInfo.Current;
+
+        var widthPixels = (int)displayInfo.Width;
+        var heightPixels = (int)displayInfo.Height;
+        var density = displayInfo.Density;
+        var platform = deviceInfo.Platform.ToString();
+        var deviceModel = deviceInfo.Model;
+        var manufacturer = deviceInfo.Manufacturer;
+
+        var profile = DeviceViewRegistry.FindBestMatch(
+            widthPixels: widthPixels,
+            heightPixels: heightPixels,
+            density: density,
+            platform: platform,
+            deviceModel: deviceModel,
+            manufacturer: manufacturer
+        );
+
         if (profile != null)
         {
             Debug.WriteLine($"🎯 Matched device: {profile.DeviceName} → {profile.ViewTypeName}");
-            Debug.WriteLine($"   Resolution: {widthPixels}x{heightPixels}, Density: {density:F1}, Platform: {platform}");
-            Debug.WriteLine($"   Diagonal: {profile.DiagonalInches:F1}\", Logical: {profile.LogicalWidth:F0}x{profile.LogicalHeight:F0}");
-            return CreateViewFromTypeName(profile.ViewTypeName);
+            return CreateViewFromTypeNameView(profile.ViewTypeName);
         }
 
-    
-        
-        // Fallback to default view
         Debug.WriteLine($"⚠️ No matching profile found for {widthPixels}x{heightPixels} @ {density:F1} DPI on {platform}");
-        Debug.WriteLine($"   Model: {deviceModel}, Manufacturer: {manufacturer}");
-        Debug.WriteLine($"   Using default WeatherPage");
-
-        return CreateViewFromTypeName("MainView1920x1200");
+        return CreateViewFromTypeNameView("MainView1920x1200");
     }
-    
-    /// <summary>
-    /// Create a view instance from its type name
-    /// </summary>
+
     private static ContentPage CreateViewFromTypeName(string typeName)
     {
-        // Map type names to concrete types
         Type? t = typeName switch
         {
-            "MainView1920x1200" => typeof(Pages.MainDeviceViews.MainView1920x1200),
-            "MainView2304x1440" => typeof(Pages.MainDeviceViews.MainView2304x1440),
-            "MainView1440x2304" => typeof(Pages.MainDeviceViews.MainView1440x2304),
-            "MainView1812x2176" => typeof(Pages.MainDeviceViews.MainView1812x2176),
-            "MainView2176x1812" => typeof(Pages.MainDeviceViews.MainView2176x1812),
-            _ => typeof(Pages.MainDeviceViews.MainView1920x1200)
+            // Kept for backward compatibility if anything is still routing directly to a page.
+            // Primary flow should use MainViewPage + ContentView layout selection.
+            "MainView1920x1200" => typeof(Pages.MainDeviceViews.MainViewPage),
+            _ => typeof(Pages.MainDeviceViews.MainViewPage)
         };
 
-        // Try to resolve the page from MAUI DI so constructors with injected ViewModels work.
+        // For route-based navigation, always return a MainViewPage hosting the selected view.
         try
         {
             var services = Application.Current?.Handler?.MauiContext?.Services;
-            if (services != null && t != null)
+            if (services != null)
             {
-                // Try to create page with DI
-                var page = ActivatorUtilities.CreateInstance(services, t) as ContentPage;
-                if (page != null) return page;
-
-                // If the page requires a ViewModel in constructor, try resolving the ViewModel then create
-                try
+                var page = ActivatorUtilities.CreateInstance(services, typeof(Pages.MainDeviceViews.MainViewPage)) as Pages.MainDeviceViews.MainViewPage;
+                if (page != null)
                 {
+                    var view = CreateViewFromTypeNameView(typeName);
+                    // attach the same resolved WeatherViewModel when available
                     var vm = services.GetService<WeatherViewModel>();
-                    if (vm != null)
-                    {
-                        page = ActivatorUtilities.CreateInstance(services, t, vm) as ContentPage;
-                        if (page != null) return page;
-                    }
+                    view.BindingContext = vm;
+                    page.SetContent(view);
+                    return page;
                 }
-                catch { }
             }
         }
-        catch { /* fall back to registry-based creation below */ }
+        catch { }
 
-        // If DI not available, attempt to construct required ViewModel from the Registry and instantiate the page
-        try
+        // Fallback: non-DI creation
+        var fallbackPage = new Pages.MainDeviceViews.MainViewPage();
+        var fallbackView = CreateViewFromTypeNameView(typeName);
+        fallbackPage.SetContent(fallbackView);
+        return fallbackPage;
+    }
+
+    private static View CreateViewFromTypeNameView(string typeName)
+    {
+        if (!MainDeviceViewsCatalog.TryGetViewType(typeName, out var viewType))
         {
-            var vm = default(WeatherViewModel);
+            viewType = null;
+        }
+
+        if (viewType != null)
+        {
             try
             {
-                if (StartupInitializer.IsInitialized)
+                var services = Application.Current?.Handler?.MauiContext?.Services;
+                if (services is not null)
                 {
-                    var reg = StartupInitializer.Registry;
-                    var logger = reg.GetTheLoggerResilient();
-                    var settings = reg.GetTheSettingRepository();
-                    var relay = reg.GetTheEventRelayBasic();
-                    vm = new WeatherViewModel(logger, settings, relay);
+                    // Prefer DI creation so constructor-injected dependencies (ViewModels, loggers) are satisfied
+                    var view = Microsoft.Extensions.DependencyInjection.ActivatorUtilities.CreateInstance(services, viewType) as View;
+                    if (view != null) return view;
                 }
             }
             catch { }
-
-            if (vm != null && t != null)
-            {
-                try
-                {
-                    var obj = Activator.CreateInstance(t, vm) as ContentPage;
-                    if (obj != null) return obj;
-                }
-                catch { }
-            }
         }
-        catch { }
 
-        // As a last resort try parameterless create (some pages may have it)
+        // Fallback: try to create the full page and return its Content
         try
         {
-            if (t != null)
-            {
-                var obj = Activator.CreateInstance(t) as ContentPage;
-                if (obj != null) return obj;
-            }
+            var page = CreateViewFromTypeName(typeName);
+            if (page?.Content is View contentView)
+                return contentView;
         }
         catch { }
 
-        // Nothing worked - throw to make the failure obvious
-        throw new InvalidOperationException($"Unable to create page for type '{typeName}' via DI or fallback constructors.");
+        // final fallback
+        return new ContentView
+        {
+            Content = new Label { Text = $"Missing view: {typeName}", HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center }
+        };
     }
-    
+
     /// <summary>
     /// Get current device characteristics as a string (for debugging/logging)
     /// </summary>
@@ -143,7 +170,7 @@ public static class DeviceViewSelector
     {
         var displayInfo = DeviceDisplay.Current.MainDisplayInfo;
         var deviceInfo = DeviceInfo.Current;
-        
+
         return $"""
             Device: {deviceInfo.Manufacturer} {deviceInfo.Model}
             Platform: {deviceInfo.Platform} {deviceInfo.Version}
@@ -153,7 +180,7 @@ public static class DeviceViewSelector
             Diagonal: {CalculateDiagonalInches(displayInfo):F1} inches
             """;
     }
-    
+
     private static double CalculateDiagonalInches(DisplayInfo display)
     {
         var widthInches = display.Width / display.Density;
@@ -188,6 +215,6 @@ public static class DeviceViewSelector
         if (profile != null && !string.IsNullOrWhiteSpace(profile.ViewTypeName))
             return profile.ViewTypeName;
 
-        return nameof(Pages.MainDeviceViews.MainView1920x1200);
+        return MainDeviceViewsCatalog.DefaultViewTypeName;
     }
 }

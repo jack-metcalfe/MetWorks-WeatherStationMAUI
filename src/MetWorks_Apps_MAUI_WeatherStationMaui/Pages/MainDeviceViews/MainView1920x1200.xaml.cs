@@ -1,9 +1,6 @@
-﻿using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.MainDeviceViews;
 
-namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.MainDeviceViews;
-
-public partial class MainView1920x1200 : ContentPage
+public partial class MainView1920x1200 : ContentView
 {
     private readonly WeatherViewModel _viewModel;
 
@@ -27,11 +24,5 @@ public partial class MainView1920x1200 : ContentPage
             }
             catch { }
         });
-    }
-
-    protected override void OnDisappearing()
-    {
-        base.OnDisappearing();
-        _viewModel?.Dispose();
     }
 }

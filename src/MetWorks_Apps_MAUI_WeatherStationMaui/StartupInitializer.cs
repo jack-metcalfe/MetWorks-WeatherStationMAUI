@@ -1,10 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace MetWorks.Apps.MAUI.WeatherStationMaui;
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui;
 public class StartupInitializer
 {
     private static int _initGuard = 0;

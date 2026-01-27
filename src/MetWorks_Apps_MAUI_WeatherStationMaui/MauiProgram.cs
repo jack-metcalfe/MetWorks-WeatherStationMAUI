@@ -45,11 +45,12 @@ public static class MauiProgram
 
         // Register ViewModels and Pages for DI-driven page activation
         builder.Services.AddTransient<WeatherViewModel>();
-        builder.Services.AddTransient<Pages.MainDeviceViews.MainView1920x1200>();
-        builder.Services.AddTransient<Pages.MainDeviceViews.MainView2304x1440>();
-        builder.Services.AddTransient<Pages.MainDeviceViews.MainView1440x2304>();
-        builder.Services.AddTransient<Pages.MainDeviceViews.MainView1812x2176>();
-        builder.Services.AddTransient<Pages.MainDeviceViews.MainView2176x1812>();
+        builder.Services.AddTransient<Pages.MainDeviceViews.MainViewPage>();
+
+        foreach (var viewType in MainDeviceViewsCatalog.AllViewTypes)
+        {
+            builder.Services.AddTransient(viewType);
+        }
 
         return builder.Build();
     }

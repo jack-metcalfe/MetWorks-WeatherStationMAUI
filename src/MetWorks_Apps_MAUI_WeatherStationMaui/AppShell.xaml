@@ -3,11 +3,21 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.Pages"
+    xmlns:views="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.Views"
     x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.AppShell">
 
-    <ShellContent
-        Title="Weather"
-        ContentTemplate="{DataTemplate pages:MainDeviceViews.MainView1920x1200}"
-        Route="WeatherPage" />
+    <FlyoutItem Title="Weather" Route="Weather">
+        <Tab Title="Weather" Route="WeatherTab">
+            <ShellContent
+                Title="Startup"
+                ContentTemplate="{DataTemplate views:InitializationSplashPage}"
+                Route="SwipeCarousel" />
+
+            <ShellContent
+                Title="Main"
+                ContentTemplate="{DataTemplate pages:MainDeviceViews.MainViewPage}"
+                Route="MainView" />
+        </Tab>
+    </FlyoutItem>
 
 </Shell>

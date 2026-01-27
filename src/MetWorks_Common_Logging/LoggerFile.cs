@@ -150,6 +150,99 @@ public class LoggerFile : ILoggerFile
     public void Error(string message) => ILogger.Error(message);
     public void Debug(string message) => ILogger.Debug(message);
     public void Trace(string message) => ILogger.Verbose(message);
+
+    public ILogger ForContext(string contextName, object? value)
+    {
+        if (string.IsNullOrWhiteSpace(contextName)) return this;
+        return new LoggerFileContext(this, contextName, value);
+    }
+
+    public ILogger ForContext(Type sourceType)
+    {
+        ArgumentNullException.ThrowIfNull(sourceType);
+        return new LoggerFileContext(this, sourceType);
+    }
+
+    sealed class LoggerFileContext : ILogger
+    {
+        readonly LoggerFile _owner;
+        readonly Serilog.ILogger _logger;
+
+        public LoggerFileContext(LoggerFile owner, string contextName, object? value)
+        {
+            ArgumentNullException.ThrowIfNull(owner);
+            _owner = owner;
+            _logger = owner.ILogger.ForContext(contextName, value, destructureObjects: true);
+        }
+
+        public LoggerFileContext(LoggerFile owner, Type sourceType)
+        {
+            ArgumentNullException.ThrowIfNull(owner);
+            ArgumentNullException.ThrowIfNull(sourceType);
+            _owner = owner;
+            _logger = owner.ILogger.ForContext(sourceType);
+        }
+
+        public void Information(string message) => _logger.Information(message);
+        public void Warning(string message) => _logger.Warning(message);
+        public void Error(string message, Exception exception) => _logger.Error(exception, message);
+        public void Error(string message) => _logger.Error(message);
+        public void Debug(string message) => _logger.Debug(message);
+        public void Trace(string message) => _logger.Verbose(message);
+
+        public Exception LogExceptionAndReturn(Exception exception) => _owner.LogExceptionAndReturn(exception);
+
+        public Exception LogExceptionAndReturn(Exception exception, string message) => _owner.LogExceptionAndReturn(exception, message);
+
+        public ILogger ForContext(string contextName, object? value)
+        {
+            if (string.IsNullOrWhiteSpace(contextName)) return this;
+            return new SerilogContextLogger(_owner, _logger.ForContext(contextName, value, destructureObjects: true));
+        }
+
+        public ILogger ForContext(Type sourceType)
+        {
+            ArgumentNullException.ThrowIfNull(sourceType);
+            return new SerilogContextLogger(_owner, _logger.ForContext(sourceType));
+        }
+
+        sealed class SerilogContextLogger : ILogger
+        {
+            readonly LoggerFile _owner;
+            readonly Serilog.ILogger _logger;
+
+            public SerilogContextLogger(LoggerFile owner, Serilog.ILogger logger)
+            {
+                ArgumentNullException.ThrowIfNull(owner);
+                ArgumentNullException.ThrowIfNull(logger);
+                _owner = owner;
+                _logger = logger;
+            }
+
+            public void Information(string message) => _logger.Information(message);
+            public void Warning(string message) => _logger.Warning(message);
+            public void Error(string message, Exception exception) => _logger.Error(exception, message);
+            public void Error(string message) => _logger.Error(message);
+            public void Debug(string message) => _logger.Debug(message);
+            public void Trace(string message) => _logger.Verbose(message);
+
+            public Exception LogExceptionAndReturn(Exception exception) => _owner.LogExceptionAndReturn(exception);
+
+            public Exception LogExceptionAndReturn(Exception exception, string message) => _owner.LogExceptionAndReturn(exception, message);
+
+            public ILogger ForContext(string contextName, object? value)
+            {
+                if (string.IsNullOrWhiteSpace(contextName)) return this;
+                return new SerilogContextLogger(_owner, _logger.ForContext(contextName, value, destructureObjects: true));
+            }
+
+            public ILogger ForContext(Type sourceType)
+            {
+                ArgumentNullException.ThrowIfNull(sourceType);
+                return new SerilogContextLogger(_owner, _logger.ForContext(sourceType));
+            }
+        }
+    }
     private static LogEventLevel ParseLevel(string level) =>
         Enum.TryParse<LogEventLevel>(level, true, out var parsed)
             ? parsed

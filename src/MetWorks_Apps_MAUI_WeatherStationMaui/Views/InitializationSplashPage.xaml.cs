@@ -1,21 +1,8 @@
-﻿using MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;
-
-namespace MetWorks.Apps.MAUI.WeatherStationMaui.Views;
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.Views;
 public partial class InitializationSplashPage : ContentPage
 {
-    ILoggerResilient _iLoggerResilient;
-    ISettingRepository _iSettingRepository;
-    IEventRelayBasic _iEventRelayBasic;
-
-    public InitializationSplashPage(
-        ILoggerResilient iLoggerResilient,
-        ISettingRepository iSettingRepository,
-        IEventRelayBasic iEventRelayBasic
-    )
+    public InitializationSplashPage()
     {
-        _iLoggerResilient = iLoggerResilient;
-        _iSettingRepository = iSettingRepository;
-        _iEventRelayBasic = iEventRelayBasic;
         InitializeComponent();
 
         // Wire events
@@ -46,41 +33,23 @@ public partial class InitializationSplashPage : ContentPage
                 // Navigate to main page determined by device profile
                 try
                 {
-                    var route = DeviceViewSelector.GetRouteForCurrentDevice();
-                    try
+                    // Navigate within the existing Shell.
+                    if (Shell.Current is null)
                     {
-                        // Ensure an AppShell is the active page on the main window so Shell.Current is available.
-                        if (Shell.Current is null)
-                        {
-                            var mainWindow = Application.Current?.Windows.FirstOrDefault();
-                            if (mainWindow != null)
-                            {
-                                // Replace the current page with AppShell (this makes Shell.Current non-null)
-                                mainWindow.Page = new AppShell();
-                            }
-                            else
-                            {
-                                // No window available - open a new one containing AppShell
-                                Application.Current?.OpenWindow(new Window(new AppShell()));
-                            }
-                        }
+                        throw new InvalidOperationException("Shell.Current is null during post-initialization navigation.");
+                    }
 
-                        // Try shell navigation to the device route
-                        if (Shell.Current is not null)
-                        {
-                            await Shell.Current.GoToAsync(route).ConfigureAwait(false);
-                        }
-                    }
-                    catch
-                    {
-                        // Final fallback: ensure AppShell is visible
-                        try { Application.Current?.OpenWindow(new Window(new AppShell())); } catch { }
-                    }
+                    await Shell.Current.GoToAsync("/MainView").ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     try { Debug.WriteLine($"Failed to navigate to device-specific startup page: {ex.Message}"); } catch { }
-                    Application.Current?.OpenWindow(new Window(new AppShell()));
+
+                    // Surface a retry UI rather than spawning additional windows.
+                    Spinner.IsRunning = false;
+                    RetryButton.IsVisible = true;
+                    DetailsLabel.IsVisible = true;
+                    DetailsLabel.Text = ex.Message;
                 }
             });
         };

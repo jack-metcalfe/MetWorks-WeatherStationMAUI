@@ -18,6 +18,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     IObservationReading? _currentObservation;
     SystemTimer? _clockTimer;
     ThreadingTimer? _statusCheckTimer;
+    string? _lastServiceStatusLine;
     DateTime _currentTime = DateTime.Now;
 
     // Lightweight init guard: 0 = not started, 1 = initializing, 2 = initialized
@@ -115,7 +116,12 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
                     var serviceStatus = isInitialized ? "✅ Running" : "⚠️ Initializing";
                     var dbStatus = isDatabaseAvailable ? "💚 Connected" : "🔶 Degraded";
 
-                    Debug.WriteLine($"Service Status: {serviceStatus} | Database: {dbStatus}");
+                    var line = $"Service Status: {serviceStatus} | Database: {dbStatus}";
+                    if (!string.Equals(_lastServiceStatusLine, line, StringComparison.Ordinal))
+                    {
+                        _lastServiceStatusLine = line;
+                        Debug.WriteLine(line);
+                    }
 
                     // Only attempt to initialize once; InitializeAsync uses an atomic guard
                     if (isInitialized) Task.Run(() => InitializeAsync());

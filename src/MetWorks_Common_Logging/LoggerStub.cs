@@ -27,4 +27,8 @@ public sealed class LoggerStub : ILoggerStub
     
     public Exception LogExceptionAndReturn(Exception exception) => exception;
     public Exception LogExceptionAndReturn(Exception exception, string message) => exception;
+
+    public ILogger ForContext(string contextName, object? value) => this;
+
+    public ILogger ForContext(Type sourceType) => this;
 }

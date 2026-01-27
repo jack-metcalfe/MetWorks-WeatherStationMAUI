@@ -1,4 +1,5 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui;
+using Microsoft.Extensions.DependencyInjection;
 public partial class App : Application
 {
     Task? _initializationTask;
@@ -54,8 +55,9 @@ public partial class App : Application
         Debug.WriteLine("🔍 Device Detection:");
         Debug.WriteLine(DeviceViewSelector.GetDeviceInfo());
 
-        // Create AppShell (which hosts the splash as initial ShellContent) so only one splash instance is created
-        var appShell = new AppShell(_iLoggerResilient, _iSettingRepository, _iEventRelayBasic);
+        // Use a single AppShell instance resolved from MAUI DI to avoid multiple Shell instances
+        // and to ensure any dependencies are created consistently through the service provider.
+        var appShell = activationState?.Context?.Services?.GetService<AppShell>() ?? new AppShell();
         var window = new Window(appShell);
 
         // Cleanup on window destruction

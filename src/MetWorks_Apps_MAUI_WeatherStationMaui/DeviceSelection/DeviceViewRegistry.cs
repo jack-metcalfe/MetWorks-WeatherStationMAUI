@@ -17,7 +17,7 @@ public static class DeviceViewRegistry
             Platform = "Android",
             DeviceModel = "SM-X518U",
             Manufacturer = "samsung",
-            ViewTypeName = "MainView2304x1440",
+            ViewTypeName = nameof(Pages.MainDeviceViews.MainView2304x1440),
             PreferredOrientation = "Landscape"
         },
         new DeviceProfile
@@ -29,7 +29,7 @@ public static class DeviceViewRegistry
             Platform = "Android",
             DeviceModel = "SM-X518U",
             Manufacturer = "samsung",
-            ViewTypeName = "MainView1440x2304",
+            ViewTypeName = nameof(Pages.MainDeviceViews.MainView1440x2304),
             PreferredOrientation = "Portrait"
         },
         new DeviceProfile
@@ -41,7 +41,7 @@ public static class DeviceViewRegistry
             Platform = "Android",
             DeviceModel = "SM-F936U1",
             Manufacturer = "samsung",
-            ViewTypeName = "MainView1812x2176",
+            ViewTypeName = nameof(Pages.MainDeviceViews.MainView1812x2176),
             PreferredOrientation = "Portrait"
         },
         new DeviceProfile
@@ -53,7 +53,7 @@ public static class DeviceViewRegistry
             Platform = "Android",
             DeviceModel = "SM-F936U",
             Manufacturer = "samsung",
-            ViewTypeName = "MainView2176x1812",
+            ViewTypeName = nameof(Pages.MainDeviceViews.MainView2176x1812),
             PreferredOrientation = "Landscape"
         },
         new DeviceProfile
@@ -65,7 +65,7 @@ public static class DeviceViewRegistry
             Platform = "WinUI",
             DeviceModel = "Raider GE68HX 13VF",
             Manufacturer = "Micro-Star International Co., Ltd.",
-            ViewTypeName = "MainView1920x1200",
+            ViewTypeName = nameof(Pages.MainDeviceViews.MainView1920x1200),
             PreferredOrientation = "Landscape"
         },
     };

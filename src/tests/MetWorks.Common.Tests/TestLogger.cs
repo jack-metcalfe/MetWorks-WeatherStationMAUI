@@ -13,6 +13,10 @@ class TestLogger : ILogger
     public void Trace(string message) => Messages.Enqueue("T:" + message);
     public System.Exception LogExceptionAndReturn(System.Exception exception) { Messages.Enqueue("EX:" + exception.Message); return exception; }
     public System.Exception LogExceptionAndReturn(System.Exception exception, string message) { Messages.Enqueue("EXM:" + message); return exception; }
+
+    public ILogger ForContext(string contextName, object? value) => this;
+
+    public ILogger ForContext(Type sourceType) => this;
 }
 
 public class LoggerResilientTests
@@ -35,5 +39,18 @@ public class LoggerResilientTests
 
         Assert.Contains("I:one", backend.Messages);
         Assert.Contains("W:two", backend.Messages);
+    }
+
+    [Fact]
+    public void ForContext_Prefixes_Messages()
+    {
+        var resilient = new LoggerResilient();
+        var backend = new TestLogger();
+        resilient.AddLogger(backend);
+
+        var ctx = resilient.ForContext(typeof(LoggerResilientTests));
+        ctx.Information("hello");
+
+        Assert.Contains(backend.Messages, m => m == $"I:[{nameof(LoggerResilientTests)}] hello");
     }
 }

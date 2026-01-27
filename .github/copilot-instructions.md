@@ -16,6 +16,7 @@
 - Use `ServiceBase` as a common base for long-running services across the codebase. Derived services should call `InitializeBase(...)`, use `StartBackground(...)` for background tasks, and rely on `ServiceBase`'s `LinkedCancellationToken`/`LocalCancellationToken` and `OnDisposeAsync` override instead of managing `CTS` and `IAsyncDisposable` manually. Prefer `ServiceBase` for non-UI services.
 - Keep `WeatherViewModel` as `IDisposable` for now and defer converting ViewModels to `ServiceBase`. Re-evaluate `ServiceBase` adoption later; prefer gradual, non-invasive migration.
 - MAUI app will use the usual MAUI constructor-DI pattern for Pages/ViewModels now that custom DI is integrated with MAUI DI.
+- Prefer per-service interfaces (not concretes) for Dependency Injection (DI).
 
 ## Concurrency Management
 - Prefer using Interlocked-based, lock-free patterns (when appropriate) to harden concurrency and reduce brittleness.
@@ -35,3 +36,10 @@
 - Migration workflow: perform file-by-file changes, one at a time, with each step's outcome guiding the next.
 - User prefers direct, candid feedback and welcomes arguments against their opinions.
 - If a helper class is only consumed by a single component, consider absorbing it into that component to simplify the design and reduce brittleness.
+
+## MAUI Specific Instructions
+- MAUI Shell uses ShellContent route `SwipeCarousel` and splash navigates via `GoToAsync("///SwipeCarousel")`.
+- The two-window issue has been fixed by removing OpenWindow/AppShell swapping and resolving AppShell from DI in App.CreateWindow.
+- SwipeCarousel currently shows only arrows (content empty) at the end of the session.
+- Prefer deterministic manual paging (host ContentView + swipe gestures + arrow/key navigation) over CarouselView when CarouselView exhibits virtualization/recycling issues like oscillation/self-swiping.
+- Prefer deterministic manual paging (host ContentView + swipe gestures + arrow/key navigation) over CarouselView when CarouselView shows virtualization/recycling issues like oscillation/self-swiping.
