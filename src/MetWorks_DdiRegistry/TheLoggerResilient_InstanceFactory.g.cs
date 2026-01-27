@@ -13,16 +13,16 @@ namespace MetWorks.ServiceRegistry
     // Declared as partial to allow modularization if needed.
     // It handles both element-driven and assignment-driven construction,
     // and immediately registers the created instance with the Registry.
-    internal static partial class TheLoggerFile_InstanceFactory
+    internal static partial class TheLoggerResilient_InstanceFactory
     {
-        public static MetWorks.Common.Logging.LoggerFile Create(Registry registry)
+        public static MetWorks.Common.Logging.LoggerResilient Create(Registry registry)
         {
             // Assignment-driven instance: construct with new().
             // This is always valid because ContainerClass is a concrete class.
-            var instance = new MetWorks.Common.Logging.LoggerFile();
+            var instance = new MetWorks.Common.Logging.LoggerResilient();
 
             // Register immediately so other instances can reference it.
-            registry.RegisterTheLoggerFile(instance);
+            registry.RegisterTheLoggerResilient(instance);
 
             return instance;
         }

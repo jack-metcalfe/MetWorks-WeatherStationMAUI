@@ -1,0 +1,6 @@
+﻿<linker>
+  <!-- Preserve RedStar.Amounts (assembly used via reflection for unit definitions) -->
+  <assembly fullname="RedStar.Amounts" preserve="all" />
+  <!-- Preserve the weather extensions assembly that registers units from RedStar -->
+  <assembly fullname="MetWorks.RedStar.Amounts.WeatherExtensions" preserve="all" />
+</linker>

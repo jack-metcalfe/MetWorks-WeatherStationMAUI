@@ -1,4 +1,5 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;
+using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Selects the appropriate view based on current device characteristics.
@@ -9,11 +10,7 @@ public static class DeviceViewSelector
     /// <summary>
     /// Get the appropriate ContentPage for the current device
     /// </summary>
-    public static ContentPage GetPageForCurrentDevice(
-        ILogger iLogger,
-        ISettingRepository iSettingRepository,
-        IEventRelayBasic iEventRelayBasic
-    )
+    public static ContentPage GetPageForCurrentDevice()
     {
         var displayInfo = DeviceDisplay.Current.MainDisplayInfo;
         var deviceInfo = DeviceInfo.Current;
@@ -41,7 +38,7 @@ public static class DeviceViewSelector
             Debug.WriteLine($"🎯 Matched device: {profile.DeviceName} → {profile.ViewTypeName}");
             Debug.WriteLine($"   Resolution: {widthPixels}x{heightPixels}, Density: {density:F1}, Platform: {platform}");
             Debug.WriteLine($"   Diagonal: {profile.DiagonalInches:F1}\", Logical: {profile.LogicalWidth:F0}x{profile.LogicalHeight:F0}");
-            return CreateViewFromTypeName(profile.ViewTypeName, iLogger, iSettingRepository, iEventRelayBasic);
+            return CreateViewFromTypeName(profile.ViewTypeName);
         }
 
     
@@ -51,32 +48,92 @@ public static class DeviceViewSelector
         Debug.WriteLine($"   Model: {deviceModel}, Manufacturer: {manufacturer}");
         Debug.WriteLine($"   Using default WeatherPage");
 
-        return new Pages.MainDeviceViews.MainView1920x1200(iLogger, iSettingRepository, iEventRelayBasic);
+        return CreateViewFromTypeName("MainView1920x1200");
     }
     
     /// <summary>
     /// Create a view instance from its type name
     /// </summary>
-    private static ContentPage CreateViewFromTypeName(
-        string typeName, 
-        ILogger iLogger,
-        ISettingRepository iSettingRepository,
-        IEventRelayBasic iEventRelayBasic
-    )
+    private static ContentPage CreateViewFromTypeName(string typeName)
     {
-        return typeName switch
+        // Map type names to concrete types
+        Type? t = typeName switch
         {
-            "MainView1920x1200" => new Pages.MainDeviceViews.MainView1920x1200(iLogger, iSettingRepository, iEventRelayBasic),
-            "MainView2304x1440" => new Pages.MainDeviceViews.MainView2304x1440(iLogger, iSettingRepository, iEventRelayBasic),
-            "MainView1440x2304" => new Pages.MainDeviceViews.MainView1440x2304(iLogger, iSettingRepository, iEventRelayBasic),
-            //"MainView1080x2400" => new Pages.MainDeviceViews.MainView1080x2400(),
-            "MainView1812x2176" => new Pages.MainDeviceViews.MainView1812x2176(iLogger, iSettingRepository, iEventRelayBasic),
-            "MainView2176x1812" => new Pages.MainDeviceViews.MainView2176x1812(iLogger, iSettingRepository, iEventRelayBasic),
-            //"MainView2400x1080" => new Pages.MainDeviceViews.MainView2400x1080(),
-            //"MainView2485x970" => new Pages.MainDeviceViews.MainView2485x970(),
-            //"MainView970x2485" => new Pages.MainDeviceViews.MainView970x2485(),
-            _ => new Pages.MainDeviceViews.MainView1920x1200(iLogger, iSettingRepository, iEventRelayBasic) // Fallback
+            "MainView1920x1200" => typeof(Pages.MainDeviceViews.MainView1920x1200),
+            "MainView2304x1440" => typeof(Pages.MainDeviceViews.MainView2304x1440),
+            "MainView1440x2304" => typeof(Pages.MainDeviceViews.MainView1440x2304),
+            "MainView1812x2176" => typeof(Pages.MainDeviceViews.MainView1812x2176),
+            "MainView2176x1812" => typeof(Pages.MainDeviceViews.MainView2176x1812),
+            _ => typeof(Pages.MainDeviceViews.MainView1920x1200)
         };
+
+        // Try to resolve the page from MAUI DI so constructors with injected ViewModels work.
+        try
+        {
+            var services = Application.Current?.Handler?.MauiContext?.Services;
+            if (services != null && t != null)
+            {
+                // Try to create page with DI
+                var page = ActivatorUtilities.CreateInstance(services, t) as ContentPage;
+                if (page != null) return page;
+
+                // If the page requires a ViewModel in constructor, try resolving the ViewModel then create
+                try
+                {
+                    var vm = services.GetService<WeatherViewModel>();
+                    if (vm != null)
+                    {
+                        page = ActivatorUtilities.CreateInstance(services, t, vm) as ContentPage;
+                        if (page != null) return page;
+                    }
+                }
+                catch { }
+            }
+        }
+        catch { /* fall back to registry-based creation below */ }
+
+        // If DI not available, attempt to construct required ViewModel from the Registry and instantiate the page
+        try
+        {
+            var vm = default(WeatherViewModel);
+            try
+            {
+                if (StartupInitializer.IsInitialized)
+                {
+                    var reg = StartupInitializer.Registry;
+                    var logger = reg.GetTheLoggerResilient();
+                    var settings = reg.GetTheSettingRepository();
+                    var relay = reg.GetTheEventRelayBasic();
+                    vm = new WeatherViewModel(logger, settings, relay);
+                }
+            }
+            catch { }
+
+            if (vm != null && t != null)
+            {
+                try
+                {
+                    var obj = Activator.CreateInstance(t, vm) as ContentPage;
+                    if (obj != null) return obj;
+                }
+                catch { }
+            }
+        }
+        catch { }
+
+        // As a last resort try parameterless create (some pages may have it)
+        try
+        {
+            if (t != null)
+            {
+                var obj = Activator.CreateInstance(t) as ContentPage;
+                if (obj != null) return obj;
+            }
+        }
+        catch { }
+
+        // Nothing worked - throw to make the failure obvious
+        throw new InvalidOperationException($"Unable to create page for type '{typeName}' via DI or fallback constructors.");
     }
     
     /// <summary>

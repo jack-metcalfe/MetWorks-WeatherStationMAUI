@@ -13,20 +13,25 @@ namespace MetWorks.ServiceRegistry
     // Per-instance async initializer.
     // Declared as partial to allow modularization if needed.
     // Only emitted for instances that have assignment-driven initialization.
-    internal static partial class TheLoggerFile_Initializer
+    internal static partial class TheLoggerResilient_Initializer
     {
-        public static async Task Initialize_TheLoggerFileAsync(Registry registry)
+        public static async Task Initialize_TheLoggerResilientAsync(Registry registry)
         {
             // Step 1: retrieve the created instance from the registry.
             // Internal accessor ensures we always get the concrete class.
-            var instance = registry.GetTheLoggerFile_Internal();
+            var instance = registry.GetTheLoggerResilient_Internal();
 
             // Step 2: call its async initializer with assignment values.
             // All argument expressions are fully computed by the pipeline.
             await instance.InitializeAsync(
-                iLoggerStub: registry.GetTheLoggerStub(),
                 iSettingRepository: registry.GetTheSettingRepository(),
-                iInstanceIdentifier: registry.GetTheInstanceIdentifier()
+                iEventRelayBasic: registry.GetTheEventRelayBasic(),
+                iInstanceIdentifier: registry.GetTheInstanceIdentifier(),
+                iLoggerStub: registry.GetTheLoggerStub(),
+                iLoggerFile: registry.GetTheLoggerFile(),
+                iLoggerPostgreSQL: registry.GetTheLoggerPostgreSQL(),
+                maxBufferSize: 1000,
+                cancellationToken: registry.GetRootCancellationTokenSource().Token
             ).ConfigureAwait(false);
         }
     }

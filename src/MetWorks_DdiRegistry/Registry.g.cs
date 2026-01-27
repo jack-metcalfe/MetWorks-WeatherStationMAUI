@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Registry
-// Generated On:        2026-01-26T05:32:30.5671217Z
+// Generated On:        2026-01-26T23:47:15.2298447Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -29,6 +29,7 @@ namespace MetWorks.ServiceRegistry
             TheInstanceIdentifier_InstanceFactory.Create(this);
             TheLoggerFile_InstanceFactory.Create(this);
             TheLoggerPostgreSQL_InstanceFactory.Create(this);
+            TheLoggerResilient_InstanceFactory.Create(this);
             TheProvenanceTracker_InstanceFactory.Create(this);
             TheUnitsOfMeasureInitializer_InstanceFactory.Create(this);
             TheSensorReadingTransformer_InstanceFactory.Create(this);
@@ -46,6 +47,7 @@ namespace MetWorks.ServiceRegistry
             await TheInstanceIdentifier_Initializer.Initialize_TheInstanceIdentifierAsync(this).ConfigureAwait(false);
             await TheLoggerFile_Initializer.Initialize_TheLoggerFileAsync(this).ConfigureAwait(false);
             await TheLoggerPostgreSQL_Initializer.Initialize_TheLoggerPostgreSQLAsync(this).ConfigureAwait(false);
+            await TheLoggerResilient_Initializer.Initialize_TheLoggerResilientAsync(this).ConfigureAwait(false);
             await TheProvenanceTracker_Initializer.Initialize_TheProvenanceTrackerAsync(this).ConfigureAwait(false);
             await TheUnitsOfMeasureInitializer_Initializer.Initialize_TheUnitsOfMeasureInitializerAsync(this).ConfigureAwait(false);
             await TheSensorReadingTransformer_Initializer.Initialize_TheSensorReadingTransformerAsync(this).ConfigureAwait(false);

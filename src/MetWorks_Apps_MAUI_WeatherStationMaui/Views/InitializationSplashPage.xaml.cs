@@ -3,17 +3,17 @@
 namespace MetWorks.Apps.MAUI.WeatherStationMaui.Views;
 public partial class InitializationSplashPage : ContentPage
 {
-    ILogger _iLogger;
+    ILoggerResilient _iLoggerResilient;
     ISettingRepository _iSettingRepository;
     IEventRelayBasic _iEventRelayBasic;
 
     public InitializationSplashPage(
-        ILogger iLogger,
+        ILoggerResilient iLoggerResilient,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic
     )
     {
-        _iLogger = iLogger;
+        _iLoggerResilient = iLoggerResilient;
         _iSettingRepository = iSettingRepository;
         _iEventRelayBasic = iEventRelayBasic;
         InitializeComponent();

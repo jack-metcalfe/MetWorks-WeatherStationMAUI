@@ -4,7 +4,7 @@
 /// when no live logger is available. When a new logger is added the buffer is flushed.
 /// Non-blocking and tolerant of logger failures.
 /// </summary>
-public sealed class LoggerResilient : ServiceBase, ILogger
+public sealed class LoggerResilient : ServiceBase, ILoggerResilient
 {
     readonly ConcurrentQueue<LogEntry> _buffer = new();
     int _maxBufferSize = 1000;
@@ -31,9 +31,12 @@ public sealed class LoggerResilient : ServiceBase, ILogger
     /// Async initialization separate from construction. Call once to wire logger, settings and start background worker.
     /// </summary>
     public Task<bool> InitializeAsync(
-        ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
+        IInstanceIdentifier? iInstanceIdentifier = null,
+        ILoggerStub? iLoggerStub = null,
+        ILoggerFile? iLoggerFile = null,
+        ILoggerPostgreSQL? iLoggerPostgreSQL = null,
         int? maxBufferSize = null,
         CancellationToken cancellationToken = default
     )
@@ -42,22 +45,28 @@ public sealed class LoggerResilient : ServiceBase, ILogger
         if (Interlocked.CompareExchange(ref _initGuard, 1, 0) != 0)
             return Task.FromResult(true);
 
-        ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
 
         try
         {
-            if (maxBufferSize.HasValue)
-            {
-                _maxBufferSize = Math.Max(1, maxBufferSize.Value);
-            }
+            if (maxBufferSize.HasValue) _maxBufferSize = Math.Max(1, maxBufferSize.Value);
 
             // Use ServiceBase helper to wire logger, settings and linked cancellation
-            InitializeBase(iLogger, iSettingRepository, iEventRelayBasic, cancellationToken);
+            InitializeBase(this, iSettingRepository, iEventRelayBasic, cancellationToken);
+
+            if (iLoggerPostgreSQL is not null)
+                AddLogger(iLoggerPostgreSQL);
+            else if (iLoggerFile is not null)
+                AddLogger(iLoggerFile);
+            else if (iLoggerStub is not null)
+                AddLogger(iLoggerStub);
 
             // Start background worker using ServiceBase StartBackground which tracks tasks and honors linked cancellation
             StartBackground(async token => await WorkerLoopAsync(token).ConfigureAwait(false));
+
+            // Mark service ready after worker loop has been started
+            try { MarkReady(); } catch { }
 
             return Task.FromResult(true);
         }

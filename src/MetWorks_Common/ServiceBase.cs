@@ -5,7 +5,7 @@
 /// - background task tracking helper
 /// - safe disposal (cancel -> wait -> dispose)
 /// </summary>
-public abstract class ServiceBase : IAsyncDisposable
+public abstract class ServiceBase : IAsyncDisposable, IServiceReady
 {
     protected bool _isInitialized = false;
 
@@ -21,14 +21,35 @@ public abstract class ServiceBase : IAsyncDisposable
     protected bool HaveProvenanceTracker => _isInitialized && _provenanceTracker != null;
     protected ProvenanceTracker? ProvenanceTracker => NullPropertyGuard.Get(_isInitialized, _provenanceTracker, nameof(ProvenanceTracker));
     // Owned local CTS + linked CTS that honors external cancellation
-    protected CancellationTokenSource LocalCancellationTokenSource { get; private set; } = new();
-    protected CancellationToken LocalCancellationToken => LocalCancellationTokenSource.Token;
-
-    protected CancellationTokenSource? LinkedCancellationTokenSource { get; private set; }
-    protected CancellationToken LinkedCancellationToken => LinkedCancellationTokenSource?.Token ?? CancellationToken.None;
+    CancellationTokenSource _localCancellationTokenSource = new();
+    protected CancellationTokenSource LocalCancellationTokenSource => NullPropertyGuard.Get(_isInitialized, _localCancellationTokenSource, nameof(LocalCancellationTokenSource));
+    CancellationTokenSource? _linkedCancellationTokenSource;
+    CancellationTokenSource LinkedCancellationTokenSource => NullPropertyGuard.Get(_isInitialized, _linkedCancellationTokenSource, nameof(LinkedCancellationTokenSource));
+    CancellationToken? _linkedCancellationToken;
+    protected CancellationToken LinkedCancellationToken => NullPropertyGuard.Get(_isInitialized, _linkedCancellationToken, nameof(LinkedCancellationToken));
 
     // Track background tasks started through StartBackground
     readonly List<Task> _backgroundTasks = new();
+    // Per-service readiness: task completes when service marks itself ready
+    readonly TaskCompletionSource<bool> _readyTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    /// <summary>
+    /// Task that completes when the service reports it is ready for use.
+    /// Consumers can await this to ensure the service has finished any asynchronous startup.
+    /// </summary>
+    public Task Ready => _readyTcs.Task;
+
+    /// <summary>
+    /// True when the service has reported readiness.
+    /// </summary>
+    public bool IsReady => _readyTcs.Task.IsCompletedSuccessfully;
+
+    /// <summary>
+    /// Mark the service as ready. Safe to call multiple times.
+    /// </summary>
+    protected void MarkReady() => _readyTcs.TrySetResult(true);
+
+    // IServiceReady implementation is satisfied by Ready and IsReady members above
 
     /// <summary>
     /// Call early in derived Initialize to wire logger and cancellation.
@@ -48,11 +69,10 @@ public abstract class ServiceBase : IAsyncDisposable
         _iEventRelayPath = iSettingRepository.IEventRelayPath;
         _provenanceTracker = provenanceTracker;
 
+        _linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+            externalCancellation, _localCancellationTokenSource.Token);
+        _linkedCancellationToken = _linkedCancellationTokenSource.Token;
         _isInitialized = true;
-
-        LocalCancellationTokenSource = new CancellationTokenSource();
-        LinkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
-            externalCancellation, LocalCancellationToken);
     }
 
     /// <summary>
@@ -112,23 +132,23 @@ public abstract class ServiceBase : IAsyncDisposable
     {
         try
         {
-            try { _iLogger?.Information("Disposing service..."); } catch { }
+            try { ILogger.Information("Disposing service..."); } catch { }
 
             await OnDisposeAsync().ConfigureAwait(false);
 
-            try { LocalCancellationTokenSource?.Cancel(); } catch { }
-            try { LinkedCancellationTokenSource?.Cancel(); } catch { }
+            try { LocalCancellationTokenSource.Cancel(); } catch { }
+            try { LinkedCancellationTokenSource.Cancel(); } catch { }
 
             await WaitForBackgroundTasksAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            try { _iLogger?.Warning($"Error during disposal: {ex.Message}"); } catch { }
+            try { ILogger.Warning($"Error during disposal: {ex.Message}"); } catch { }
         }
         finally
         {
-            try { LinkedCancellationTokenSource?.Dispose(); } catch { }
-            try { LocalCancellationTokenSource?.Dispose(); } catch { }
+            try { LinkedCancellationTokenSource.Dispose(); } catch { }
+            try { LocalCancellationTokenSource.Dispose(); } catch { }
             _isInitialized = false;
         }
     }

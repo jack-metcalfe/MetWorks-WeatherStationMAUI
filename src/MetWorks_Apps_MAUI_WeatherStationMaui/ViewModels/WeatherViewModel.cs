@@ -8,8 +8,8 @@
 public class WeatherViewModel : INotifyPropertyChanged, IDisposable
 {
     bool _isInitialized = false;
-    ILogger? _iLogger = null;
-    ILogger ILogger => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
+    ILoggerResilient? _iLoggerResilient = null;
+    ILoggerResilient ILoggerResilient => NullPropertyGuard.Get(_isInitialized, _iLoggerResilient, nameof(ILoggerResilient));
     ISettingRepository? _iSettingRepository = null;
     ISettingRepository ISettingRepository => NullPropertyGuard.Get(_isInitialized, _iSettingRepository, nameof(ISettingRepository));
     IEventRelayBasic? _iEventRelayBasic = null;
@@ -81,15 +81,16 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     public string TimeDateDisplay => _currentTime.ToString("MMM dd");
     public string TimeDisplay => _currentTime.ToString("HH:mm");
     public WeatherViewModel(
-        ILogger iLogger,
+        ILoggerResilient iLoggerResilient,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic
     )
     {
-        _iLogger = iLogger;
+        _iLoggerResilient = iLoggerResilient;
         _iSettingRepository = iSettingRepository;
         _iEventRelayBasic = iEventRelayBasic;
         StartServiceStatusMonitoring();
+        // Initialization is event-driven: subscribe to event relay and initialize when data arrives.
     }
     private void StartServiceStatusMonitoring()
     {
@@ -182,7 +183,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
             _isInitialized = false;
 
             // Use backing logger field — property might throw if initialization failed earlier
-            _iLogger?.Error("Failed to initialize", exception);
+            _iLoggerResilient?.Error("Failed to initialize", exception);
             throw;
         }
     }

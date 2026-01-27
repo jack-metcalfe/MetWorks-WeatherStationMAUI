@@ -37,7 +37,7 @@ public class RawPacketIngestor : ServiceBase
 
     // No schema pre-checks. Any Postgres action that fails will be treated as a fatal initialization error.
     public async Task<bool> InitializeAsync(
-        ILogger iLogger,
+        ILoggerResilient iLoggerResilient,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         IInstanceIdentifier iInstanceIdentifier,
@@ -45,19 +45,19 @@ public class RawPacketIngestor : ServiceBase
         ProvenanceTracker? provenanceTracker = null
     )
     {
-        iLogger.Information($"RawPacketIngestor.InitializeAsync() starting - thread={Environment.CurrentManagedThreadId}");
+        iLoggerResilient.Information($"RawPacketIngestor.InitializeAsync() starting - thread={Environment.CurrentManagedThreadId}");
         try
         {
             // Use ServiceBase helper to wire logger and linked cancellation
             InitializeBase(
-                iLogger,
+                iLoggerResilient,
                 iSettingRepository,
                 iEventRelayBasic,
                 externalCancellation,
                 provenanceTracker
             );
 
-            iLogger.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")}enabled for PostgreSQL listener");
+            iLoggerResilient.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")}enabled for PostgreSQL listener");
 
             _bufferingEnabled = iSettingRepository.GetValueOrDefault<bool>(
                 LookupDictionaries.XMLToPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.XMLToPostgreSQL_enableBuffering)
@@ -66,7 +66,7 @@ public class RawPacketIngestor : ServiceBase
             if (_bufferingEnabled)
             {
                 _messageBuffer = new ConcurrentQueue<IRawPacketRecordTyped>();
-                iLogger.Information("📦 Message buffering enabled for PostgreSQL listener");
+                iLoggerResilient.Information("📦 Message buffering enabled for PostgreSQL listener");
             }
 
             _connectionString = iSettingRepository.GetValueOrDefault<string>(
@@ -89,33 +89,36 @@ public class RawPacketIngestor : ServiceBase
 
             if (string.IsNullOrWhiteSpace(_connectionString))
             {
-                iLogger.Warning("⚠️ PostgreSQL connection string not configured. Running in degraded mode.");
+                iLoggerResilient.Warning("⚠️ PostgreSQL connection string not configured. Running in degraded mode.");
                 await StartDegradedAsync();
                 return true; // Return true to allow app to continue
             }
 
             // Attempt initial connection
-            iLogger.Information($"Calling TryEstablishConnectionAsync fom RawPacketIngestor.InitializeAsync() - thread={Environment.CurrentManagedThreadId}");
+            iLoggerResilient.Information($"Calling TryEstablishConnectionAsync fom RawPacketIngestor.InitializeAsync() - thread={Environment.CurrentManagedThreadId}");
             var connected = await TryEstablishConnectionAsync(_connectionString).ConfigureAwait(false);
-            iLogger.Information($"Back from calling TryEstablishConnectionAsync fom RawPacketIngestor.InitializeAsync() - thread={Environment.CurrentManagedThreadId}");
+            iLoggerResilient.Information($"Back from calling TryEstablishConnectionAsync fom RawPacketIngestor.InitializeAsync() - thread={Environment.CurrentManagedThreadId}");
 
             // Fail fast: if any Postgres action fails during initialization, abort startup.
             if (!connected)
             {
-                iLogger.Error("❌ PostgreSQL initial connection failed during initialization. Aborting Postgres listener startup.");
+                iLoggerResilient.Error("❌ PostgreSQL initial connection failed during initialization. Aborting Postgres listener startup.");
                 return false;
             }
 
-            iLogger.Information("✅ PostgreSQL listener initialized with active connection");
+            iLoggerResilient.Information("✅ PostgreSQL listener initialized with active connection");
             await StartAsync().ConfigureAwait(false);
 
-            iLogger.Information($"RawPacketIngestor.InitializeAsync() completed, returning  - thread={Environment.CurrentManagedThreadId}");
+            // Mark service readiness after successful start
+            try { MarkReady(); } catch { }
+
+            iLoggerResilient.Information($"RawPacketIngestor.InitializeAsync() completed, returning  - thread={Environment.CurrentManagedThreadId}");
             return true; // Always return true - we handle failures gracefully
         }
         catch (Exception exception)
         {
-            iLogger.Error($"❌ Error during PostgreSQL listener initialization: {exception.Message}");
-            iLogger.Warning("⚠️ Starting PostgreSQL listener in degraded mode");
+            iLoggerResilient.Error($"❌ Error during PostgreSQL listener initialization: {exception.Message}");
+            iLoggerResilient.Warning("⚠️ Starting PostgreSQL listener in degraded mode");
             await StartDegradedAsync().ConfigureAwait(false);
             return true; // Don't throw - allow app to continue
         }
@@ -704,18 +707,18 @@ public class RawPacketIngestor : ServiceBase
             // Unregister from relay (use backing field to be safe)
             try
             {
-                IEventRelayBasic?.Unregister<IRawPacketRecordTyped>(this);
+                IEventRelayBasic.Unregister<IRawPacketRecordTyped>(this);
             }
             catch { /* swallow */ }
 
             // No factory to clear anymore.
 
             // Log disposal
-            try { _iLogger?.Information("🧹 PostgreSQL listener disposed"); } catch { }
+            try { ILogger.Information("🧹 PostgreSQL listener disposed"); } catch { }
         }
         catch (Exception ex)
         {
-            try { _iLogger?.Warning($"⚠️ Error during ListenerSink disposal: {ex.Message}"); } catch { }
+            try { ILogger.Warning($"⚠️ Error during ListenerSink disposal: {ex.Message}"); } catch { }
         }
 
         await Task.CompletedTask;

@@ -89,3 +89,62 @@
   - Documentation: update docs to reference `LookupDictionaries.<Group>GroupSettingsDefinition.BuildSettingPath(name)` for reading specific settings and `BuildGroupPath()` for registering prefix handlers with `IEventRelayPath` rather than using hard-coded `/services/...` string literals.
   - Docs sweep: replace textual references in repository docs that hard-code `/services/...` with canonical API examples and guidance.
   - Prepare PR summary and changelog entry describing these changes (settings override persistence, InstanceIdentifier service, tests, and docs updates).
+Applied work and remaining suggested changes
+==========================================
+
+Summary of notable changes already applied in the workspace (during recent session):
+- Moved startup splash into `AppShell` and implemented Shell-based navigation so `Shell.Current` is available and the splash is shown exactly once.
+- Implemented create-vs-init startup: `StartupInitializer.CreateRegistryAndRegisterServices(IServiceCollection)` registers DDI-created instances into MAUI DI before `builder.Build()`; `StartupInitializer.InitializeAsync()` runs the long-running init in background and emits events (`StatusChanged`, `Initialized`, `InitializationFailed`).
+- Added ConfigureAwait(false) fixes in background/service files (UDP listener, Postgres ingestor, logger worker) to avoid capturing UI context in services.
+- Added a lightweight splash/progress page `InitializationSplashPage` and wiring to startup events.
+
+Note on third-party code (RedStar)
+---------------------------------
+- This project uses `RedStar.Amounts` for unit definitions and conversions. We intentionally avoid
+  modifying `RedStar.Amounts` or `RedStar.Amount.StandardUnits` in this repository so upstream
+  updates remain simple. For diagnostics or linker-preserve work, prefer wrapper/adapter code
+  or documentation notes rather than editing RedStar sources directly. Credit to the RedStar
+  project for providing the unit definitions and conversion helpers used here.
+
+Remaining suggested tasks (recommended, not yet implemented)
+-----------------------------------------------------
+These are suggestions from previous diagnostics and code review that were not implemented automatically. They're ordered by impact/priority with short rationale and a recommended owner/approach.
+
+A. Diagnostic & linker-hardening for Android (high)
+- Add targeted diagnostics when reflection-based loading fails in the `RedStar.Amounts` assembly: catch `ReflectionTypeLoadException` in `UnitManager.RegisterUnits(Assembly)` and log `LoaderExceptions` with full type names and messages so logcat shows exactly what was trimmed.
+- Add a conservative Android linker preservation rule (linker.xml) or `[Preserve]` attributes for types referenced only via reflection (unit definition classes, conversion classes, parsing helpers). Prefer a small linker XML preserving the specific `RedStar.Amounts` namespace/types.
+- Disable the linker for Debug temporarily (csproj `<AndroidLinkMode>None</AndroidLinkMode>`) to confirm the linker is the root cause.
+
+B. Per-service readiness (medium)
+- Add a standard readiness pattern to long-running services:
+  - internal `TaskCompletionSource<bool> _readyTcs` set to true when service is ready
+  - public `Task Ready => _readyTcs.Task` and `bool IsReady` property
+  - Consumers may `await service.Ready` or check `IsReady` before performing init-dependent calls.
+- Implement the pattern for at least one critical service (e.g., `TempestPacketTransformer` or `RawPacketIngestor`) as an example.
+
+C. More granular startup status messages (low/UX)
+- Emit more granular `StatusChanged` messages from `StartupInitializer.RegisterServices()` at clear checkpoints: "Creating registry", "Initializing UDP listener", "Starting Postgres listener (degraded)", "Postgres connected", "Registering DDI singletons", etc. This improves splash UX and diagnostics.
+
+D. Route naming and registration cleanup (low)
+- Replace dynamic route strings (type names) with explicit route constants to avoid string typos. Centralize route constants in a static `Routes` class and register them in `AppShell.RegisterRoutes()`.
+
+E. Audit & refactor direct `Registry` usages (medium)
+- Scan repository for direct usages of `StartupInitializer.Registry` and replace with DI where sensible. Where direct registry access is necessary, add guarded checks (e.g., `if (StartupInitializer.IsInitialized)`) or use lazy resolution.
+
+F. Move route registration into XAML (optional)
+- For a cleaner separation, declare `ShellContent` and routes in `AppShell.xaml` and use code-behind only to swap the initial content after init. This is mostly cosmetic but yields clearer markup-driven navigation.
+
+G. Add targeted unit/integration tests (medium)
+- Add tests for: `InstanceIdentifier` generation/persistence, `UnitManager` registration behavior (including fallback UnitResolve handler), and a small integration test exercising the `IEventRelayBasic` flow for a ViewModel.
+
+H. Example: add diagnostic logging around `UnitManager.RegisterUnits` (quick task)
+- Implement a small try/catch around assembly scanning to capture loader exceptions and log them to the resilient logger file so Android logcat contains the exact failure. This is the recommended first step to confirm linker trimming is the real issue.
+
+How to proceed (recommended next actions)
+1. Implement (H) diagnostic logging in `RedStar.Amounts.UnitManager.RegisterUnits` and repro on Android to capture `LoaderExceptions` in logcat.
+2. If diagnostics point to linker trimming, add a small linker XML preserving the `RedStar.Amounts` namespace and re-run. Only widen preservation if necessary.
+3. Implement per-service `Ready` Task on one critical service and update a sample page to await it before accessing initialization-dependent APIs.
+4. Add route constants and centralize registration as a follow-up refactor.
+
+If you want I can implement (H) now (small code changes and quick build) and then prepare the conservative linker XML. Tell me which to do next.
+

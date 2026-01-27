@@ -11,6 +11,6 @@ namespace MetWorks.ServiceRegistry
 {
     public partial class Registry
     {
-        private MetWorks.Ingest.Transformer.SensorReadingTransformer _TheSensorReadingTransformerInstance;
+        private MetWorks.Common.Logging.LoggerResilient _TheLoggerResilientInstance;
     }
 }

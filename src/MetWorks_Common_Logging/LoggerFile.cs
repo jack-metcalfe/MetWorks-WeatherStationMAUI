@@ -1,15 +1,15 @@
 ﻿namespace MetWorks.Common.Logging;
-public class LoggerFile : ILogger
+public class LoggerFile : ILoggerFile
 {
     public Task<bool> InitializeAsync(
-        ILogger iLogger,
+        ILoggerStub iLoggerStub,
         ISettingRepository iSettingRepository,
         IInstanceIdentifier iInstanceIdentifier,
         IPlatformPaths? platformPaths = null,
         CancellationToken cancellationToken = default
     )
     {
-        ArgumentNullException.ThrowIfNull(iLogger);
+        ArgumentNullException.ThrowIfNull(iLoggerStub);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
 
         if (_isInitialized)

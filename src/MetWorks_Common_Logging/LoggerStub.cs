@@ -4,7 +4,7 @@
 /// Used during bootstrap phase before the real logger is initialized.
 /// This is a no-op stub that satisfies the IFileLogger interface contract.
 /// </summary>
-public sealed class LoggerStub : Interfaces.ILogger
+public sealed class LoggerStub : ILoggerStub
 {
     public Task<bool> InitializeAsync(
         int fileSizeLimitBytes,

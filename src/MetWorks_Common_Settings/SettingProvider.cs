@@ -37,12 +37,12 @@ public class SettingProvider : ISettingProvider
         _overridesBaseDirectory = overridesBaseDirectory;
     }
     public async Task<bool> InitializeAsync(
-        ILogger iLogger
+        ILoggerStub iLoggerStub
     )
     {
         try
         {
-            ILogger = iLogger;
+            ILogger = iLoggerStub;
             var settingModel = Load();
             if (settingModel is not null)
             {

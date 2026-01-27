@@ -22,7 +22,7 @@ public class SensorReadingTransformer : ServiceBase
     // Initialization
     // ========================================
     public async Task<bool> InitializeAsync(
-        ILogger iLogger,
+        ILoggerResilient iLoggerResilient,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         CancellationToken externalCancellation = default,
@@ -32,22 +32,22 @@ public class SensorReadingTransformer : ServiceBase
         try
         {
             InitializeBase(
-                iLogger,
+                iLoggerResilient,
                 iSettingRepository,
                 iEventRelayBasic,
                 externalCancellation,
                 provenanceTracker
             );
-            iLogger.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")} enabled for sensor readings");
+            iLoggerResilient.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")} enabled for sensor readings");
             // Load current unit preferences from settings
-            if (!LoadUnitPreference(iLogger, iSettingRepository))
+            if (!LoadUnitPreference(iLoggerResilient, iSettingRepository))
             {
-                iLogger.Error("Failed to load unit preferences during initialization");
+                iLoggerResilient.Error("Failed to load unit preferences during initialization");
                 return false;
             }
-            iLogger.Information("🌡️ WeatherDataTransformer initialized successfully");
+            iLoggerResilient.Information("🌡️ WeatherDataTransformer initialized successfully");
             foreach(var unitKVP in _preferredUnits)
-                iLogger.Information($"   {unitKVP.Key}: {unitKVP.Value.Name}");
+                iLoggerResilient.Information($"   {unitKVP.Key}: {unitKVP.Value.Name}");
             // Subscribe to unit setting changes for the whole group (prefix match).
             // Use the GroupSettingDefinition to build the canonical settings path prefix
             // so the value is not hard-coded (DRY).
@@ -55,6 +55,7 @@ public class SensorReadingTransformer : ServiceBase
             IEventRelayPath.Register(unitGroupPrefix, OnUnitSettingChanged);
             // Subscribe to raw packet events
             IEventRelayBasic.Register<IRawPacketRecordTyped>(this, OnRawPacketReceived);
+            MarkReady();
             return await Task.FromResult(true);
         }
         catch (Exception ex)

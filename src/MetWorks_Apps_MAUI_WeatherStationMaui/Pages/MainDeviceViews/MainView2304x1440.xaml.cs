@@ -7,13 +7,11 @@ public partial class MainView2304x1440 : ContentPage
     private readonly WeatherViewModel _viewModel;
 
     public MainView2304x1440(
-        ILogger iLogger,
-        ISettingRepository iSettingRepository,
-        IEventRelayBasic iEventRelayBasic
+        WeatherViewModel viewModel
     )
     {
         InitializeComponent();
-        _viewModel = new WeatherViewModel(iLogger, iSettingRepository, iEventRelayBasic);
+        _viewModel = viewModel;
         BindingContext = _viewModel;
     }
 

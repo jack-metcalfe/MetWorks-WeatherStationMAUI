@@ -10,10 +10,10 @@ public class UnitsOfMeasureInitializer
     {
     }
     public async Task<bool> InitializeAsync(
-        ILogger iLogger
+        ILoggerResilient iLoggerResilient
     )
     {
-        _iLogger = iLogger ?? throw new ArgumentNullException(nameof(iLogger));
+        _iLogger = iLoggerResilient ?? throw new ArgumentNullException(nameof(iLoggerResilient));
         try
         {
             _iLogger.Information("📐 Registering RedStar.Amounts units...");
@@ -34,8 +34,22 @@ public class UnitsOfMeasureInitializer
                 throw;
             }
 
-            UnitManager.RegisterByAssembly(asm);
-            _iLogger.Information("✅ RedStar.Amounts units registered");
+            try
+            {
+                UnitManager.RegisterByAssembly(asm);
+                _iLogger.Information("✅ RedStar.Amounts units registered");
+            }
+            catch (ReflectionTypeLoadException rtle)
+            {
+                // Log loader exceptions with details to aid Android linker diagnostics
+                _iLogger.Error("ReflectionTypeLoadException while registering unit assembly.", rtle);
+                foreach (var le in rtle.LoaderExceptions ?? Array.Empty<Exception>())
+                {
+                    try { _iLogger.Error("Loader exception during UnitManager.RegisterByAssembly:", le); } catch { }
+                }
+                // Rethrow so outer handler can handle flow (degraded startup)
+                throw;
+            }
 
             _iLogger.Information("🌤️ Registering weather unit aliases...");
             WeatherUnitAliases.Register();

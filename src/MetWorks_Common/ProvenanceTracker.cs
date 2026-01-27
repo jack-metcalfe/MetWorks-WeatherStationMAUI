@@ -16,10 +16,10 @@ public class ProvenanceTracker
     /// Initializes the provenance tracker.
     /// </summary>
     public async Task<bool> InitializeAsync(
-        ILogger iLogger
+        ILoggerResilient iLoggerResilient
     )
     {
-        _iLogger = iLogger;
+        _iLogger = iLoggerResilient;
         _isInitialized = true;
         return await Task.FromResult(_isInitialized);
     }

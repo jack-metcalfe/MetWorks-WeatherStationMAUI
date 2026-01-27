@@ -18,7 +18,7 @@ public class TempestPacketTransformer : ServiceBase
     }
     // Accept CancellationToken (not CTS) per .NET convention
     public async Task<bool> InitializeAsync(
-        ILogger iLogger,
+        ILoggerResilient iLoggerResilient,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         CancellationToken externalCancellation = default,
@@ -28,14 +28,14 @@ public class TempestPacketTransformer : ServiceBase
         try
         {
             InitializeBase(
-                iLogger,
+                iLoggerResilient,
                 iSettingRepository,
                 iEventRelayBasic,
                 externalCancellation,
                 provenanceTracker
             );
 
-            iLogger.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")} enabled for Tempest Packet Transformer");
+            iLoggerResilient.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")} enabled for Tempest Packet Transformer");
 
             // Log network interfaces for diagnostics
             LogNetworkInterfaces();
@@ -45,17 +45,20 @@ public class TempestPacketTransformer : ServiceBase
 
             if (!await SetupAsync().ConfigureAwait(false))
             {
-                ILogger.Error("❌ UDP listener setup failed");
+                iLoggerResilient.Error("❌ UDP listener setup failed");
                 return false;
             }
 
             if (!await StartAsync().ConfigureAwait(false))
             {
-                ILogger.Error("❌ UDP listener failed to start");
+                iLoggerResilient.Error("❌ UDP listener failed to start");
                 return false;
             }
 
-            ILogger.Information("🛠️ UDP listener initialized successfully");
+            // Service is successfully initialized and background receive loop started
+            try { MarkReady(); } catch { }
+
+            iLoggerResilient.Information("🛠️ UDP listener initialized successfully");
 
             return true;
         }
@@ -95,115 +98,129 @@ public class TempestPacketTransformer : ServiceBase
     }
     async Task<bool> SetupAsync()
     {
-        var preferredPort = ISettingRepository.GetValueOrDefault<int>(
-                LookupDictionaries.UdpListenerGroupSettingsDefinition.BuildSettingPath(SettingConstants.UdpListener_preferredPort)
-            );
-
-        // Try preferred port first
-        if (await TryBindToPortAsync(preferredPort))
-            return true;
-
-        // If preferred port fails, try alternate ports
-        ILogger.Warning($"⚠️ Failed to bind to preferred port {preferredPort}, trying alternates...");
-
-        for (int port = preferredPort + 1; port < preferredPort + 10; port++)
+        try
         {
-            if (await TryBindToPortAsync(port))
-            {
-                ILogger.Information($"✅ Successfully bound to alternate port {port}");
-                return true;
-            }
-        }
+            var preferredPort = ISettingRepository.GetValueOrDefault<int>(
+                    LookupDictionaries.UdpListenerGroupSettingsDefinition.BuildSettingPath(SettingConstants.UdpListener_preferredPort)
+                );
 
-        ILogger.Error("❌ Failed to bind to any UDP port after trying alternates");
+            // Try preferred port first
+            if (await TryBindToPortAsync(preferredPort))
+                return true;
+
+            // If preferred port fails, try alternate ports
+            ILogger.Warning($"⚠️ Failed to bind to preferred port {preferredPort}, trying alternates...");
+
+            for (int port = preferredPort + 1; port < preferredPort + 10; port++)
+            {
+                if (await TryBindToPortAsync(port))
+                {
+                    ILogger.Information($"✅ Successfully bound to alternate port {port}");
+                    return true;
+                }
+            }
+
+            ILogger.Error("❌ Failed to bind to any UDP port after trying alternates");
+        }
+        catch (Exception exception)
+        {
+            ILogger.Error($"❌ Exception during UDP listener setup: {exception.Message}");
+        }
         return false;
     }
     private async Task<bool> TryBindToPortAsync(int port)
     {
-        var token = LinkedCancellationToken;
-        for (int attempt = 1; attempt <= MaxRetryAttempts; attempt++)
+        try
         {
-            try
+            var token = LinkedCancellationToken;
+            for (int attempt = 1; attempt <= MaxRetryAttempts; attempt++)
             {
-                // Respect external cancellation
-                if (token.IsCancellationRequested)
+                try
                 {
-                    ILogger.Warning("⚠️ Bind cancelled by external shutdown");
+                    // Respect external cancellation
+                    if (token.IsCancellationRequested)
+                    {
+                        ILogger.Warning("⚠️ Bind cancelled by external shutdown");
+                        return false;
+                    }
+
+                    // Create UdpClient without binding so we can set socket options first
+                    var client = new UdpClient(AddressFamily.InterNetwork);
+
+                    // Allow reuse of address on platforms that support it so rebind is more resilient
+                    try
+                    {
+                        client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                    }
+                    catch
+                    {
+                        // Not critical if platform doesn't allow this; log for diagnostics
+                        ILogger.Debug("Could not set SO_REUSEADDR on UdpClient (platform may not support it)");
+                    }
+
+                    // Bind explicitly (so exceptions are thrown here)
+                    client.Client.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Any, port));
+
+                    if (client == null)
+                    {
+                        throw new InvalidOperationException("UdpClient instantiation returned null");
+                    }
+
+                    // Swap in new client under lock and dispose old
+                    await _udpClientLock.WaitAsync(token).ConfigureAwait(false);
+                    try
+                    {
+                        var old = UdpClient;
+                        UdpClient = client;
+                        old?.Dispose();
+                    }
+                    finally
+                    {
+                        _udpClientLock.Release();
+                    }
+
+                    var endpoint = UdpClient.Client.LocalEndPoint?.ToString() ?? "(unbound)";
+                    ILogger.Information($"✅ Bound UDP listener to ALL INTERFACES on port {port} ({endpoint})");
+
+                    await Task.CompletedTask;
+                    return true;
+                }
+                catch (SocketException socketException) when (
+                    socketException.SocketErrorCode == SocketError.AddressAlreadyInUse ||
+                    socketException.SocketErrorCode == SocketError.AccessDenied)
+                {
+                    if (attempt < MaxRetryAttempts)
+                    {
+                        ILogger.Warning(
+                            $"⚠️ Attempt {attempt}/{MaxRetryAttempts}: Port {port} unavailable " +
+                            $"({socketException.SocketErrorCode}). Retrying in {RetryDelaySeconds}s...");
+
+                        await Task.Delay(TimeSpan.FromSeconds(RetryDelaySeconds), token).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        ILogger.Warning(
+                            $"❌ Port {port} unavailable after {MaxRetryAttempts} attempts: " +
+                            $"{socketException.SocketErrorCode}");
+                    }
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
+                {
+                    ILogger.Warning("⚠️ Port bind cancelled by external shutdown");
                     return false;
                 }
-
-                // Create UdpClient without binding so we can set socket options first
-                var client = new UdpClient(AddressFamily.InterNetwork);
-
-                // Allow reuse of address on platforms that support it so rebind is more resilient
-                try
+                catch (Exception exception)
                 {
-                    client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                    ILogger.Warning($"❌ Unexpected error binding to port {port}: {exception.Message}");
+                    return false;
                 }
-                catch
-                {
-                    // Not critical if platform doesn't allow this; log for diagnostics
-                    ILogger.Debug("Could not set SO_REUSEADDR on UdpClient (platform may not support it)");
-                }
-
-                // Bind explicitly (so exceptions are thrown here)
-                client.Client.Bind(new System.Net.IPEndPoint(System.Net.IPAddress.Any, port));
-
-                if (client == null)
-                {
-                    throw new InvalidOperationException("UdpClient instantiation returned null");
-                }
-
-                // Swap in new client under lock and dispose old
-                        await _udpClientLock.WaitAsync(token).ConfigureAwait(false);
-                try
-                {
-                    var old = UdpClient;
-                    UdpClient = client;
-                    old?.Dispose();
-                }
-                finally
-                {
-                    _udpClientLock.Release();
-                }
-
-                var endpoint = UdpClient.Client.LocalEndPoint?.ToString() ?? "(unbound)";
-                ILogger.Information($"✅ Bound UDP listener to ALL INTERFACES on port {port} ({endpoint})");
-
-                await Task.CompletedTask;
-                return true;
-            }
-            catch (SocketException socketException) when (
-                socketException.SocketErrorCode == SocketError.AddressAlreadyInUse ||
-                socketException.SocketErrorCode == SocketError.AccessDenied)
-            {
-                if (attempt < MaxRetryAttempts)
-                {
-                    ILogger.Warning(
-                        $"⚠️ Attempt {attempt}/{MaxRetryAttempts}: Port {port} unavailable " +
-                        $"({socketException.SocketErrorCode}). Retrying in {RetryDelaySeconds}s...");
-
-                    await Task.Delay(TimeSpan.FromSeconds(RetryDelaySeconds), token).ConfigureAwait(false);
-                }
-                else
-                {
-                    ILogger.Warning(
-                        $"❌ Port {port} unavailable after {MaxRetryAttempts} attempts: " +
-                        $"{socketException.SocketErrorCode}");
-                }
-            }
-            catch (OperationCanceledException) when (token.IsCancellationRequested)
-            {
-                ILogger.Warning("⚠️ Port bind cancelled by external shutdown");
-                return false;
-            }
-            catch (Exception exception)
-            {
-                ILogger.Warning($"❌ Unexpected error binding to port {port}: {exception.Message}");
-                return false;
             }
         }
 
+        catch(Exception exception)
+        {
+            ILogger.Warning($"❌ Exception in TryBindToPortAsync for port {port}: {exception.Message}");
+        }
         return false;
     }
     // Called to attempt a rebind when we detect network issues or events
@@ -549,7 +566,7 @@ public class TempestPacketTransformer : ServiceBase
             // Use backing fields to avoid NullPropertyGuard exceptions if Dispose called before Initialize
             try
             {
-                _iLogger?.Information("🧹 Disposing UDP listener...");
+                ILogger.Information("🧹 Disposing UDP listener...");
             }
             catch { /* swallow */ }
 
@@ -574,7 +591,7 @@ public class TempestPacketTransformer : ServiceBase
         }
         catch (Exception ex)
         {
-            try { _iLogger?.Warning($"⚠️ Error during UDP listener disposal: {ex.Message}"); } catch { }
+            try { ILogger.Warning($"⚠️ Error during UDP listener disposal: {ex.Message}"); } catch { }
         }
 
         return Task.CompletedTask;

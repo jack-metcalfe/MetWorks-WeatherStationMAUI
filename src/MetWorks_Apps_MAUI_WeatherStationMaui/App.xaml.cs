@@ -3,17 +3,17 @@ public partial class App : Application
 {
     Task? _initializationTask;
     CancellationTokenSource? _shutdownCts;
-    ILogger _iLogger;
+    ILoggerResilient _iLoggerResilient;
     ISettingRepository _iSettingRepository;
     IEventRelayBasic _iEventRelayBasic;
     
     public App(
-        ILogger iLogger,
+        ILoggerResilient iLoggerResilient,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic
     )
     {
-        _iLogger = iLogger;
+        _iLoggerResilient = iLoggerResilient;
         _iSettingRepository = iSettingRepository;
         _iEventRelayBasic = iEventRelayBasic;  
 
@@ -55,7 +55,7 @@ public partial class App : Application
         Debug.WriteLine(DeviceViewSelector.GetDeviceInfo());
 
         // Create AppShell (which hosts the splash as initial ShellContent) so only one splash instance is created
-        var appShell = new AppShell(_iLogger, _iSettingRepository, _iEventRelayBasic);
+        var appShell = new AppShell(_iLoggerResilient, _iSettingRepository, _iEventRelayBasic);
         var window = new Window(appShell);
 
         // Cleanup on window destruction

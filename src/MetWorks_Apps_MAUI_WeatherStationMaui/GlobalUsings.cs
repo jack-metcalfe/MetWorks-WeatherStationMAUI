@@ -15,7 +15,8 @@ global using MetWorks.Common.Utility;
 global using MetWorks.Interfaces;
 global using MetWorks.Models.Observables.Weather;
 global using MetWorks.ServiceRegistry;
-
+global using MetWorks.Ingest.Transformer;
+global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Maui;
 global using Microsoft.Maui.ApplicationModel;
@@ -27,6 +28,5 @@ global using Microsoft.Maui.Hosting;
 global using RedStar.Amounts;
 global using RedStar.Amounts.StandardUnits;
 
-global using ILogger = MetWorks.Interfaces.ILogger;
 global using SystemTimer = System.Timers.Timer;
 global using ThreadingTimer = System.Threading.Timer;

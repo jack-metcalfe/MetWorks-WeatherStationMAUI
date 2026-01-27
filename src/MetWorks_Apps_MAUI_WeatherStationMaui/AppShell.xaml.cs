@@ -8,7 +8,7 @@ public partial class AppShell : Shell
     }
 
     // Constructor used at runtime to inject services and show the splash as the initial Shell content
-    public AppShell(ILogger iLogger, ISettingRepository iSettingRepository, IEventRelayBasic iEventRelayBasic)
+    public AppShell(ILoggerResilient iLoggerResilient, ISettingRepository iSettingRepository, IEventRelayBasic iEventRelayBasic)
     {
         InitializeComponent();
         RegisterRoutes();
@@ -16,7 +16,7 @@ public partial class AppShell : Shell
         // Build initial Shell items programmatically so we can inject the splash page with DI
         try
         {
-            var splashPage = new Views.InitializationSplashPage(iLogger, iSettingRepository, iEventRelayBasic);
+            var splashPage = new Views.InitializationSplashPage(iLoggerResilient, iSettingRepository, iEventRelayBasic);
 
             var splashContent = new ShellContent
             {

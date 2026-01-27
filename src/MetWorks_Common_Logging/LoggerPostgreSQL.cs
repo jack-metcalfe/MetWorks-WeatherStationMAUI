@@ -8,16 +8,16 @@ using ILogEventSink = Serilog.Core.ILogEventSink;
 /// - Schema creation runs in background with retry; writes are best-effort and will resume automatically when network returns.
 /// - Future: swap or augment writes to persist to local SQLite when unhealthy and flush when healthy.
 /// </summary>
-public class LoggerPostgreSQL : ILogger
+public class LoggerPostgreSQL : ILoggerPostgreSQL
 {
     public Task<bool> InitializeAsync(
-        ILogger iLogger,
+        ILoggerFile iLoggerFile,
         ISettingRepository iSettingRepository,
         IInstanceIdentifier iInstanceIdentifier,
         CancellationToken cancellationToken = default
     )
     {
-        ArgumentNullException.ThrowIfNull(iLogger);
+        ArgumentNullException.ThrowIfNull(iLoggerFile);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
 
         if (_isInitialized)

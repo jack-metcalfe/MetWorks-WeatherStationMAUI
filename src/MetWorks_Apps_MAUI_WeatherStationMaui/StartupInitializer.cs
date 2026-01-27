@@ -56,7 +56,7 @@ public class StartupInitializer
     //NullPropertyGuard.Get(
     //IsInitialized, _appRegistry, nameof(Registry));
 
-    private static ILogger? _fileLogger;
+    private static ILoggerResilient? _iLoggerResilient;
     private static bool _isInitialized = false;
     private static bool _isDatabaseAvailable = false;
     
@@ -94,7 +94,7 @@ public class StartupInitializer
             try { InitializationFailed?.Invoke(exception); } catch { }
             
             // Try to log with file logger if available
-            _fileLogger?.Error($"Startup initialization failed: {exception}");
+            _iLoggerResilient?.Error($"Startup initialization failed: {exception}");
             
             // Re-throw with clear context for UI
             throw new InvalidOperationException(
@@ -123,8 +123,8 @@ public class StartupInitializer
                 await _appRegistry!.InitializeAllAsync().ConfigureAwait(false);
 
                 // Step 3: Cache logger after initialization
-                _fileLogger = _appRegistry.GetTheLoggerPostgreSQL();
-                _fileLogger?.Information("✅ All services initialized successfully");
+                _iLoggerResilient = _appRegistry.GetTheLoggerResilient();
+                _iLoggerResilient?.Information("✅ All services initialized");
 
                 // Step 4: Verify critical services
                 await VerifyCriticalServicesAsync().ConfigureAwait(false);
@@ -137,8 +137,8 @@ public class StartupInitializer
                 exception.InnerException is Npgsql.NpgsqlException)
             {
                 Debug.WriteLine($"⚠️ PostgreSQL initialization failed: {exception.Message}");
-                _fileLogger?.Warning("⚠️ PostgreSQL unavailable at startup. App running in degraded mode.");
-                _fileLogger?.Information("🔄 Auto-reconnection enabled - database will connect automatically when available");
+                _iLoggerResilient?.Warning("⚠️ PostgreSQL unavailable at startup. App running in degraded mode.");
+                _iLoggerResilient?.Information("🔄 Auto-reconnection enabled - database will connect automatically when available");
 
                 _isDatabaseAvailable = false;
                 // Don't throw - app can continue without database
@@ -148,7 +148,7 @@ public class StartupInitializer
                 Debug.WriteLine($"❌ Service initialization failed: {exception.Message}");
                 Debug.WriteLine($"   Stack trace: {exception.StackTrace}");
 
-                _fileLogger?.Error($"Service initialization failed: {exception}");
+                _iLoggerResilient?.Error($"Service initialization failed: {exception}");
 
                 throw;
             }
@@ -159,7 +159,7 @@ public class StartupInitializer
             Debug.WriteLine($"❌ FATAL: Startup initialization failed: {exception}");
 
             // Try to log with file logger if available
-            _fileLogger?.Error($"Startup initialization failed: {exception}");
+            _iLoggerResilient?.Error($"Startup initialization failed: {exception}");
 
             // Re-throw with clear context for UI
             throw new InvalidOperationException(
@@ -175,28 +175,17 @@ public class StartupInitializer
         
         try
         {
-            // Verify logger is available (CRITICAL - must have)
-            var logger = _appRegistry.GetTheLoggerPostgreSQL();
-            if (logger is null)
-                throw new InvalidOperationException("PostgreSQL logger failed to initialize");
-
-            // Verify UDP settings repository (CRITICAL - must have)
-            var udpRepo = _appRegistry.GetTheUdpListener();
-            if (udpRepo is null)
+            if (_appRegistry.GetTheSettingRepository() is null)
                 throw new InvalidOperationException("UDP settings repository failed to initialize");
-            
-            // Verify UDP listener (CRITICAL - must have)
-            var udpListener = _appRegistry.GetTheUdpListener();
-            if (udpListener is null)
+
+            if (_appRegistry.GetTheUdpListener() is null)
                 throw new InvalidOperationException("UDP listener failed to initialize");
-            
-            // Postgres is now OPTIONAL - don't fail if it's not available
-            var pgRepo = _appRegistry.GetTheSettingRepository();
-            if (pgRepo is null)
-                logger.Warning("⚠️ PostgreSQL settings repository not available - database features disabled");
+
+            if (_appRegistry.GetTheLoggerPostgreSQL() is null)
+                _iLoggerResilient?.Warning("⚠️ PostgreSQL settings repository not available");
             
             Debug.WriteLine("✅ All critical services verified");
-            logger.Information("Critical services verification completed successfully");
+            _iLoggerResilient.Information("Critical services verification completed successfully");
             
             await Task.CompletedTask;
         }
@@ -212,7 +201,7 @@ public class StartupInitializer
     {
         try
         {
-            _fileLogger?.Information("🛑 Shutting down application services...");
+            _iLoggerResilient?.Information("🛑 Shutting down application services...");
             Debug.WriteLine("🛑 Shutting down application services...");
             
             if (_appRegistry != null)
@@ -223,7 +212,7 @@ public class StartupInitializer
             _isInitialized = false;
             _isDatabaseAvailable = false;
             
-            _fileLogger?.Information("✅ Application services shut down successfully");
+            _iLoggerResilient?.Information("✅ Application services shut down successfully");
             Debug.WriteLine("✅ Application services shut down successfully");
             
             await Task.CompletedTask;
@@ -231,7 +220,7 @@ public class StartupInitializer
         catch (Exception exception)
         {
             Debug.WriteLine($"⚠️ Error during shutdown: {exception}");
-            _fileLogger?.Warning($"Error during shutdown: {exception}");
+            _iLoggerResilient?.Warning($"Error during shutdown: {exception}");
         }
     }
 }

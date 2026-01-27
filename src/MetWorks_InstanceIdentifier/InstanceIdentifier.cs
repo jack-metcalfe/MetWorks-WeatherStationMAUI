@@ -4,7 +4,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
     // Build canonical setting path from the GroupSettingDefinition to avoid hard-coded strings.
     private static string Path => LookupDictionaries.InstanceGroupSettingsDefinition.BuildSettingPath(SettingConstants.Instance_installationId);
     private ISettingProvider? _settingProvider;
-    private ILogger? _logger;
+    private ILoggerStub? iLoggerStub;
     private string? _cached;
 
     // Parameterless constructor for DDI creation
@@ -12,11 +12,11 @@ public partial class InstanceIdentifier : IInstanceIdentifier
 
     // Declarative DI initialize signature
     public async Task<bool> InitializeAsync(
-        ILogger iLogger, 
+        ILoggerStub iLoggerStub, 
         ISettingProvider iSettingProvider
     )
     {
-        _logger = iLogger ?? throw new ArgumentNullException(nameof(iLogger));
+        this.iLoggerStub = iLoggerStub ?? throw new ArgumentNullException(nameof(iLoggerStub));
         _settingProvider = iSettingProvider ?? throw new ArgumentNullException(nameof(iSettingProvider));
 
         // Ensure provider is initialized - if not, we can't read values; just return true if set
@@ -35,7 +35,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
         }
         catch (Exception ex)
         {
-            _logger.Error("InstanceIdentifier failed to initialize.", ex);
+            this.iLoggerStub.Error("InstanceIdentifier failed to initialize.", ex);
             return false;
         }
     }
@@ -43,7 +43,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
     {
         if (!string.IsNullOrEmpty(_cached)) return _cached!;
         if (_settingProvider is null) throw new InvalidOperationException("InstanceIdentifier not initialized");
-        if (_logger is null) throw new InvalidOperationException("InstanceIdentifier not initialized");
+        if (iLoggerStub is null) throw new InvalidOperationException("InstanceIdentifier not initialized");
 
         try
         {
@@ -63,7 +63,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
             var saved = _settingProvider.SaveValueOverride(Path, guid);
             if (!saved)
             {
-                _logger.Warning("Failed to persist installationId override, continuing with transient value.");
+                iLoggerStub.Warning("Failed to persist installationId override, continuing with transient value.");
             }
 
             _cached = guid;
@@ -71,7 +71,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
         }
         catch (Exception ex)
         {
-            _logger.Error("Failed to obtain or create installation id.", ex);
+            iLoggerStub.Error("Failed to obtain or create installation id.", ex);
             _cached = Guid.NewGuid().ToString();
             return _cached!;
         }
