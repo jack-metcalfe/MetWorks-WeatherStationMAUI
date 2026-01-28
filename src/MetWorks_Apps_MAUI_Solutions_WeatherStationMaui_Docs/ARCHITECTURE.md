@@ -7,6 +7,7 @@ Key references
 - Packet parsing: src/udp_packets/TempestPacketParser.cs
 - Transformation & last-packet cache: src/metworks_services/WeatherDataTransformer.cs
 - Settings entrypoint: src/settings/SettingRepository.cs
+- UI architecture notes: 2026-01-28-ui-architecture-notes.md
 
 Core concepts
 - UDP Listener receives raw packets, TempestPacketParser parses them into typed packets, WeatherDataTransformer applies business transforms and maintains a last-packet cache for retransforms; transformed events are published via the Event Relay and persisted as configured.

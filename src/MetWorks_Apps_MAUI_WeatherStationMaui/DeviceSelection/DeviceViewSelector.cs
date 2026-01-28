@@ -1,9 +1,10 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;
-using Microsoft.Extensions.DependencyInjection;
 
 using System;
-using Microsoft.Extensions.DependencyInjection;
+
 using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
+
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Devices;
 
 /// <summary>
@@ -47,7 +48,14 @@ public static class DeviceViewSelector
             Debug.WriteLine($"🎯 Matched device: {profile!.DeviceName} → {viewTypeName}");
         }
 
-        var page = new Pages.MainDeviceViews.MainViewPage();
+        var services = Application.Current?.Handler?.MauiContext?.Services;
+        if (services is null)
+            throw new InvalidOperationException("MAUI IServiceProvider was not available to create MainViewPage via DI.");
+
+        var page = ActivatorUtilities.CreateInstance(services, typeof(Pages.MainDeviceViews.MainViewPage)) as Pages.MainDeviceViews.MainViewPage;
+        if (page is null)
+            throw new InvalidOperationException("Failed to create MainViewPage via DI.");
+
         var view = CreateViewFromTypeNameView(viewTypeName);
         page.SetContent(view);
         return page;
@@ -118,11 +126,7 @@ public static class DeviceViewSelector
         }
         catch { }
 
-        // Fallback: non-DI creation
-        var fallbackPage = new Pages.MainDeviceViews.MainViewPage();
-        var fallbackView = CreateViewFromTypeNameView(typeName);
-        fallbackPage.SetContent(fallbackView);
-        return fallbackPage;
+        throw new InvalidOperationException("MAUI IServiceProvider was not available to create MainViewPage via DI.");
     }
 
     private static View CreateViewFromTypeNameView(string typeName)

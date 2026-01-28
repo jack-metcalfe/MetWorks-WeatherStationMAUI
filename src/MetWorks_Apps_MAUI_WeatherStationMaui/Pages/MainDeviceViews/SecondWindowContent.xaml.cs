@@ -2,7 +2,9 @@
 
 public partial class SecondWindowContent : ContentView
 {
-    public SecondWindowContent()
+    public SecondWindowContent(
+        ILoggerResilient iLoggerResilient
+    )
     {
         InitializeComponent();
     }

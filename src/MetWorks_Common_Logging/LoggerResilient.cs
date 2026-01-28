@@ -53,14 +53,23 @@ public sealed class LoggerResilient : ServiceBase, ILoggerResilient
             if (maxBufferSize.HasValue) _maxBufferSize = Math.Max(1, maxBufferSize.Value);
 
             // Use ServiceBase helper to wire logger, settings and linked cancellation
-            InitializeBase(this, iSettingRepository, iEventRelayBasic, cancellationToken);
+            var selectedLogger = iLoggerStub ?? _fallbackLogger;
 
             if (iLoggerPostgreSQL is not null)
-                AddLogger(iLoggerPostgreSQL);
+                selectedLogger = iLoggerPostgreSQL;
             else if (iLoggerFile is not null)
-                AddLogger(iLoggerFile);
+                selectedLogger = iLoggerFile;
             else if (iLoggerStub is not null)
-                AddLogger(iLoggerStub);
+                selectedLogger = iLoggerStub;
+
+            AddLogger(selectedLogger);
+
+            InitializeBase(
+                this,
+                iSettingRepository,
+                iEventRelayBasic,
+                cancellationToken
+            );
 
             // Start background worker using ServiceBase StartBackground which tracks tasks and honors linked cancellation
             StartBackground(async token => await WorkerLoopAsync(token).ConfigureAwait(false));

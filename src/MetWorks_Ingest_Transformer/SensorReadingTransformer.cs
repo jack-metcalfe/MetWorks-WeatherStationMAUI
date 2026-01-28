@@ -32,7 +32,7 @@ public class SensorReadingTransformer : ServiceBase
         try
         {
             InitializeBase(
-                iLoggerResilient,
+                iLoggerResilient.ForContext(this.GetType()),
                 iSettingRepository,
                 iEventRelayBasic,
                 externalCancellation,

@@ -28,12 +28,14 @@ public class TempestPacketTransformer : ServiceBase
         try
         {
             InitializeBase(
-                iLoggerResilient,
+                iLoggerResilient.ForContext(this.GetType()),
                 iSettingRepository,
                 iEventRelayBasic,
                 externalCancellation,
                 provenanceTracker
             );
+
+            iLoggerResilient.Ready.ConfigureAwait(false).GetAwaiter().GetResult();
 
             iLoggerResilient.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")} enabled for Tempest Packet Transformer");
 

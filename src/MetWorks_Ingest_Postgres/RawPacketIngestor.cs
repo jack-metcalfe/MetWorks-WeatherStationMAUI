@@ -50,7 +50,7 @@ public class RawPacketIngestor : ServiceBase
         {
             // Use ServiceBase helper to wire logger and linked cancellation
             InitializeBase(
-                iLoggerResilient,
+                iLoggerResilient.ForContext(this.GetType()),
                 iSettingRepository,
                 iEventRelayBasic,
                 externalCancellation,

@@ -1,10 +1,10 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.MainDeviceViews;
-
-using System.Collections.ObjectModel;
-
+using Microsoft.Extensions.DependencyInjection;
 public partial class MainViewPage : ContentPage
 {
     bool _contentSet;
+
+    readonly IServiceProvider _services;
 
     View? _deviceMainView;
     View? _secondView;
@@ -16,8 +16,10 @@ public partial class MainViewPage : ContentPage
     static readonly TimeSpan KeyNavigationDebounce = TimeSpan.FromMilliseconds(150);
 #endif
 
-    public MainViewPage()
+    public MainViewPage(IServiceProvider services)
     {
+        ArgumentNullException.ThrowIfNull(services);
+        _services = services;
         InitializeComponent();
 
 #if WINDOWS
@@ -35,7 +37,7 @@ public partial class MainViewPage : ContentPage
         ArgumentNullException.ThrowIfNull(view);
 
         _deviceMainView = view;
-        _secondView ??= new SecondWindowContent();
+        _secondView ??= _services.GetRequiredService<SecondWindowContent>();
         _index = 0;
 
         Host.Content = _deviceMainView;
@@ -50,7 +52,7 @@ public partial class MainViewPage : ContentPage
 
         try
         {
-            var view = DeviceSelection.DeviceViewSelector.GetViewForCurrentDevice();
+            var view = DeviceViewSelector.GetViewForCurrentDevice();
             SetContent(view);
 
             btnLeft.IsVisible = true;

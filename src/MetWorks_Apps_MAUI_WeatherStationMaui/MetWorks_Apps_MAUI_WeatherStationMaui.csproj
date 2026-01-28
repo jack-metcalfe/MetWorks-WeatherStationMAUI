@@ -103,9 +103,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<MauiXaml Update="Pages\MainDeviceViews\DetailsContent.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
 		<MauiXaml Update="Pages\MainDeviceViews\MainView1440x2304.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
@@ -115,16 +112,10 @@
 		<MauiXaml Update="Pages\MainDeviceViews\MainView2304x1440.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainViewContent.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
 		<MauiXaml Update="Pages\MainDeviceViews\MainViewPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Pages\MainDeviceViews\SecondWindowContent.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\SwipeCarouselPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Resources\Styles\WeatherColors.xaml">
