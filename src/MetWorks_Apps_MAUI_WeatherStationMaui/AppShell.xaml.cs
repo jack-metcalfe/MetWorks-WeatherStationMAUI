@@ -10,11 +10,8 @@ public partial class AppShell : Shell
 
     void RegisterRoutes()
     {
-        try
-        {
-            Routing.RegisterRoute(nameof(Pages.MainDeviceViews.MainViewPage), typeof(Pages.MainDeviceViews.MainViewPage));
-            Routing.RegisterRoute("MainView", typeof(Pages.MainDeviceViews.MainViewPage));
-        }
-        catch { /* ignore routing registration failures */ }
+        // ShellContent routes defined in AppShell.xaml don't require Route registration.
+        // Only register routes for pages you navigate to that are NOT ShellContent.
+        // Keeping this method in case additional non-shell routes are added later.
     }
 }

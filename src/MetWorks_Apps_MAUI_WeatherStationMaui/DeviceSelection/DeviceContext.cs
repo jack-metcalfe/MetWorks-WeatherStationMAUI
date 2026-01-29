@@ -1,7 +1,4 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;
-
-using Microsoft.Maui.Devices;
-
 /// <summary>
 /// Snapshot of device + display characteristics used for selecting UI variants.
 /// Prefer dp-based metrics for layout decisions; keep identity fields for overrides.

@@ -2,17 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\interfaces\MetWorks.Interfaces.csproj" />
-    <ProjectReference Include="..\..\logging\MetWorks.Common.Logging.csproj" />
+    <ProjectReference Include="..\..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
+    <ProjectReference Include="..\..\MetWorks_Common_Logging\MetWorks_Common_Logging.csproj" />
   </ItemGroup>
 
 </Project>

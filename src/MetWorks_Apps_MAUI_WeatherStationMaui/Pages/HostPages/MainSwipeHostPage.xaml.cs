@@ -1,13 +1,15 @@
-﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.MainDeviceViews;
-using Microsoft.Extensions.DependencyInjection;
-public partial class MainViewPage : ContentPage
+﻿using MetWorks.Apps.Maui.WeatherStationMaui.DeviceSelection;
+
+namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.HostPages;
+public partial class MainSwipeHostPage : ContentPage
 {
     bool _contentSet;
 
     readonly IServiceProvider _services;
+    readonly IContentViewFactory _contentViewFactory;
+    readonly IHostCompositionCatalog _hostCompositionCatalog;
 
-    View? _deviceMainView;
-    View? _secondView;
+    readonly List<View> _slots = new();
     int _index;
 
 
@@ -16,10 +18,18 @@ public partial class MainViewPage : ContentPage
     static readonly TimeSpan KeyNavigationDebounce = TimeSpan.FromMilliseconds(150);
 #endif
 
-    public MainViewPage(IServiceProvider services)
+    public MainSwipeHostPage(
+        IServiceProvider services, 
+        IContentViewFactory contentViewFactory,
+        IHostCompositionCatalog hostCompositionCatalog
+    )
     {
         ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(contentViewFactory);
+        ArgumentNullException.ThrowIfNull(hostCompositionCatalog);
         _services = services;
+        _contentViewFactory = contentViewFactory;
+        _hostCompositionCatalog = hostCompositionCatalog;
         InitializeComponent();
 
 #if WINDOWS
@@ -36,12 +46,16 @@ public partial class MainViewPage : ContentPage
     {
         ArgumentNullException.ThrowIfNull(view);
 
-        _deviceMainView = view;
-        _secondView ??= _services.GetRequiredService<SecondWindowContent>();
+        _slots.Clear();
+        _slots.Add(view);
+
         _index = 0;
 
-        Host.Content = _deviceMainView;
+        Host.Content = _slots[0];
         _contentSet = true;
+
+        btnLeft.IsVisible = true;
+        btnRight.IsVisible = true;
     }
 
     protected override void OnAppearing()
@@ -52,8 +66,28 @@ public partial class MainViewPage : ContentPage
 
         try
         {
-            var view = DeviceViewSelector.GetViewForCurrentDevice();
-            SetContent(view);
+            var ctx = DeviceContext.Current();
+
+            if (!_hostCompositionCatalog.TryGetComposition(HostKey.MainSwipe, out var composition))
+                throw new InvalidOperationException($"No host composition registered for {HostKey.MainSwipe}.");
+
+            if (composition.Slots.Count < 1)
+                throw new InvalidOperationException($"Host composition {HostKey.MainSwipe} must specify at least one slot.");
+
+            _slots.Clear();
+            foreach (var slot in composition.Slots)
+            {
+                var view = _contentViewFactory.Create(slot, ctx);
+                _slots.Add(view);
+            }
+
+            if (_slots.Count == 0)
+                throw new InvalidOperationException($"Host composition {HostKey.MainSwipe} produced no views.");
+
+            _index = 0;
+
+            Host.Content = _slots[0];
+            _contentSet = true;
 
             btnLeft.IsVisible = true;
             btnRight.IsVisible = true;
@@ -79,20 +113,13 @@ public partial class MainViewPage : ContentPage
 
     void ShowIndex(int index)
     {
-        var count = 2;
-        if (count == 0) return;
+        var count = _slots.Count;
+        if (count == 0)
+            return;
 
         _index = (index % count + count) % count;
 
-        var next = _index switch
-        {
-            0 => _deviceMainView,
-            1 => _secondView,
-            _ => _deviceMainView
-        };
-
-        if (next is null)
-            return;
+        var next = _slots[_index];
 
         if (!ReferenceEquals(Host.Content, next))
             Host.Content = next;

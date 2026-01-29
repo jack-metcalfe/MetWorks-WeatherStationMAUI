@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.MainDeviceViews;
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages;
 
 public partial class MainView1920x1200 : ContentView
 {

@@ -2,9 +2,9 @@
 public interface IObservationReadingDto
 {
     long EpochTimestampUtc { get; }
-    double WindLull { get; }
     double WindAverage { get; }
     double WindGust { get; }
+    double WindLull { get; }
     int WindDirection { get; }
     int WindSampleInterval { get; }
     double StationPressure { get; }

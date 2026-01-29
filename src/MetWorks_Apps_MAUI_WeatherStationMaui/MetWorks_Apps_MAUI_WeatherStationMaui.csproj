@@ -41,6 +41,9 @@
 	  <!-- Linker descriptor to prevent trimming of reflection-used RedStar types -->
 	  <AndroidLinkDescription Include="Platforms\Android\linker.xml" />
 	  
+	  <!-- Curated device overrides -->
+	  <MauiAsset Include="device-overrides.yaml" LogicalName="device-overrides.yaml" />
+	  
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
 
@@ -59,18 +62,27 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Remove="Pages\MainDeviceViews\MainView1080x2400 .xaml.cs" />
-		<Compile Remove="Pages\MainDeviceViews\MainView1080x2400.xaml.cs" />
-		<Compile Remove="Pages\MainDeviceViews\MainView2400x1080.xaml.cs" />
-		<Compile Remove="Pages\MainDeviceViews\MainVIew2485x970.xaml.cs" />
-		<Compile Remove="Pages\MainDeviceViews\MainView970x2485.xaml.cs" />
+	  <AndroidResource Remove="Pages\MainDeviceViews\**" />
+	  <Compile Remove="Pages\MainDeviceViews\**" />
+	  <EmbeddedResource Remove="Pages\MainDeviceViews\**" />
+	  <MauiCss Remove="Pages\MainDeviceViews\**" />
+	  <MauiXaml Remove="Pages\MainDeviceViews\**" />
+	  <None Remove="Pages\MainDeviceViews\**" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<MauiXaml Remove="Pages\MainDeviceViews\MainView1080x2400.xaml" />
-		<MauiXaml Remove="Pages\MainDeviceViews\MainView2400x1080.xaml" />
-		<MauiXaml Remove="Pages\MainDeviceViews\MainVIew2485x970.xaml" />
-		<MauiXaml Remove="Pages\MainDeviceViews\MainView970x2485.xaml" />
+		<Compile Remove="Pages\GuestPages\MainView1080x2400 .xaml.cs" />
+		<Compile Remove="Pages\GuestPages\MainView1080x2400.xaml.cs" />
+		<Compile Remove="Pages\GuestPages\MainView2400x1080.xaml.cs" />
+		<Compile Remove="Pages\GuestPages\MainVIew2485x970.xaml.cs" />
+		<Compile Remove="Pages\GuestPages\MainView970x2485.xaml.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<MauiXaml Remove="Pages\GuestPages\MainView1080x2400.xaml" />
+		<MauiXaml Remove="Pages\GuestPages\MainView2400x1080.xaml" />
+		<MauiXaml Remove="Pages\GuestPages\MainVIew2485x970.xaml" />
+		<MauiXaml Remove="Pages\GuestPages\MainView970x2485.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -88,40 +100,46 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Pages\MainDeviceViews\MainView1440x2304.xaml.cs">
+	  <Compile Update="Pages\GuestPages\MainView1440x2304.xaml.cs">
 	    <DependentUpon>MainView1440x2304.xaml</DependentUpon>
 	  </Compile>
-	  <Compile Update="Pages\MainDeviceViews\MainView1812x2176.xaml.cs">
+	  <Compile Update="Pages\GuestPages\MainView1812x2176.xaml.cs">
 	    <DependentUpon>MainView1812x2176.xaml</DependentUpon>
 	  </Compile>
-	  <Compile Update="Pages\MainDeviceViews\MainView1920x1200.xaml.cs">
+	  <Compile Update="Pages\GuestPages\MainView1920x1200.xaml.cs">
 	    <DependentUpon>MainView1920x1200.xaml</DependentUpon>
 	  </Compile>
-	  <Compile Update="Pages\MainDeviceViews\MainView2304x1440.xaml.cs">
+	  <Compile Update="Pages\GuestPages\MainView2304x1440.xaml.cs">
 	    <DependentUpon>MainView2304x1440.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\GuestPages\LiveWindAdaptive.xaml.cs">
+	    <DependentUpon>LiveWindAdaptive.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\HostPages\MainSwipeHostPage.xaml.cs">
+	    <DependentUpon>MainSwipeHostPage.xaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
-		<MauiXaml Update="Pages\MainDeviceViews\MainView1440x2304.xaml">
+		<MauiXaml Update="Pages\GuestPages\MainView1440x2304.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainView1920x1200.xaml">
+		<MauiXaml Update="Pages\GuestPages\MainView1920x1200.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainView2304x1440.xaml">
+		<MauiXaml Update="Pages\GuestPages\MainView2304x1440.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\MainViewPage.xaml">
+		<MauiXaml Update="Pages\HostPages\MainSwipeHostPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Pages\MainDeviceViews\SecondWindowContent.xaml">
+		<MauiXaml Update="Pages\GuestPages\LiveWindAdaptive.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Resources\Styles\WeatherColors.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\InitializationSplashPage.xaml">
+		<MauiXaml Update="Pages\InitializationSplashPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 	</ItemGroup>

@@ -1,8 +1,9 @@
-﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui;
+﻿using MetWorks.Apps.Maui.WeatherStationMaui.DeviceSelection;
+using MetWorks.Apps.Maui.WeatherStationMaui.DeviceSelection.Overrides;
+
+namespace MetWorks.Apps.MAUI.WeatherStationMaui;
 public static class MauiProgram
 {
-    static bool _ddiRegistered = false;
-
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
@@ -45,13 +46,15 @@ public static class MauiProgram
 
         // Register ViewModels and Pages for DI-driven page activation
         builder.Services.AddTransient<WeatherViewModel>();
-        builder.Services.AddTransient<MainViewPage>();
-        builder.Services.AddTransient<SecondWindowContent>();
+        builder.Services.AddTransient<MainSwipeHostPage>();
+        builder.Services.AddTransient<LiveWindAdaptive>();
+        builder.Services.AddTransient<MainView1920x1200>();
+        builder.Services.AddTransient<MainView2176x1812>();
 
-        foreach (var viewType in MainDeviceViewsCatalog.AllViewTypes)
-        {
-            builder.Services.AddTransient(viewType);
-        }
+        builder.Services.AddSingleton<IContentVariantCatalog, ContentVariantCatalog>();
+        builder.Services.AddSingleton<IDeviceOverrideSource, YamlDeviceOverrideSource>();
+        builder.Services.AddSingleton<IHostCompositionCatalog, HostCompositionCatalog>();
+        builder.Services.AddTransient<IContentViewFactory, ContentViewFactory>();
 
         return builder.Build();
     }

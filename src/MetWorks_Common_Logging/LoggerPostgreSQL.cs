@@ -10,6 +10,9 @@ using ILogEventSink = Serilog.Core.ILogEventSink;
 /// </summary>
 public class LoggerPostgreSQL : ILoggerPostgreSQL
 {
+    const int DefaultConnectTimeoutSeconds = 2;
+    const int DefaultCommandTimeoutSeconds = 2;
+
     public Task<bool> InitializeAsync(
         ILoggerFile iLoggerFile,
         ISettingRepository iSettingRepository,
@@ -52,7 +55,7 @@ public class LoggerPostgreSQL : ILoggerPostgreSQL
             );
 
             // Keep settings visible on the instance
-            _connectionString = connectionString;
+            _connectionString = ApplyFailFastTimeouts(connectionString);
             _tableName = tableName;
 
             // Build Serilog logger with our custom sink.
@@ -75,7 +78,7 @@ public class LoggerPostgreSQL : ILoggerPostgreSQL
 
             // Pass a health callback so the outer class can expose a health flag.
             _iLogger = loggerCfg
-                .WriteTo.Sink(new PostgresSink(connectionString, tableName, autoCreateTable, SetHealth))
+                .WriteTo.Sink(new PostgresSink(_connectionString, tableName, autoCreateTable, SetHealth))
                 .CreateLogger();
 
             _isInitialized = true;
@@ -235,6 +238,32 @@ public class LoggerPostgreSQL : ILoggerPostgreSQL
         Enum.TryParse<LogEventLevel>(level, true, out var parsed)
             ? parsed
             : LogEventLevel.Information;
+
+    static string ApplyFailFastTimeouts(string connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return connectionString;
+
+        try
+        {
+            var csb = new NpgsqlConnectionStringBuilder(connectionString);
+
+            // Only override if not explicitly set in config.
+            if (csb.Timeout <= 0)
+                csb.Timeout = DefaultConnectTimeoutSeconds;
+
+            if (csb.CommandTimeout <= 0)
+                csb.CommandTimeout = DefaultCommandTimeoutSeconds;
+
+            // Optional: keep pooling off the critical path; if network is down pooling won't help.
+            return csb.ConnectionString;
+        }
+        catch
+        {
+            // If parsing fails, keep original connection string.
+            return connectionString;
+        }
+    }
     public Exception LogExceptionAndReturn(Exception exception)
     {
         ILogger.Error("An error occurred", exception);

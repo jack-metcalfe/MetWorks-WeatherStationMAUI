@@ -19,7 +19,7 @@ We want:
 - MAUI DI registrations for these views are driven by `MainDeviceViewsCatalog.AllViewTypes`.
 
 ### Host page and paging
-- `Pages/MainDeviceViews/MainViewPage` currently acts as a **host page**.
+- `Pages/HostPages/MainSwipeHostPage` currently acts as a **host page**.
 - The UI uses **deterministic manual paging** (a single host `ContentView` and explicit swapping) rather than `CarouselView`.
   - Rationale: `CarouselView` exhibited virtualization/recycling issues (oscillation/self-swiping) in this scenario.
   - Paging gestures:
@@ -29,8 +29,8 @@ We want:
 ### Second content view
 - `SecondWindowContent` is currently a placeholder for the second “swiped” screen.
 - `SecondWindowContent` can be created via MAUI DI (constructor injection supported).
-- `MainViewPage` was refactored to be DI-friendly:
-  - `MainViewPage(IServiceProvider services)` constructor injection
+- `MainSwipeHostPage` was refactored to be DI-friendly:
+  - `MainSwipeHostPage(IServiceProvider services)` constructor injection
   - `SecondWindowContent` resolved via injected `IServiceProvider`
   - Removed polling/waiting for `Application.Current?.Handler?.MauiContext?.Services`
 

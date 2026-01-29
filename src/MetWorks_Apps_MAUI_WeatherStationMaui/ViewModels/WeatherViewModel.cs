@@ -1,5 +1,4 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
-
 /// <summary>
 /// ViewModel for displaying current weather readings.
 /// Subscribes to weather reading streams via ISingletonEventRelay.
@@ -7,13 +6,15 @@
 /// </summary>
 public class WeatherViewModel : INotifyPropertyChanged, IDisposable
 {
-    bool _isInitialized = false;
-    ILoggerResilient? _iLoggerResilient = null;
-    ILoggerResilient ILoggerResilient => NullPropertyGuard.Get(_isInitialized, _iLoggerResilient, nameof(ILoggerResilient));
-    ISettingRepository? _iSettingRepository = null;
-    ISettingRepository ISettingRepository => NullPropertyGuard.Get(_isInitialized, _iSettingRepository, nameof(ISettingRepository));
-    IEventRelayBasic? _iEventRelayBasic = null;
-    IEventRelayBasic IEventRelayBasic => NullPropertyGuard.Get(_isInitialized, _iEventRelayBasic, nameof(IEventRelayBasic));
+    enum InitializeStateEnum
+    {
+        Uninitialized = 0,
+        Initializing = 1,
+        Initialized = 2
+    }
+    readonly ILoggerResilient _iLoggerResilient;
+    readonly ISettingRepository _iSettingRepository;
+    readonly IEventRelayBasic _iEventRelayBasic;
     IWindReading? _currentWind;
     IObservationReading? _currentObservation;
     SystemTimer? _clockTimer;
@@ -22,16 +23,27 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     DateTime _currentTime = DateTime.Now;
 
     // Lightweight init guard: 0 = not started, 1 = initializing, 2 = initialized
-    int _initializeState = 0;
+    int _initializeState = (int)InitializeStateEnum.Uninitialized;
 
     // Cancellation pattern for cooperative shutdown (optional)
     CancellationTokenSource? _localCancellation;
     CancellationTokenSource? _linkedCancellation;
     CancellationToken LinkedCancellationToken => _linkedCancellation?.Token ?? CancellationToken.None;
-
     // ========================================
-    // Temperature Display Properties
+    // Observation Display Properties
     // ========================================
+    public string WindAverage =>
+        CurrentObservation != null
+            ? $"{CurrentObservation.WindAverage.Value:F0} {CurrentObservation.WindAverage.Unit.Symbol}"
+            : "--";
+    public string WindGust =>
+        CurrentObservation != null
+            ? $"{CurrentObservation.WindGust.Value:F0} {CurrentObservation.WindGust.Unit.Symbol}"
+            : "--";
+    public string WindLull =>
+        CurrentObservation != null
+            ? $"{CurrentObservation.WindLull.Value:F0} {CurrentObservation.WindLull.Unit.Symbol}"
+            : "--";
     public string TemperatureValue =>
         CurrentObservation != null
             ? $"{CurrentObservation.Temperature.Value:F0}"
@@ -87,6 +99,10 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         IEventRelayBasic iEventRelayBasic
     )
     {
+        ArgumentNullException.ThrowIfNull(iLoggerResilient);
+        ArgumentNullException.ThrowIfNull(iSettingRepository);
+        ArgumentNullException.ThrowIfNull(iEventRelayBasic);
+
         _iLoggerResilient = iLoggerResilient;
         _iSettingRepository = iSettingRepository;
         _iEventRelayBasic = iEventRelayBasic;
@@ -100,9 +116,9 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
             UpdateServiceStatus,
             null,
             TimeSpan.Zero,  // Start immediately
-            TimeSpan.FromSeconds(5));
+            TimeSpan.FromSeconds(5)
+        );
     }
-
     private void UpdateServiceStatus(object? state)
     {
         MainThread.BeginInvokeOnMainThread(
@@ -133,22 +149,30 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
             }
         );
     }
-
-    // Accept optional external CancellationToken so this viewmodel can be cooperatively cancelled.
-    public async Task<bool> InitializeAsync()
+    async Task<bool> InitializeAsync()
     {
         // Quick check: if already marked initialized return true
-        if (Interlocked.CompareExchange(ref _initializeState, 2, 2) == 2)
+        if (
+            Interlocked.CompareExchange(
+                ref _initializeState,
+                (int)InitializeStateEnum.Initialized,
+                (int)InitializeStateEnum.Initialized
+            ) == (int)InitializeStateEnum.Initialized
+        )
             return await Task.FromResult(true);
 
         // Try to transition from 0 -> 1 (not started -> initializing)
-        var prior = Interlocked.CompareExchange(ref _initializeState, 1, 0);
-        if (prior == 1)
+        var prior = Interlocked.CompareExchange(
+            ref _initializeState, 
+            (int)InitializeStateEnum.Initializing, 
+            (int)InitializeStateEnum.Uninitialized
+        );
+        if (prior == (int)InitializeStateEnum.Initializing)
         {
             // someone else is initializing
             return await Task.FromResult(false);
         }
-        if (prior == 2)
+        if (prior == (int)InitializeStateEnum.Initialized)
         {
             // already initialized
             return await Task.FromResult(true);
@@ -163,9 +187,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
             _localCancellation = new CancellationTokenSource();
             _linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(iExternalCancellationToken, _localCancellation.Token);
 
-            // Mark initialized so NullPropertyGuard does not throw when used by callbacks.
-            _isInitialized = true;
-            Interlocked.Exchange(ref _initializeState, 2);
+            Interlocked.Exchange(ref _initializeState, (int)InitializeStateEnum.Initialized);
 
             // Stop status checks once we begin real initialization
             if (_statusCheckTimer is not null)
@@ -174,9 +196,9 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
                 _statusCheckTimer = null;
             }
 
-            // Register for events using backing field (avoid guarded property in setup)
-            _iEventRelayBasic?.Register<IWindReading>(this, OnWindReceived);
-            _iEventRelayBasic?.Register<IObservationReading>(this, OnObservationReceived);
+            // Register for events
+            _iEventRelayBasic.Register<IWindReading>(this, OnWindReceived);
+            _iEventRelayBasic.Register<IObservationReading>(this, OnObservationReceived);
 
             InitializeClockTimer();
 
@@ -185,11 +207,12 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         catch (Exception exception)
         {
             // Reset init state so caller can retry later
-            Interlocked.Exchange(ref _initializeState, 0);
-            _isInitialized = false;
+            Interlocked.Exchange(
+                ref _initializeState, 
+                (int)InitializeStateEnum.Uninitialized
+            );
 
-            // Use backing logger field — property might throw if initialization failed earlier
-            _iLoggerResilient?.Error("Failed to initialize", exception);
+            _iLoggerResilient.Error("Failed to initialize", exception);
             throw;
         }
     }
@@ -297,6 +320,10 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
                 OnPropertyChanged(nameof(TemperatureUnit));
                 OnPropertyChanged(nameof(TemperatureValue));
 
+                OnPropertyChanged(nameof(WindAverage));
+                OnPropertyChanged(nameof(WindGust));
+                OnPropertyChanged(nameof(WindLull));
+
                 OnPropertyChanged(nameof(UvIndexValue));
             }
         }
@@ -345,9 +372,9 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
             _statusCheckTimer = null;
         }
 
-        // Unregister from event relay using backing field to avoid NullPropertyGuard throws
-        try { _iEventRelayBasic?.Unregister<IWindReading>(this); } catch { }
-        try { _iEventRelayBasic?.Unregister<IObservationReading>(this); } catch { }
+        // Unregister from event relay
+        try { _iEventRelayBasic.Unregister<IWindReading>(this); } catch { }
+        try { _iEventRelayBasic.Unregister<IObservationReading>(this); } catch { }
 
         // Stop and dispose clock timer
         try
@@ -369,8 +396,6 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         try { _linkedCancellation?.Dispose(); } catch { }
         try { _localCancellation?.Dispose(); } catch { }
 
-        // Do not reference guarded properties after disposal
-        _isInitialized = false;
     }
 
     // ========================================

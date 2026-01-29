@@ -2,9 +2,9 @@
 internal sealed class ObservationReadingDto : IObservationReadingDto
 {
     public long EpochTimestampUtc { get; init; }
-    public double WindLull { get; init; }
     public double WindAverage { get; init; }
     public double WindGust { get; init; }
+    public double WindLull { get; init; }
     public int WindDirection { get; init; }
     public int WindSampleInterval { get; init; }
     public double StationPressure { get; init; }

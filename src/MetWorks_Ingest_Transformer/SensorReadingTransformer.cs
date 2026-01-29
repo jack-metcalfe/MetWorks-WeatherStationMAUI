@@ -289,6 +289,12 @@ public class SensorReadingTransformer : ServiceBase
                 return null;
             }
             // Convert from Tempest's METRIC units to user preferences
+            var windAverage = new Amount(reading.WindAverage, SpeedUnits.MeterPerSecond)
+                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.WindSpeed]);
+            var windGust = new Amount(reading.WindGust, SpeedUnits.MeterPerSecond)
+                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.WindSpeed]);
+            var windLull = new Amount(reading.WindLull, SpeedUnits.MeterPerSecond)
+                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.WindSpeed]);
             var temperature = new Amount(reading.AirTemperature, TemperatureUnits.DegreeCelsius)
                 .ConvertedTo(_preferredUnits[MeasurementTypeEnum.AirTemperature]);
             
@@ -301,6 +307,9 @@ public class SensorReadingTransformer : ServiceBase
                 SourcePacketId = rawPacket.Id,
                 Timestamp = DateTimeOffset.FromUnixTimeSeconds(reading.EpochTimestampUtc).UtcDateTime,
                 ReceivedUtc = rawPacket.ReceivedTime,
+                WindAverage = windAverage,
+                WindGust = windGust,
+                WindLull = windLull,
                 Temperature = temperature,
                 HumidityPercent = reading.RelativeHumidity,
                 Pressure = pressure,

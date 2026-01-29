@@ -21,7 +21,9 @@ public interface IObservationReading : IWeatherReading
     /// Unit determined by user preferences at transformation time.
     /// </summary>
     Amount Pressure { get; }
-
+    Amount WindAverage { get; }
+    Amount WindGust { get; }
+    Amount WindLull { get; }
     /// <summary>
     /// Calculated dew point temperature (optional - may not be provided by all stations).
     /// </summary>

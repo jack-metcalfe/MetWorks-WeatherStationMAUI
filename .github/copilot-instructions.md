@@ -5,6 +5,10 @@
 - Second general instruction
 - Use this project as a learning vehicle; leverage the assistant for guidance and clarification on concepts and practices.
 - Prefer a tiny third 'workspace' Git repo to represent a multi-repo Visual Studio workspace on GitHub (instead of nesting repos).
+- Use backward compatibility only as a short interim step; remove incompatible and dead/legacy code as soon as possible to reduce complexity in the codebase.
+
+## App Startup Flow
+- App startup flow is fixed (InitializationSplashPage then MainSwipeHostPage). Host pages should contain host-specific logic but should remain data-driven where practical; device/registry matching should select guest pages by logical names from the host’s configured list, rather than selecting the host page.
 
 ## Logging Behavior
 - Logger must not fail initialization when the database/network is unavailable.
@@ -17,6 +21,7 @@
 - Keep `WeatherViewModel` as `IDisposable` for now and defer converting ViewModels to `ServiceBase`. Re-evaluate `ServiceBase` adoption later; prefer gradual, non-invasive migration.
 - MAUI app will use the usual MAUI constructor-DI pattern for Pages/ViewModels now that custom DI is integrated with MAUI DI.
 - Prefer per-service interfaces (not concretes) for Dependency Injection (DI).
+- For MAUI DI-constructed classes, prefer readonly non-null constructor-injected fields/properties over nullable fields + NullPropertyGuard; reserve guards for DDI-style parameterless ctor + InitializeAsync two-phase initialization.
 
 ## Concurrency Management
 - Prefer using Interlocked-based, lock-free patterns (when appropriate) to harden concurrency and reduce brittleness.
@@ -36,6 +41,7 @@
 - Migration workflow: perform file-by-file changes, one at a time, with each step's outcome guiding the next.
 - User prefers direct, candid feedback and welcomes arguments against their opinions.
 - If a helper class is only consumed by a single component, consider absorbing it into that component to simplify the design and reduce brittleness.
+- It is acceptable to remove obsolete tests during refactors; adding lots of new tests is desired but should be pragmatic, prioritizing fun and velocity.
 
 ## MAUI Specific Instructions
 - MAUI Shell uses ShellContent route `SwipeCarousel` and splash navigates via `GoToAsync("///SwipeCarousel")`.

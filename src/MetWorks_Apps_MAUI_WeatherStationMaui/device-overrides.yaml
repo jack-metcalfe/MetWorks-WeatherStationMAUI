@@ -1,0 +1,19 @@
+﻿version: 1
+
+devices:
+  - id: "laptop"
+    platform: "WinUI"
+    manufacturer: "Microsoft"
+    model: "GE68HX13V"
+    overrides:
+      DefaultWeather: "DefaultWeather.Win1920x1200"
+    notes: "Primary dev machine"
+
+  - id: "zfold4"
+    platform: "Android"
+    manufacturer: "Samsung"
+    model: "SM-F936U"
+    overrides:
+      DefaultWeather:
+        Landscape: "DefaultWeather.Android.ZFold4.Landscape"
+    notes: "ZFold4 unfolded landscape"

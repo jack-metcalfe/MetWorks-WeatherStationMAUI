@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.Pages.MainDeviceViews"
-             x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.MainDeviceViews.MainViewPage"
+             xmlns:local="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages"
+             x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.HostPages.MainSwipeHostPage"
              BackgroundColor="{StaticResource PurpleVikings}"
              Shell.NavBarIsVisible="False">
 
@@ -11,12 +11,12 @@
     </Shell.BackButtonBehavior>
 
     <Grid>
-        <ContentView x:Name="Host" />
-
         <Grid.GestureRecognizers>
             <SwipeGestureRecognizer Direction="Left" Swiped="OnSwipedLeft" />
             <SwipeGestureRecognizer Direction="Right" Swiped="OnSwipedRight" />
         </Grid.GestureRecognizers>
+
+        <ContentView x:Name="Host" />
 
         <Button x:Name="btnLeft" Text="⟨" WidthRequest="56" HeightRequest="56" HorizontalOptions="Start" VerticalOptions="Center" Margin="10" Opacity="0.8" IsVisible="False" Clicked="OnLeftClicked" />
         <Button x:Name="btnRight" Text="⟩" WidthRequest="56" HeightRequest="56" HorizontalOptions="End" VerticalOptions="Center" Margin="10" Opacity="0.8" IsVisible="False" Clicked="OnRightClicked" />

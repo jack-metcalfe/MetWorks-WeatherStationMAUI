@@ -13,7 +13,8 @@ public sealed class LoggerStub : ILoggerStub
         string relativeLogPath,
         int retainedFileCountLimit,
         string rollingInterval,
-        bool rollOnFileSizeLimit)
+        bool rollOnFileSizeLimit
+    )
     {
         return Task.FromResult(true);
     }
@@ -24,11 +25,8 @@ public sealed class LoggerStub : ILoggerStub
     public void Error(string message) { }
     public void Debug(string message) { }
     public void Trace(string message) { }
-    
     public Exception LogExceptionAndReturn(Exception exception) => exception;
     public Exception LogExceptionAndReturn(Exception exception, string message) => exception;
-
     public ILogger ForContext(string contextName, object? value) => this;
-
     public ILogger ForContext(Type sourceType) => this;
 }

@@ -1,0 +1,47 @@
+﻿<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels"
+             x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages.LiveWindAdaptive"
+             x:DataType="viewmodels:WeatherViewModel"
+>
+    <Grid>
+        <VerticalStackLayout HorizontalOptions="Center" Spacing="0">
+            <Label Text="Wind Average"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               FontSize="48"
+               TextColor="{StaticResource WhiteVikings}" 
+            />
+            <Label Text="{Binding WindAverage}"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               FontSize="48"
+               TextColor="{StaticResource WhiteVikings}" 
+            />
+            <Label Text="Wind Gust"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               FontSize="48"
+               TextColor="{StaticResource WhiteVikings}" 
+            />
+            <Label Text="{Binding WindGust}"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               FontSize="48"
+               TextColor="{StaticResource WhiteVikings}" 
+            />
+            <Label Text="Wind Lull"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               FontSize="48"
+               TextColor="{StaticResource WhiteVikings}" 
+            />
+            <Label Text="{Binding WindLull}"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               FontSize="48"
+               TextColor="{StaticResource WhiteVikings}" 
+            />
+        </VerticalStackLayout>
+    </Grid>
+</ContentView>

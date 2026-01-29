@@ -23,4 +23,7 @@ public record ObservationReading : IObservationReading
     public Amount? StationPressure { get; init; }
     public double? UvIndex { get; init; }
     public double? SolarRadiation { get; init; }
+    public required Amount WindAverage { get; init; }
+    public required Amount WindGust { get; init; }
+    public required Amount WindLull { get; init; }
 }

@@ -1,7 +1,10 @@
-﻿using MetWorks.Common.Tests;
+﻿using System;
+using System.Collections.Concurrent;
+using MetWorks.Interfaces;
 
 namespace MetWorks.Models.Observables.Provenance.Common.Tests;
-class TestLogger : ILogger
+
+class TestLogger : ILoggerStub
 {
     public readonly ConcurrentQueue<string> Messages = new();
 
@@ -22,17 +25,23 @@ class TestLogger : ILogger
 public class LoggerResilientTests
 {
     [Fact]
-    public async Task Buffers_When_No_Loggers_And_Flushes_When_Added()
+    public async Task WhenBackendAddedThenSubsequentLogsReachBackend()
     {
         var resilient = new LoggerResilient();
-        // initialize to match previous behavior
         var eventRelay = new MetWorks.EventRelay.EventRelayBasic();
-        await resilient.InitializeAsync(new TestLogger(), new InMemorySettingRepository(new System.Collections.Generic.Dictionary<string,string>()), eventRelay, maxBufferSize: 100);
-        resilient.Information("one");
-        resilient.Warning("two");
+        var stub = new TestLogger();
+        await resilient.InitializeAsync(
+            iSettingRepository: new MetWorks.Common.Tests.InMemorySettingRepository(new System.Collections.Generic.Dictionary<string, string>()),
+            iEventRelayBasic: eventRelay,
+            iLoggerStub: stub,
+            maxBufferSize: 100
+        );
 
         var backend = new TestLogger();
         resilient.AddLogger(backend);
+
+        resilient.Information("one");
+        resilient.Warning("two");
 
         // give background flush a moment
         await Task.Delay(200);

@@ -1,5 +1,4 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui;
-using Microsoft.Extensions.DependencyInjection;
 public partial class App : Application
 {
     Task? _initializationTask;
@@ -53,7 +52,16 @@ public partial class App : Application
         // Select and load appropriate view for this device
         // Log device info for debugging
         Debug.WriteLine("🔍 Device Detection:");
-        Debug.WriteLine(DeviceViewSelector.GetDeviceInfo());
+        try
+        {
+            var displayInfo = DeviceDisplay.Current.MainDisplayInfo;
+            var deviceInfo = DeviceInfo.Current;
+            Debug.WriteLine($"Device: {deviceInfo.Manufacturer} {deviceInfo.Model}");
+            Debug.WriteLine($"Platform: {deviceInfo.Platform} {deviceInfo.Version}");
+            Debug.WriteLine($"Resolution: {displayInfo.Width}x{displayInfo.Height} px @ density {displayInfo.Density:F2}");
+            Debug.WriteLine($"Orientation: {displayInfo.Orientation}");
+        }
+        catch { }
 
         // Use a single AppShell instance resolved from MAUI DI to avoid multiple Shell instances
         // and to ensure any dependencies are created consistently through the service provider.

@@ -1,6 +1,6 @@
 ﻿using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
 
-namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.MainDeviceViews;
+namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages;
 
 public partial class MainView1812x2176 : ContentView
 {
