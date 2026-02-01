@@ -6,7 +6,12 @@ internal sealed class LightningDto : PacketDtoBase, ILightningDto
     [JsonIgnore] public double RelativeEnergyContent { get; init; }
     [JsonPropertyName("evt")] public JsonElement MeasurementPayload { get; init; }
     [JsonConstructor]
-    public LightningDto(string serial_number, string type, string hub_sn, JsonElement evt)
+    public LightningDto(
+        string serial_number, 
+        string type, 
+        string hub_sn, 
+        JsonElement evt
+    )
     {
         SerialNumber = serial_number;
         Type = type;

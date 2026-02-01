@@ -23,6 +23,7 @@
     <PackageVersion Include="Serilog.Sinks.PostgreSQL" Version="2.3.0" />
     <PackageVersion Include="Serilog.Sinks.Postgresql.Alternative" Version="4.2.0" />
     <PackageVersion Include="System.CodeDom" Version="10.0.0" />
+    <PackageVersion Include="System.Net.Http.Json" Version="10.0.0" />
     <PackageVersion Include="System.Reactive" Version="7.0.0-preview.1" />
     <PackageVersion Include="YamlDotNet" Version="16.3.0" />
     <PackageVersion Include="coverlet.collector" Version="3.2.0" />

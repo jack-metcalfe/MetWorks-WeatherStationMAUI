@@ -24,20 +24,33 @@
         <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" StrokeThickness="0">
             <VerticalStackLayout HorizontalOptions="Center" Spacing="0">
                 <HorizontalStackLayout HorizontalOptions="Center">
-                    <Label FontSize="32" TextColor="{StaticResource GoldVikings}" Text="Temp" />
-                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" Text=" (" />
-                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource WhiteVikings}" Text="{Binding TemperatureUnit}" />
-                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" Text=")" />
+                    <Label FontSize="32" TextColor="{StaticResource GoldVikings}"
+                        Text="Temp" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}"
+                        Text=" (" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource WhiteVikings}" 
+                        Text="{Binding AirTemperatureUnit}" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}"
+                        Text=")" />
                 </HorizontalStackLayout>
-                <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}" Text="{Binding TemperatureValue}" />
+                <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}" >
+                    <Label.Text>
+                        <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
+                            <Binding Path="AirTemperatureValue" />
+                        </MultiBinding>
+                    </Label.Text>
+                </Label>
             </VerticalStackLayout>
         </Border>
 
         <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="6" StrokeThickness="0">
             <VerticalStackLayout HorizontalOptions="Center" Spacing="0">
-                <Label FontSize="240" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" Text="{Binding TimeDayOfWeek}" />
-                <Label FontSize="170" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" Text="{Binding TimeDateDisplay}" />
-                <Label FontSize="200" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" Text="{Binding TimeDisplay}" />
+                <Label FontSize="240" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+                    Text="{Binding TimeDayOfWeekDisplay}" />
+                <Label FontSize="160" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+                    Text="{Binding TimeDateDisplay}" />
+                <Label FontSize="200" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+                    Text="{Binding TimeDisplay}" />
             </VerticalStackLayout>
         </Border>
 
@@ -45,29 +58,49 @@
             <VerticalStackLayout HorizontalOptions="Center" Spacing="0">
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Label FontSize="32" TextColor="{StaticResource GoldVikings}" Text="Wind" />
-                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" Text=" (" />
-                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource WhiteVikings}" Text="{Binding WindSpeedUnit}" />
-                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" Text=")" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" 
+                           Text=" (" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource WhiteVikings}" 
+                           Text="{Binding WindSpeedInstantUnit}" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" 
+                           Text=")" />
                 </HorizontalStackLayout>
                 <HorizontalStackLayout HorizontalOptions="Center">
-                    <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource GoldVikings}" VerticalTextAlignment="Start" HorizontalTextAlignment="Center" Text="{Binding WindDirectionCardinal}" />
-                    <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource GoldVikings}" Text=" (" />
-                    <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource WhiteVikings}" Text="{Binding WindDirectionDegrees}" />
-                    <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource GoldVikings}" Text=")" />
+                    <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource GoldVikings}" 
+                           VerticalTextAlignment="Start" HorizontalTextAlignment="Center" 
+                           Text="{Binding WindDirectionCardinalInstantValue}" />
+                    <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource GoldVikings}" 
+                           Text=" (" />
+                    <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource WhiteVikings}" 
+                           Text="{Binding WindDirectionDegreesInstantValue}" />
+                    <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource GoldVikings}" 
+                           Text=")" />
                 </HorizontalStackLayout>
-                <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}" Text="{Binding WindSpeedValue}" />
+                <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}">
+                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
+                        <Binding Path="WindSpeedInstantValue" />
+                    </MultiBinding>
+                </Label>
             </VerticalStackLayout>
         </Border>
 
         <Border Grid.Row="3" Grid.Column="0" Grid.RowSpan="3" StrokeThickness="0">
             <VerticalStackLayout HorizontalOptions="Center" Spacing="0">
                 <HorizontalStackLayout HorizontalOptions="Center">
-                    <Label FontSize="32" TextColor="{StaticResource GoldVikings}" Text="Humidity" />
-                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" Text=" (" />
-                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource WhiteVikings}" Text="{Binding HumidityUnit}" />
-                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" Text=")" />
+                    <Label FontSize="32" TextColor="{StaticResource GoldVikings}" 
+                           Text="Humidity" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" 
+                           Text=" (" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource WhiteVikings}" 
+                           Text="{Binding RelativeHumidityUnit}" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" 
+                           Text=")" />
                 </HorizontalStackLayout>
-                <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}" Text="{Binding HumidityValue}" />
+                <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}">
+                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
+                        <Binding Path="RelativeHumidityValue" />
+                    </MultiBinding>
+                </Label>
             </VerticalStackLayout>
         </Border>
 
@@ -76,7 +109,11 @@
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Label FontSize="32" TextColor="{StaticResource GoldVikings}" Text="UV Index" />
                 </HorizontalStackLayout>
-                <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}" Text="{Binding UvIndexValue}" />
+                <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}">
+                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
+                        <Binding Path="UvIndexValue" />
+                    </MultiBinding>
+                </Label>
             </VerticalStackLayout>
         </Border>
     </Grid>

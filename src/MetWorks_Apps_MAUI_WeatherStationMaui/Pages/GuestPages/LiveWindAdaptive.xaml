@@ -5,43 +5,337 @@
              x:DataType="viewmodels:WeatherViewModel"
 >
     <Grid>
-        <VerticalStackLayout HorizontalOptions="Center" Spacing="0">
-            <Label Text="Wind Average"
-               HorizontalOptions="Center"
-               VerticalOptions="Center"
-               FontSize="48"
-               TextColor="{StaticResource WhiteVikings}" 
-            />
-            <Label Text="{Binding WindAverage}"
-               HorizontalOptions="Center"
-               VerticalOptions="Center"
-               FontSize="48"
-               TextColor="{StaticResource WhiteVikings}" 
-            />
-            <Label Text="Wind Gust"
-               HorizontalOptions="Center"
-               VerticalOptions="Center"
-               FontSize="48"
-               TextColor="{StaticResource WhiteVikings}" 
-            />
-            <Label Text="{Binding WindGust}"
-               HorizontalOptions="Center"
-               VerticalOptions="Center"
-               FontSize="48"
-               TextColor="{StaticResource WhiteVikings}" 
-            />
-            <Label Text="Wind Lull"
-               HorizontalOptions="Center"
-               VerticalOptions="Center"
-               FontSize="48"
-               TextColor="{StaticResource WhiteVikings}" 
-            />
-            <Label Text="{Binding WindLull}"
-               HorizontalOptions="Center"
-               VerticalOptions="Center"
-               FontSize="48"
-               TextColor="{StaticResource WhiteVikings}" 
-            />
-        </VerticalStackLayout>
+        <ScrollView>
+            <VerticalStackLayout HorizontalOptions="Start" VerticalOptions="Center" Spacing="0">
+                <Label
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Air Temperature: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.AirTemperature.Value" />
+                                        <Binding Path="CurrentObservation.AirTemperature.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Atmospheric Pressure: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.AtmosphericPressure.Value" />
+                                        <Binding Path="CurrentObservation.AtmosphericPressure.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Battery Level: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.BatteryLevel.Value" />
+                                        <Binding Path="CurrentObservation.BatteryLevel.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Dew Point: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.DewPoint.Value" />
+                                        <Binding Path="CurrentObservation.DewPoint.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label Text="{Binding CurrentObservation.EpochTimeOfMeasurement, FallbackValue='Observation Reading Time Epoch Seconds: --', StringFormat='{}Observation Reading Time Epoch Seconds: {0:###,###,###,###}'}"
+                   FontSize="48"
+                   TextColor="{StaticResource WhiteVikings}" 
+                />
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Feels Like: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.FeelsLike.Value" />
+                                        <Binding Path="CurrentObservation.FeelsLike.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Heat Index: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.HeatIndex.Value" />
+                                        <Binding Path="CurrentObservation.HeatIndex.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Illuminance: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
+                                        <Binding Path="CurrentObservation.Illuminance" />
+                                        <Binding Path="CurrentObservation.Illuminance.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Lightning Strike Average Distance: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.LightningStrikeAverageDistance" />
+                                        <Binding Path="CurrentObservation.LightningStrikeAverageDistance.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label Text="{Binding CurrentObservation.LightningStrikeCount, FallbackValue='Observation Lightning Strike Count: --', StringFormat='{}Observation Lightning Strike Count: {0}'}"
+                       FontSize="48"
+                       TextColor="{StaticResource WhiteVikings}" 
+                />
+                <Label Text="{Binding PrecipitationTypeDisplay, FallbackValue='Observation Precipitation Type: --', StringFormat='{}Observation Precipitation Type: {0}'}"
+                   FontSize="48"
+                   TextColor="{StaticResource WhiteVikings}" 
+                />
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Rain accumulation: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.RainAccumulation" />
+                                        <Binding Path="CurrentObservation.RainAccumulation.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label Text="{Binding CurrentObservation.RelativeHumidity, FallbackValue='Observation Relative Humidity: --', StringFormat='{}Observation Relative Humidity: {0:F2}'}"
+                   FontSize="48"
+                   TextColor="{StaticResource WhiteVikings}" 
+                />
+                <Label Text="{Binding CurrentObservation.ReportingInterval, FallbackValue='Observation Reporting Interval Minutes: --', StringFormat='{}Observation Reporting Interval Minutes: {0}'}"
+                   FontSize="48"
+                   TextColor="{StaticResource WhiteVikings}" 
+                />
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Solar Radiation: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
+                                        <Binding Path="CurrentObservation.SolarRadiation" />
+                                        <Binding Path="CurrentObservation.SolarRadiation.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Station Pressure: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.StationPressure" />
+                                        <Binding Path="CurrentObservation.StationPressure.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label Text="{Binding CurrentObservation.Timestamp, FallbackValue='Observation Timestamp: --', StringFormat='{}Observation Timestamp: {0:HH:mm:ss.ms}'}"
+                   FontSize="48"
+                   TextColor="{StaticResource WhiteVikings}" 
+                />
+                <Label Text="{Binding CurrentObservation.UvIndex, FallbackValue='Observation UV Index: --', StringFormat='{}Observation UV Index: {0}'}"
+                   FontSize="48"
+                   TextColor="{StaticResource WhiteVikings}" 
+                />
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Wind Average: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.WindAverage" />
+                                        <Binding Path="CurrentObservation.WindAverage.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Wind Chill: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.WindChill.Value" />
+                                        <Binding Path="CurrentObservation.WindChill.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Wind Gust: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.WindGust" />
+                                        <Binding Path="CurrentObservation.WindGust.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Observation Wind Lull: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentObservation.WindLull" />
+                                        <Binding Path="CurrentObservation.WindLull.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label Text="{Binding CurrentWind.DirectionCardinal, FallbackValue='Wind Direction Cardinal: --', StringFormat='{}Wind Direction Cardinal: {0}'}"
+                   FontSize="48"
+                   TextColor="{StaticResource WhiteVikings}" 
+                />
+                <Label Text="{Binding CurrentWind.DirectionDegrees, FallbackValue='Wind Direction Degrees: --', StringFormat='{}Wind Direction Degrees: {0}'}"
+                   FontSize="48"
+                   TextColor="{StaticResource WhiteVikings}" 
+                />
+                <Label 
+                    FontSize="48"
+                    TextColor="{StaticResource WhiteVikings}"
+                >
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Wind Speed: " />
+                            <Span>
+                                <Span.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="CurrentWind.Speed" />
+                                        <Binding Path="CurrentWind.Speed.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Span.Text>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label Text="{Binding CurrentWind.Timestamp, FallbackValue='Wind Reading Time: --', StringFormat='{}Wind Reading Time: {0:HH:mm:ss.ms}'}"
+                   FontSize="48"
+                   TextColor="{StaticResource WhiteVikings}" 
+                />
+            </VerticalStackLayout>
+        </ScrollView>
     </Grid>
 </ContentView>

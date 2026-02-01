@@ -1,7 +1,7 @@
 ﻿namespace MetWorks.IoT.UDP.Tempest;
-public interface IObservationDto
+public interface IObservationDto  : IPacketDtoBase
 {
     int FirmwareRevision { get; }
     JsonElement Measurements { get; }
-    IObservationReadingDto[] Observations { get; }
+    IObservationEntryDto[] Observations { get; }
 }

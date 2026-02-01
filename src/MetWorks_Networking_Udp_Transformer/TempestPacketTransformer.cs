@@ -454,7 +454,7 @@ public class TempestPacketTransformer : ServiceBase
             var packetAsReadOnlyMemoryOfChar = ReadOnlyMemoryOfCharFactory.From(result.Buffer);
             var iRawPacketRecordTyped = IRawPacketRecordTypedFactory.Create(packetAsReadOnlyMemoryOfChar);
 
-            // NEW: Track packet reception in provenance system
+            // Track packet reception in provenance system
             ProvenanceTracker?.TrackNewPacket(iRawPacketRecordTyped);
 
             if (iRawPacketRecordTyped.PacketEnum != PacketEnum.NotImplemented)
@@ -480,7 +480,6 @@ public class TempestPacketTransformer : ServiceBase
                     $"⚠️ Received unimplemented packet type from {result.RemoteEndPoint} " +
                         $"({result.Buffer.Length} bytes)");
                 ILogger.Warning($"packet contents [{iRawPacketRecordTyped.RawPacketJson}]");
-
             }
 
             await Task.CompletedTask;

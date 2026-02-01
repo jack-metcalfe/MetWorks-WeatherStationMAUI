@@ -9,16 +9,16 @@ public static class TempestPacketParser
     /// Parses an observation packet and returns the first reading.
     /// Returns null if parsing fails or packet contains no observations.
     /// </summary>
-    public static IObservationReadingDto? ParseObservation(IRawPacketRecordTyped rawPacket)
+    public static IObservationEntryDto? ParseObservation(IRawPacketRecordTyped rawPacket)
     {
         try
         {
-            var dto = PacketEnumToConcreteDto.PacketHandlers[PacketEnum.Observation](
+            var observationEntryDto = PacketEnumToConcreteDto.PacketHandlers[PacketEnum.Observation](
                 rawPacket.RawPacketJson.AsMemory()
             ) as ObservationDto;
-            
-            return dto?.Observations.Length > 0 ? dto.Observations[0] : null;
+            return observationEntryDto?.Observations.Length > 0 ? observationEntryDto.Observations[0] : null;
         }
+
         catch
         {
             return null;

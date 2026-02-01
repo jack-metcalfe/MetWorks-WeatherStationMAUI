@@ -1,5 +1,5 @@
 ﻿namespace MetWorks.IoT.UDP.Tempest;
-public interface IWindDto
+public interface IWindDto : IPacketDtoBase
 {
     long DeviceReceivedUtcTimestampEpoch { get; }
     double WindSpeed { get; }

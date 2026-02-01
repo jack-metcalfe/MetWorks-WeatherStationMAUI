@@ -3,7 +3,10 @@ public enum MeasurementTypeEnum
 {
     AirPressure,
     AirTemperature,
+    BatteryLevel,
+    Illuminance,
     LightningDistance,
-    PrecipitationAmount,
+    RainAccumulation,
+    SolarRadiation,
     WindSpeed
 }

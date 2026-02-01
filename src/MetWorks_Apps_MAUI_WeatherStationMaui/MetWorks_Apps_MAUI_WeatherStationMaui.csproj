@@ -97,6 +97,7 @@
 	  <ProjectReference Include="..\MetWorks_Common_Utility\MetWorks_Common_Utility.csproj" />
 	  <ProjectReference Include="..\MetWorks_DdiRegistry\MetWorks_DdiRegistry.csproj" />
 	  <ProjectReference Include="..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
+	  <ProjectReference Include="..\MetWorks_Ingest_Postgres\MetWorks_Ingest_Postgres.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

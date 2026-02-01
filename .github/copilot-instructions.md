@@ -7,6 +7,9 @@
 - Prefer a tiny third 'workspace' Git repo to represent a multi-repo Visual Studio workspace on GitHub (instead of nesting repos).
 - Use backward compatibility only as a short interim step; remove incompatible and dead/legacy code as soon as possible to reduce complexity in the codebase.
 
+## Naming Conventions
+- Prefer a naming pattern where raw, unformatted properties keep their actual type and use a 'Value' suffix (e.g., AirTemperatureValue is a double).
+
 ## App Startup Flow
 - App startup flow is fixed (InitializationSplashPage then MainSwipeHostPage). Host pages should contain host-specific logic but should remain data-driven where practical; device/registry matching should select guest pages by logical names from the host’s configured list, rather than selecting the host page.
 
@@ -33,7 +36,7 @@
 - Session restore files are created at `src/docs/session-restore-2026-01-18.md` and `src/docs/session-restore-2026-01-18.json`.
 - Implement a resilient UDP listener/receiver in `Transformer.cs` with bind/rebind logic, provenance tracking, background receive loop, and graceful disposal. This file is currently open and contains the resilient UDP listener logic.
 - The project is a .NET MAUI application located at `C:\WinRepos\MetWorks-WeatherStationMAUI` on the `main` branch, with other open files including MAUI XAML pages under `src\weather-station-maui` (MainDeviceViews variants, WeatherPage) and `App.xaml/AppShell.xaml`.
-- Update Declarative DI (MetWorks-DeclarativeDI) to provide CancellationToken values (not CancellationTokenSource) from the generated code and support defining properties on class declarations in the DDI input YAML, allowing dotted-notation access to those properties when assigning named initialization parameters for `InitializeAsync`. Repository: [MetWorks-DeclarativeDI](https://github.com/jack-metcalfe/MetWorks-DeclarativeDI).
+- Update Declarative DI (MetWorks-DeclarativeDI) to provide CancellationToken values (not CancellationTokenSource) from the generated code and support defining properties on class declarations in the DDI input YAML, allowing dotted-notation access to those properties when assigning named initialization parameters for `InitializeAsync`. Ensure that `instance:` entries appear after all their dependencies in the YAML, and every referenced class/interface has a corresponding entry under `namespace:`. Repository: [MetWorks-DeclarativeDI](https://github.com/jack-metcalfe/MetWorks-DeclarativeDI).
 - Prefer domain-first namespaces starting with 'MetWorks'. Use technology-specific sub-namespaces (e.g., `MetWorks.Persistence.Postgres`) and program to interfaces where appropriate.
 - Prefer not to create interfaces solely for testing; test via the real event-driven path (`IEventRelayBasic`) and integration tests. If programmatic ingestion is needed, expose a public `IngestAsync` on the concrete class rather than adding an interface purely for tests.
 - Keep event-driven `IEventRelayBasic` (WeakReferenceMessenger wrapper) as the canonical public API for messaging; components register for specific message types.

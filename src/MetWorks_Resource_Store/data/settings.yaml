@@ -28,6 +28,25 @@ definitions:
     isEditable: true
     isSecret: false
 
+  - path:   /services/unitOfMeasure/batteryLevel
+    defaultValue: "volt"
+    description: "Unit that battery level is provided in"
+    expectedValueType: "String"
+    allowableValues:
+    - "volt"
+    isEditable: false
+    isSecret: false
+
+  - path:   /services/unitOfMeasure/illuminance
+    defaultValue: "lux"
+    description: "Unit that illuminance is provided in"
+    expectedValueType: "String"
+    allowableValues:
+    - "lux"
+    - "candela"
+    isEditable: false
+    isSecret: false
+
   - path: /services/unitOfMeasure/lightningDistance
     defaultValue: "mile"
     description: "Unit that lightning distance is provided in"
@@ -40,14 +59,23 @@ definitions:
     isEditable: true
     isSecret: false
   
-  - path: /services/unitOfMeasure/precipitationAmount
+  - path: /services/unitOfMeasure/rainAccumulation
     defaultValue: "inch"
-    description: "Unit that the amount of precipitation is provided in"
+    description: "Unit that the amount of rain accumulation is provided in"
     expectedValueType: "String"
     allowableValues:
       - "centimeter"
       - "millimeter"
       - "inch"
+    isSecret: false
+
+  - path: /services/unitOfMeasure/solarRadiation
+    defaultValue: "watt/square meter"
+    description: "Unit that lightning distance is provided in"
+    expectedValueType: "String"
+    allowableValues:
+    - "watt/square meter"
+    - "kilowatt/square meter"
     isSecret: false
 
   - path: /services/unitOfMeasure/windSpeed
@@ -188,4 +216,20 @@ definitions:
     expectedValueType: "String"
     allowableValues: []
     isEditable: false
+    isSecret: false
+
+  - path: /services/tempest/apiKey
+    defaultValue: "00000000-0000-0000-0000-000000000000"
+    description: "API Key for Tempest Weather Station"
+    expectedValueType: "String"
+    allowableValues: []
+    isEditable: true
+    isSecret: true
+  
+  - path: /services/tempest/stationId
+    defaultValue: "0"
+    description: "Station ID for Tempest Weather Station"
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
     isSecret: false

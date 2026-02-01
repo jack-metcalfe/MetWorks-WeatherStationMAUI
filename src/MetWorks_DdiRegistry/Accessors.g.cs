@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-01-26T23:47:15.2298447Z
+// Generated On:        2026-02-01T03:34:47.7996337Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -180,6 +180,36 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.ProvenanceTracker GetTheProvenanceTracker_Internal() =>
             _TheProvenanceTrackerInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheTempestRestClient(MetWorks.Common.TempestRestClient instance) =>
+            _TheTempestRestClientInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public ITempestRestClient GetTheTempestRestClient() =>
+            _TheTempestRestClientInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.TempestRestClient GetTheTempestRestClient_Internal() =>
+            _TheTempestRestClientInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheStationMetadataProvider(MetWorks.Common.StationMetadataProvider instance) =>
+            _TheStationMetadataProviderInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Interfaces.IStationMetadataProvider GetTheStationMetadataProvider() =>
+            _TheStationMetadataProviderInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.StationMetadataProvider GetTheStationMetadataProvider_Internal() =>
+            _TheStationMetadataProviderInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors

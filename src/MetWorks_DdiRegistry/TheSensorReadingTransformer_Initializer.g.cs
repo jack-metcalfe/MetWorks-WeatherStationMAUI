@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Assignments.Initializer
-// Generated On:        2026-01-26T23:47:15.2298447Z
+// Generated On:        2026-02-01T03:34:47.7996337Z
 #nullable enable
 using System.Threading.Tasks;
 
@@ -28,7 +28,8 @@ namespace MetWorks.ServiceRegistry
                 iSettingRepository: registry.GetTheSettingRepository(),
                 iEventRelayBasic: registry.GetTheEventRelayBasic(),
                 externalCancellation: registry.GetRootCancellationTokenSource().Token,
-                provenanceTracker: registry.GetTheProvenanceTracker()
+                provenanceTracker: registry.GetTheProvenanceTracker(),
+                iStationMetadataProvider: registry.GetTheStationMetadataProvider()
             ).ConfigureAwait(false);
         }
     }

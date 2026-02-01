@@ -1,7 +1,4 @@
-﻿using MetWorks.Apps.Maui.WeatherStationMaui.DeviceSelection;
-using MetWorks.Apps.Maui.WeatherStationMaui.DeviceSelection.Overrides;
-
-namespace MetWorks.Apps.MAUI.WeatherStationMaui;
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui;
 public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
@@ -50,6 +47,9 @@ public static class MauiProgram
         builder.Services.AddTransient<LiveWindAdaptive>();
         builder.Services.AddTransient<MainView1920x1200>();
         builder.Services.AddTransient<MainView2176x1812>();
+
+        // Tempest station metadata persistence (PostgreSQL)
+        builder.Services.AddSingleton<MetWorks.Ingest.Postgres.StationMetadataIngestor>();
 
         builder.Services.AddSingleton<IContentVariantCatalog, ContentVariantCatalog>();
         builder.Services.AddSingleton<IDeviceOverrideSource, YamlDeviceOverrideSource>();

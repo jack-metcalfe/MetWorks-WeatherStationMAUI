@@ -6,6 +6,9 @@
 /// </summary>
 public class SensorReadingTransformer : ServiceBase
 {
+    IStationMetadataProvider? _stationMetadataProvider;
+    IStationMetadataProvider IStationMetadataProvider => NullPropertyGuard.Get(_isInitialized, _stationMetadataProvider, nameof(IStationMetadataProvider));
+
     // ========================================
     // Last-Packet Cache (LRU pattern)
     // ========================================
@@ -26,7 +29,8 @@ public class SensorReadingTransformer : ServiceBase
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         CancellationToken externalCancellation = default,
-        ProvenanceTracker? provenanceTracker = null
+        ProvenanceTracker? provenanceTracker = null,
+        IStationMetadataProvider? iStationMetadataProvider = null
     )
     {
         try
@@ -38,6 +42,8 @@ public class SensorReadingTransformer : ServiceBase
                 externalCancellation,
                 provenanceTracker
             );
+
+            _stationMetadataProvider = iStationMetadataProvider;
             iLoggerResilient.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")} enabled for sensor readings");
             // Load current unit preferences from settings
             if (!LoadUnitPreference(iLoggerResilient, iSettingRepository))
@@ -88,15 +94,30 @@ public class SensorReadingTransformer : ServiceBase
                 );
             _preferredUnits[MeasurementTypeEnum.AirTemperature] = Unit.Parse(unitOfMeasure_airTemperature);
 
+            var unitOfMeasure_batteryLevel = iSettingRepository.GetValueOrDefault<string>(
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_batteryLevel)
+                );
+            _preferredUnits[MeasurementTypeEnum.BatteryLevel] = Unit.Parse(unitOfMeasure_batteryLevel);
+
+            var unitOfMeasure_illuminance = iSettingRepository.GetValueOrDefault<string>(
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_illuminance)
+                );
+            _preferredUnits[MeasurementTypeEnum.Illuminance] = Unit.Parse(unitOfMeasure_illuminance);
+
             var unitOfMeasure_lightningDistance = iSettingRepository.GetValueOrDefault<string>(
                     LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_lightningDistance)
                 );
             _preferredUnits[MeasurementTypeEnum.LightningDistance] = Unit.Parse(unitOfMeasure_lightningDistance);
 
-            var unitOfMeasure_precipitationAmount = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_precipitationAmount)
+            var unitOfMeasure_rainAccumulation = iSettingRepository.GetValueOrDefault<string>(
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_rainAccumulation)
                 );
-            _preferredUnits[MeasurementTypeEnum.PrecipitationAmount] = Unit.Parse(unitOfMeasure_precipitationAmount);
+            _preferredUnits[MeasurementTypeEnum.RainAccumulation] = Unit.Parse(unitOfMeasure_rainAccumulation);
+
+            var unitOfMeasure_solarRadiation = iSettingRepository.GetValueOrDefault<string>(
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_solarRadiation)
+                );
+            _preferredUnits[MeasurementTypeEnum.SolarRadiation] = Unit.Parse(unitOfMeasure_solarRadiation);
 
             var unitOfMeasure_windSpeed = iSettingRepository.GetValueOrDefault<string>(
                     LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_windSpeed)
@@ -252,17 +273,17 @@ public class SensorReadingTransformer : ServiceBase
         // ========================================
         switch (reading)
         {
-            case IObservationReading obs:
-                IEventRelayBasic.Send(obs);  // ✅ Send as IObservationReading
+            case IObservationReading iObservationReading:
+                IEventRelayBasic.Send(iObservationReading);  // ✅ Send as IObservationReading
                 break;
-            case IWindReading wind:
-                IEventRelayBasic.Send(wind);  // ✅ Send as IWindReading
+            case IWindReading iWindReading:
+                IEventRelayBasic.Send(iWindReading);  // ✅ Send as IWindReading
                 break;
-            case IPrecipitationReading precip:
-                IEventRelayBasic.Send(precip);  // ✅ Send as IPrecipitationReading
+            case IPrecipitationReading iPrecipitationReading:
+                IEventRelayBasic.Send(iPrecipitationReading);  // ✅ Send as IPrecipitationReading
                 break;
-            case ILightningReading lightning:
-                IEventRelayBasic.Send(lightning);  // ✅ Send as ILightningReading
+            case ILightningReading iLightningReading:
+                IEventRelayBasic.Send(iLightningReading);  // ✅ Send as ILightningReading
                 break;
             default:
                 ILogger.Warning($"⚠️ Unknown reading type: {reading.GetType().Name}");
@@ -281,41 +302,53 @@ public class SensorReadingTransformer : ServiceBase
         try
         {
             // Use public parser API (keeps DTOs internal)
-            var reading = TempestPacketParser.ParseObservation(rawPacket);
-            if (reading is null)
+            var iObservationReadingDto = TempestPacketParser.ParseObservation(rawPacket);
+            if (iObservationReadingDto is null)
             {
                 ILogger.Warning($"⚠️ Failed to parse observation packet {rawPacket.Id}");
                 ILogger.Warning($"observation contents {rawPacket.RawPacketJson}");
                 return null;
             }
-            // Convert from Tempest's METRIC units to user preferences
-            var windAverage = new Amount(reading.WindAverage, SpeedUnits.MeterPerSecond)
-                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.WindSpeed]);
-            var windGust = new Amount(reading.WindGust, SpeedUnits.MeterPerSecond)
-                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.WindSpeed]);
-            var windLull = new Amount(reading.WindLull, SpeedUnits.MeterPerSecond)
-                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.WindSpeed]);
-            var temperature = new Amount(reading.AirTemperature, TemperatureUnits.DegreeCelsius)
+
+            var airTemperature = new Amount(iObservationReadingDto.AirTemperature, TemperatureUnits.DegreeCelsius)
                 .ConvertedTo(_preferredUnits[MeasurementTypeEnum.AirTemperature]);
-            
-            var pressure = new Amount(reading.StationPressure, PressureUnits.MilliBar)
+
+            var windAverage = new Amount(iObservationReadingDto.WindAverage, SpeedUnits.MeterPerSecond)
+                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.WindSpeed]);
+
+            var stationPressure = new Amount(iObservationReadingDto.StationPressure, PressureUnits.MilliBar)
                 .ConvertedTo(_preferredUnits[MeasurementTypeEnum.AirPressure]);
+
+            var stationElevation = IStationMetadataProvider.GetStationElevationMetersAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            var atmosphericPressure = DerivedObservationCalculator.TryComputeSeaLevelPressure(
+                stationPressure,
+                airTemperature,
+                stationElevation
+            )
+                ?.ConvertedTo(_preferredUnits[MeasurementTypeEnum.AirPressure]);
+
+            var dewPoint = DerivedObservationCalculator.TryComputeDewPoint(airTemperature, iObservationReadingDto.RelativeHumidity)
+                ?.ConvertedTo(_preferredUnits[MeasurementTypeEnum.AirTemperature]);
+
+            var windChill = DerivedObservationCalculator.TryComputeWindChill(airTemperature, windAverage)
+                ?.ConvertedTo(_preferredUnits[MeasurementTypeEnum.AirTemperature]);
+
+            var heatIndex = DerivedObservationCalculator.TryComputeHeatIndex(airTemperature, iObservationReadingDto.RelativeHumidity)
+                ?.ConvertedTo(_preferredUnits[MeasurementTypeEnum.AirTemperature]);
+
+            var feelsLike = DerivedObservationCalculator.ComputeFeelsLike(airTemperature, windChill, heatIndex)
+                ?.ConvertedTo(_preferredUnits[MeasurementTypeEnum.AirTemperature]);
 
             return new ObservationReading
             {
+                HubSerialNumber = iObservationReadingDto.HubSerialNumber,
+                SerialNumber = iObservationReadingDto.SerialNumber,
+                Type = iObservationReadingDto.Type,
+
                 Id = IdGenerator.CreateCombGuid(),
                 SourcePacketId = rawPacket.Id,
-                Timestamp = DateTimeOffset.FromUnixTimeSeconds(reading.EpochTimestampUtc).UtcDateTime,
+                Timestamp = DateTimeOffset.FromUnixTimeSeconds(iObservationReadingDto.EpochTimestampUtc).UtcDateTime,
                 ReceivedUtc = rawPacket.ReceivedTime,
-                WindAverage = windAverage,
-                WindGust = windGust,
-                WindLull = windLull,
-                Temperature = temperature,
-                HumidityPercent = reading.RelativeHumidity,
-                Pressure = pressure,
-                DewPoint = null,  // Can be calculated if needed
-                UvIndex = reading.UvIndex,
-                SolarRadiation = reading.SolarRadiation,
                 Provenance = new ReadingProvenance
                 {
                     RawPacketId = rawPacket.Id,
@@ -323,11 +356,44 @@ public class SensorReadingTransformer : ServiceBase
                     TransformStartTime = DateTime.UtcNow,
                     TransformEndTime = DateTime.UtcNow,
                     SourceUnits = "degree celsius, millibar",
-                    TargetUnits = 
+                    TargetUnits =
                         $"{_preferredUnits[MeasurementTypeEnum.AirTemperature].Name}," +
                         $"{_preferredUnits[MeasurementTypeEnum.AirPressure].Name}",
                     TransformerVersion = isRetransformation ? "1.0-retransform" : "1.0"
-                }
+                },
+
+                AirTemperature = airTemperature,
+                BatteryLevel = new Amount(iObservationReadingDto.BatteryLevel, ElectricUnits.Volt)
+                    .ConvertedTo(_preferredUnits[MeasurementTypeEnum.BatteryLevel]),
+                EpochTimeOfMeasurement = iObservationReadingDto.EpochTimestampUtc,
+                Illuminance = new Amount(iObservationReadingDto.Illuminance, LuminousIntensityUnits.Lux)
+                    .ConvertedTo(_preferredUnits[MeasurementTypeEnum.Illuminance]),
+                LightningStrikeAverageDistance = new Amount(iObservationReadingDto.LightningStrikeAverageDistance, LengthUnits.KiloMeter)
+                    .ConvertedTo(_preferredUnits[MeasurementTypeEnum.LightningDistance]),
+                LightningStrikeCount = iObservationReadingDto.LightningStrikeCount,
+                PrecipitationType = iObservationReadingDto.PrecipitationType,
+                RainAccumulation = new Amount(iObservationReadingDto.RainAccumulation, LengthUnits.MilliMeter)
+                    .ConvertedTo(_preferredUnits[MeasurementTypeEnum.RainAccumulation]),
+                ReportingInterval = iObservationReadingDto.ReportingInterval,
+                WindAverage = windAverage,
+                WindDirection = iObservationReadingDto.WindDirection,
+                WindGust = new Amount(iObservationReadingDto.WindGust, SpeedUnits.MeterPerSecond)
+                    .ConvertedTo(_preferredUnits[MeasurementTypeEnum.WindSpeed]),
+                WindLull = new Amount(iObservationReadingDto.WindLull, SpeedUnits.MeterPerSecond)
+                    .ConvertedTo(_preferredUnits[MeasurementTypeEnum.WindSpeed]),
+                WindSampleInterval = iObservationReadingDto.WindSampleInterval,
+                RelativeHumidity = iObservationReadingDto.RelativeHumidity,
+                StationPressure = stationPressure,
+                UvIndex = iObservationReadingDto.UvIndex,
+                SolarRadiation = new Amount(iObservationReadingDto.StationPressure, SolarRadiationUnits.WattPerSquareMeter)
+                    .ConvertedTo(_preferredUnits[MeasurementTypeEnum.SolarRadiation]),
+
+                // Derived
+                DewPoint = dewPoint,
+                WindChill = windChill,
+                HeatIndex = heatIndex,
+                FeelsLike = feelsLike,
+                AtmosphericPressure = atmosphericPressure
             };
         }
         catch (Exception ex)
@@ -355,14 +421,18 @@ public class SensorReadingTransformer : ServiceBase
 
             return new WindReading
             {
+                HubSerialNumber = windDto.HubSerialNumber,
+                SerialNumber = windDto.SerialNumber,
+                Type = windDto.Type,
+
                 Id = IdGenerator.CreateCombGuid(),
                 SourcePacketId = rawPacket.Id,
                 Timestamp = DateTimeOffset.FromUnixTimeSeconds(windDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime,
                 ReceivedUtc = rawPacket.ReceivedTime,
                 Speed = speed,
+                DeviceReceivedUtcTimestampEpoch = windDto.DeviceReceivedUtcTimestampEpoch,
                 DirectionDegrees = windDto.WindDirection,
                 DirectionCardinal = DegreesToCardinal(windDto.WindDirection),
-                GustSpeed = null,  // rapid_wind doesn't include gusts
                 Provenance = new ReadingProvenance
                 {
                     RawPacketId = rawPacket.Id,
@@ -390,21 +460,23 @@ public class SensorReadingTransformer : ServiceBase
         try
         {
             // Use public parser API
-            var precipDto = TempestPacketParser.ParsePrecipitation(rawPacket);
-            if (precipDto is null)
+            var iPrecipitationDto = TempestPacketParser.ParsePrecipitation(rawPacket);
+            if (iPrecipitationDto is null)
             {
                 ILogger.Warning($"⚠️ Failed to parse precipitation packet {rawPacket.Id}");
                 return null;
             }
-
-            // evt_precip is just a notification event (no rate data in the event itself)
             return new PrecipitationReading
             {
+                HubSerialNumber = iPrecipitationDto.HubSerialNumber,
+                SerialNumber = iPrecipitationDto.SerialNumber,
+                Type = iPrecipitationDto.Type,
+
                 Id = IdGenerator.CreateCombGuid(),
                 SourcePacketId = rawPacket.Id,
-                Timestamp = DateTimeOffset.FromUnixTimeSeconds(precipDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime,
+                Timestamp = DateTimeOffset.FromUnixTimeSeconds(iPrecipitationDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime,
                 ReceivedUtc = rawPacket.ReceivedTime,
-                RainRate = new Amount(0, LengthUnits.MilliMeter).ConvertedTo(_preferredUnits[MeasurementTypeEnum.PrecipitationAmount]),
+                RainRate = new Amount(0, LengthUnits.MilliMeter).ConvertedTo(_preferredUnits[MeasurementTypeEnum.RainAccumulation]),
                 DailyAccumulation = null,  // Get from observation packet
                 Provenance = new ReadingProvenance
                 {
@@ -413,7 +485,7 @@ public class SensorReadingTransformer : ServiceBase
                     TransformStartTime = DateTime.UtcNow,
                     TransformEndTime = DateTime.UtcNow,
                     SourceUnits = "millimeter",
-                    TargetUnits = _preferredUnits[MeasurementTypeEnum.PrecipitationAmount].Name,
+                    TargetUnits = _preferredUnits[MeasurementTypeEnum.RainAccumulation].Name,
                     TransformerVersion = isRetransformation ? "1.0-retransform" : "1.0"
                 }
             };
@@ -430,24 +502,25 @@ public class SensorReadingTransformer : ServiceBase
         try
         {
             // Use public parser API
-            var lightningDto = TempestPacketParser.ParseLightning(rawPacket);
-            if (lightningDto is null)
+            var iLightningDto = TempestPacketParser.ParseLightning(rawPacket);
+            if (iLightningDto is null)
             {
                 ILogger.Warning($"⚠️ Failed to parse lightning packet {rawPacket.Id}");
                 return null;
             }
 
-            // Convert from Tempest's METRIC units (km) to user preferences
-            var strikeDistance = new Amount(lightningDto.LightningStrikeDistanceKm, LengthUnits.KiloMeter)
-                .ConvertedTo(_preferredUnits[MeasurementTypeEnum.LightningDistance]);
-
             return new LightningReading
             {
+                HubSerialNumber = iLightningDto.HubSerialNumber,
+                SerialNumber = iLightningDto.SerialNumber,
+                Type = iLightningDto.Type,
+
                 Id = IdGenerator.CreateCombGuid(),
                 SourcePacketId = rawPacket.Id,
-                Timestamp = DateTimeOffset.FromUnixTimeSeconds(lightningDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime,
+                Timestamp = DateTimeOffset.FromUnixTimeSeconds(iLightningDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime,
                 ReceivedUtc = rawPacket.ReceivedTime,
-                StrikeDistance = strikeDistance,
+                StrikeDistance = new Amount(iLightningDto.LightningStrikeDistanceKm, LengthUnits.KiloMeter)
+                    .ConvertedTo(_preferredUnits[MeasurementTypeEnum.LightningDistance]),
                 StrikeCount = 1,  // Each event is one strike
                 Provenance = new ReadingProvenance
                 {

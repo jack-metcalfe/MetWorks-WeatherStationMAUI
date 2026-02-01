@@ -45,8 +45,10 @@ public static class LookupDictionaries
         settingNames: [
             SettingConstants.UnitOfMeasure_airPressure,
             SettingConstants.UnitOfMeasure_airTemperature,
+            SettingConstants.UnitOfMeasure_batteryLevel,
+            SettingConstants.UnitOfMeasure_illuminance,
             SettingConstants.UnitOfMeasure_lightningDistance,
-            SettingConstants.UnitOfMeasure_precipitationAmount,
+            SettingConstants.UnitOfMeasure_rainAccumulation,
             SettingConstants.UnitOfMeasure_windSpeed
         ]
     );
@@ -58,6 +60,17 @@ public static class LookupDictionaries
         [
             SettingConstants.XMLToPostgreSQL_connectionString,
             SettingConstants.XMLToPostgreSQL_enableBuffering
+        ]
+    );
+
+    public static readonly GroupSettingDefinition TempestGroupSettingsDefinition = new GroupSettingDefinition(
+        groupName: SettingConstants.Tempest_groupName,
+        groupBasePath: SettingConstants.Tempest_groupName,
+        settingNames:
+
+        [
+            SettingConstants.Tempest_apiKey,
+            SettingConstants.Tempest_stationId
         ]
     );
 }

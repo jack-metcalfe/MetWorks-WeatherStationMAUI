@@ -30,67 +30,144 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     CancellationTokenSource? _linkedCancellation;
     CancellationToken LinkedCancellationToken => _linkedCancellation?.Token ?? CancellationToken.None;
     // ========================================
-    // Observation Display Properties
+    // Wind Display Properties - 3 second readings
     // ========================================
-    public string WindAverage =>
-        CurrentObservation != null
-            ? $"{CurrentObservation.WindAverage.Value:F0} {CurrentObservation.WindAverage.Unit.Symbol}"
-            : "--";
-    public string WindGust =>
-        CurrentObservation != null
-            ? $"{CurrentObservation.WindGust.Value:F0} {CurrentObservation.WindGust.Unit.Symbol}"
-            : "--";
-    public string WindLull =>
-        CurrentObservation != null
-            ? $"{CurrentObservation.WindLull.Value:F0} {CurrentObservation.WindLull.Unit.Symbol}"
-            : "--";
-    public string TemperatureValue =>
-        CurrentObservation != null
-            ? $"{CurrentObservation.Temperature.Value:F0}"
-            : "--";
-    public string TemperatureUnit =>
-        CurrentObservation != null
-            ? $"{CurrentObservation.Temperature.Unit.Symbol}"
-            : "";
-    // ========================================
-    // Wind Display Properties
-    // ========================================
-    public string WindSpeedValue =>
-        CurrentWind != null
-            ? $"{CurrentWind.Speed.Value:F0}"
-            : "--";
-    public string WindSpeedUnit =>
-        CurrentWind != null
-            ? CurrentWind.Speed.Unit.Symbol
-            : "";
-    public string WindDirectionCardinal =>
-        CurrentWind != null
+    public string WindDirectionCardinalInstantValue =>
+        CurrentWind is not null
             ? CurrentWind.DirectionCardinal
             : "--";
-    public string WindDirectionDegrees =>
-        CurrentWind != null
-            ? $"{CurrentWind.DirectionDegrees:F0}°"
+    public string WindDirectionDegreesInstantValue =>
+        CurrentWind is not null
+            ? $"{CurrentWind.DirectionDegrees:F0}"
             : "";
-    // ========================================
-    // Humidity Display Properties
-    // ========================================
-    public string HumidityValue =>
-        CurrentObservation != null
-            ? $"{CurrentObservation.HumidityPercent:F0}"
+    public string WindSpeedInstantUnit =>
+        CurrentWind is not null
+            ? CurrentWind.Speed.Unit.Symbol
+            : "";
+    public double WindSpeedInstantValue =>
+        CurrentWind is not null
+            ? CurrentWind.Speed.Value
+            : double.NaN;
+    public string WindSpeedInstantDisplay =>
+        CurrentWind is not null
+            ? $"{CurrentWind.Speed.Value:F1} {CurrentWind.Speed.Unit.Symbol}"
+            : "-- (waiting for data)";
+    public string WindDeviceReceivedUtcTimestampEpochInstant =>
+        CurrentWind is not null
+            ? $"{new DateTime(1970, 1, 1).AddSeconds(CurrentWind.DeviceReceivedUtcTimestampEpoch).ToLocalTime():yyyy-MM-dd HH:mm:ss}"
             : "--";
-    public string HumidityUnit => "%";
+    public string WindDirectionInstantDisplay =>
+        CurrentWind is not null
+            ? $"{CurrentWind.DirectionCardinal} ({CurrentWind.DirectionDegrees:F0}°)"
+            : "--";
+    public string WindHubSerialNumberInstant =>
+        CurrentWind is not null
+            ? $"{CurrentWind.HubSerialNumber}"
+            : "--";
+    public string WindSerialNumberInstant =>
+        CurrentWind is not null
+            ? $"{CurrentWind.SerialNumber}"
+            : "--";
+    public string WindTypeInstant =>
+        CurrentWind is not null
+            ? $"{CurrentWind.Type}"
+            : "--";
+    // ========================================
+    // Observation Reading Display Properties
+    // ========================================
+    public string AirTemperatureUnit =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.AirTemperature.Unit.Symbol}"
+            : "--";
+    public double AirTemperatureValue =>
+        CurrentObservation is not null
+            ? CurrentObservation.AirTemperature.Value
+            : double.NaN;
+    public string BatteryLevelDisplay =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.BatteryLevel.Value:F2} {CurrentObservation.BatteryLevel.Unit.Symbol}"
+            : "--";
+    public string BatteryLevelUnit =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.BatteryLevel.Unit.Symbol}"
+            : "--";
+    public string EpochTimestampUtcDisplay =>
+        CurrentObservation is not null
+            ? $"{new DateTime(1970, 1, 1).AddSeconds(CurrentObservation.EpochTimeOfMeasurement).ToLocalTime():yyyy-MM-dd HH:mm:ss}"
+            : "--";
+    public string IlluminanceDisplay =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.Illuminance.Value:F0} {CurrentObservation.Illuminance.Unit.Symbol}"
+            : "--";
+    public string LightningStrikeAverageDistanceDisplay =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.LightningStrikeAverageDistance.Value:F0} {CurrentObservation.LightningStrikeAverageDistance.Unit.Symbol}"
+            : "--";
+    public string LightningStrikeCount =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.LightningStrikeCount}"
+            : "--";
+    // ToDo: Move the conversion to text into the transformer layer or other but should NOT be up to UI
+    public string PrecipitationTypeDisplay =>
+        CurrentObservation is not null
+            ? CurrentObservation.PrecipitationType switch
+            {
+                0 => "None",
+                1 => "Rain",
+                2 => "Hail",
+                3 => "Rain + Hail",
+                _ => "Unknown"
+            }
+            : "--";
+    public string RainAccumulationDisplay =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.RainAccumulation.Value:F2} {CurrentObservation.RainAccumulation.Unit.Symbol}"
+            : "--";
+    public string RelativeHumidityUnit => "%";
+    public double RelativeHumidityValue =>
+        CurrentObservation is not null
+            ? CurrentObservation.RelativeHumidity
+            : double.NaN;
+    public string ReportingIntervalValue =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.ReportingInterval:F0}"
+            : "--";
+    public string SolarRadiationDisplay =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.SolarRadiation.Value:F0} {CurrentObservation.SolarRadiation.Unit.Symbol}"
+            : "--";
+    public string StationPressureDisplay =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.StationPressure.Value:F2} {CurrentObservation.StationPressure.Unit.Symbol}"
+            : "--";
     // ========================================
     // UV Index Display Properties
     // ========================================
-    public string UvIndexValue =>
-        CurrentObservation?.UvIndex != null
-            ? $"{CurrentObservation.UvIndex:F0}"
-            : "--";
+    public double UvIndexValue =>
+        CurrentObservation is not null
+            ? CurrentObservation.UvIndex
+            : double.NaN;
     public string UvIndexUnit => ""; // UV Index has no unit
+    public string WindAverageDisplay =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.WindAverage.Value:F0} {CurrentObservation.WindAverage.Unit.Symbol}"
+            : "--";
+    public string WindGustDisplay =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.WindGust.Value:F0} {CurrentObservation.WindGust.Unit.Symbol}"
+            : "--";
+    public string WindLullDisplay =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.WindLull.Value:F0} {CurrentObservation.WindLull.Unit.Symbol}"
+            : "--";
+    public string WindSampleInterval =>
+        CurrentObservation is not null
+            ? $"{CurrentObservation.WindSampleInterval:F0}"
+            : "--";
     // ========================================
     // Time Display Properties
     // ========================================
-    public string TimeDayOfWeek => _currentTime.ToString("ddd");
+    public string TimeDayOfWeekDisplay => _currentTime.ToString("ddd");
     public string TimeDateDisplay => _currentTime.ToString("MMM dd");
     public string TimeDisplay => _currentTime.ToString("HH:mm");
     public WeatherViewModel(
@@ -222,7 +299,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     private void InitializeClockTimer()
     {
         _currentTime = DateTime.Now;
-        OnPropertyChanged(nameof(TimeDayOfWeek));
+        OnPropertyChanged(nameof(TimeDayOfWeekDisplay));
         OnPropertyChanged(nameof(TimeDateDisplay));
         OnPropertyChanged(nameof(TimeDisplay));
 
@@ -243,7 +320,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         UpdateTimeDisplay();
 
         // Reconfigure timer for every minute from now on
-        if (_clockTimer != null)
+        if (_clockTimer is not null)
         {
             _clockTimer.Elapsed -= OnClockTimerFirstTick;
             _clockTimer.Elapsed += OnClockTimerTick;
@@ -261,7 +338,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
         {
             _currentTime = DateTime.Now;
-            OnPropertyChanged(nameof(TimeDayOfWeek));
+            OnPropertyChanged(nameof(TimeDayOfWeekDisplay));
             OnPropertyChanged(nameof(TimeDateDisplay));
             OnPropertyChanged(nameof(TimeDisplay));
         });
@@ -298,10 +375,12 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
                 _currentWind = value;
                 OnPropertyChanged();
 
-                OnPropertyChanged(nameof(WindSpeedUnit));
-                OnPropertyChanged(nameof(WindDirectionCardinal));
-                OnPropertyChanged(nameof(WindDirectionDegrees));
-                OnPropertyChanged(nameof(WindSpeedValue));
+                OnPropertyChanged(nameof(WindDirectionCardinalInstantValue));
+                OnPropertyChanged(nameof(WindDirectionDegreesInstantValue));
+                OnPropertyChanged(nameof(WindSpeedInstantUnit));
+                OnPropertyChanged(nameof(WindSpeedInstantValue));
+                OnPropertyChanged(nameof(WindSpeedInstantDisplay));
+                OnPropertyChanged(nameof(WindDirectionInstantDisplay));
             }
         }
     }
@@ -314,17 +393,27 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
             {
                 _currentObservation = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(HumidityUnit));
-                OnPropertyChanged(nameof(HumidityValue));
 
-                OnPropertyChanged(nameof(TemperatureUnit));
-                OnPropertyChanged(nameof(TemperatureValue));
-
-                OnPropertyChanged(nameof(WindAverage));
-                OnPropertyChanged(nameof(WindGust));
-                OnPropertyChanged(nameof(WindLull));
-
+                OnPropertyChanged(nameof(AirTemperatureUnit));
+                OnPropertyChanged(nameof(AirTemperatureValue));
+                OnPropertyChanged(nameof(BatteryLevelDisplay));
+                OnPropertyChanged(nameof(BatteryLevelUnit));
+                OnPropertyChanged(nameof(EpochTimestampUtcDisplay));
+                OnPropertyChanged(nameof(IlluminanceDisplay));
+                OnPropertyChanged(nameof(LightningStrikeAverageDistanceDisplay));
+                OnPropertyChanged(nameof(LightningStrikeCount));
+                OnPropertyChanged(nameof(PrecipitationTypeDisplay));
+                OnPropertyChanged(nameof(RainAccumulationDisplay));
+                OnPropertyChanged(nameof(RelativeHumidityUnit));
+                OnPropertyChanged(nameof(RelativeHumidityValue));
+                OnPropertyChanged(nameof(ReportingIntervalValue));
+                OnPropertyChanged(nameof(SolarRadiationDisplay));
+                OnPropertyChanged(nameof(StationPressureDisplay));
                 OnPropertyChanged(nameof(UvIndexValue));
+                OnPropertyChanged(nameof(WindAverageDisplay));
+                OnPropertyChanged(nameof(WindGustDisplay));
+                OnPropertyChanged(nameof(WindLullDisplay));
+                OnPropertyChanged(nameof(WindSampleInterval));
             }
         }
     }
@@ -332,34 +421,14 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     // ========================================
     // Display Properties for UI Binding
     // ========================================
-
-    public string WindSpeedDisplay =>
-        CurrentWind != null
-            ? $"{CurrentWind.Speed.Value:F1} {CurrentWind.Speed.Unit.Symbol}"
-            : "-- (waiting for data)";
-    public string WindDirectionDisplay =>
-        CurrentWind != null
-            ? $"{CurrentWind.DirectionCardinal} ({CurrentWind.DirectionDegrees:F0}°)"
-            : "--";
-    public string WindGustDisplay =>
-        CurrentWind?.GustSpeed is not null
-            ? $"{CurrentWind.GustSpeed.Value:F1} {CurrentWind.GustSpeed.Unit.Symbol}"
-            : "--";
-    public string TemperatureDisplay =>
-        CurrentObservation != null
-            ? $"{CurrentObservation.Temperature.Value:F1}°{CurrentObservation.Temperature.Unit.Symbol}"
-            : "-- (waiting for data)";
-
     public string PressureDisplay =>
-        CurrentObservation != null
-            ? $"{CurrentObservation.Pressure.Value:F2} {CurrentObservation.Pressure.Unit.Symbol}"
+        CurrentObservation is not null
+            ? $"{CurrentObservation.StationPressure.Value:F2} {CurrentObservation.StationPressure.Unit.Symbol}"
             : "--";
-
     public string HumidityDisplay =>
-        CurrentObservation != null
-            ? $"{CurrentObservation.HumidityPercent:F0}%"
+        CurrentObservation is not null
+            ? $"{CurrentObservation.RelativeHumidity:F0}%"
             : "--";
-
     // ========================================
     // Disposal
     // ========================================
@@ -395,18 +464,13 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
 
         try { _linkedCancellation?.Dispose(); } catch { }
         try { _localCancellation?.Dispose(); } catch { }
-
     }
-
     // ========================================
     // INotifyPropertyChanged
     // ========================================
-
     public event PropertyChangedEventHandler? PropertyChanged;
-
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
-
 }

@@ -27,11 +27,18 @@ public static class SettingConstants
     public const string UnitOfMeasure_groupName = "unitOfMeasure";
     public const string UnitOfMeasure_airPressure = "airPressure";
     public const string UnitOfMeasure_airTemperature = "airTemperature";
+    public const string UnitOfMeasure_batteryLevel = "batteryLevel";
+    public const string UnitOfMeasure_illuminance = "illuminance";
     public const string UnitOfMeasure_lightningDistance = "lightningDistance";
-    public const string UnitOfMeasure_precipitationAmount = "precipitationAmount";
+    public const string UnitOfMeasure_rainAccumulation = "rainAccumulation";
+    public const string UnitOfMeasure_solarRadiation = "solarRadiation";
     public const string UnitOfMeasure_windSpeed = "windSpeed";
 
     public const string XMLToPostgreSQL_groupName = "xmlToPostgreSQL";
     public const string XMLToPostgreSQL_connectionString = "connectionString";
     public const string XMLToPostgreSQL_enableBuffering = "enableBuffering";
+
+    public const string Tempest_groupName = "tempest";
+    public const string Tempest_apiKey = "apiKey";
+    public const string Tempest_stationId = "stationId";
 }

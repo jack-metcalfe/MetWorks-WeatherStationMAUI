@@ -2,16 +2,18 @@
 global using System.Collections.Generic;
 global using System.ComponentModel;
 global using System.Diagnostics;
+global using System.Globalization;
 global using System.Linq;
 global using System.Runtime.CompilerServices;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using System.Timers;
 
-global using MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;
-global using MetWorks.Apps.MAUI.WeatherStationMaui.Pages.HostPages;
+global using MetWorks.Apps.Maui.WeatherStationMaui.DeviceSelection;
 global using MetWorks.Apps.Maui.WeatherStationMaui.DeviceSelection.Overrides;
+global using MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;
 global using MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages;
+global using MetWorks.Apps.MAUI.WeatherStationMaui.Pages.HostPages;
 global using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
 global using MetWorks.Common.Utility;
 global using MetWorks.Interfaces;
