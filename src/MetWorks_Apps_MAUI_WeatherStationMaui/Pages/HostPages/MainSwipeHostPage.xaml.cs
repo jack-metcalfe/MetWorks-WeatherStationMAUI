@@ -54,8 +54,10 @@ public partial class MainSwipeHostPage : ContentPage
         Host.Content = _slots[0];
         _contentSet = true;
 
+#if WINDOWS
         btnLeft.IsVisible = true;
         btnRight.IsVisible = true;
+#endif
     }
 
     protected override void OnAppearing()
@@ -89,8 +91,10 @@ public partial class MainSwipeHostPage : ContentPage
             Host.Content = _slots[0];
             _contentSet = true;
 
-            btnLeft.IsVisible = true;
-            btnRight.IsVisible = true;
+#if WINDOWS
+        btnLeft.IsVisible = true;
+        btnRight.IsVisible = true;
+#endif
         }
         catch (Exception ex)
         {

@@ -43,8 +43,10 @@ public static class MauiProgram
 
         // Register ViewModels and Pages for DI-driven page activation
         builder.Services.AddTransient<WeatherViewModel>();
+        builder.Services.AddTransient<MetricsOneViewModel>();
         builder.Services.AddTransient<MainSwipeHostPage>();
         builder.Services.AddTransient<LiveWindAdaptive>();
+        builder.Services.AddTransient<MetricsOne>();
         builder.Services.AddTransient<MainView1920x1200>();
         builder.Services.AddTransient<MainView2176x1812>();
 

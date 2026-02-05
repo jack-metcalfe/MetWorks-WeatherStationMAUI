@@ -9,9 +9,11 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\MetWorks_Common_Utility\MetWorks_Common_Utility.csproj" />
 	  <ProjectReference Include="..\MetWorks_Constants\MetWorks_Constants.csproj" />
+	  <ProjectReference Include="..\MetWorks_EventRelay\MetWorks_EventRelay.csproj" />
 	  <ProjectReference Include="..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="System.Net.Http.Json" />
+	  <PackageReference Include="Npgsql" />
 	</ItemGroup>
 </Project>

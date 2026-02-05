@@ -57,6 +57,9 @@ public sealed class ContentViewFactory : IContentViewFactory
             LogicalContentKey.LiveWind 
                 => VariantKeys.Placeholder.Default,
 
+            LogicalContentKey.MetricsOne
+                => VariantKeys.Placeholder.Default,
+
             LogicalContentKey.HomePage
                 => SelectDefaultWeatherVariant(
                         deviceContext

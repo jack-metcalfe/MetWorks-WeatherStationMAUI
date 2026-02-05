@@ -73,4 +73,22 @@ public static class LookupDictionaries
             SettingConstants.Tempest_stationId
         ]
     );
+
+    public static readonly GroupSettingDefinition MetricsGroupSettingsDefinition = new GroupSettingDefinition(
+        groupName: SettingConstants.Metrics_groupName,
+        groupBasePath: SettingConstants.Metrics_groupName,
+        settingNames:
+        [
+            SettingConstants.Metrics_enabled,
+            SettingConstants.Metrics_captureIntervalSeconds,
+            SettingConstants.Metrics_applicationId,
+            SettingConstants.MetricsPostgreSQL_connectionString,
+            SettingConstants.MetricsPostgreSQL_tableName,
+            SettingConstants.MetricsPostgreSQL_autoCreateTable,
+            SettingConstants.Metrics_relayEnabled,
+            SettingConstants.Metrics_relayTopN,
+            SettingConstants.Metrics_pipelineEnabled,
+            SettingConstants.Metrics_pipelineTopN
+        ]
+    );
 }

@@ -13,5 +13,6 @@ public partial class AppShell : Shell
         // ShellContent routes defined in AppShell.xaml don't require Route registration.
         // Only register routes for pages you navigate to that are NOT ShellContent.
         // Keeping this method in case additional non-shell routes are added later.
+        Routing.RegisterRoute("InitializationSplashPage", typeof(Pages.InitializationSplashPage));
     }
 }

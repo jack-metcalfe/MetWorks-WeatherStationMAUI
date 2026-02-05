@@ -131,6 +131,9 @@
 		<MauiXaml Update="Pages\GuestPages\MainView2304x1440.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="Pages\GuestPages\MetricsOne.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Pages\HostPages\MainSwipeHostPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

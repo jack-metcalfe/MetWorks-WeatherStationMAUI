@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-02-01T03:34:47.7996337Z
+// Generated On:        2026-02-04T20:48:31.7351773Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -30,6 +30,21 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal System.Threading.CancellationTokenSource GetRootCancellationTokenSource_Internal() =>
             _RootCancellationTokenSourceInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheMetricsLatestSnapshotStore(MetWorks.Common.Metrics.MetricsLatestSnapshotStore instance) =>
+            _TheMetricsLatestSnapshotStoreInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Common.Metrics.IMetricsLatestSnapshot GetTheMetricsLatestSnapshotStore() =>
+            _TheMetricsLatestSnapshotStoreInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.Metrics.MetricsLatestSnapshotStore GetTheMetricsLatestSnapshotStore_Internal() =>
+            _TheMetricsLatestSnapshotStoreInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
@@ -114,7 +129,7 @@ namespace MetWorks.ServiceRegistry
             _TheInstanceIdentifierInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.InstanceIdentifier.InstanceIdentifier GetTheInstanceIdentifier() =>
+        public MetWorks.Interfaces.IInstanceIdentifier GetTheInstanceIdentifier() =>
             _TheInstanceIdentifierInstance;
 
         // Internal accessor: always returns the concrete class.
@@ -180,6 +195,36 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.ProvenanceTracker GetTheProvenanceTracker_Internal() =>
             _TheProvenanceTrackerInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheMetricsSampler(MetWorks.Common.Metrics.MetricsSamplerService instance) =>
+            _TheMetricsSamplerInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Common.Metrics.MetricsSamplerService GetTheMetricsSampler() =>
+            _TheMetricsSamplerInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.Metrics.MetricsSamplerService GetTheMetricsSampler_Internal() =>
+            _TheMetricsSamplerInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheMetricsSummaryIngestor(MetWorks.Common.Metrics.MetricsSummaryIngestor instance) =>
+            _TheMetricsSummaryIngestorInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Common.Metrics.MetricsSummaryIngestor GetTheMetricsSummaryIngestor() =>
+            _TheMetricsSummaryIngestorInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.Metrics.MetricsSummaryIngestor GetTheMetricsSummaryIngestor_Internal() =>
+            _TheMetricsSummaryIngestorInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors

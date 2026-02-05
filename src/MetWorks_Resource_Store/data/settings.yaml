@@ -3,106 +3,12 @@
     value: "50222"
 
 definitions:
-  - path: /services/unitOfMeasure/airPressure
-    defaultValue: "inch of mercury"
-    description: "Unit that air pressure is provided in"
+  - path: /services/instance/installationId
+    defaultValue: ""
+    description: "Per-installation stable identifier (GUID). Generated on first run and persisted locally."
     expectedValueType: "String"
-    allowableValues:
-      - "atmosphere"
-      - "bar"
-      - "hectopascal"
-      - "inch of mercury"
-      - "kilopascal"
-      - "millibar"
-      - "pascal"
-    isEditable: true
-    isSecret: false
-    
-  - path:   /services/unitOfMeasure/airTemperature
-    defaultValue: "degree fahrenheit"
-    description: "Unit that air temperature is provided in"
-    expectedValueType: "String"
-    allowableValues:
-    - "degree fahrenheit"
-    - "degree celsius"
-    isEditable: true
-    isSecret: false
-
-  - path:   /services/unitOfMeasure/batteryLevel
-    defaultValue: "volt"
-    description: "Unit that battery level is provided in"
-    expectedValueType: "String"
-    allowableValues:
-    - "volt"
+    allowableValues: []
     isEditable: false
-    isSecret: false
-
-  - path:   /services/unitOfMeasure/illuminance
-    defaultValue: "lux"
-    description: "Unit that illuminance is provided in"
-    expectedValueType: "String"
-    allowableValues:
-    - "lux"
-    - "candela"
-    isEditable: false
-    isSecret: false
-
-  - path: /services/unitOfMeasure/lightningDistance
-    defaultValue: "mile"
-    description: "Unit that lightning distance is provided in"
-    expectedValueType: "String"
-    allowableValues:
-      - "kilometer"
-      - "meter"
-      - "mile"
-      - "nautical mile"
-    isEditable: true
-    isSecret: false
-  
-  - path: /services/unitOfMeasure/rainAccumulation
-    defaultValue: "inch"
-    description: "Unit that the amount of rain accumulation is provided in"
-    expectedValueType: "String"
-    allowableValues:
-      - "centimeter"
-      - "millimeter"
-      - "inch"
-    isSecret: false
-
-  - path: /services/unitOfMeasure/solarRadiation
-    defaultValue: "watt/square meter"
-    description: "Unit that lightning distance is provided in"
-    expectedValueType: "String"
-    allowableValues:
-    - "watt/square meter"
-    - "kilowatt/square meter"
-    isSecret: false
-
-  - path: /services/unitOfMeasure/windSpeed
-    defaultValue: "mile/hour"
-    description: "Unit that lightning distance is provided in"
-    expectedValueType: "String"
-    allowableValues:
-    - "kilometer/hour"
-    - "knot"
-    - "meter/second"
-    - "mile/hour"
-    isSecret: false
-
-  - path: /services/xmlToPostgreSQL/connectionString
-    defaultValue: "Host=192.168.8.9;Port=5432;Database=weather;Username=weather;Password=Sylvia3927"
-    description: "Connection string for PostgreSQL database"
-    expectedValueType: "String"
-    allowableValues:
-    isSecret: true
-
-  - path: /services/xmlToPostgreSQL/enableBuffering
-    defaultValue: "false"
-    description: "Enable buffering for PostgreSQL database"
-    expectedValueType: "Boolean"
-    allowableValues:
-      - true
-      - false
     isSecret: false
 
   - path: /services/loggerFile/fileSizeLimitBytes
@@ -146,6 +52,15 @@ definitions:
     allowableValues: []
     isSecret: false
 
+  - path: /services/loggerFile/rollOnFileSizeLimit
+    defaultValue: "false"
+    description: "Roll on file size limit"
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
+    isSecret: false
+
   - path: /services/loggerFile/rollingInterval
     defaultValue: "Day"
     description: "Rolling Interval"
@@ -159,13 +74,11 @@ definitions:
       - "Minute"
     isSecret: false
 
-  - path: /services/loggerFile/rollOnFileSizeLimit
-    defaultValue: "false"
-    description: "Roll on file size limit"
+  - path: /services/loggerPostgreSQL/autoCreateTable
+    defaultValue: true
+    description: "Auto create table for PostgreSQL logging"
     expectedValueType: "Boolean"
-    allowableValues:
-      - true
-      - false
+    allowableValues: []
     isSecret: false
 
   - path: "/services/loggerPostgreSQL/connectionString"
@@ -174,13 +87,6 @@ definitions:
     expectedValueType: "String"
     allowableValues: []
     isSecret: true
-
-  - path: /services/loggerPostgreSQL/tableName
-    defaultValue: "log"
-    description: "Table name for PostgreSQL logging"
-    expectedValueType: "String"
-    allowableValues: []
-    isSecret: false
 
   - path: /services/loggerPostgreSQL/minimumLevel
     defaultValue: "Information"
@@ -195,27 +101,97 @@ definitions:
       - "Fatal"
     isSecret: false
 
-  - path: /services/loggerPostgreSQL/autoCreateTable
-    defaultValue: true
-    description: "Auto create table for PostgreSQL logging"
-    expectedValueType: "Boolean"
+  - path: /services/loggerPostgreSQL/tableName
+    defaultValue: "log"
+    description: "Table name for PostgreSQL logging"
+    expectedValueType: "String"
     allowableValues: []
     isSecret: false
 
-  - path: /services/udpListener/preferredPort
-    defaultValue: "50222"
-    description: "UDP Port for listening for readings from Tempest Weather Station"
+  - path: /services/metrics/applicationId
+    defaultValue: "00000000-0000-0000-0000-000000000000"
+    description: "Stable application identifier (GUID) used for metrics correlation across app renames"
+    expectedValueType: "String"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/metrics/autoCreateTable
+    defaultValue: "true"
+    description: "Auto create table for PostgreSQL metrics summaries"
+    expectedValueType: "Boolean"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/metrics/captureIntervalSeconds
+    defaultValue: "10"
+    description: "Metrics collection interval in seconds"
     expectedValueType: "Int32"
     allowableValues: []
     isEditable: true
     isSecret: false
 
-  - path: /services/instance/installationId
-    defaultValue: ""
-    description: "Per-installation stable identifier (GUID). Generated on first run and persisted locally."
+  - path: /services/metrics/connectionString
+    defaultValue: "Host=192.168.8.9;Port=5432;Database=weather;Username=weather;Password=password"
+    description: "Metrics persistence connection string for PostgreSQL database"
     expectedValueType: "String"
     allowableValues: []
-    isEditable: false
+    isEditable: true
+    isSecret: true
+
+  - path: /services/metrics/enabled
+    defaultValue: "false"
+    description: "Enable metrics collection and persistence (intended for wall-device tuning; typically off for field deployments)"
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
+    isEditable: true
+    isSecret: false
+
+  - path: /services/metrics/pipelineEnabled
+    defaultValue: "false"
+    description: "Enable provenance-based pipeline timing summaries for weather readings (UDP→transform and transform durations)"
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
+    isEditable: true
+    isSecret: false
+
+  - path: /services/metrics/pipelineTopN
+    defaultValue: "10"
+    description: "Number of top reading types to include in periodic pipeline summary"
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/metrics/relayEnabled
+    defaultValue: "false"
+    description: "Enable EventRelayBasic handler timing aggregation"
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
+    isEditable: true
+    isSecret: false
+
+  - path: /services/metrics/relayTopN
+    defaultValue: "10"
+    description: "Number of top (message_type, recipient_type) handler pairs to include in periodic relay metrics summary"
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/metrics/tableName
+    defaultValue: "metrics_summary"
+    description: "Table name for PostgreSQL metrics summaries"
+    expectedValueType: "String"
+    allowableValues: []
+    isEditable: true
     isSecret: false
 
   - path: /services/tempest/apiKey
@@ -225,11 +201,121 @@ definitions:
     allowableValues: []
     isEditable: true
     isSecret: true
-  
+
   - path: /services/tempest/stationId
     defaultValue: "0"
     description: "Station ID for Tempest Weather Station"
     expectedValueType: "Int32"
     allowableValues: []
     isEditable: true
+    isSecret: false
+
+  - path: /services/udpListener/preferredPort
+    defaultValue: "50000"
+    description: "UDP Port for listening for readings from Tempest Weather Station"
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/unitOfMeasure/airPressure
+    defaultValue: "inch of mercury"
+    description: "Unit that air pressure is provided in"
+    expectedValueType: "String"
+    allowableValues:
+      - "atmosphere"
+      - "bar"
+      - "hectopascal"
+      - "inch of mercury"
+      - "kilopascal"
+      - "millibar"
+      - "pascal"
+    isEditable: true
+    isSecret: false
+
+  - path: /services/unitOfMeasure/airTemperature
+    defaultValue: "degree fahrenheit"
+    description: "Unit that air temperature is provided in"
+    expectedValueType: "String"
+    allowableValues:
+      - "degree fahrenheit"
+      - "degree celsius"
+    isEditable: true
+    isSecret: false
+
+  - path: /services/unitOfMeasure/batteryLevel
+    defaultValue: "volt"
+    description: "Unit that battery level is provided in"
+    expectedValueType: "String"
+    allowableValues:
+      - "volt"
+    isEditable: false
+    isSecret: false
+
+  - path: /services/unitOfMeasure/illuminance
+    defaultValue: "lux"
+    description: "Unit that illuminance is provided in"
+    expectedValueType: "String"
+    allowableValues:
+      - "lux"
+      - "candela"
+    isEditable: false
+    isSecret: false
+
+  - path: /services/unitOfMeasure/lightningDistance
+    defaultValue: "mile"
+    description: "Unit that lightning distance is provided in"
+    expectedValueType: "String"
+    allowableValues:
+      - "kilometer"
+      - "meter"
+      - "mile"
+      - "nautical mile"
+    isEditable: true
+    isSecret: false
+
+  - path: /services/unitOfMeasure/rainAccumulation
+    defaultValue: "inch"
+    description: "Unit that the amount of rain accumulation is provided in"
+    expectedValueType: "String"
+    allowableValues:
+      - "centimeter"
+      - "millimeter"
+      - "inch"
+    isSecret: false
+
+  - path: /services/unitOfMeasure/solarRadiation
+    defaultValue: "watt/square meter"
+    description: "Unit that lightning distance is provided in"
+    expectedValueType: "String"
+    allowableValues:
+      - "watt/square meter"
+      - "kilowatt/square meter"
+    isSecret: false
+
+  - path: /services/unitOfMeasure/windSpeed
+    defaultValue: "mile/hour"
+    description: "Unit that lightning distance is provided in"
+    expectedValueType: "String"
+    allowableValues:
+      - "kilometer/hour"
+      - "knot"
+      - "meter/second"
+      - "mile/hour"
+    isSecret: false
+
+  - path: /services/xmlToPostgreSQL/connectionString
+    defaultValue: "Host=192.168.8.9;Port=5432;Database=weather;Username=weather;Password=password"
+    description: "Connection string for PostgreSQL database"
+    expectedValueType: "String"
+    allowableValues:
+    isSecret: true
+
+  - path: /services/xmlToPostgreSQL/enableBuffering
+    defaultValue: "false"
+    description: "Enable buffering for PostgreSQL database"
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
     isSecret: false

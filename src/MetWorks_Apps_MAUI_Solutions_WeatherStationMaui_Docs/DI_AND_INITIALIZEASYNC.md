@@ -1,4 +1,4 @@
-# Declarative DI and InitializeAsync
+﻿# Declarative DI and InitializeAsync
 
 External reference: https://github.com/jack-metcalfe/MetWorks-DeclarativeDI
 
@@ -23,3 +23,13 @@ Rationale
 Usage notes
 - See src/settings/SettingRepository.cs for InitializeAsync usage patterns and how settings are usually provided to components.
 - The DDI repo above contains helpers for registering and invoking InitializeAsync for all DDI components; prefer using the shared helpers to ensure consistent lifecycles.
+
+## DDI YAML authoring notes (this solution)
+
+- `instance:` entries must be defined before first use (no forward references).
+  - This ordering constraint applies to `instance:` only; `namespace:` ordering is not constrained.
+- The `namespace:` class `parameter:` list is the contract for initializer wiring.
+  - Any initializer argument assigned in `instance:` must exist in the class `parameter:` list.
+- Dotted instance property access (e.g., `RootCancellationTokenSource.Token`, `TheInstanceIdentifier.InstallationId`) requires:
+  - declaring the property under the class’s `property:` list in `namespace:`
+  - the property to exist on the concrete implementation (and on the interface if you expose the instance to MAUI DI).

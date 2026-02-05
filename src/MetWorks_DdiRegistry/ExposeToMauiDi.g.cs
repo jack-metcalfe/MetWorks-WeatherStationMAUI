@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  ExposeToMauiDi
-// Generated On:        2026-02-01T03:34:47.7996337Z
+// Generated On:        2026-02-04T20:48:31.7351773Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -17,6 +17,10 @@ namespace MetWorks.ServiceRegistry
             CancellationToken cancellationToken = default
 		)
         {
+            MetWorks.Common.Metrics.IMetricsLatestSnapshot
+                        _TheMetricsLatestSnapshotStore = GetTheMetricsLatestSnapshotStore();
+            services.AddSingleton<MetWorks.Common.Metrics.IMetricsLatestSnapshot>
+                (_TheMetricsLatestSnapshotStore);
             MetWorks.Interfaces.IEventRelayBasic
                         _TheEventRelayBasic = GetTheEventRelayBasic();
             services.AddSingleton<MetWorks.Interfaces.IEventRelayBasic>
@@ -33,9 +37,9 @@ namespace MetWorks.ServiceRegistry
                         _TheSettingRepository = GetTheSettingRepository();
             services.AddSingleton<MetWorks.Interfaces.ISettingRepository>
                 (_TheSettingRepository);
-            MetWorks.InstanceIdentifier.InstanceIdentifier
+            MetWorks.Interfaces.IInstanceIdentifier
                         _TheInstanceIdentifier = GetTheInstanceIdentifier();
-            services.AddSingleton<MetWorks.InstanceIdentifier.InstanceIdentifier>
+            services.AddSingleton<MetWorks.Interfaces.IInstanceIdentifier>
                 (_TheInstanceIdentifier);
             MetWorks.Interfaces.ILoggerFile
                         _TheLoggerFile = GetTheLoggerFile();

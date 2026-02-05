@@ -5,7 +5,6 @@
              x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages.MainView1920x1200"
              x:DataType="viewmodels:WeatherViewModel"
 >
-    <!-- 1920x1200-specific layout -->
     <Grid Margin="0" Padding="0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -29,14 +28,14 @@
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}"
                         Text=" (" />
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource WhiteVikings}" 
-                        Text="{Binding AirTemperatureUnit}" />
+                        Text="{Binding CurrentObservation.AirTemperature.Unit}" />
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}"
                         Text=")" />
                 </HorizontalStackLayout>
                 <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}" >
                     <Label.Text>
                         <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
-                            <Binding Path="AirTemperatureValue" />
+                            <Binding Path="CurrentObservation.AirTemperature" />
                         </MultiBinding>
                     </Label.Text>
                 </Label>
@@ -61,24 +60,24 @@
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" 
                            Text=" (" />
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource WhiteVikings}" 
-                           Text="{Binding WindSpeedInstantUnit}" />
+                           Text="{Binding CurrentWind.Speed.Unit}" />
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" 
                            Text=")" />
                 </HorizontalStackLayout>
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource GoldVikings}" 
                            VerticalTextAlignment="Start" HorizontalTextAlignment="Center" 
-                           Text="{Binding WindDirectionCardinalInstantValue}" />
+                           Text="{Binding CurrentWind.DirectionCardinal}" />
                     <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource GoldVikings}" 
                            Text=" (" />
                     <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource WhiteVikings}" 
-                           Text="{Binding WindDirectionDegreesInstantValue}" />
+                           Text="{Binding CurrentWind.DirectionDegrees}" />
                     <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource GoldVikings}" 
                            Text=")" />
                 </HorizontalStackLayout>
                 <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}">
                     <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
-                        <Binding Path="WindSpeedInstantValue" />
+                        <Binding Path="CurrentWind.Speed" />
                     </MultiBinding>
                 </Label>
             </VerticalStackLayout>
@@ -92,13 +91,13 @@
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" 
                            Text=" (" />
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource WhiteVikings}" 
-                           Text="{Binding RelativeHumidityUnit}" />
+                           Text="%" />
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" 
                            Text=")" />
                 </HorizontalStackLayout>
                 <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}">
                     <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
-                        <Binding Path="RelativeHumidityValue" />
+                        <Binding Path="CurrentObservation.RelativeHumidity" />
                     </MultiBinding>
                 </Label>
             </VerticalStackLayout>
@@ -111,7 +110,7 @@
                 </HorizontalStackLayout>
                 <Label FontSize="300" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}">
                     <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
-                        <Binding Path="UvIndexValue" />
+                        <Binding Path="CurrentObservation.UvIndex" />
                     </MultiBinding>
                 </Label>
             </VerticalStackLayout>

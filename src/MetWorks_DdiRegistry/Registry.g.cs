@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Registry
-// Generated On:        2026-02-01T03:34:47.7996337Z
+// Generated On:        2026-02-04T20:48:31.7351773Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -21,6 +21,7 @@ namespace MetWorks.ServiceRegistry
         public void CreateAll()
         {
             RootCancellationTokenSource_InstanceFactory.Create(this);
+            TheMetricsLatestSnapshotStore_InstanceFactory.Create(this);
             TheEventRelayBasic_InstanceFactory.Create(this);
             TheEventRelayPath_InstanceFactory.Create(this);
             TheLoggerStub_InstanceFactory.Create(this);
@@ -31,6 +32,8 @@ namespace MetWorks.ServiceRegistry
             TheLoggerPostgreSQL_InstanceFactory.Create(this);
             TheLoggerResilient_InstanceFactory.Create(this);
             TheProvenanceTracker_InstanceFactory.Create(this);
+            TheMetricsSampler_InstanceFactory.Create(this);
+            TheMetricsSummaryIngestor_InstanceFactory.Create(this);
             TheTempestRestClient_InstanceFactory.Create(this);
             TheStationMetadataProvider_InstanceFactory.Create(this);
             TheUnitsOfMeasureInitializer_InstanceFactory.Create(this);
@@ -51,6 +54,8 @@ namespace MetWorks.ServiceRegistry
             await TheLoggerPostgreSQL_Initializer.Initialize_TheLoggerPostgreSQLAsync(this).ConfigureAwait(false);
             await TheLoggerResilient_Initializer.Initialize_TheLoggerResilientAsync(this).ConfigureAwait(false);
             await TheProvenanceTracker_Initializer.Initialize_TheProvenanceTrackerAsync(this).ConfigureAwait(false);
+            await TheMetricsSampler_Initializer.Initialize_TheMetricsSamplerAsync(this).ConfigureAwait(false);
+            await TheMetricsSummaryIngestor_Initializer.Initialize_TheMetricsSummaryIngestorAsync(this).ConfigureAwait(false);
             await TheTempestRestClient_Initializer.Initialize_TheTempestRestClientAsync(this).ConfigureAwait(false);
             await TheStationMetadataProvider_Initializer.Initialize_TheStationMetadataProviderAsync(this).ConfigureAwait(false);
             await TheUnitsOfMeasureInitializer_Initializer.Initialize_TheUnitsOfMeasureInitializerAsync(this).ConfigureAwait(false);

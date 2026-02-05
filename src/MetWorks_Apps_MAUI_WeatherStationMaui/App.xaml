@@ -16,6 +16,7 @@
 
             <converters:AirTemperatureFormatter x:Key="AirTemperatureFormatter" />
             <converters:QuantityFormatter x:Key="QuantityFormatter" />
+            <converters:TimeConverter x:Key="TimeConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

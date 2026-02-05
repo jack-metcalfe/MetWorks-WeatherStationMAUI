@@ -10,6 +10,8 @@ public partial class InstanceIdentifier : IInstanceIdentifier
     // Parameterless constructor for DDI creation
     public InstanceIdentifier() { }
 
+    public string InstallationId => GetOrCreateInstallationId();
+
     // Declarative DI initialize signature
     public async Task<bool> InitializeAsync(
         ILoggerStub iLoggerStub, 

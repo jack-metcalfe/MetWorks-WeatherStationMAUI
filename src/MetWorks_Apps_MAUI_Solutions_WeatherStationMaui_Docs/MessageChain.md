@@ -1,19 +1,68 @@
 ﻿# Complete Message Chain Documentation
 
 ## Overview
-This document details every message sent through ISingletonEventRelay in chronological order, including message types, senders, receivers, and what each component does with the data.
+This document details the key message flows in the WeatherStation MAUI app.
+
+There are two distinct relays:
+
+- `IEventRelayBasic` (typed messages) implemented by `MetWorks.EventRelay.EventRelayBasic`
+  - API: `Register<TMessage>(recipient, handler)` / `Send<TMessage>(message)`
+  - Implementation uses `CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger`
+- `IEventRelayPath` (settings-change routing) implemented by `MetWorks.EventRelay.EventRelayPath`
+  - API: `Register(pathPrefix, handler)` / `Send(ISettingValue settingValue)`
+  - Routes by prefix match on `ISettingValue.Path`
+
+---
+
+## Correlation & identity fields (present today)
+
+This system already contains the information needed to correlate messages and measure end-to-end timing without adding a new “message base interface”.
+
+### The two key IDs
+
+- **Message/record ID (`Id`)**
+  - Used on `IRawPacketRecordTyped` and on each derived reading (`IObservationReading`, `IWindReading`, etc.).
+  - Generated as a COMB GUID (chronologically sortable).
+
+- **Upstream correlation (`SourcePacketId`)**
+  - Used on derived readings to correlate them back to the originating UDP packet:
+    - `IObservationReading.SourcePacketId`
+    - `IWindReading.SourcePacketId`
+    - `IPrecipitationReading.SourcePacketId`
+    - `ILightningReading.SourcePacketId`
+  - The value is the upstream `IRawPacketRecordTyped.Id`.
+
+### Provenance (timing + lineage)
+
+Derived readings also carry `Provenance` (`IReadingProvenance`) which includes:
+
+- `RawPacketId` (same value as `SourcePacketId`)
+- `UdpReceiptTime`
+- `TransformStartTime`
+- `TransformEndTime`
+- `TransformerVersion` (e.g., `"1.0"` vs `"1.0-retransform"`)
+
+### How to use this for instrumentation
+
+- **Correlation across the pipeline**: use `SourcePacketId` / `Provenance.RawPacketId` to join derived readings back to the raw packet id.
+- **Processing time (transform)**: `TransformEndTime - TransformStartTime`.
+- **End-to-end (UDP → UI-ready)**: `TransformEndTime - UdpReceiptTime` (or `Timestamp` vs `UdpReceiptTime` depending on what “end-to-end” means).
+
+Notes:
+
+- `StationMetadata` is a separate flow and currently does not carry a `SourcePacketId` because it originates from REST/cache rather than UDP.
 
 ---
 
 ## MESSAGE FLOW CHAIN
 
-### 1. IRawPacketRecordTyped
+### 1. `IRawPacketRecordTyped`
 
 SENT BY:
-- Component: Transformer (UDP Listener)
-- Location: src/udp_in_raw_packet_record_typed_out/Transformer.cs
-- Method: ProcessPacketAsync()
-- Code: ISingletonEventRelay.Send(iRawPacketRecordTyped);
+- Component: `TempestPacketTransformer` (UDP Listener)
+- Location: `src/MetWorks_Networking_Udp_Transformer/TempestPacketTransformer.cs`
+- Method: `ProcessPacketAsync(...)`
+- Code: `IEventRelayBasic.Send(iRawPacketRecordTyped);`
 
 MESSAGE CONTAINS:
 - Id - COMB GUID (chronologically sortable)
@@ -23,29 +72,38 @@ MESSAGE CONTAINS:
 - ReceivedUtcUnixEpochSecondsAsLong - Unix epoch seconds
 
 RECEIVED BY:
-- Component: WeatherDataTransformer
-- Location: src/metworks_services/WeatherDataTransformer.cs
-- Method: OnRawPacketReceived()
-- Registration: ISingletonEventRelay.Register<IRawPacketRecordTyped>(this, OnRawPacketReceived);
+- Component: `RawPacketIngestor` (PostgreSQL sink)
+  - Location: `src/MetWorks_Ingest_Postgres/RawPacketIngestor.cs`
+  - Registration: `IEventRelayBasic.Register<IRawPacketRecordTyped>(this, ReceiveHandler);`
+
+- Component: `SensorReadingTransformer` (transforms into typed readings)
+  - Location: `src/MetWorks_Ingest_Transformer/SensorReadingTransformer.cs`
+  - Registration: `IEventRelayBasic.Register<IRawPacketRecordTyped>(this, OnRawPacketReceived);`
 
 WHAT RECEIVER DOES:
-1. Caches packet in _lastPacketCache for retransformation
-2. Parses JSON based on PacketEnum type
-3. Converts from metric units to user preferred units
-4. Creates typed reading with provenance
-5. Publishes typed reading (see below)
+
+`RawPacketIngestor`:
+1. Buffers messages if DB is unavailable and buffering is enabled
+2. Writes raw JSON into Postgres tables (`observation`, `wind`, `lightning`, `precipitation`)
+
+`SensorReadingTransformer`:
+1. Caches the last packet per `PacketEnum` in `_lastPacketCache` for retransformation
+2. Parses JSON via `TempestPacketParser`
+3. Converts from Tempest metric units to user preferred units
+4. Computes derived values (dew point, wind chill, heat index, feels-like; sea-level pressure when elevation is available)
+5. Publishes typed readings via `IEventRelayBasic.Send(...)` (see below)
 
 FREQUENCY: Every UDP packet received (~3 seconds for wind, ~60 seconds for observation)
 
 ---
 
-### 2. IObservationReading
+### 2. `IObservationReading`
 
 SENT BY:
-- Component: WeatherDataTransformer
-- Location: src/metworks_services/WeatherDataTransformer.cs
-- Method: TransformAndPublish()
-- Code: case IObservationReading obs: ISingletonEventRelay.Send(obs);
+- Component: `SensorReadingTransformer`
+- Location: `src/MetWorks_Ingest_Transformer/SensorReadingTransformer.cs`
+- Method: `TransformAndPublish(...)`
+- Code: `IEventRelayBasic.Send(iObservationReading);`
 
 MESSAGE CONTAINS:
 - Id - New COMB GUID for this reading
@@ -68,10 +126,9 @@ MESSAGE CONTAINS:
   - TransformerVersion - "1.0" or "1.0-retransform"
 
 RECEIVED BY:
-- Component: WeatherViewModel
-- Location: src/weather-station-maui/ViewModels/WeatherViewModel.cs
-- Method: OnObservationReceived()
-- Registration: ISingletonEventRelay.Register<IObservationReading>(this, OnObservationReceived);
+- Component: `WeatherViewModel`
+- Location: `src/MetWorks_Apps_MAUI_WeatherStationMaui/ViewModels/WeatherViewModel.cs`
+- Registration: `_iEventRelayBasic.Register<IObservationReading>(this, OnObservationReceived);`
 
 WHAT RECEIVER DOES:
 1. Marshals to main thread (MainThread.BeginInvokeOnMainThread)
@@ -83,13 +140,13 @@ FREQUENCY: ~Every 60 seconds (from weather station), Immediately on unit prefere
 
 ---
 
-### 3. IWindReading
+### 3. `IWindReading`
 
 SENT BY:
-- Component: WeatherDataTransformer
-- Location: src/metworks_services/WeatherDataTransformer.cs
-- Method: TransformAndPublish()
-- Code: case IWindReading wind: ISingletonEventRelay.Send(wind);
+- Component: `SensorReadingTransformer`
+- Location: `src/MetWorks_Ingest_Transformer/SensorReadingTransformer.cs`
+- Method: `TransformAndPublish(...)`
+- Code: `IEventRelayBasic.Send(iWindReading);`
 
 MESSAGE CONTAINS:
 - Id - New COMB GUID for this reading
@@ -105,10 +162,9 @@ MESSAGE CONTAINS:
 - Provenance - Complete lineage (same structure as Observation)
 
 RECEIVED BY:
-- Component: WeatherViewModel
-- Location: src/weather-station-maui/ViewModels/WeatherViewModel.cs
-- Method: OnWindReceived()
-- Registration: ISingletonEventRelay.Register<IWindReading>(this, OnWindReceived);
+- Component: `WeatherViewModel`
+- Location: `src/MetWorks_Apps_MAUI_WeatherStationMaui/ViewModels/WeatherViewModel.cs`
+- Registration: `_iEventRelayBasic.Register<IWindReading>(this, OnWindReceived);`
 
 WHAT RECEIVER DOES:
 1. Marshals to main thread
@@ -120,13 +176,13 @@ FREQUENCY: ~Every 3 seconds (rapid_wind packets from weather station), Immediate
 
 ---
 
-### 4. IPrecipitationReading
+### 4. `IPrecipitationReading`
 
 SENT BY:
-- Component: WeatherDataTransformer
-- Location: src/metworks_services/WeatherDataTransformer.cs
-- Method: TransformAndPublish()
-- Code: case IPrecipitationReading precip: ISingletonEventRelay.Send(precip);
+- Component: `SensorReadingTransformer`
+- Location: `src/MetWorks_Ingest_Transformer/SensorReadingTransformer.cs`
+- Method: `TransformAndPublish(...)`
+- Code: `IEventRelayBasic.Send(iPrecipitationReading);`
 
 MESSAGE CONTAINS:
 - Id - New COMB GUID for this reading
@@ -145,13 +201,47 @@ FREQUENCY: Only during rain events
 
 ---
 
-### 5. ILightningReading
+### 5. `ILightningReading`
 
 SENT BY:
-- Component: WeatherDataTransformer
-- Location: src/metworks_services/WeatherDataTransformer.cs
-- Method: TransformAndPublish()
-- Code: case ILightningReading lightning: ISingletonEventRelay.Send(lightning);
+- Component: `SensorReadingTransformer`
+- Location: `src/MetWorks_Ingest_Transformer/SensorReadingTransformer.cs`
+- Method: `TransformAndPublish(...)`
+- Code: `IEventRelayBasic.Send(iLightningReading);`
+
+### 6. `StationMetadata` (station snapshot-derived)
+
+SENT BY:
+- Component: `StationMetadataProvider`
+- Location: `src/MetWorks_Common/StationMetadataProvider.cs`
+- Method: `GetStationMetadataAsync(...)`
+- Code: `IEventRelayBasic.Send(_metadata);`
+
+RECEIVED BY:
+- Component: `StationMetadataIngestor` (PostgreSQL sink)
+- Location: `src/MetWorks_Ingest_Postgres/StationMetadataIngestor.cs`
+- Registration: `IEventRelayBasic.Register<StationMetadata>(this, md => StartBackground(ct => PersistAsync(md, ct)));`
+
+## SETTINGS CHANGE NOTIFICATIONS (`IEventRelayPath`)
+
+Settings changes are routed by prefix match on `ISettingValue.Path`. This is **separate** from the typed message pipeline above.
+
+PUBLISHED BY:
+- Component: `SettingRepository`
+- Location: `src/MetWorks_Common_Settings/SettingRepository.cs`
+- Method: `ApplyOverrides(IEnumerable<ISettingValue> overrides)`
+- Code: `IEventRelayPath.Send(c);`
+
+SUBSCRIBED BY (CURRENT):
+- Component: `SensorReadingTransformer`
+- Location: `src/MetWorks_Ingest_Transformer/SensorReadingTransformer.cs`
+- Method: `InitializeAsync(...)`
+- Registration:
+  - `var unitGroupPrefix = LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildGroupPath();`
+  - `IEventRelayPath.Register(unitGroupPrefix, OnUnitSettingChanged);`
+
+INTENDED EFFECT:
+- When unit-of-measure settings change under that prefix, the transformer reloads preferences and retransforms cached packets so the UI updates in the new units.
 
 MESSAGE CONTAINS:
 - Id - New COMB GUID for this reading

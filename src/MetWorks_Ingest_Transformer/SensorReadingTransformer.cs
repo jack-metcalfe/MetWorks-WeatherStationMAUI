@@ -347,7 +347,7 @@ public class SensorReadingTransformer : ServiceBase
 
                 Id = IdGenerator.CreateCombGuid(),
                 SourcePacketId = rawPacket.Id,
-                Timestamp = DateTimeOffset.FromUnixTimeSeconds(iObservationReadingDto.EpochTimestampUtc).UtcDateTime,
+                Timestamp = DateTimeOffset.FromUnixTimeSeconds(iObservationReadingDto.EpochTimestampUtc).UtcDateTime.ToLocalTime(),
                 ReceivedUtc = rawPacket.ReceivedTime,
                 Provenance = new ReadingProvenance
                 {
@@ -427,7 +427,7 @@ public class SensorReadingTransformer : ServiceBase
 
                 Id = IdGenerator.CreateCombGuid(),
                 SourcePacketId = rawPacket.Id,
-                Timestamp = DateTimeOffset.FromUnixTimeSeconds(windDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime,
+                Timestamp = DateTimeOffset.FromUnixTimeSeconds(windDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime.ToLocalTime(),
                 ReceivedUtc = rawPacket.ReceivedTime,
                 Speed = speed,
                 DeviceReceivedUtcTimestampEpoch = windDto.DeviceReceivedUtcTimestampEpoch,
@@ -474,7 +474,7 @@ public class SensorReadingTransformer : ServiceBase
 
                 Id = IdGenerator.CreateCombGuid(),
                 SourcePacketId = rawPacket.Id,
-                Timestamp = DateTimeOffset.FromUnixTimeSeconds(iPrecipitationDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime,
+                Timestamp = DateTimeOffset.FromUnixTimeSeconds(iPrecipitationDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime.ToLocalTime(),
                 ReceivedUtc = rawPacket.ReceivedTime,
                 RainRate = new Amount(0, LengthUnits.MilliMeter).ConvertedTo(_preferredUnits[MeasurementTypeEnum.RainAccumulation]),
                 DailyAccumulation = null,  // Get from observation packet
@@ -517,7 +517,7 @@ public class SensorReadingTransformer : ServiceBase
 
                 Id = IdGenerator.CreateCombGuid(),
                 SourcePacketId = rawPacket.Id,
-                Timestamp = DateTimeOffset.FromUnixTimeSeconds(iLightningDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime,
+                Timestamp = DateTimeOffset.FromUnixTimeSeconds(iLightningDto.DeviceReceivedUtcTimestampEpoch).UtcDateTime.ToLocalTime(),
                 ReceivedUtc = rawPacket.ReceivedTime,
                 StrikeDistance = new Amount(iLightningDto.LightningStrikeDistanceKm, LengthUnits.KiloMeter)
                     .ConvertedTo(_preferredUnits[MeasurementTypeEnum.LightningDistance]),

@@ -6,14 +6,21 @@ devices:
     manufacturer: "Microsoft"
     model: "GE68HX13V"
     overrides:
-      DefaultWeather: "DefaultWeather.Win1920x1200"
+      HomePage: "HomePage.Win1920x1200"
     notes: "Primary dev machine"
 
   - id: "zfold4"
     platform: "Android"
-    manufacturer: "Samsung"
-    model: "SM-F936U"
+    manufacturer: "samsung"
+    model: "SM-F936U1"
     overrides:
-      DefaultWeather:
-        Landscape: "DefaultWeather.Android.ZFold4.Landscape"
+      HomePage: "HomePage.And2176x1812"
     notes: "ZFold4 unfolded landscape"
+
+  - id: "samsungTablet"
+    platform: "Android"
+    manufacturer: "samsung"
+    model: "SM-X518U"
+    overrides:
+      HomePage: "HomePage.And2304x1440"
+    notes: "Samsung Tablet Landscape"

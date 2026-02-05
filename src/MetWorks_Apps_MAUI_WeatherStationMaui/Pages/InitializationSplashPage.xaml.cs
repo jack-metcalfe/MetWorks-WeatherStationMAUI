@@ -79,7 +79,7 @@ public partial class InitializationSplashPage : ContentPage
                 if (Shell.Current is null)
                     throw new InvalidOperationException("Shell.Current is null during post-initialization navigation.");
 
-                await Shell.Current.GoToAsync("///Weather/WeatherTab/MainSwipeHostPage");
+                await Shell.Current.GoToAsync("///Weather/MainSwipeHostPage");
             }
             catch (Exception ex)
             {

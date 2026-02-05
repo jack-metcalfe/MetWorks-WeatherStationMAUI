@@ -8,17 +8,17 @@ public static class VariantKeys
 {
     public static class DefaultWeather
     {
-        public const string Adaptive = "DefaultWeather.Adaptive";
+        public const string Adaptive = "HomePage.Adaptive";
 
-        public const string Compact = "DefaultWeather.Compact";
-        public const string Medium = "DefaultWeather.Medium";
-        public const string Expanded = "DefaultWeather.Expanded";
+        public const string Compact = "HomePage.Compact";
+        public const string Medium = "HomePage.Medium";
+        public const string Expanded = "HomePage.Expanded";
 
         // Current concrete implementations (initial curated set)
-        public const string Win1920x1200 = "DefaultWeather.Win1920x1200";
-        public const string AndroidZFold4Landscape = "DefaultWeather.Android.ZFold4.Landscape";
+        public const string Win1920x1200 = "HomePage.Win1920x1200";
+        public const string And2176x1812 = "HomePage.And2176x1812";
+        public const string And2304x1440 = "HomePage.And2304x1440";
     }
-
     public static class Placeholder
     {
         public const string Default = "Placeholder.Default";

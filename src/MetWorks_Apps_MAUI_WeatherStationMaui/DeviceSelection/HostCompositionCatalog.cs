@@ -4,7 +4,7 @@ public sealed class HostCompositionCatalog : IHostCompositionCatalog
 {
     static readonly HostComposition MainSwipe = new(
         HostKey.MainSwipe,
-        new[] { LogicalContentKey.HomePage, LogicalContentKey.LiveWind }
+        new[] { LogicalContentKey.HomePage, LogicalContentKey.LiveWind, LogicalContentKey.MetricsOne }
     );
 
     public bool TryGetComposition(HostKey hostKey, out HostComposition composition)

@@ -4,6 +4,9 @@ using ISettingValueDictionary = Dictionary<string, ISettingValue>;
 public class SettingProvider : ISettingProvider
 {
     private readonly string? _overridesBaseDirectory;
+    public string? SettingsTemplateResourceName { get; private set; }
+    public string? SettingsOverrideFilePath { get; private set; }
+    public bool SettingsOverrideFileExistsAtLoad { get; private set; }
     bool _isInitialized = false;
     ILogger? _iLogger = null;
     ILogger ILogger
@@ -80,9 +83,12 @@ public class SettingProvider : ISettingProvider
             // then overlay any local overrides found in AppData so overrides only replace values.
             var localDir = _overridesBaseDirectory ?? GetAppDataDirectory();
             var overridePath = Path.Combine(localDir ?? string.Empty, SettingConstants.ProviderFilename);
+            SettingsOverrideFilePath = overridePath;
+            SettingsOverrideFileExistsAtLoad = !string.IsNullOrWhiteSpace(localDir) && File.Exists(overridePath);
 
-            // Load template from embedded resources first (preferred). Try common names.
-            var templateString = ResourceProvider.GetString(SettingConstants.ProviderFilename);
+            // Load template from embedded resources first (preferred).
+            SettingsTemplateResourceName = SettingConstants.ProviderFilename;
+            var templateString = ResourceProvider.GetString(SettingsTemplateResourceName);
 
             SettingModel templateModel = templateString is null
                 ? new SettingModel()

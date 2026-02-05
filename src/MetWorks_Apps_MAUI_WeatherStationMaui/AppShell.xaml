@@ -8,17 +8,10 @@
     x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.AppShell">
 
     <FlyoutItem Title="Weather" Route="Weather">
-        <Tab Title="Weather" Route="WeatherTab">
-            <ShellContent
-                Title="Startup"
-                ContentTemplate="{DataTemplate pages:InitializationSplashPage}"
-                Route="InitializationSplashPage" />
-
-            <ShellContent
-                Title="HomePage"
-                ContentTemplate="{DataTemplate hostPages:MainSwipeHostPage}"
-                Route="MainSwipeHostPage" />
-        </Tab>
+        <ShellContent
+            Title="HomePage"
+            ContentTemplate="{DataTemplate hostPages:MainSwipeHostPage}"
+            Route="MainSwipeHostPage" />
     </FlyoutItem>
 
 </Shell>

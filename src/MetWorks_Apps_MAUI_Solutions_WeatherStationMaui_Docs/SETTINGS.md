@@ -24,7 +24,14 @@ Reacting to changes (example)
  ```
 
 Persistence and overrides
-- The provider loads definitions from the embedded `data.settings.yaml`. Runtime overrides are persisted to an overrides file under the app-local directory (by default `%LocalAppData%/MetWorks-WeatherStationMAUI/data.settings.yaml`).
+- The provider loads settings in this order:
+  1. **Embedded template**: `data.settings.yaml` from the app assembly resources (contains both `definitions:` and optional default `values:`).
+  2. **Local override file** (if present): `%LocalAppData%/MetWorks-WeatherStationMAUI/data.settings.yaml` (Windows) / `FileSystem.AppDataDirectory/data.settings.yaml` (MAUI platforms).
+     - Override `values:` entries replace (or add) values from the embedded template.
+     - Override `definitions:` entries are only used to add *missing* definitions.
+  3. **In-memory defaulting**: after load, any setting with a definition but no value gets a value equal to its definition `defaultValue`.
+
+- At startup, the app logs a single non-secret line reporting the template resource name and the computed override file path (and whether it existed at load time).
 - `SettingProvider` exposes `SaveValueOverride(string path, string value)` to write a single-value override atomically.
 
 Per-installation identifier

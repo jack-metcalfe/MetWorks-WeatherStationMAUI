@@ -6,5 +6,6 @@
 public enum LogicalContentKey
 {
     HomePage = 0,
-    LiveWind = 1
+    LiveWind = 1,
+    MetricsOne = 2
 }

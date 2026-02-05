@@ -41,4 +41,23 @@ public static class SettingConstants
     public const string Tempest_groupName = "tempest";
     public const string Tempest_apiKey = "apiKey";
     public const string Tempest_stationId = "stationId";
+
+    public const string Metrics_groupName = "metrics";
+    public const string Metrics_enabled = "enabled";
+    public const string Metrics_captureIntervalSeconds = "captureIntervalSeconds";
+    public const string Metrics_applicationId = "applicationId";
+    public const string Metrics_connectionString = "connectionString";
+    public const string Metrics_tableName = "tableName";
+    public const string Metrics_autoCreateTable = "autoCreateTable";
+    // Metrics persistence uses /services/metrics/{connectionString,tableName,autoCreateTable}
+    // Legacy compatibility aliases. Prefer Metrics_* for /services/metrics/*.
+    public const string MetricsPostgreSQL_connectionString = Metrics_connectionString;
+    public const string MetricsPostgreSQL_tableName = Metrics_tableName;
+    public const string MetricsPostgreSQL_autoCreateTable = Metrics_autoCreateTable;
+
+    public const string Metrics_relayEnabled = "relayEnabled";
+    public const string Metrics_relayTopN = "relayTopN";
+
+    public const string Metrics_pipelineEnabled = "pipelineEnabled";
+    public const string Metrics_pipelineTopN = "pipelineTopN";
 }

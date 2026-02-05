@@ -141,6 +141,19 @@ public class StartupInitializer
                 _iLoggerResilient = _appRegistry.GetTheLoggerResilient();
                 _iLoggerResilient?.Information("✅ All services initialized");
 
+                // Log settings source diagnostics (non-secret)
+                try
+                {
+                    var sp = _appRegistry.GetTheSettingProvider() as MetWorks.Common.Settings.SettingProvider;
+                    if (sp is not null)
+                    {
+                        _iLoggerResilient?.Information(
+                            $"Settings loaded. templateResource='{sp.SettingsTemplateResourceName}', overrideFile='{sp.SettingsOverrideFilePath}', overrideExists={sp.SettingsOverrideFileExistsAtLoad}"
+                        );
+                    }
+                }
+                catch { }
+
                 // Step 4: Verify critical services
                 await VerifyCriticalServicesAsync().ConfigureAwait(false);
 
