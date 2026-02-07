@@ -6,6 +6,8 @@
 - Use this project as a learning vehicle; leverage the assistant for guidance and clarification on concepts and practices.
 - Prefer a tiny third 'workspace' Git repo to represent a multi-repo Visual Studio workspace on GitHub (instead of nesting repos).
 - Use backward compatibility only as a short interim step; remove incompatible and dead/legacy code as soon as possible to reduce complexity in the codebase.
+- Align with tool defaults (e.g., YamlDotNet default YAML quoting/serialization) across all repos; avoid fighting tool behavior unless there's a clear reason or deep understanding of the tool.
+- Ensure UI changes consider dark mode readability, as the user typically uses a dark theme whenever available.
 
 ## Instrumentation Preferences
 - Target Android primarily; emit reports to logs first.
@@ -65,10 +67,11 @@
 - It is acceptable to remove obsolete tests during refactors; adding lots of new tests is desired but should be pragmatic, prioritizing fun and velocity.
 - Prefer sorting YAML settings `definitions` by `path` for discoverability; duplicates should be adjacent to ease cleanup.
 - In DDI YAML, instances must be defined before first use (no forward references) within the `instance:` section; the `namespace:` section ordering is not constrained. Reorder `instance:` entries so dependencies appear earlier than dependents.
+- Prefer not to fight tool defaults (e.g., YamlDotNet default YAML quoting/serialization) unless they understand the tool well; align with default behaviors.
 
 ## MAUI Specific Instructions
 - MAUI Shell uses ShellContent route `SwipeCarousel` and splash navigates via `GoToAsync("///SwipeCarousel")`.
 - The two-window issue has been fixed by removing OpenWindow/AppShell swapping and resolving AppShell from DI in App.CreateWindow.
 - SwipeCarousel currently shows only arrows (content empty) at the end of the session.
-- Prefer deterministic manual paging (host ContentView + swipe gestures + arrow/key navigation) over CarouselView when CarouselView exhibits virtualization/recycling issues like oscillation/self-swiping.
+- Prefer deterministic manual paging (host ContentView + swipe gestures + arrow:key navigation) over CarouselView when CarouselView exhibits virtualization/recycling issues like oscillation/self-swiping.
 - Prefer deterministic manual paging (host ContentView + swipe gestures + arrow:key navigation) over CarouselView when CarouselView shows virtualization/recycling issues like oscillation/self-swiping.

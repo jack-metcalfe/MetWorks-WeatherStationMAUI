@@ -2,7 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels"
-             x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages.MetricsOne"
+             x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages.MetricsOne2304x1440"
              x:DataType="viewmodels:MetricsOneViewModel">
 
     <Grid Margin="0" Padding="12" RowSpacing="0" ColumnSpacing="12">
@@ -74,25 +74,29 @@
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
         <Label
-                Grid.Row="0" Grid.ColumnSpan="50" 
-                FontSize="40" TextColor="{StaticResource GoldVikings}"
-                HorizontalOptions="Center"
-                Text="Metrics" 
+                Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="7" 
+                FontSize="22" TextColor="{StaticResource GoldVikings}"
+                Text="Installation Id:" 
         />
         <Label
-                Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" 
+                Grid.Row="0" Grid.Column="7" Grid.ColumnSpan="18" 
+                FontSize="22" TextColor="{StaticResource GoldVikings}"
+                Text="{Binding InstallationId}" 
+        />
+        <Label
+                Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" 
                 FontSize="22" TextColor="{StaticResource GoldVikings}"
                 Text="Captured:" 
         />
         <Label
-                Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="8"
+                Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="8"
                 FontSize="22" TextColor="{StaticResource WhiteVikings}" 
                 Text="{Binding Current.CapturedUtc, Converter={StaticResource TimeConverter}, StringFormat='{}{0:G}'}" 
         />
         <Label
-                Grid.Row="1" Grid.Column="12" Grid.ColumnSpan="8"
+                Grid.Row="1" Grid.Column="13" Grid.ColumnSpan="6"
                 FontSize="22" TextColor="{StaticResource GoldVikings}" 
-                Text="Interval (seconds):"
+                Text="Interval(sec):"
         />
         <Label
                 Grid.Row="1" Grid.Column="19" Grid.ColumnSpan="2"
@@ -100,29 +104,29 @@
                 Text="{Binding Current.IntervalSeconds}"
         />
         <Label
-                Grid.Row="1" Grid.Column="21" Grid.ColumnSpan="3"
+                Grid.Row="1" Grid.Column="21" Grid.ColumnSpan="4"
                 FontSize="22" TextColor="{StaticResource GoldVikings}"
                 Text="Persist:"
         />
         <Label 
-                Grid.Row="1" Grid.Column="24" Grid.ColumnSpan="3"
+                Grid.Row="1" Grid.Column="24" Grid.ColumnSpan="7"
                 FontSize="22" TextColor="{StaticResource WhiteVikings}"
                 Text="{Binding PersistStatusDisplay}"
         />
         <Label
-                Grid.Row="1" Grid.Column="28" Grid.ColumnSpan="6"
+                Grid.Row="1" Grid.Column="31" Grid.ColumnSpan="4"
                 FontSize="22" TextColor="{StaticResource GoldVikings}" 
-                Text="Persist Attempt:" 
+                Text="Attempt:" 
         />
         <Label
-                Grid.Row="1" Grid.Column="34" Grid.ColumnSpan="8"
+                Grid.Row="1" Grid.Column="35" Grid.ColumnSpan="14"
                 FontSize="22" TextColor="{StaticResource WhiteVikings}" 
                 Text="{Binding Current.PersistAttemptUtc, Converter={StaticResource TimeConverter}, StringFormat='{}{0:G}'}"
         />
         <Label
                 Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5"
                 FontSize="22" TextColor="{StaticResource GoldVikings}" 
-                Text="Persist Error:" LineBreakMode="TailTruncation" 
+                Text="Persist:" LineBreakMode="TailTruncation" 
         />
         <Label
                 Grid.Row="3" Grid.Column="5" Grid.ColumnSpan="5"

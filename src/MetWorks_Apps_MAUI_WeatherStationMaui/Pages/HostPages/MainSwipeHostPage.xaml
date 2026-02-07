@@ -4,11 +4,7 @@
              xmlns:local="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages"
              x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.HostPages.MainSwipeHostPage"
              BackgroundColor="{StaticResource PurpleVikings}"
-             Shell.NavBarIsVisible="False">
-
-    <Shell.BackButtonBehavior>
-        <BackButtonBehavior IsEnabled="False" IsVisible="False" />
-    </Shell.BackButtonBehavior>
+             Shell.NavBarIsVisible="{OnPlatform Android=True, WinUI=False}">
 
     <Grid>
         <Grid.GestureRecognizers>

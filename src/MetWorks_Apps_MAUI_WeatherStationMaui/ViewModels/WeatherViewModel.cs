@@ -15,6 +15,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     readonly ILoggerResilient _iLoggerResilient;
     readonly ISettingRepository _iSettingRepository;
     readonly IEventRelayBasic _iEventRelayBasic;
+    private readonly IInstanceIdentifier _iInstanceIdentifier;
     IWindReading? _currentWind;
     IObservationReading? _currentObservation;
     SystemTimer? _clockTimer;
@@ -54,16 +55,19 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     public WeatherViewModel(
         ILoggerResilient iLoggerResilient,
         ISettingRepository iSettingRepository,
-        IEventRelayBasic iEventRelayBasic
+        IEventRelayBasic iEventRelayBasic,
+        IInstanceIdentifier iInstanceIdentifier
     )
     {
         ArgumentNullException.ThrowIfNull(iLoggerResilient);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
+        ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
 
         _iLoggerResilient = iLoggerResilient;
         _iSettingRepository = iSettingRepository;
         _iEventRelayBasic = iEventRelayBasic;
+        _iInstanceIdentifier = iInstanceIdentifier;
         StartServiceStatusMonitoring();
         // Initialization is event-driven: subscribe to event relay and initialize when data arrives.
     }

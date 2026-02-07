@@ -101,6 +101,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Pages\GuestPages\LiveWind2304x1440.xaml.cs">
+	    <DependentUpon>LiveWind2304x1440.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\GuestPages\LiveWind2176x1812.xaml.cs">
+	    <DependentUpon>LiveWind2176x1812.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\GuestPages\LiveWind1920x1200.xaml.cs">
+	    <DependentUpon>LiveWind1920x1200.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Pages\GuestPages\MainView1440x2304.xaml.cs">
 	    <DependentUpon>MainView1440x2304.xaml</DependentUpon>
 	  </Compile>
@@ -116,12 +125,30 @@
 	  <Compile Update="Pages\GuestPages\LiveWindAdaptive.xaml.cs">
 	    <DependentUpon>LiveWindAdaptive.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Pages\GuestPages\MetricsOne2176x1812.xaml.cs">
+	    <DependentUpon>MetricsOne2176x1812.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\GuestPages\MetricsOne2304x1440.xaml.cs">
+	    <DependentUpon>MetricsOne2304x1440.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\GuestPages\MetricsOne1920x1200.xaml.cs">
+	    <DependentUpon>MetricsOne1920x1200.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Pages\HostPages\MainSwipeHostPage.xaml.cs">
 	    <DependentUpon>MainSwipeHostPage.xaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
+		<MauiXaml Update="Pages\GuestPages\LiveWind2176x1812.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\GuestPages\LiveWind2304x1440.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\GuestPages\LiveWind1920x1200.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Pages\GuestPages\MainView1440x2304.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
@@ -131,13 +158,22 @@
 		<MauiXaml Update="Pages\GuestPages\MainView2304x1440.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Pages\GuestPages\MetricsOne.xaml">
+		<MauiXaml Update="Pages\GuestPages\MetricsOne2176x1812.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\GuestPages\MetricsOne2304x1440.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\GuestPages\MetricsOne1920x1200.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Pages\HostPages\MainSwipeHostPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Pages\GuestPages\LiveWindAdaptive.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\Settings\SettingsEditorPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Resources\Styles\WeatherColors.xaml">

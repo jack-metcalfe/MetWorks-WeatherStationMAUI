@@ -2,9 +2,9 @@
 
 using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
 
-public partial class MetricsOne : ContentView
+public partial class MetricsOne2304x1440 : ContentView
 {
-    public MetricsOne(MetricsOneViewModel vm)
+    public MetricsOne2304x1440(MetricsOneViewModel vm)
     {
         ArgumentNullException.ThrowIfNull(vm);
         InitializeComponent();

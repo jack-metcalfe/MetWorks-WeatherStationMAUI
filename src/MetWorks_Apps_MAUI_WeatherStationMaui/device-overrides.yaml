@@ -3,10 +3,12 @@
 devices:
   - id: "laptop"
     platform: "WinUI"
-    manufacturer: "Microsoft"
-    model: "GE68HX13V"
+    manufacturer: "Micro-Star International Co., Ltd."
+    model: "Raider GE68HX 13VF"
     overrides:
       HomePage: "HomePage.Win1920x1200"
+      MetricsOne: "MetricsOne.Win1920x1200"
+      LiveWind: "LiveWind.Win1920x1200"
     notes: "Primary dev machine"
 
   - id: "zfold4"
@@ -15,6 +17,8 @@ devices:
     model: "SM-F936U1"
     overrides:
       HomePage: "HomePage.And2176x1812"
+      MetricsOne: "MetricsOne.And2176x1812"
+      LiveWind: "LiveWind.And2176x1812"
     notes: "ZFold4 unfolded landscape"
 
   - id: "samsungTablet"
@@ -23,4 +27,6 @@ devices:
     model: "SM-X518U"
     overrides:
       HomePage: "HomePage.And2304x1440"
+      MetricsOne: "MetricsOne.And2304x1440"
+      LiveWind: "LiveWind.And2304x1440"
     notes: "Samsung Tablet Landscape"

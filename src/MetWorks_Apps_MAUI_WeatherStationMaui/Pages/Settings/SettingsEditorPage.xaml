@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels"
+             x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.Settings.SettingsEditorPage"
+             x:DataType="viewmodels:SettingsEditorViewModel"
+             Title="Settings"
+             BackgroundColor="{StaticResource PurpleVikings}">
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="12" RowSpacing="12">
+        <HorizontalStackLayout Grid.Row="0" Spacing="12">
+            <Button Text="Reload" Command="{Binding ReloadCommand}" />
+            <Button Text="Save" Command="{Binding SaveCommand}" />
+        </HorizontalStackLayout>
+
+        <Label Grid.Row="1" Text="{Binding Status}" LineBreakMode="TailTruncation" TextColor="{StaticResource WhiteVikings}" />
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Items}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="{x:Type viewmodels:SettingsEditorViewModel+SettingItemViewModel}">
+                    <Frame Padding="12" Margin="0,0,0,12" BackgroundColor="White" BorderColor="{StaticResource GoldVikings}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label FontAttributes="Bold" Text="{Binding Path}" TextColor="Black" />
+                            <Label FontSize="12" Text="{Binding Description}" TextColor="Black" />
+
+                            <Entry Text="{Binding EditedValue}" Placeholder="value" TextColor="Black" PlaceholderColor="Gray" />
+
+                            <Label FontSize="11" Text="{Binding ExpectedValueType, StringFormat='Expected: {0}'}" TextColor="Black" />
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

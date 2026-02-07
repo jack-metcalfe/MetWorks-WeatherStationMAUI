@@ -11,19 +11,7 @@ public sealed class ContentVariantCatalog : IContentVariantCatalog
 
         viewType = default!;
 
-        if (content == LogicalContentKey.LiveWind)
-        {
-            viewType = typeof(LiveWindAdaptive);
-            return true;
-        }
-
-        if (content == LogicalContentKey.MetricsOne)
-        {
-            viewType = typeof(MetricsOne);
-            return true;
-        }
-
-        if (content != LogicalContentKey.HomePage)
+        if (content != LogicalContentKey.HomePage && content != LogicalContentKey.MetricsOne && content != LogicalContentKey.LiveWind)
             return false;
 
         viewType = variantKey switch
@@ -37,6 +25,14 @@ public sealed class ContentVariantCatalog : IContentVariantCatalog
             var k when k == VariantKeys.DefaultWeather.Compact => typeof(MainView1920x1200),
             var k when k == VariantKeys.DefaultWeather.Medium => typeof(MainView1920x1200),
             var k when k == VariantKeys.DefaultWeather.Expanded => typeof(MainView1920x1200),
+
+            var k when k == VariantKeys.LiveWind.Win1920x1200 => typeof(LiveWind1920x1200),
+            var k when k == VariantKeys.LiveWind.And2176x1812 => typeof(LiveWind2176x1812),
+            var k when k == VariantKeys.LiveWind.And2304x1440 => typeof(LiveWind2304x1440),
+
+            var k when k == VariantKeys.MetricsOne.Win1920x1200 => typeof(MetricsOne1920x1200),
+            var k when k == VariantKeys.MetricsOne.And2176x1812 => typeof(MetricsOne2176x1812),
+            var k when k == VariantKeys.MetricsOne.And2304x1440 => typeof(MetricsOne2304x1440),
 
             _ => null
         };

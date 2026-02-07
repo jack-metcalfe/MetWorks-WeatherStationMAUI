@@ -32,7 +32,7 @@
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}"
                         Text=")" />
                 </HorizontalStackLayout>
-                <Label FontSize="200" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}" >
+                <Label FontSize="200" Margin="0,-20,0,0" TextColor="{StaticResource WhiteVikings}" >
                     <Label.Text>
                         <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
                             <Binding Path="CurrentObservation.AirTemperature" />
@@ -75,7 +75,7 @@
                     <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource GoldVikings}" 
                            Text=")" />
                 </HorizontalStackLayout>
-                <Label FontSize="200" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}">
+                <Label FontSize="200" Margin="0,-40,0,0" TextColor="{StaticResource WhiteVikings}">
                     <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
                         <Binding Path="CurrentWind.Speed" />
                     </MultiBinding>
@@ -95,7 +95,7 @@
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" 
                            Text=")" />
                 </HorizontalStackLayout>
-                <Label FontSize="200" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}">
+                <Label FontSize="200" Margin="0,-20,0,0" TextColor="{StaticResource WhiteVikings}">
                     <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
                         <Binding Path="CurrentObservation.RelativeHumidity" />
                     </MultiBinding>
@@ -108,7 +108,7 @@
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Label FontSize="32" TextColor="{StaticResource GoldVikings}" Text="UV Index" />
                 </HorizontalStackLayout>
-                <Label FontSize="200" Margin="0,0,0,0" TextColor="{StaticResource WhiteVikings}">
+                <Label FontSize="200" Margin="0,-20,0,0" TextColor="{StaticResource WhiteVikings}">
                     <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
                         <Binding Path="CurrentObservation.UvIndex" />
                     </MultiBinding>

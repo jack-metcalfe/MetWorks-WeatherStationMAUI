@@ -18,7 +18,6 @@ public sealed class YamlDeviceOverrideSource : IDeviceOverrideSource
         variantKey = string.Empty;
 
         var index = _index.Value;
-
         var contentKey = content.ToString();
         if (!index.ContentOverrides.TryGetValue(contentKey, out var perContent))
             return false;

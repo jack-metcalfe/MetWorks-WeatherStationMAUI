@@ -4,14 +4,38 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.Pages"
     xmlns:hostPages="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.Pages.HostPages"
+    xmlns:settingsPages="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.Pages.Settings"
     xmlns:views="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.Pages"
+    FlyoutBehavior="Flyout"
+    FlyoutBackgroundColor="{StaticResource PurpleVikings}"
     x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.AppShell">
+
+    <Shell.FlyoutHeader>
+        <Grid Padding="16" BackgroundColor="{StaticResource PurpleVikings}">
+            <Label Text="WeatherStationMaui" FontSize="18" TextColor="{StaticResource WhiteVikings}" />
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <Shell.ItemTemplate>
+        <DataTemplate>
+            <Grid Padding="12,10">
+                <Label Text="{Binding Title}" FontSize="16" TextColor="{StaticResource WhiteVikings}" />
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
 
     <FlyoutItem Title="Weather" Route="Weather">
         <ShellContent
             Title="HomePage"
             ContentTemplate="{DataTemplate hostPages:MainSwipeHostPage}"
             Route="MainSwipeHostPage" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Settings" Route="Settings">
+        <ShellContent
+            Title="Settings"
+            ContentTemplate="{DataTemplate settingsPages:SettingsEditorPage}"
+            Route="SettingsEditorPage" />
     </FlyoutItem>
 
 </Shell>

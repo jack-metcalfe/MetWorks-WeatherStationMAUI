@@ -70,7 +70,6 @@ public sealed class ContentViewFactory : IContentViewFactory
             )
         };
     }
-
     static string SelectDefaultWeatherVariant(DeviceContext deviceContext)
     {
         // Screen-class fallback (dp-based)

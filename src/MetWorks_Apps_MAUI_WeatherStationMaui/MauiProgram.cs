@@ -42,13 +42,21 @@ public static class MauiProgram
         builder.Services.AddSingleton<AppShell>();
 
         // Register ViewModels and Pages for DI-driven page activation
-        builder.Services.AddTransient<WeatherViewModel>();
-        builder.Services.AddTransient<MetricsOneViewModel>();
         builder.Services.AddTransient<MainSwipeHostPage>();
+
+        builder.Services.AddTransient<MetricsOneViewModel>();
+        builder.Services.AddTransient<MetricsOne1920x1200>();
+        builder.Services.AddTransient<MetricsOne2176x1812>();
+        builder.Services.AddTransient<MetricsOne2304x1440>();
+
+        builder.Services.AddTransient<WeatherViewModel>();
         builder.Services.AddTransient<LiveWindAdaptive>();
-        builder.Services.AddTransient<MetricsOne>();
         builder.Services.AddTransient<MainView1920x1200>();
         builder.Services.AddTransient<MainView2176x1812>();
+        builder.Services.AddTransient<MainView2304x1440>();
+
+        builder.Services.AddTransient<ViewModels.SettingsEditorViewModel>();
+        builder.Services.AddTransient<Pages.Settings.SettingsEditorPage>();
 
         // Tempest station metadata persistence (PostgreSQL)
         builder.Services.AddSingleton<MetWorks.Ingest.Postgres.StationMetadataIngestor>();

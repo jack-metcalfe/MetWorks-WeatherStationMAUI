@@ -1,17 +1,14 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
-
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using MetWorks.Common.Metrics;
-using Microsoft.Maui.Dispatching;
-
 public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
 {
     readonly IMetricsLatestSnapshot _latest;
+    private readonly IInstanceIdentifier _iInstanceIdentifier;
     readonly ThreadingTimer _timer;
 
     MetricsLatestSnapshot _current;
-    MetWorks.Common.Metrics.MetricsStructuredSnapshot? _structured;
+    MetricsStructuredSnapshot? _structured;
+
+    public string InstallationId => _iInstanceIdentifier.InstallationId;
 
     public MetricsLatestSnapshot Current
     {
@@ -33,7 +30,7 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
         }
     }
 
-    public MetWorks.Common.Metrics.MetricsStructuredSnapshot? Structured
+    public MetricsStructuredSnapshot? Structured
     {
         get => _structured;
         private set
@@ -78,7 +75,7 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
     public string TopPipelineReading1 => FormatPipelineReading(Structured?.Pipeline?.TopReadings, 0);
     public string TopPipelineReading2 => FormatPipelineReading(Structured?.Pipeline?.TopReadings, 1);
 
-    static string FormatRelayHandler(IReadOnlyList<MetWorks.Common.Metrics.MetricsRelayHandlerHotspot>? list, int idx)
+    static string FormatRelayHandler(IReadOnlyList<MetricsRelayHandlerHotspot>? list, int idx)
     {
         if (list is null || idx < 0 || idx >= list.Count) return "--";
         var h = list[idx];
@@ -87,7 +84,7 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
         return $"{mt} → {rt} | n={h.Count} avg={h.AvgMs:F1}ms max={h.MaxMs:F1}ms";
     }
 
-    static string FormatRelayFanout(IReadOnlyList<MetWorks.Common.Metrics.MetricsRelayFanoutHotspot>? list, int idx)
+    static string FormatRelayFanout(IReadOnlyList<MetricsRelayFanoutHotspot>? list, int idx)
     {
         if (list is null || idx < 0 || idx >= list.Count) return "--";
         var f = list[idx];
@@ -95,7 +92,7 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
         return $"{mt} | handler_invocations={f.HandlerInvocations}";
     }
 
-    static string FormatPipelineReading(IReadOnlyList<MetWorks.Common.Metrics.MetricsPipelineReadingHotspot>? list, int idx)
+    static string FormatPipelineReading(IReadOnlyList<MetricsPipelineReadingHotspot>? list, int idx)
     {
         if (list is null || idx < 0 || idx >= list.Count) return "--";
         var r = list[idx];
@@ -164,10 +161,15 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
         }
     }
 
-    public MetricsOneViewModel(IMetricsLatestSnapshot latest)
+    public MetricsOneViewModel(
+        IMetricsLatestSnapshot latest,
+        IInstanceIdentifier iInstanceIdentifier
+    )
     {
         ArgumentNullException.ThrowIfNull(latest);
+        ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
         _latest = latest;
+        _iInstanceIdentifier = iInstanceIdentifier;
 
         _current = _latest.Current;
         _structured = _latest.CurrentStructured;
