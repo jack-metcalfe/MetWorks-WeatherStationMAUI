@@ -1,16 +1,9 @@
-﻿ /// <summary>
+﻿/// <summary>
 /// PostgreSQL listener sink with robust lifecycle and cooperative cancellation support.
 /// </summary>
 namespace MetWorks.Ingest.Postgres;
 public class RawPacketIngestor : ServiceBase
 {
-    static Dictionary<PacketEnum, string> PacketToTableDictionary = new()
-    {
-        { PacketEnum.Lightning, "lightning" },
-        { PacketEnum.Observation, "observation" },
-        { PacketEnum.Precipitation, "precipitation" },
-        { PacketEnum.Wind, "wind" }
-    };
     // Connection state tracking
     bool _isDatabaseAvailable = false;
     int _isInitializing = 0;
@@ -34,7 +27,6 @@ public class RawPacketIngestor : ServiceBase
     public RawPacketIngestor()
     {
     }
-
     // No schema pre-checks. Any Postgres action that fails will be treated as a fatal initialization error.
     public async Task<bool> InitializeAsync(
         ILoggerResilient iLoggerResilient,
@@ -77,7 +69,7 @@ public class RawPacketIngestor : ServiceBase
             _instanceIdentifier = iInstanceIdentifier;
             if (_instanceIdentifier is null)
             {
-                ILogger.Error("InstanceIdentifier is required for Postgres writes but was not provided. Aborting initialization.");
+                iLoggerResilient.Error("InstanceIdentifier is required for Postgres writes but was not provided. Aborting initialization.");
                 return false;
             }
             var iid = _instanceIdentifier.GetOrCreateInstallationId();
@@ -135,11 +127,9 @@ public class RawPacketIngestor : ServiceBase
 
             // Bound connection establishment and command execution even if cancellation isn't honored promptly.
             // Timeout: connect timeout (seconds). CommandTimeout: default command timeout (seconds).
-            if (csb.Timeout <= 0 || csb.Timeout > 10)
-                csb.Timeout = 5;
+            if (csb.Timeout <= 0 || csb.Timeout > 10) csb.Timeout = 5;
 
-            if (csb.CommandTimeout <= 0 || csb.CommandTimeout > 30)
-                csb.CommandTimeout = 5;
+            if (csb.CommandTimeout <= 0 || csb.CommandTimeout > 30) csb.CommandTimeout = 5;
 
             csb.Pooling = pooling;
 
@@ -245,7 +235,7 @@ public class RawPacketIngestor : ServiceBase
                 await using var schemaConnection = await CreateOpenConnectionAsync(connectionString, linkedInitCts.Token, pooling: false)
                     .ConfigureAwait(false);
 
-                await PostgresInitializer.DatabaseInitializeAsync(
+                await Initializer.DatabaseInitializeAsync(
                     ILogger,
                     schemaConnection,
                     linkedInitCts.Token).ConfigureAwait(false);
@@ -281,7 +271,7 @@ public class RawPacketIngestor : ServiceBase
             ILogger.Warning("⚠️ Connection attempt cancelled by external shutdown");
             return false;
         }
-        catch (Npgsql.NpgsqlException npgsqlException)
+        catch (NpgsqlException npgsqlException)
         {
             _isDatabaseAvailable = false;
             _lastConnectionAttempt = DateTime.UtcNow;
@@ -317,7 +307,6 @@ public class RawPacketIngestor : ServiceBase
             Interlocked.Decrement(ref _isInitializing);
         }
     }
-
     async Task StartDegradedAsync()
     {
         ILogger.Warning("🔶 PostgreSQL listener running in DEGRADED MODE");
@@ -334,7 +323,6 @@ public class RawPacketIngestor : ServiceBase
 
         await Task.CompletedTask;
     }
-
     async Task<bool> StartAsync()
     {
         ILogger.Information("✅ PostgreSQL Listener started in ACTIVE mode");
@@ -348,7 +336,6 @@ public class RawPacketIngestor : ServiceBase
 
         return await Task.FromResult(true);
     }
-
     void StartHealthMonitoring()
     {
         if (_healthCheckTimer is not null) return; // Already started
@@ -363,22 +350,20 @@ public class RawPacketIngestor : ServiceBase
 
         ILogger.Information("🏥 Health monitoring started for PostgreSQL listener");
     }
-
     void StartReconnectionTimer()
     {
-        if (_reconnectionTimer is not null)
-            return; // Already started
+        if (_reconnectionTimer is not null) return; // Already started
 
         // Attempt reconnection every 30 seconds if database is unavailable
         _reconnectionTimer = new Timer(
             ReconnectionCallback,
             null,
             TimeSpan.FromSeconds(ReconnectionIntervalSeconds),
-            TimeSpan.FromSeconds(ReconnectionIntervalSeconds));
+            TimeSpan.FromSeconds(ReconnectionIntervalSeconds)
+        );
 
         ILogger.Information("🔄 Reconnection timer started for PostgreSQL listener");
     }
-
     void HealthCheckCallback(object? state)
     {
         try
@@ -421,7 +406,6 @@ public class RawPacketIngestor : ServiceBase
             ILogger.Error($"❌ Error in health check: {exception.Message}");
         }
     }
-
     void ReconnectionCallback(object? state)
     {
         // Only attempt reconnection if database is unavailable or not shutting down
@@ -467,12 +451,10 @@ public class RawPacketIngestor : ServiceBase
             }
         });
     }
-
     void ReceiveHandler(IRawPacketRecordTyped iRawPacketRecordTyped)
     {
         StartBackground(async token => await ProcessMessage(iRawPacketRecordTyped));
     }
-
     async Task ProcessMessage(IRawPacketRecordTyped iRawPacketRecordTyped)
     {
         // If database is unavailable and buffering is enabled, queue the message
@@ -492,7 +474,6 @@ public class RawPacketIngestor : ServiceBase
                 return;
             }
         }
-
         // If database is unavailable and buffering is disabled, drop the message
         if (!_isDatabaseAvailable)
         {
@@ -504,10 +485,9 @@ public class RawPacketIngestor : ServiceBase
         // Database is available - attempt to write
         await WriteToDatabase(iRawPacketRecordTyped);
     }
-
     async Task WriteToDatabase(IRawPacketRecordTyped iRawPacketRecordTyped)
     {
-        var tableString = PacketToTableDictionary[iRawPacketRecordTyped.PacketEnum];
+        var tableString = UdpPacketTableData.PacketTableDataMap[iRawPacketRecordTyped.PacketEnum].TableName;
             var sql = $@"INSERT INTO public.""{tableString}"" "
             + " (id, json_document_original, application_received_utc_timestampz)"
             + " VALUES (@id, @json_document_original, to_timestamp(@application_received_utc_timestampz))";
@@ -556,7 +536,7 @@ public class RawPacketIngestor : ServiceBase
                 ILogger.Warning($"📦 Message buffered due to shutdown (buffer size: {_messageBuffer.Count})");
             }
         }
-        catch (Npgsql.NpgsqlException npgsqlException)
+        catch (NpgsqlException npgsqlException)
         {
             _failureCount++;
             _lastConnectionAttempt = DateTime.UtcNow;
@@ -640,9 +620,7 @@ public class RawPacketIngestor : ServiceBase
             }
         }
     }
-
     // NOTE: ClearConnectionFactoryAsync removed (factory inlined).
-
     async Task ProcessBufferedMessagesAsync()
     {
         if (_messageBuffer == null || _messageBuffer.IsEmpty)
@@ -689,11 +667,9 @@ public class RawPacketIngestor : ServiceBase
                 }
             }
         }
-
         ILogger.Information(
             $"✅ Buffer processing complete. Processed: {processed}, Failed: {failed}, Remaining: {_messageBuffer.Count}");
     }
-
     protected override async Task OnDisposeAsync()
     {
         try

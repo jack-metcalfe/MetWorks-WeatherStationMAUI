@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Assignments.Initializer
-// Generated On:        2026-02-04T20:48:31.7351773Z
+// Generated On:        2026-02-08T19:18:29.6186727Z
 #nullable enable
 using System.Threading.Tasks;
 
@@ -26,7 +26,8 @@ namespace MetWorks.ServiceRegistry
             await instance.InitializeAsync(
                 iLoggerFile: registry.GetTheLoggerFile(),
                 iSettingRepository: registry.GetTheSettingRepository(),
-                iInstanceIdentifier: registry.GetTheInstanceIdentifier()
+                iInstanceIdentifier: registry.GetTheInstanceIdentifier(),
+                cancellationToken: registry.GetRootCancellationTokenSource().Token
             ).ConfigureAwait(false);
         }
     }

@@ -7,28 +7,44 @@
 		<RootNamespace>MetWorks.Resource.Store</RootNamespace>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Remove="RawPacketIngestor\lightning.sql" />
-		<EmbeddedResource Include="RawPacketIngestor\lightning.sql">
-			<LogicalName>RawPacketIngestor.lightning.sql</LogicalName>
+		<None Remove="Ingest/PostgreSQL/lightning.sql" />
+		<EmbeddedResource Include="Ingest/PostgreSQL/lightning.sql">
+			<LogicalName>Ingest.PostgreSQL.lightning.sql</LogicalName>
 		</EmbeddedResource>
-		<None Remove="RawPacketIngestor\observation.sql" />
-		<EmbeddedResource Include="RawPacketIngestor\observation.sql">
-			<LogicalName>RawPacketIngestor.observation.sql</LogicalName>
+		<None Remove="Ingest/PostgreSQL/observation.sql" />
+		<EmbeddedResource Include="Ingest/PostgreSQL/observation.sql">
+			<LogicalName>Ingest.PostgreSQL.observation.sql</LogicalName>
 		</EmbeddedResource>
-		<None Remove="RawPacketIngestor\precipitation.sql" />
-		<EmbeddedResource Include="RawPacketIngestor\precipitation.sql">
-			<LogicalName>RawPacketIngestor.precipitation.sql</LogicalName>
+		<None Remove="Ingest/PostgreSQL/precipitation.sql" />
+		<EmbeddedResource Include="Ingest/PostgreSQL/precipitation.sql">
+			<LogicalName>Ingest.PostgreSQL.precipitation.sql</LogicalName>
 		</EmbeddedResource>
-		<None Remove="RawPacketIngestor\wind.sql" />
-		<EmbeddedResource Include="RawPacketIngestor\wind.sql">
-			<LogicalName>RawPacketIngestor.wind.sql</LogicalName>
+		<None Remove="Ingest/PostgreSQL/wind.sql" />
+		<EmbeddedResource Include="Ingest/PostgreSQL/wind.sql">
+			<LogicalName>Ingest.PostgreSQL.wind.sql</LogicalName>
 		</EmbeddedResource>
-		<None Remove="data\settings.yaml" />
-		<EmbeddedResource Include="data\settings.yaml">
+		<None Remove="data/settings.yaml" />
+		<EmbeddedResource Include="data/settings.yaml">
 			<LogicalName>data.settings.yaml</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/lightning.sql">
+			<LogicalName>Ingest.SQLite.lightning.sql</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/observation.sql">
+			<LogicalName>Ingest.SQLite.observation.sql</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/precipitation.sql">
+			<LogicalName>Ingest.SQLite.precipitation.sql</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/wind.sql">
+			<LogicalName>Ingest.SQLite.wind.sql</LogicalName>
 		</EmbeddedResource>
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\MetWorks_Common\MetWorks_Common.csproj" />
+		<ProjectReference Include="..\MetWorks_Common\MetWorks_Common.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Ingest/PostgreSQL/" />
+		<Folder Include="Ingest/SQLite/" />
 	</ItemGroup>
 </Project>

@@ -32,6 +32,17 @@ public static class LookupDictionaries
                     SettingConstants.LoggerPostgreSQL_autoCreateTable
             ]
         );
+
+    public static readonly GroupSettingDefinition LoggerSQLiteGroupSettingsDefinition = new GroupSettingDefinition(
+        groupName: SettingConstants.LoggerSQLite_groupName,
+        groupBasePath: SettingConstants.LoggerSQLite_groupName,
+        settingNames: [
+            SettingConstants.LoggerSQLite_dbPath,
+            SettingConstants.LoggerSQLite_tableName,
+            SettingConstants.LoggerSQLite_minimumLevel,
+            SettingConstants.LoggerSQLite_autoCreateTable
+        ]
+    );
     public static readonly GroupSettingDefinition UdpListenerGroupSettingsDefinition = new GroupSettingDefinition(
         groupName: SettingConstants.UdpListener_groupName,
         groupBasePath: SettingConstants.UdpListener_groupName,
@@ -60,6 +71,18 @@ public static class LookupDictionaries
         [
             SettingConstants.XMLToPostgreSQL_connectionString,
             SettingConstants.XMLToPostgreSQL_enableBuffering
+        ]
+    );
+
+    public static readonly GroupSettingDefinition JsonToSQLiteGroupSettingsDefinition = new GroupSettingDefinition(
+        groupName: SettingConstants.JsonToSQLite_groupName,
+        groupBasePath: SettingConstants.JsonToSQLite_groupName,
+        settingNames:
+
+        [
+            SettingConstants.JsonToSQLite_connectionString,
+            SettingConstants.JsonToSQLite_dbPath,
+            SettingConstants.JsonToSQLite_enableBuffering
         ]
     );
 

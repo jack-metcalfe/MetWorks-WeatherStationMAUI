@@ -37,6 +37,7 @@ public sealed class LoggerResilient : ServiceBase, ILoggerResilient
         ILoggerStub? iLoggerStub = null,
         ILoggerFile? iLoggerFile = null,
         ILoggerPostgreSQL? iLoggerPostgreSQL = null,
+        ILoggerSQLite? iLoggerSQLite = null,
         int? maxBufferSize = null,
         CancellationToken cancellationToken = default
     )
@@ -63,6 +64,9 @@ public sealed class LoggerResilient : ServiceBase, ILoggerResilient
                 selectedLogger = iLoggerStub;
 
             AddLogger(selectedLogger);
+
+            if (iLoggerSQLite is not null)
+                AddLogger(iLoggerSQLite);
 
             InitializeBase(
                 this,

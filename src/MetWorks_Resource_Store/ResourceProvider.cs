@@ -12,7 +12,7 @@ public static class ResourceProvider
     public static string? GetString(string path)
     {
         using var stream = GetStream(path);
-        if (stream == null) return null;
+        if (stream is null) return null;
 
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();

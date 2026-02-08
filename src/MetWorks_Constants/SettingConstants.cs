@@ -19,6 +19,12 @@ public static class SettingConstants
     public const string LoggerPostgreSQL_minimumLevel = "minimumLevel";
     public const string LoggerPostgreSQL_autoCreateTable = "autoCreateTable";
 
+    public const string LoggerSQLite_groupName = "loggerSQLite";
+    public const string LoggerSQLite_dbPath = "dbPath";
+    public const string LoggerSQLite_tableName = "tableName";
+    public const string LoggerSQLite_minimumLevel = "minimumLevel";
+    public const string LoggerSQLite_autoCreateTable = "autoCreateTable";
+
     public const string ProviderFilename = @"data.settings.yaml";
 
     public const string UdpListener_groupName = "udpListener";
@@ -37,6 +43,11 @@ public static class SettingConstants
     public const string XMLToPostgreSQL_groupName = "xmlToPostgreSQL";
     public const string XMLToPostgreSQL_connectionString = "connectionString";
     public const string XMLToPostgreSQL_enableBuffering = "enableBuffering";
+
+    public const string JsonToSQLite_groupName = "jsonToSQLite";
+    public const string JsonToSQLite_connectionString = "connectionString";
+    public const string JsonToSQLite_dbPath = "dbPath";
+    public const string JsonToSQLite_enableBuffering = "enableBuffering";
 
     public const string Tempest_groupName = "tempest";
     public const string Tempest_apiKey = "apiKey";

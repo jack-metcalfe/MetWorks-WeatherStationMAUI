@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-02-04T20:48:31.7351773Z
+// Generated On:        2026-02-08T19:18:29.6186727Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -170,6 +170,21 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheLoggerSQLite(MetWorks.Common.Logging.LoggerSQLite instance) =>
+            _TheLoggerSQLiteInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Interfaces.ILoggerSQLite GetTheLoggerSQLite() =>
+            _TheLoggerSQLiteInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.Logging.LoggerSQLite GetTheLoggerSQLite_Internal() =>
+            _TheLoggerSQLiteInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
         public void RegisterTheLoggerResilient(MetWorks.Common.Logging.LoggerResilient instance) =>
             _TheLoggerResilientInstance = instance;
 
@@ -245,6 +260,36 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
+        public void RegisterThePostgresStationMetadataIngestor(MetWorks.Ingest.Postgres.StationMetadataIngestor instance) =>
+            _ThePostgresStationMetadataIngestorInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Ingest.Postgres.StationMetadataIngestor GetThePostgresStationMetadataIngestor() =>
+            _ThePostgresStationMetadataIngestorInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Ingest.Postgres.StationMetadataIngestor GetThePostgresStationMetadataIngestor_Internal() =>
+            _ThePostgresStationMetadataIngestorInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheSQLiteStationMetadataIngestor(MetWorks.Ingest.SQLite.StationMetadataIngestor instance) =>
+            _TheSQLiteStationMetadataIngestorInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Ingest.SQLite.StationMetadataIngestor GetTheSQLiteStationMetadataIngestor() =>
+            _TheSQLiteStationMetadataIngestorInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Ingest.SQLite.StationMetadataIngestor GetTheSQLiteStationMetadataIngestor_Internal() =>
+            _TheSQLiteStationMetadataIngestorInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
         public void RegisterTheStationMetadataProvider(MetWorks.Common.StationMetadataProvider instance) =>
             _TheStationMetadataProviderInstance = instance;
 
@@ -315,5 +360,20 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.Postgres.RawPacketIngestor GetThePostgresRawPacketIngestor_Internal() =>
             _ThePostgresRawPacketIngestorInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheSQLiteRawPacketIngestor(MetWorks.Ingest.SQLite.RawPacketIngestor instance) =>
+            _TheSQLiteRawPacketIngestorInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Ingest.SQLite.RawPacketIngestor GetTheSQLiteRawPacketIngestor() =>
+            _TheSQLiteRawPacketIngestorInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Ingest.SQLite.RawPacketIngestor GetTheSQLiteRawPacketIngestor_Internal() =>
+            _TheSQLiteRawPacketIngestorInstance;
     }
 }

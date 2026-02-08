@@ -5,15 +5,8 @@
 /// - caller can pass a cancellation token (e.g., a short timeout) when running initialization synchronously.
 /// - recommended: run DatabaseInitializeAsync in background with retries if desired by caller.
 /// </summary>
-internal class PostgresInitializer
+internal class Initializer
 {
-    static readonly List<string> _listOfDbScriptFilenames = new()
-    {
-        "lightning.sql",
-        "observation.sql",
-        "precipitation.sql",
-        "wind.sql"
-    };
     internal static async Task<bool> DatabaseInitializeAsync(
         ILogger iFileLogger,
         NpgsqlConnection npgSqlConnection,
@@ -42,7 +35,7 @@ internal class PostgresInitializer
         }
 
         int applied = 0;
-        foreach (var scriptFilename in _listOfDbScriptFilenames)
+        foreach (var UdpPacketTableEntry in UdpPacketTableData.PacketTableDataMap.Values)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -52,7 +45,7 @@ internal class PostgresInitializer
 
             try
             {
-                var scriptPath = Path.Combine(typeof(RawPacketIngestor).Name, scriptFilename);
+                var scriptPath = Path.Combine(@"Ingest",DatabaseEnum.PostgreSQL.ToString(), UdpPacketTableEntry.TableScriptName);
                 var script = IResourceProvider.GetString(scriptPath.Replace('\\', '/'));
                 if (string.IsNullOrEmpty(script))
                 {
@@ -76,12 +69,12 @@ internal class PostgresInitializer
             catch (Exception exception)
             {
                 // Log the script error but continue with the next script. Caller can retry entire initializer later.
-                iFileLogger.Warning($"⚠️ Failed to apply script '{scriptFilename}': {exception.Message}");
+                iFileLogger.Warning($"⚠️ Failed to apply script '{UdpPacketTableEntry}': {exception.Message}");
                 iFileLogger.Debug($"   Stack trace: {exception.StackTrace}");
             }
         }
 
-        iFileLogger.Information($"✅ PostgreSQL schema initialization completed. Scripts applied: {applied}/{_listOfDbScriptFilenames.Count}");
+        iFileLogger.Information($"✅ PostgreSQL schema initialization completed. Scripts applied: {applied}/{UdpPacketTableData.PacketTableDataMap.Count}");
         return applied > 0;
     }
 }

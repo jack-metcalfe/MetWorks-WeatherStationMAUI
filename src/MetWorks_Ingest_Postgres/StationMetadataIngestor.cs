@@ -3,7 +3,6 @@ public sealed class StationMetadataIngestor : ServiceBase, IStationMetadataPersi
 {
     string _connectionString = string.Empty;
     Guid _installationIdGuid;
-
     public Task<bool> InitializeAsync(
         ILoggerResilient iLoggerResilient,
         ISettingRepository iSettingRepository,
@@ -47,20 +46,21 @@ public sealed class StationMetadataIngestor : ServiceBase, IStationMetadataPersi
         ArgumentNullException.ThrowIfNull(metadata);
         await Ready.ConfigureAwait(false);
 
-        if (string.IsNullOrWhiteSpace(_connectionString))
-            return;
+        if (string.IsNullOrWhiteSpace(_connectionString))return;
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        await using var conn = new NpgsqlConnection(_connectionString);
-        await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
 
-        await EnsureTableAsync(conn, cancellationToken).ConfigureAwait(false);
+            await EnsureTableAsync(conn, cancellationToken).ConfigureAwait(false);
 
-        var json = JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = false });
+            var json = JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = false });
 
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = @"
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
 INSERT INTO public.station_metadata (
     id,
     application_received_utc_timestampz,
@@ -86,22 +86,28 @@ VALUES (
     @installation_id
 );";
 
-        cmd.Parameters.AddWithValue("id", IdGenerator.CreateCombGuid().ToString());
-        cmd.Parameters.AddWithValue("app_ts", metadata.RetrievedUtc.UtcDateTime);
-        cmd.Parameters.AddWithValue("station_id", metadata.StationId);
-        cmd.Parameters.AddWithValue("station_name", (object?)metadata.StationName ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("tempest_device_name", (object?)metadata.TempestDeviceName ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("lat", (object?)metadata.Latitude ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("lon", (object?)metadata.Longitude ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("elev", (object?)metadata.ElevationMeters ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("json", json);
+            cmd.Parameters.AddWithValue("id", IdGenerator.CreateCombGuid().ToString());
+            cmd.Parameters.AddWithValue("app_ts", metadata.RetrievedUtc.UtcDateTime);
+            cmd.Parameters.AddWithValue("station_id", metadata.StationId);
+            cmd.Parameters.AddWithValue("station_name", (object?)metadata.StationName ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("tempest_device_name", (object?)metadata.TempestDeviceName ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("lat", (object?)metadata.Latitude ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("lon", (object?)metadata.Longitude ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("elev", (object?)metadata.ElevationMeters ?? DBNull.Value);
+            cmd.Parameters.Add("json", NpgsqlTypes.NpgsqlDbType.Json).Value = json;
 
-        if (_installationIdGuid != Guid.Empty)
-            cmd.Parameters.AddWithValue("installation_id", NpgsqlTypes.NpgsqlDbType.Uuid, _installationIdGuid);
-        else
-            cmd.Parameters.AddWithValue("installation_id", DBNull.Value);
+            if (_installationIdGuid != Guid.Empty)
+                cmd.Parameters.AddWithValue("installation_id", NpgsqlTypes.NpgsqlDbType.Uuid, _installationIdGuid);
+            else
+                cmd.Parameters.AddWithValue("installation_id", DBNull.Value);
 
-        await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        catch(Exception exception)
+        {
+            ILogger.Error("Error persisting station metadata: {Message}", exception);
+        }
     }
 
     static async Task EnsureTableAsync(NpgsqlConnection conn, CancellationToken cancellationToken)

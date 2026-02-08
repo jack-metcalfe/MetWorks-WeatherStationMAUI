@@ -11,6 +11,8 @@ global using MetWorks.Interfaces;
 global using MetWorks.Common.Utility;
 global using MetWorks.Constants;
 
+global using Microsoft.Data.Sqlite;
+
 global using Npgsql;
 
 global using Serilog;

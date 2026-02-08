@@ -11,7 +11,9 @@
   <Project Path="src/MetWorks_DdiRegistry/MetWorks_DdiRegistry.csproj" />
   <Project Path="src/MetWorks_EnumDefinitions/MetWorks_EnumDefinitions.csproj" />
   <Project Path="src/MetWorks_EventRelay/MetWorks_EventRelay.csproj" />
+  <Project Path="src/MetWorks_Ingest/MetWorks_Ingest.csproj" />
   <Project Path="src/MetWorks_Ingest_Postgres/MetWorks_Ingest_Postgres.csproj" />
+  <Project Path="src/MetWorks_Ingest_SQLite/MetWorks_Ingest_SQLite.csproj" />
   <Project Path="src/MetWorks_Ingest_Transformer/MetWorks_Ingest_Transformer.csproj" />
   <Project Path="src/MetWorks_InstanceIdentifier/MetWorks_InstanceIdentifier.csproj" />
   <Project Path="src/MetWorks_Interfaces/MetWorks_Interfaces.csproj" />

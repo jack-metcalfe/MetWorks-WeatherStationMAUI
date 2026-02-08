@@ -15,6 +15,7 @@ namespace:
       - name: "ILoggerFile"
       - name: "ILoggerPostgreSQL"
       - name: "ILoggerResilient"
+      - name: "ILoggerSQLite"
       - name: "IPlatformPaths"
       - name: "ISettingProvider"
       - name: "ISettingRepository"
@@ -158,6 +159,9 @@ namespace:
           - name: "iInstanceIdentifier"
             class: null
             interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
+          - name: "cancellationToken"
+            class: System.Threading.CancellationToken
+            interface: null
         property: []
       - name: "LoggerResilient"
         interface: MetWorks.Interfaces.ILoggerResilient
@@ -180,9 +184,28 @@ namespace:
           - name: "iLoggerPostgreSQL"
             class: null
             interface: "MetWorks.Interfaces.ILoggerPostgreSQL"
+          - name: "iLoggerSQLite"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerSQLite"
           - name: "maxBufferSize"
             class: System.Int32
             interface: null
+          - name: "cancellationToken"
+            class: System.Threading.CancellationToken
+            interface: null
+        property: []
+      - name: "LoggerSQLite"
+        interface: MetWorks.Interfaces.ILoggerSQLite
+        parameter:
+          - name: "iLoggerFile"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerFile"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iInstanceIdentifier"
+            class: null
+            interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
           - name: "cancellationToken"
             class: System.Threading.CancellationToken
             interface: null
@@ -370,6 +393,70 @@ namespace:
             class: "MetWorks.Common.ProvenanceTracker"
             interface: null
         property: []
+      - name: "StationMetadataIngestor"
+        interface: null
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "MetWorks.Interfaces.IEventRelayBasic"
+          - name: "iInstanceIdentifier"
+            class: null
+            interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
+          - name: "externalCancellation"
+            class: "System.Threading.CancellationToken"
+            interface: null
+        property: []
+
+  - name: "MetWorks.Ingest.SQLite"
+    interface: []
+    class:
+      - name: "RawPacketIngestor"
+        interface: null
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "MetWorks.Interfaces.IEventRelayBasic"
+          - name: "iInstanceIdentifier"
+            class: null
+            interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
+          - name: "externalCancellation"
+            class: "System.Threading.CancellationToken"
+            interface: null
+          - name: "provenanceTracker"
+            class: "MetWorks.Common.ProvenanceTracker"
+            interface: null
+        property: []
+      - name: "StationMetadataIngestor"
+        interface: null
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "MetWorks.Interfaces.IEventRelayBasic"
+          - name: "iInstanceIdentifier"
+            class: null
+            interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
+          - name: "externalCancellation"
+            class: "System.Threading.CancellationToken"
+            interface: null
+        property: []
 
 instance:
   - name: "RootCancellationTokenSource"
@@ -463,6 +550,27 @@ instance:
       - name: "iInstanceIdentifier"
         literal: null
         instance: "TheInstanceIdentifier"
+      - name: "cancellationToken"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+    element: []
+
+  - name: "TheLoggerSQLite"
+    class: "MetWorks.Common.Logging.LoggerSQLite"
+    exposeToMauiDi: true
+    assignment:
+      - name: "iLoggerFile"
+        literal: null
+        instance: "TheLoggerFile"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iInstanceIdentifier"
+        literal: null
+        instance: "TheInstanceIdentifier"
+      - name: "cancellationToken"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
     element: []
 
   - name: "TheLoggerResilient"
@@ -487,6 +595,9 @@ instance:
       - name: "iLoggerPostgreSQL"
         literal: null
         instance: "TheLoggerPostgreSQL"
+      - name: "iLoggerSQLite"
+        literal: null
+        instance: "TheLoggerSQLite"
       - name: "maxBufferSize"
         literal: 1000
         instance: null
@@ -576,6 +687,48 @@ instance:
         instance: "RootCancellationTokenSource.Token"
     element: []
 
+  - name: "ThePostgresStationMetadataIngestor"
+    class: "MetWorks.Ingest.Postgres.StationMetadataIngestor"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+      - name: "iInstanceIdentifier"
+        literal: null
+        instance: "TheInstanceIdentifier"
+      - name: "externalCancellation"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+    element: []
+
+  - name: "TheSQLiteStationMetadataIngestor"
+    class: "MetWorks.Ingest.SQLite.StationMetadataIngestor"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+      - name: "iInstanceIdentifier"
+        literal: null
+        instance: "TheInstanceIdentifier"
+      - name: "externalCancellation"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+    element: []
+
   - name: "TheStationMetadataProvider"
     class: "MetWorks.Common.StationMetadataProvider"
     exposeToMauiDi: true
@@ -653,6 +806,30 @@ instance:
 
   - name: "ThePostgresRawPacketIngestor"
     class: "MetWorks.Ingest.Postgres.RawPacketIngestor"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+      - name: "iInstanceIdentifier"
+        literal: null
+        instance: "TheInstanceIdentifier"
+      - name: "externalCancellation"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+      - name: "provenanceTracker"
+        literal: null
+        instance: "TheProvenanceTracker"
+    element: []
+
+  - name: "TheSQLiteRawPacketIngestor"
+    class: "MetWorks.Ingest.SQLite.RawPacketIngestor"
     exposeToMauiDi: false
     assignment:
       - name: "iLoggerResilient"
