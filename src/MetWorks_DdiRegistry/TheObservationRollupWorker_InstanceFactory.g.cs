@@ -13,16 +13,16 @@ namespace MetWorks.ServiceRegistry
     // Declared as partial to allow modularization if needed.
     // It handles both element-driven and assignment-driven construction,
     // and immediately registers the created instance with the Registry.
-    internal static partial class TheSensorReadingTransformer_InstanceFactory
+    internal static partial class TheObservationRollupWorker_InstanceFactory
     {
-        public static MetWorks.Ingest.Transformer.SensorReadingTransformer Create(Registry registry)
+        public static MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker Create(Registry registry)
         {
             // Assignment-driven instance: construct with new().
             // This is always valid because ContainerClass is a concrete class.
-            var instance = new MetWorks.Ingest.Transformer.SensorReadingTransformer();
+            var instance = new MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker();
 
             // Register immediately so other instances can reference it.
-            registry.RegisterTheSensorReadingTransformer(instance);
+            registry.RegisterTheObservationRollupWorker(instance);
 
             return instance;
         }

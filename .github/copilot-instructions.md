@@ -48,6 +48,7 @@
 
 ## Concurrency Management
 - Prefer using Interlocked-based, lock-free patterns (when appropriate) to harden concurrency and reduce brittleness.
+- Use a semaphore/single-connection approach; set WAL and busy_timeout; rollup worker should run only when the DB is available and back off on SQLITE_BUSY.
 
 ## Project-Specific Rules
 - InitializeAsync methods must accept a CancellationToken; the host creates a CancellationTokenSource and passes the Token.
@@ -68,6 +69,10 @@
 - Prefer sorting YAML settings `definitions` by `path` for discoverability; duplicates should be adjacent to ease cleanup.
 - In DDI YAML, instances must be defined before first use (no forward references) within the `instance:` section; the `namespace:` section ordering is not constrained. Reorder `instance:` entries so dependencies appear earlier than dependents.
 - Prefer not to fight tool defaults (e.g., YamlDotNet default YAML quoting/serialization) unless they understand the tool well; align with default behaviors.
+
+## Data Retention Policy
+- When the database hits max size, prefer a retention policy that preserves the last N hours (delete oldest first). Observation rollups should exclude wind and lightning fields (use wind/lightning tables for those) and focus on station pressure, air temperature, relative humidity, illuminance, UV, solar radiation, rain accumulation over the previous minute, and battery; optionally carry the reporting interval.
+- Rollups: start with 1h and 1d (skip 1m). Observation battery is obs[0][16] (double) and should be added as a generated column. Retention: preserve last N hours applies to raw facts + rollups; rollups may outlive raw facts. For now, delete old DB rather than migrate.
 
 ## MAUI Specific Instructions
 - MAUI Shell uses ShellContent route `SwipeCarousel` and splash navigates via `GoToAsync("///SwipeCarousel")`.

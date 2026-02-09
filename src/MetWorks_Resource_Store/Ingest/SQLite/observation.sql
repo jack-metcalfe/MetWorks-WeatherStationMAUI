@@ -2,7 +2,7 @@
 (
     id TEXT PRIMARY KEY -- COMB-style GUID supplied by SQLite sync or C# writer
     -- Timestamps (all UTC)
-    , application_received_utc_timestampz TEXT NOT NULL
+    , application_received_utc_timestampz INTEGER NOT NULL
     , database_received_utc_timestampz TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
     -- JSON payloads
     , json_document_original TEXT NOT NULL
@@ -16,6 +16,7 @@
     , illuminance_at_timestamp REAL GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.obs[0][9]') AS REAL)) STORED
     , lightning_strike_average_distance_in_reporting_interval REAL GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.obs[0][14]') AS REAL)) STORED
     , lightning_strikes_in_reporting_interval INTEGER GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.obs[0][15]') AS INTEGER)) STORED
+    , battery_level_at_timestamp REAL GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.obs[0][16]') AS REAL)) STORED
     , rain_accumulation_in_reporting_interval REAL GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.obs[0][12]') AS REAL)) STORED
     , relative_humidity_at_timestamp REAL GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.obs[0][8]') AS REAL)) STORED
     , reporting_interval INTEGER GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.obs[0][17]') AS INTEGER)) STORED
@@ -36,7 +37,18 @@ CREATE INDEX IF NOT EXISTS idx_observation_device_received_utc_timestampz ON obs
     device_received_utc_timestampz
 );
 
+CREATE INDEX IF NOT EXISTS idx_observation_device_received_utc_timestamp_epoch ON observation
+(
+    device_received_utc_timestamp_epoch
+);
+
 CREATE INDEX IF NOT EXISTS idx_observation_installation_id ON observation
 (
     installation_id
+);
+
+CREATE INDEX IF NOT EXISTS idx_observation_installation_id_device_received_utc_timestamp_epoch ON observation
+(
+    installation_id,
+    device_received_utc_timestamp_epoch
 );

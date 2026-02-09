@@ -11,6 +11,6 @@ namespace MetWorks.ServiceRegistry
 {
     public partial class Registry
     {
-        private MetWorks.Common.Metrics.MetricsLatestSnapshotStore _TheMetricsLatestSnapshotStoreInstance;
+        private MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker _TheObservationRollupWorkerInstance;
     }
 }

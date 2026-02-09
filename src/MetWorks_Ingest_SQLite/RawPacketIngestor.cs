@@ -171,6 +171,13 @@ public sealed class RawPacketIngestor : ServiceBase
 
             await using var testConnection = await CreateOpenConnectionAsync(connectionString, linkedTestCts.Token).ConfigureAwait(false);
 
+            // Reduce contention for concurrent readers/writers.
+            await using (var pragmaCmd = testConnection.CreateCommand())
+            {
+                pragmaCmd.CommandText = "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;";
+                _ = await pragmaCmd.ExecuteNonQueryAsync(linkedTestCts.Token).ConfigureAwait(false);
+            }
+
             // Make sure JSON1 functions are available.
             await using (var jsonProbe = testConnection.CreateCommand())
             {

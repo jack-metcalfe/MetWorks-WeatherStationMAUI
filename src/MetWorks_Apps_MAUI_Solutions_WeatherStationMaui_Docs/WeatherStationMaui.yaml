@@ -11,10 +11,10 @@ namespace:
       - name: "IEventRelayBasic"
       - name: "IEventRelayPath"
       - name: "IInstanceIdentifier"
-      - name: "ILoggerStub"
       - name: "ILoggerFile"
       - name: "ILoggerPostgreSQL"
       - name: "ILoggerResilient"
+      - name: "ILoggerStub"
       - name: "ILoggerSQLite"
       - name: "IPlatformPaths"
       - name: "ISettingProvider"
@@ -319,6 +319,31 @@ namespace:
             class: "System.String"
             interface: null
 
+  - name: "MetWorks.Ingest.SQLite.Rollups"
+    interface: []
+    class:
+      - name: "ObservationRollupWorker"
+        interface: null
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "MetWorks.Interfaces.IEventRelayBasic"
+          - name: "iInstanceIdentifier"
+            class: null
+            interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
+          - name: "externalCancellation"
+            class: "System.Threading.CancellationToken"
+            interface: null
+          - name: "provenanceTracker"
+            class: "MetWorks.Common.ProvenanceTracker"
+            interface: null
+
   - name: "MetWorks.Ingest.Transformer"
     interface: []
     class:
@@ -615,6 +640,33 @@ instance:
         instance: "TheLoggerResilient"
     element: []
 
+  - name: "TheMetricsSummaryIngestor"
+    class: "MetWorks.Common.Metrics.MetricsSummaryIngestor"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+      - name: "installationId"
+        literal: null
+        instance: "TheInstanceIdentifier.InstallationId"
+      - name: "metricsLatestSnapshotStore"
+        literal: null
+        instance: "TheMetricsLatestSnapshotStore"
+      - name: "externalCancellation"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+      - name: "provenanceTracker"
+        literal: null
+        instance: "TheProvenanceTracker"
+    element: []
+
   - name: "TheMetricsSampler"
     class: "MetWorks.Common.Metrics.MetricsSamplerService"
     exposeToMauiDi: false
@@ -642,8 +694,8 @@ instance:
         instance: "TheProvenanceTracker"
     element: []
 
-  - name: "TheMetricsSummaryIngestor"
-    class: "MetWorks.Common.Metrics.MetricsSummaryIngestor"
+  - name: "TheObservationRollupWorker"
+    class: "MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker"
     exposeToMauiDi: false
     assignment:
       - name: "iLoggerResilient"
@@ -655,12 +707,9 @@ instance:
       - name: "iEventRelayBasic"
         literal: null
         instance: "TheEventRelayBasic"
-      - name: "installationId"
+      - name: "iInstanceIdentifier"
         literal: null
-        instance: "TheInstanceIdentifier.InstallationId"
-      - name: "metricsLatestSnapshotStore"
-        literal: null
-        instance: "TheMetricsLatestSnapshotStore"
+        instance: "TheInstanceIdentifier"
       - name: "externalCancellation"
         literal: null
         instance: "RootCancellationTokenSource.Token"

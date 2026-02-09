@@ -39,9 +39,22 @@ NOT EXISTS idx_observation_device_received_utc_timestampz ON public.observation
     )
 ;
 CREATE INDEX IF
+NOT EXISTS idx_observation_device_received_utc_timestamp_epoch ON public.observation
+    (
+        device_received_utc_timestamp_epoch
+    )
+;
+CREATE INDEX IF
 NOT EXISTS idx_observation_installation_id ON public.observation
     (
         installation_id
+    )
+;
+CREATE INDEX IF
+NOT EXISTS idx_observation_installation_id_device_received_utc_timestamp_epoch ON public.observation
+    (
+        installation_id,
+        device_received_utc_timestamp_epoch
     )
 ;
 ;

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,6 +8,20 @@
 
   <ItemGroup>
     <None Include="**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="..\MetWorks_Resource_Store\Ingest\SQLite\**\*.sql" />
+    <None Remove="..\MetWorks_Resource_Store\Ingest\PostgreSQL\**\*.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="..\MetWorks_Resource_Store\Ingest\SQLite\*.sql" />
+    <None Remove="..\MetWorks_Resource_Store\Ingest\PostgreSQL\*.sql" />
+    <None Remove="..\MetWorks_Resource_Store\Ingest\SQLite\**\*.sql" />
+    <None Remove="..\MetWorks_Resource_Store\Ingest\PostgreSQL\**\*.sql" />
+    <Content Remove="..\MetWorks_Resource_Store\Ingest\SQLite\**\*.sql" />
+    <Content Remove="..\MetWorks_Resource_Store\Ingest\PostgreSQL\**\*.sql" />
   </ItemGroup>
 
   <Target Name="Build" />

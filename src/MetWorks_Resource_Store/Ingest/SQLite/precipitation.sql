@@ -2,7 +2,7 @@
 (
     id TEXT PRIMARY KEY -- COMB-style GUID from C# supplied by SQLite sync or C# writer
     -- Timestamps (all UTC)
-    , application_received_utc_timestampz TEXT NOT NULL
+    , application_received_utc_timestampz INTEGER NOT NULL
     , database_received_utc_timestampz TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
     -- JSON payloads
     , json_document_original TEXT NOT NULL
@@ -14,12 +14,18 @@
     , installation_id TEXT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_precipitation_device_received_utc_timestampz ON precipitation
+CREATE INDEX IF NOT EXISTS idx_precipitation_device_received_utc_timestamp_epoch ON precipitation
 (
-    device_received_utc_timestampz
+    device_received_utc_timestamp_epoch
 );
 
 CREATE INDEX IF NOT EXISTS idx_precipitation_installation_id ON precipitation
 (
     installation_id
+);
+
+CREATE INDEX IF NOT EXISTS idx_precipitation_installation_id_device_received_utc_timestamp_epoch ON precipitation
+(
+    installation_id,
+    device_received_utc_timestamp_epoch
 );

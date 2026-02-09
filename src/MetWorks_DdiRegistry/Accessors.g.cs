@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-02-08T19:18:29.6186727Z
+// Generated On:        2026-02-09T02:55:58.0510994Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -215,6 +215,21 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheMetricsSummaryIngestor(MetWorks.Common.Metrics.MetricsSummaryIngestor instance) =>
+            _TheMetricsSummaryIngestorInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Common.Metrics.MetricsSummaryIngestor GetTheMetricsSummaryIngestor() =>
+            _TheMetricsSummaryIngestorInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.Metrics.MetricsSummaryIngestor GetTheMetricsSummaryIngestor_Internal() =>
+            _TheMetricsSummaryIngestorInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
         public void RegisterTheMetricsSampler(MetWorks.Common.Metrics.MetricsSamplerService instance) =>
             _TheMetricsSamplerInstance = instance;
 
@@ -230,16 +245,16 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheMetricsSummaryIngestor(MetWorks.Common.Metrics.MetricsSummaryIngestor instance) =>
-            _TheMetricsSummaryIngestorInstance = instance;
+        public void RegisterTheObservationRollupWorker(MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker instance) =>
+            _TheObservationRollupWorkerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Common.Metrics.MetricsSummaryIngestor GetTheMetricsSummaryIngestor() =>
-            _TheMetricsSummaryIngestorInstance;
+        public MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker GetTheObservationRollupWorker() =>
+            _TheObservationRollupWorkerInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal MetWorks.Common.Metrics.MetricsSummaryIngestor GetTheMetricsSummaryIngestor_Internal() =>
-            _TheMetricsSummaryIngestorInstance;
+        internal MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker GetTheObservationRollupWorker_Internal() =>
+            _TheObservationRollupWorkerInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors

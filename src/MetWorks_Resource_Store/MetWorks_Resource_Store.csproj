@@ -33,8 +33,17 @@
 		<EmbeddedResource Include="Ingest/SQLite/observation.sql">
 			<LogicalName>Ingest.SQLite.observation.sql</LogicalName>
 		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/observation_rollup_1d.sql">
+			<LogicalName>Ingest.SQLite.observation_rollup_1d.sql</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/observation_rollup_1h.sql">
+			<LogicalName>Ingest.SQLite.observation_rollup_1h.sql</LogicalName>
+		</EmbeddedResource>
 		<EmbeddedResource Include="Ingest/SQLite/precipitation.sql">
 			<LogicalName>Ingest.SQLite.precipitation.sql</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/rollup_state.sql">
+			<LogicalName>Ingest.SQLite.rollup_state.sql</LogicalName>
 		</EmbeddedResource>
 		<EmbeddedResource Include="Ingest/SQLite/wind.sql">
 			<LogicalName>Ingest.SQLite.wind.sql</LogicalName>
@@ -45,6 +54,5 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Folder Include="Ingest/PostgreSQL/" />
-		<Folder Include="Ingest/SQLite/" />
 	</ItemGroup>
 </Project>

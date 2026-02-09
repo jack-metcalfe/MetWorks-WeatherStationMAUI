@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Registry
-// Generated On:        2026-02-08T19:18:29.6186727Z
+// Generated On:        2026-02-09T02:55:58.0510994Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -33,8 +33,9 @@ namespace MetWorks.ServiceRegistry
             TheLoggerSQLite_InstanceFactory.Create(this);
             TheLoggerResilient_InstanceFactory.Create(this);
             TheProvenanceTracker_InstanceFactory.Create(this);
-            TheMetricsSampler_InstanceFactory.Create(this);
             TheMetricsSummaryIngestor_InstanceFactory.Create(this);
+            TheMetricsSampler_InstanceFactory.Create(this);
+            TheObservationRollupWorker_InstanceFactory.Create(this);
             TheTempestRestClient_InstanceFactory.Create(this);
             ThePostgresStationMetadataIngestor_InstanceFactory.Create(this);
             TheSQLiteStationMetadataIngestor_InstanceFactory.Create(this);
@@ -59,8 +60,9 @@ namespace MetWorks.ServiceRegistry
             await TheLoggerSQLite_Initializer.Initialize_TheLoggerSQLiteAsync(this).ConfigureAwait(false);
             await TheLoggerResilient_Initializer.Initialize_TheLoggerResilientAsync(this).ConfigureAwait(false);
             await TheProvenanceTracker_Initializer.Initialize_TheProvenanceTrackerAsync(this).ConfigureAwait(false);
-            await TheMetricsSampler_Initializer.Initialize_TheMetricsSamplerAsync(this).ConfigureAwait(false);
             await TheMetricsSummaryIngestor_Initializer.Initialize_TheMetricsSummaryIngestorAsync(this).ConfigureAwait(false);
+            await TheMetricsSampler_Initializer.Initialize_TheMetricsSamplerAsync(this).ConfigureAwait(false);
+            await TheObservationRollupWorker_Initializer.Initialize_TheObservationRollupWorkerAsync(this).ConfigureAwait(false);
             await TheTempestRestClient_Initializer.Initialize_TheTempestRestClientAsync(this).ConfigureAwait(false);
             await ThePostgresStationMetadataIngestor_Initializer.Initialize_ThePostgresStationMetadataIngestorAsync(this).ConfigureAwait(false);
             await TheSQLiteStationMetadataIngestor_Initializer.Initialize_TheSQLiteStationMetadataIngestorAsync(this).ConfigureAwait(false);
