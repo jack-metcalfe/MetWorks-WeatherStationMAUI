@@ -92,9 +92,12 @@ public sealed class RawPacketIngestor : ServiceBase
                     return true;
                 }
 
+                var appDataDir = new DefaultPlatformPaths().AppDataDirectory;
                 var resolvedDbPath = Path.IsPathRooted(_dbPath)
                     ? _dbPath
-                    : Path.Combine(AppContext.BaseDirectory, _dbPath);
+                    : Path.Combine(appDataDir, _dbPath);
+
+                TryMigrateDbFromBaseDirectory(_dbPath, resolvedDbPath);
 
                 var builder = new SqliteConnectionStringBuilder
                 {
@@ -124,6 +127,30 @@ public sealed class RawPacketIngestor : ServiceBase
             iLoggerResilient.Warning("⚠️ Starting SQLite listener in degraded mode");
             await StartDegradedAsync().ConfigureAwait(false);
             return true;
+        }
+
+        void TryMigrateDbFromBaseDirectory(string configuredDbPath, string resolvedDbPath)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(configuredDbPath)) return;
+                if (Path.IsPathRooted(configuredDbPath)) return;
+                if (string.IsNullOrWhiteSpace(resolvedDbPath)) return;
+                if (File.Exists(resolvedDbPath)) return;
+
+                var oldPath = Path.Combine(AppContext.BaseDirectory, configuredDbPath);
+                if (!File.Exists(oldPath)) return;
+
+                var dir = Path.GetDirectoryName(resolvedDbPath);
+                if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+
+                File.Copy(oldPath, resolvedDbPath, overwrite: false);
+                try { ILogger.Information($"Migrated SQLite db from '{oldPath}' to '{resolvedDbPath}'."); } catch { }
+            }
+            catch (Exception ex)
+            {
+                try { ILogger.Warning($"Failed to migrate SQLite db to app data directory: {ex.Message}"); } catch { }
+            }
         }
     }
 

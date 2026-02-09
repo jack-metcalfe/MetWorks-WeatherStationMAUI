@@ -1,4 +1,5 @@
 ﻿namespace MetWorks.Common.Metrics;
+using MetWorks.Common.Metrics.Storage;
 public sealed class MetricsSamplerService : ServiceBase
 {
     const int DefaultCaptureIntervalSeconds = 10;
@@ -14,7 +15,8 @@ public sealed class MetricsSamplerService : ServiceBase
         MetricsSummaryIngestor? metricsSummaryIngestor = null,
         IMetricsLatestSnapshot? metricsLatestSnapshotStore = null,
         CancellationToken externalCancellation = default,
-        ProvenanceTracker? provenanceTracker = null)
+        ProvenanceTracker? provenanceTracker = null
+    )
     {
         ArgumentNullException.ThrowIfNull(iLoggerResilient);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
@@ -67,14 +69,23 @@ public sealed class MetricsSamplerService : ServiceBase
         if (pipelineTopN <= 0)
             pipelineTopN = 10;
 
-        StartBackground(ct => SamplerLoopAsync(TimeSpan.FromSeconds(intervalSeconds), relayEnabled, relayTopN, pipelineEnabled, pipelineTopN, metricsSummaryIngestor, metricsLatestSnapshotStore, ct));
+        var storageEnabled = ISettingRepository.GetValueOrDefault<bool>(
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_storageEnabled));
+
+        var storageTopN = ISettingRepository.GetValueOrDefault<int>(
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_storageTopN));
+
+        if (storageTopN <= 0)
+            storageTopN = 10;
+
+        StartBackground(ct => SamplerLoopAsync(TimeSpan.FromSeconds(intervalSeconds), relayEnabled, relayTopN, pipelineEnabled, pipelineTopN, storageEnabled, storageTopN, metricsSummaryIngestor, metricsLatestSnapshotStore, ct));
 
         try { MarkReady(); } catch { }
-        ILogger.Information($"MetricsSamplerService started (interval={intervalSeconds}s, relayEnabled={relayEnabled}, relayTopN={relayTopN}, pipelineEnabled={pipelineEnabled}, pipelineTopN={pipelineTopN})");
+        ILogger.Information($"MetricsSamplerService started (interval={intervalSeconds}s, relayEnabled={relayEnabled}, relayTopN={relayTopN}, pipelineEnabled={pipelineEnabled}, pipelineTopN={pipelineTopN}, storageEnabled={storageEnabled}, storageTopN={storageTopN})");
         return true;
     }
 
-    async Task SamplerLoopAsync(TimeSpan interval, bool relayEnabled, int relayTopN, bool pipelineEnabled, int pipelineTopN, MetricsSummaryIngestor? metricsSummaryIngestor, IMetricsLatestSnapshot? metricsLatestSnapshotStore, CancellationToken token)
+    async Task SamplerLoopAsync(TimeSpan interval, bool relayEnabled, int relayTopN, bool pipelineEnabled, int pipelineTopN, bool storageEnabled, int storageTopN, MetricsSummaryIngestor? metricsSummaryIngestor, IMetricsLatestSnapshot? metricsLatestSnapshotStore, CancellationToken token)
     {
         var proc = Process.GetCurrentProcess();
         var lastWall = DateTime.UtcNow;
@@ -157,9 +168,41 @@ public sealed class MetricsSamplerService : ServiceBase
                     pipeline = new { top_readings = top };
                 }
 
+                object? storage = null;
+                if (storageEnabled)
+                {
+                    var collector = new LocalStorageSizeCollector();
+
+                    var appDataDirectory = new DefaultPlatformPaths().AppDataDirectory;
+                    var settingsOverridePath = appDataDirectory is null
+                        ? null
+                        : Path.Combine(appDataDirectory, SettingConstants.ProviderFilename);
+
+                    var logFilePath = TryGetLoggerFilePath(iSettingRepository: ISettingRepository, appDataDirectory);
+                    var loggerSqlitePath = TryGetLoggerSqliteDbPath(ISettingRepository, appDataDirectory);
+                    var readingsSqlitePath = TryGetSqlitePathFromJsonToSqliteSettings(ISettingRepository, appDataDirectory);
+
+                    var snap = collector.Capture(
+                        settingsOverrideFilePath: settingsOverridePath,
+                        absoluteLogFilePath: logFilePath,
+                        appDataDirectory: appDataDirectory,
+                        loggerSqliteDbPath: loggerSqlitePath,
+                        readingsSqliteDbPath: readingsSqlitePath,
+                        topN: storageTopN);
+
+                    storage = new
+                    {
+                        settings_override_bytes = snap.SettingsOverrideBytes,
+                        log_file = snap.LogFile is null ? null : new { path = snap.LogFile.Path, bytes = snap.LogFile.Bytes },
+                        logger_sqlite_bytes = snap.LoggerSqliteBytes,
+                        readings_sqlite_bytes = snap.ReadingsSqliteBytes,
+                        top_log_files = snap.TopLogFiles.Select(f => new { path = f.Path, bytes = f.Bytes }).ToArray()
+                    };
+                }
+
                 var payload = new
                 {
-                    schema_version = 1,
+                    schema_version = 2,
                     captured_utc = nowWall,
                     interval_seconds = (int)Math.Round(wallDelta.TotalSeconds),
                     process = new
@@ -177,7 +220,8 @@ public sealed class MetricsSamplerService : ServiceBase
                         }
                     },
                     relay,
-                    pipeline
+                    pipeline,
+                    storage
                 };
 
                 // Phase 1: log-only for now. DB persistence wiring happens next.
@@ -230,5 +274,107 @@ public sealed class MetricsSamplerService : ServiceBase
                 try { await Task.Delay(TimeSpan.FromSeconds(5), token).ConfigureAwait(false); } catch { }
             }
         }
+
+    static string? TryGetLoggerFilePath(ISettingRepository iSettingRepository, string? appDataDirectory)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(appDataDirectory)) return null;
+
+            var relativeLogPath = iSettingRepository.GetValueOrDefault<string>(
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerFile_relativeLogPath));
+
+            if (string.IsNullOrWhiteSpace(relativeLogPath)) return null;
+
+            var candidate = Path.Combine(appDataDirectory, relativeLogPath);
+            var absolute = Path.GetFullPath(candidate);
+            var appDataFull = Path.GetFullPath(appDataDirectory);
+
+            if (!absolute.StartsWith(appDataFull, StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            return absolute;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    static string? TryGetLoggerSqliteDbPath(ISettingRepository iSettingRepository, string? appDataDirectory)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(appDataDirectory)) return null;
+
+            var dbPath = iSettingRepository.GetValueOrDefault<string>(
+                LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerSQLite_dbPath));
+
+            if (string.IsNullOrWhiteSpace(dbPath)) return null;
+            return Path.IsPathRooted(dbPath) ? dbPath : Path.Combine(appDataDirectory, dbPath);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    static string? TryGetSqlitePathFromJsonToSqliteSettings(ISettingRepository iSettingRepository, string? appDataDirectory)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(appDataDirectory)) return null;
+
+            var cs = iSettingRepository.GetValueOrDefault<string>(
+                LookupDictionaries.JsonToSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.JsonToSQLite_connectionString));
+
+            if (!string.IsNullOrWhiteSpace(cs))
+                return TryResolveSqliteDataSourceFromConnectionString(cs, appDataDirectory);
+
+            var dbPath = iSettingRepository.GetValueOrDefault<string>(
+                LookupDictionaries.JsonToSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.JsonToSQLite_dbPath));
+
+            if (string.IsNullOrWhiteSpace(dbPath)) return null;
+            return Path.IsPathRooted(dbPath) ? dbPath : Path.Combine(appDataDirectory, dbPath);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    static string? TryResolveSqliteDataSourceFromConnectionString(string connectionString, string appDataDirectory)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(connectionString)) return null;
+            if (string.IsNullOrWhiteSpace(appDataDirectory)) return null;
+
+            // Minimal parser to avoid introducing a Microsoft.Data.Sqlite dependency into MetWorks_Common.
+            // Handles typical forms: "Data Source=foo.sqlite" or "DataSource=foo.sqlite".
+            var parts = connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            foreach (var part in parts)
+            {
+                var kv = part.Split('=', 2, StringSplitOptions.TrimEntries);
+                if (kv.Length != 2) continue;
+
+                var key = kv[0];
+                var val = kv[1].Trim().Trim('"');
+
+                if (key.Equals("Data Source", StringComparison.OrdinalIgnoreCase) ||
+                    key.Equals("DataSource", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (string.IsNullOrWhiteSpace(val)) return null;
+                    return Path.IsPathRooted(val) ? val : Path.Combine(appDataDirectory, val);
+                }
+            }
+
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
     }
 }

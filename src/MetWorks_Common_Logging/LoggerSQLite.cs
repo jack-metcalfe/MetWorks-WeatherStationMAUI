@@ -406,9 +406,10 @@ CREATE INDEX IF NOT EXISTS idx_{_tableName}_installation_id ON ""{_tableName}""(
 
         static string BuildConnectionString(string dbPath)
         {
+            var appDataDir = new DefaultPlatformPaths().AppDataDirectory;
             var resolvedDbPath = Path.IsPathRooted(dbPath)
                 ? dbPath
-                : Path.Combine(AppContext.BaseDirectory, dbPath);
+                : Path.Combine(appDataDir, dbPath);
 
             return new SqliteConnectionStringBuilder
             {

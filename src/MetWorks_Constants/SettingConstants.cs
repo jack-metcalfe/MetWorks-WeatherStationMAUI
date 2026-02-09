@@ -71,4 +71,7 @@ public static class SettingConstants
 
     public const string Metrics_pipelineEnabled = "pipelineEnabled";
     public const string Metrics_pipelineTopN = "pipelineTopN";
+
+    public const string Metrics_storageEnabled = "storageEnabled";
+    public const string Metrics_storageTopN = "storageTopN";
 }

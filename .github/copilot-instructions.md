@@ -8,6 +8,7 @@
 - Use backward compatibility only as a short interim step; remove incompatible and dead/legacy code as soon as possible to reduce complexity in the codebase.
 - Align with tool defaults (e.g., YamlDotNet default YAML quoting/serialization) across all repos; avoid fighting tool behavior unless there's a clear reason or deep understanding of the tool.
 - Ensure UI changes consider dark mode readability, as the user typically uses a dark theme whenever available.
+- Keep unordered lists sorted logically for discoverability; specifically, keep `settings.yaml` sections sorted lexicographically by 'path' and prefer grouping similar members (properties/constructors/methods) and sorting them by name/signature within the group.
 
 ## Instrumentation Preferences
 - Target Android primarily; emit reports to logs first.

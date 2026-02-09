@@ -11,32 +11,6 @@ definitions:
     isEditable: false
     isSecret: false
 
-  - path: /services/jsonToSQLite/connectionString
-    defaultValue: ""
-    description: "SQLite connection string (leave blank to use dbPath + default connection string builder)."
-    expectedValueType: "String"
-    allowableValues:
-    isEditable: true
-    isSecret: true
-
-  - path: /services/jsonToSQLite/dbPath
-    defaultValue: "metworks.sqlite"
-    description: "SQLite database file path (relative paths are relative to the app's data directory)."
-    expectedValueType: "String"
-    allowableValues:
-    isEditable: true
-    isSecret: false
-
-  - path: /services/jsonToSQLite/enableBuffering
-    defaultValue: "false"
-    description: "Enable buffering for SQLite writes when the database is unavailable (e.g., locked or I/O errors)."
-    expectedValueType: "Boolean"
-    allowableValues:
-      - true
-      - false
-    isEditable: true
-    isSecret: false
-
   - path: /services/loggerFile/fileSizeLimitBytes
     defaultValue: "10485760"
     description: "File size limit in bytes"
@@ -247,24 +221,6 @@ definitions:
     isEditable: true
     isSecret: false
 
-  - path: /services/metrics/storageEnabled
-    defaultValue: "true"
-    description: "Capture local storage consumption metrics (settings overrides, log file, logging sqlite, readings sqlite)"
-    expectedValueType: "Boolean"
-    allowableValues:
-      - true
-      - false
-    isEditable: true
-    isSecret: false
-
-  - path: /services/metrics/storageTopN
-    defaultValue: "10"
-    description: "Maximum number of largest log files (by size) to include under the log file sink directory"
-    expectedValueType: "Int32"
-    allowableValues: []
-    isEditable: true
-    isSecret: false
-
   - path: /services/metrics/tableName
     defaultValue: "metrics_summary"
     description: "Table name for PostgreSQL metrics summaries"
@@ -397,4 +353,30 @@ definitions:
     allowableValues:
       - true
       - false
+    isSecret: false
+
+  - path: /services/jsonToSQLite/connectionString
+    defaultValue: ""
+    description: "SQLite connection string (leave blank to use dbPath + default connection string builder)."
+    expectedValueType: "String"
+    allowableValues:
+    isEditable: true
+    isSecret: true
+
+  - path: /services/jsonToSQLite/dbPath
+    defaultValue: "metworks.sqlite"
+    description: "SQLite database file path (relative paths are relative to the app's data directory)."
+    expectedValueType: "String"
+    allowableValues:
+    isEditable: true
+    isSecret: false
+
+  - path: /services/jsonToSQLite/enableBuffering
+    defaultValue: "false"
+    description: "Enable buffering for SQLite writes when the database is unavailable (e.g., locked or I/O errors)."
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
+    isEditable: true
     isSecret: false
