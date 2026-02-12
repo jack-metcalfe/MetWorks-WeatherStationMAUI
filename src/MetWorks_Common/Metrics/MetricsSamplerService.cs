@@ -12,10 +12,10 @@ public sealed class MetricsSamplerService : ServiceBase
         ILoggerResilient iLoggerResilient,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
-        MetricsSummaryIngestor? metricsSummaryIngestor = null,
-        IMetricsLatestSnapshot? metricsLatestSnapshotStore = null,
-        CancellationToken externalCancellation = default,
-        ProvenanceTracker? provenanceTracker = null
+        IMetricsSummaryPersister iMetricsSummaryPersister,
+        IMetricsLatestSnapshot iMetricsLatestSnapshot,
+        CancellationToken externalCancellation,
+        ProvenanceTracker provenanceTracker
     )
     {
         ArgumentNullException.ThrowIfNull(iLoggerResilient);
@@ -28,6 +28,7 @@ public sealed class MetricsSamplerService : ServiceBase
             iEventRelayBasic,
             externalCancellation,
             provenanceTracker);
+
 
         await iLoggerResilient.Ready.ConfigureAwait(false);
 
@@ -78,14 +79,25 @@ public sealed class MetricsSamplerService : ServiceBase
         if (storageTopN <= 0)
             storageTopN = 10;
 
-        StartBackground(ct => SamplerLoopAsync(TimeSpan.FromSeconds(intervalSeconds), relayEnabled, relayTopN, pipelineEnabled, pipelineTopN, storageEnabled, storageTopN, metricsSummaryIngestor, metricsLatestSnapshotStore, ct));
+        StartBackground(ct => SamplerLoopAsync(TimeSpan.FromSeconds(intervalSeconds), relayEnabled, relayTopN, pipelineEnabled, pipelineTopN, storageEnabled, storageTopN, iMetricsSummaryPersister, iMetricsLatestSnapshot, ct));
 
         try { MarkReady(); } catch { }
         ILogger.Information($"MetricsSamplerService started (interval={intervalSeconds}s, relayEnabled={relayEnabled}, relayTopN={relayTopN}, pipelineEnabled={pipelineEnabled}, pipelineTopN={pipelineTopN}, storageEnabled={storageEnabled}, storageTopN={storageTopN})");
         return true;
     }
 
-    async Task SamplerLoopAsync(TimeSpan interval, bool relayEnabled, int relayTopN, bool pipelineEnabled, int pipelineTopN, bool storageEnabled, int storageTopN, MetricsSummaryIngestor? metricsSummaryIngestor, IMetricsLatestSnapshot? metricsLatestSnapshotStore, CancellationToken token)
+    async Task SamplerLoopAsync(
+        TimeSpan interval, 
+        bool relayEnabled, 
+        int relayTopN, 
+        bool pipelineEnabled, 
+        int pipelineTopN, 
+        bool storageEnabled, 
+        int storageTopN, 
+        IMetricsSummaryPersister? metricsSummaryIngestor, 
+        IMetricsLatestSnapshot? metricsLatestSnapshotStore, 
+        CancellationToken token
+    )
     {
         var proc = Process.GetCurrentProcess();
         var lastWall = DateTime.UtcNow;
@@ -200,6 +212,10 @@ public sealed class MetricsSamplerService : ServiceBase
                     };
                 }
 
+                 // Reserved for local-first shipping state (acked + potential lossy deletions).
+                 // Populated once shipping state is wired to a concrete local SQLite connection.
+                 object? shipping = null;
+
                 var payload = new
                 {
                     schema_version = 2,
@@ -221,7 +237,8 @@ public sealed class MetricsSamplerService : ServiceBase
                     },
                     relay,
                     pipeline,
-                    storage
+                     storage,
+                     shipping
                 };
 
                 // Phase 1: log-only for now. DB persistence wiring happens next.

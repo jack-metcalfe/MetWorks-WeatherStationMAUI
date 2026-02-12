@@ -52,7 +52,7 @@ public class RawPacketIngestor : ServiceBase
             iLoggerResilient.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")}enabled for PostgreSQL listener");
 
             _bufferingEnabled = iSettingRepository.GetValueOrDefault<bool>(
-                LookupDictionaries.XMLToPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.XMLToPostgreSQL_enableBuffering)
+                LookupDictionaries.jsonToPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.jsonToPostgreSQL_enableBuffering)
             );
 
             if (_bufferingEnabled)
@@ -62,7 +62,7 @@ public class RawPacketIngestor : ServiceBase
             }
 
             _connectionString = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.XMLToPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.XMLToPostgreSQL_connectionString)
+                LookupDictionaries.jsonToPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.jsonToPostgreSQL_connectionString)
             );
 
             // Store instance id for DB writes and cache parsed GUID (installation id should be stable)

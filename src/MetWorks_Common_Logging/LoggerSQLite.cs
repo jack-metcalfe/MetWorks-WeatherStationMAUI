@@ -20,6 +20,7 @@ public sealed class LoggerSQLite : ILoggerSQLite
     {
         ArgumentNullException.ThrowIfNull(iLoggerFile);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
+        ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
 
         if (_isInitialized)
             throw new InvalidOperationException($"{nameof(LoggerSQLite)} is already initialized.");
@@ -33,6 +34,11 @@ public sealed class LoggerSQLite : ILoggerSQLite
                     SettingConstants.LoggerSQLite_dbPath
                 )
             );
+
+            var appDataDir = new DefaultPlatformPaths().AppDataDirectory;
+            var resolvedDbPath = Path.IsPathRooted(dbPath)
+                ? dbPath
+                : Path.Combine(appDataDir, dbPath);
 
             var tableName = iSettingRepository.GetValueOrDefault<string>(
                 LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildSettingPath(
@@ -52,7 +58,7 @@ public sealed class LoggerSQLite : ILoggerSQLite
                 )
             );
 
-            _dbPath = dbPath;
+            _dbPath = resolvedDbPath;
             _tableName = tableName;
 
             var loggerCfg = new LoggerConfiguration()

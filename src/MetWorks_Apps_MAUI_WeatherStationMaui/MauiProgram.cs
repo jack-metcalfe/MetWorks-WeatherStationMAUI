@@ -58,9 +58,6 @@ public static class MauiProgram
         builder.Services.AddTransient<ViewModels.SettingsEditorViewModel>();
         builder.Services.AddTransient<Pages.Settings.SettingsEditorPage>();
 
-        // Tempest station metadata persistence (PostgreSQL)
-        builder.Services.AddSingleton<MetWorks.Ingest.Postgres.StationMetadataIngestor>();
-
         builder.Services.AddSingleton<IContentVariantCatalog, ContentVariantCatalog>();
         builder.Services.AddSingleton<IDeviceOverrideSource, YamlDeviceOverrideSource>();
         builder.Services.AddSingleton<IHostCompositionCatalog, HostCompositionCatalog>();

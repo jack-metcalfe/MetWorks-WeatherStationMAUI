@@ -1,5 +1,4 @@
 ﻿namespace MetWorks.Ingest.SQLite;
-
 internal static class SqliteFeatureProbe
 {
     internal static async Task<bool> SupportsGeneratedColumnsAsync(SqliteConnection connection, CancellationToken cancellationToken)

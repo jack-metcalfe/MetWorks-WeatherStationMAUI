@@ -20,4 +20,8 @@
 		<ProjectReference Include="..\MetWorks_Resource_Store\MetWorks_Resource_Store.csproj" />
 		<ProjectReference Include="..\MetWorks_InstanceIdentifier\MetWorks_InstanceIdentifier.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Metrics\" />
+	</ItemGroup>
 </Project>

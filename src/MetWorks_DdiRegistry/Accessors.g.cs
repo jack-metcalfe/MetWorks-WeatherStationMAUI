@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-02-09T02:55:58.0510994Z
+// Generated On:        2026-02-12T05:35:58.8534477Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -155,21 +155,6 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheLoggerPostgreSQL(MetWorks.Common.Logging.LoggerPostgreSQL instance) =>
-            _TheLoggerPostgreSQLInstance = instance;
-
-        // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Interfaces.ILoggerPostgreSQL GetTheLoggerPostgreSQL() =>
-            _TheLoggerPostgreSQLInstance;
-
-        // Internal accessor: always returns the concrete class.
-        internal MetWorks.Common.Logging.LoggerPostgreSQL GetTheLoggerPostgreSQL_Internal() =>
-            _TheLoggerPostgreSQLInstance;
-        // Template:            Accessors.Triplet
-        // Version:             1.1
-        // Template Requested:  Accessors
-
-        // Register method: stores the concrete instance in the backing field.
         public void RegisterTheLoggerSQLite(MetWorks.Common.Logging.LoggerSQLite instance) =>
             _TheLoggerSQLiteInstance = instance;
 
@@ -215,31 +200,136 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheMetricsSummaryIngestor(MetWorks.Common.Metrics.MetricsSummaryIngestor instance) =>
+        public void RegisterTheStreamShippingHttpClientProvider(MetWorks.Common.Networking.StreamShippingHttpClientProvider instance) =>
+            _TheStreamShippingHttpClientProviderInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Common.Networking.StreamShippingHttpClientProvider GetTheStreamShippingHttpClientProvider() =>
+            _TheStreamShippingHttpClientProviderInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.Networking.StreamShippingHttpClientProvider GetTheStreamShippingHttpClientProvider_Internal() =>
+            _TheStreamShippingHttpClientProviderInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheStationMetadataStreamShipper(MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper instance) =>
+            _TheStationMetadataStreamShipperInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper GetTheStationMetadataStreamShipper() =>
+            _TheStationMetadataStreamShipperInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper GetTheStationMetadataStreamShipper_Internal() =>
+            _TheStationMetadataStreamShipperInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheMetricsSummaryIngestor(MetWorks.Ingest.SQLite.MetricsSummaryIngestor instance) =>
             _TheMetricsSummaryIngestorInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Common.Metrics.MetricsSummaryIngestor GetTheMetricsSummaryIngestor() =>
+        public IMetricsSummaryPersister GetTheMetricsSummaryIngestor() =>
             _TheMetricsSummaryIngestorInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal MetWorks.Common.Metrics.MetricsSummaryIngestor GetTheMetricsSummaryIngestor_Internal() =>
+        internal MetWorks.Ingest.SQLite.MetricsSummaryIngestor GetTheMetricsSummaryIngestor_Internal() =>
             _TheMetricsSummaryIngestorInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheMetricsSampler(MetWorks.Common.Metrics.MetricsSamplerService instance) =>
-            _TheMetricsSamplerInstance = instance;
+        public void RegisterTheLightningStreamShipper(MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper instance) =>
+            _TheLightningStreamShipperInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Common.Metrics.MetricsSamplerService GetTheMetricsSampler() =>
-            _TheMetricsSamplerInstance;
+        public MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper GetTheLightningStreamShipper() =>
+            _TheLightningStreamShipperInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal MetWorks.Common.Metrics.MetricsSamplerService GetTheMetricsSampler_Internal() =>
-            _TheMetricsSamplerInstance;
+        internal MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper GetTheLightningStreamShipper_Internal() =>
+            _TheLightningStreamShipperInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheLoggerSQLiteStreamShipper(MetWorks.Ingest.SQLite.Shipping.LoggerSQLiteStreamShipper instance) =>
+            _TheLoggerSQLiteStreamShipperInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Ingest.SQLite.Shipping.LoggerSQLiteStreamShipper GetTheLoggerSQLiteStreamShipper() =>
+            _TheLoggerSQLiteStreamShipperInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Ingest.SQLite.Shipping.LoggerSQLiteStreamShipper GetTheLoggerSQLiteStreamShipper_Internal() =>
+            _TheLoggerSQLiteStreamShipperInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheObservationStreamShipper(MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper instance) =>
+            _TheObservationStreamShipperInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper GetTheObservationStreamShipper() =>
+            _TheObservationStreamShipperInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper GetTheObservationStreamShipper_Internal() =>
+            _TheObservationStreamShipperInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterThePrecipitationStreamShipper(MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper instance) =>
+            _ThePrecipitationStreamShipperInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper GetThePrecipitationStreamShipper() =>
+            _ThePrecipitationStreamShipperInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper GetThePrecipitationStreamShipper_Internal() =>
+            _ThePrecipitationStreamShipperInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheWindStreamShipper(MetWorks.Ingest.SQLite.Shipping.WindStreamShipper instance) =>
+            _TheWindStreamShipperInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Ingest.SQLite.Shipping.WindStreamShipper GetTheWindStreamShipper() =>
+            _TheWindStreamShipperInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Ingest.SQLite.Shipping.WindStreamShipper GetTheWindStreamShipper_Internal() =>
+            _TheWindStreamShipperInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheMetricsSamplerService(MetWorks.Common.Metrics.MetricsSamplerService instance) =>
+            _TheMetricsSamplerServiceInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Common.Metrics.MetricsSamplerService GetTheMetricsSamplerService() =>
+            _TheMetricsSamplerServiceInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.Metrics.MetricsSamplerService GetTheMetricsSamplerService_Internal() =>
+            _TheMetricsSamplerServiceInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
@@ -270,21 +360,6 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.TempestRestClient GetTheTempestRestClient_Internal() =>
             _TheTempestRestClientInstance;
-        // Template:            Accessors.Triplet
-        // Version:             1.1
-        // Template Requested:  Accessors
-
-        // Register method: stores the concrete instance in the backing field.
-        public void RegisterThePostgresStationMetadataIngestor(MetWorks.Ingest.Postgres.StationMetadataIngestor instance) =>
-            _ThePostgresStationMetadataIngestorInstance = instance;
-
-        // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.Postgres.StationMetadataIngestor GetThePostgresStationMetadataIngestor() =>
-            _ThePostgresStationMetadataIngestorInstance;
-
-        // Internal accessor: always returns the concrete class.
-        internal MetWorks.Ingest.Postgres.StationMetadataIngestor GetThePostgresStationMetadataIngestor_Internal() =>
-            _ThePostgresStationMetadataIngestorInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
@@ -360,21 +435,6 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Networking.Udp.Transformer.TempestPacketTransformer GetTheUdpListener_Internal() =>
             _TheUdpListenerInstance;
-        // Template:            Accessors.Triplet
-        // Version:             1.1
-        // Template Requested:  Accessors
-
-        // Register method: stores the concrete instance in the backing field.
-        public void RegisterThePostgresRawPacketIngestor(MetWorks.Ingest.Postgres.RawPacketIngestor instance) =>
-            _ThePostgresRawPacketIngestorInstance = instance;
-
-        // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.Postgres.RawPacketIngestor GetThePostgresRawPacketIngestor() =>
-            _ThePostgresRawPacketIngestorInstance;
-
-        // Internal accessor: always returns the concrete class.
-        internal MetWorks.Ingest.Postgres.RawPacketIngestor GetThePostgresRawPacketIngestor_Internal() =>
-            _ThePostgresRawPacketIngestorInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors

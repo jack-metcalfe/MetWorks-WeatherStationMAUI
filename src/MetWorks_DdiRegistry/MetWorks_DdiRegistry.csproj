@@ -10,7 +10,6 @@
 	  <ProjectReference Include="..\MetWorks_Common\MetWorks_Common.csproj" />
 	  <ProjectReference Include="..\MetWorks_Common_Logging\MetWorks_Common_Logging.csproj" />
 	  <ProjectReference Include="..\MetWorks_Common_Settings\MetWorks_Common_Settings.csproj" />
-	  <ProjectReference Include="..\MetWorks_Ingest_Postgres\MetWorks_Ingest_Postgres.csproj" />
 	  <ProjectReference Include="..\MetWorks_Ingest_SQLite\MetWorks_Ingest_SQLite.csproj" />
 	  <ProjectReference Include="..\MetWorks_Ingest_Transformer\MetWorks_Ingest_Transformer.csproj" />
 	  <ProjectReference Include="..\MetWorks_InstanceIdentifier\MetWorks_InstanceIdentifier.csproj" />

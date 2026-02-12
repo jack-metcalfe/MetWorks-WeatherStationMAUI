@@ -24,7 +24,7 @@ public sealed class StationMetadataIngestor : ServiceBase, IStationMetadataPersi
         );
 
         _connectionString = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.XMLToPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.XMLToPostgreSQL_connectionString)
+            LookupDictionaries.jsonToPostgreSQLGroupSettingsDefinition.BuildSettingPath(SettingConstants.jsonToPostgreSQL_connectionString)
         );
 
         var iid = iInstanceIdentifier.GetOrCreateInstallationId();

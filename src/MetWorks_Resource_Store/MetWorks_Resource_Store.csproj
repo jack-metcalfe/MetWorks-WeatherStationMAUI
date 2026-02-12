@@ -7,22 +7,6 @@
 		<RootNamespace>MetWorks.Resource.Store</RootNamespace>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Remove="Ingest/PostgreSQL/lightning.sql" />
-		<EmbeddedResource Include="Ingest/PostgreSQL/lightning.sql">
-			<LogicalName>Ingest.PostgreSQL.lightning.sql</LogicalName>
-		</EmbeddedResource>
-		<None Remove="Ingest/PostgreSQL/observation.sql" />
-		<EmbeddedResource Include="Ingest/PostgreSQL/observation.sql">
-			<LogicalName>Ingest.PostgreSQL.observation.sql</LogicalName>
-		</EmbeddedResource>
-		<None Remove="Ingest/PostgreSQL/precipitation.sql" />
-		<EmbeddedResource Include="Ingest/PostgreSQL/precipitation.sql">
-			<LogicalName>Ingest.PostgreSQL.precipitation.sql</LogicalName>
-		</EmbeddedResource>
-		<None Remove="Ingest/PostgreSQL/wind.sql" />
-		<EmbeddedResource Include="Ingest/PostgreSQL/wind.sql">
-			<LogicalName>Ingest.PostgreSQL.wind.sql</LogicalName>
-		</EmbeddedResource>
 		<None Remove="data/settings.yaml" />
 		<EmbeddedResource Include="data/settings.yaml">
 			<LogicalName>data.settings.yaml</LogicalName>
@@ -45,14 +29,14 @@
 		<EmbeddedResource Include="Ingest/SQLite/rollup_state.sql">
 			<LogicalName>Ingest.SQLite.rollup_state.sql</LogicalName>
 		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/shipper_state.sql">
+			<LogicalName>Ingest.SQLite.shipper_state.sql</LogicalName>
+		</EmbeddedResource>
 		<EmbeddedResource Include="Ingest/SQLite/wind.sql">
 			<LogicalName>Ingest.SQLite.wind.sql</LogicalName>
 		</EmbeddedResource>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\MetWorks_Common\MetWorks_Common.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Ingest/PostgreSQL/" />
 	</ItemGroup>
 </Project>

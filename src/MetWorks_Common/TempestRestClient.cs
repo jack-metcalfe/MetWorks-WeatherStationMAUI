@@ -12,8 +12,7 @@ public sealed class TempestRestClient : ServiceBase, ITempestRestClient
         ILoggerResilient iLoggerResilient,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
-        CancellationToken externalCancellation = default,
-        HttpClient? httpClient = null
+        CancellationToken externalCancellation
     )
     {
         ArgumentNullException.ThrowIfNull(iLoggerResilient);
@@ -27,7 +26,7 @@ public sealed class TempestRestClient : ServiceBase, ITempestRestClient
             externalCancellation
         );
 
-        _httpClient = httpClient ?? new HttpClient
+        _httpClient = new HttpClient
         {
             BaseAddress = new Uri(BaseUrl, UriKind.Absolute),
             Timeout = TimeSpan.FromSeconds(10)

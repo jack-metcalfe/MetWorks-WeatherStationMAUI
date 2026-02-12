@@ -63,14 +63,14 @@ public static class LookupDictionaries
             SettingConstants.UnitOfMeasure_windSpeed
         ]
     );
-    public static readonly GroupSettingDefinition XMLToPostgreSQLGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.XMLToPostgreSQL_groupName,
-        groupBasePath: SettingConstants.XMLToPostgreSQL_groupName,
+    public static readonly GroupSettingDefinition jsonToPostgreSQLGroupSettingsDefinition = new GroupSettingDefinition(
+        groupName: SettingConstants.jsonToPostgreSQL_groupName,
+        groupBasePath: SettingConstants.jsonToPostgreSQL_groupName,
         settingNames:
 
         [
-            SettingConstants.XMLToPostgreSQL_connectionString,
-            SettingConstants.XMLToPostgreSQL_enableBuffering
+            SettingConstants.jsonToPostgreSQL_connectionString,
+            SettingConstants.jsonToPostgreSQL_enableBuffering
         ]
     );
 
@@ -112,6 +112,27 @@ public static class LookupDictionaries
             SettingConstants.Metrics_relayTopN,
             SettingConstants.Metrics_pipelineEnabled,
             SettingConstants.Metrics_pipelineTopN
+        ]
+    );
+
+    public static readonly GroupSettingDefinition StreamShippingGroupSettingsDefinition = new GroupSettingDefinition(
+        groupName: SettingConstants.StreamShipping_groupName,
+        groupBasePath: SettingConstants.StreamShipping_groupName,
+        settingNames:
+        [
+            SettingConstants.StreamShipping_enabled,
+            SettingConstants.StreamShipping_endpointUrl,
+            SettingConstants.StreamShipping_shipIntervalSeconds,
+            SettingConstants.StreamShipping_maxBatchRows
+        ]
+    );
+
+    public static readonly GroupSettingDefinition StreamShippingHttpGroupSettingsDefinition = new GroupSettingDefinition(
+        groupName: SettingConstants.StreamShippingHttp_groupName,
+        groupBasePath: SettingConstants.StreamShippingHttp_groupName,
+        settingNames:
+        [
+            SettingConstants.StreamShippingHttp_timeoutSeconds
         ]
     );
 }

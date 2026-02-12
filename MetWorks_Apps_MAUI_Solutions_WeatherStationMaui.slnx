@@ -1,10 +1,14 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MetWorks_Ingest_StreamReceiver/MetWorks_Ingest_StreamReceiver.csproj" />
+  </Folder>
   <Project Path="src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs.csproj" />
   <Project Path="src/MetWorks_Apps_MAUI_WeatherStationMaui/MetWorks_Apps_MAUI_WeatherStationMaui.csproj">
     <Deploy Solution="Debug|*" />
   </Project>
   <Project Path="src/MetWorks_Common/MetWorks_Common.csproj" />
   <Project Path="src/MetWorks_Common_Logging/MetWorks_Common_Logging.csproj" />
+  <Project Path="src/MetWorks_Common_Metrics/MetWorks_Common_Metrics.csproj" Id="eeeb61da-c02e-469c-996b-69730b1004bb" />
   <Project Path="src/MetWorks_Common_Settings/MetWorks_Common_Settings.csproj" />
   <Project Path="src/MetWorks_Common_Utility/MetWorks_Common_Utility.csproj" />
   <Project Path="src/MetWorks_Constants/MetWorks_Constants.csproj" />

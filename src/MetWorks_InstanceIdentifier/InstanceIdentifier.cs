@@ -41,6 +41,31 @@ public partial class InstanceIdentifier : IInstanceIdentifier
             return false;
         }
     }
+
+    public string CreateNewInstallationId()
+    {
+        if (_settingProvider is null) throw new InvalidOperationException("InstanceIdentifier not initialized");
+        if (iLoggerStub is null) throw new InvalidOperationException("InstanceIdentifier not initialized");
+
+        try
+        {
+            var guid = Guid.NewGuid().ToString();
+            var saved = _settingProvider.SaveValueOverride(Path, guid);
+            if (!saved)
+            {
+                iLoggerStub.Warning("Failed to persist new installationId override, continuing with transient value.");
+            }
+
+            _cached = guid;
+            return _cached;
+        }
+        catch (Exception ex)
+        {
+            iLoggerStub.Error("Failed to create new installation id.", ex);
+            _cached = Guid.NewGuid().ToString();
+            return _cached;
+        }
+    }
     public string GetOrCreateInstallationId()
     {
         if (!string.IsNullOrEmpty(_cached)) return _cached!;

@@ -9,6 +9,8 @@
 - Align with tool defaults (e.g., YamlDotNet default YAML quoting/serialization) across all repos; avoid fighting tool behavior unless there's a clear reason or deep understanding of the tool.
 - Ensure UI changes consider dark mode readability, as the user typically uses a dark theme whenever available.
 - Keep unordered lists sorted logically for discoverability; specifically, keep `settings.yaml` sections sorted lexicographically by 'path' and prefer grouping similar members (properties/constructors/methods) and sorting them by name/signature within the group.
+- Prefer the repo’s existing settings + DDI/codegen conventions: parameterless constructors with async `InitializeAsync(...)` taking services/interfaces; keep code consistent across projects; ask before diverging from established patterns.
+- DDI/codegen is a deliberate choice; avoid runtime reflection for DI. Use reflection at build/codegen time for YAML validation and signature extraction. Prefer consistency in `InitializeAsync` signatures but it's evolving; don't digress into improving DDI tooling now.
 
 ## Instrumentation Preferences
 - Target Android primarily; emit reports to logs first.
@@ -18,6 +20,7 @@
 - Phase 1 sampler uses `Process.TotalProcessorTime` deltas + GC deltas.
 - Phase 2 wraps `EventRelayBasic` handlers for timing aggregated by `(message_type, recipient_type)` and reports interval-based top-N hotspots with snake_case fields.
 - For metrics persistence (Phase 5), use `/services/metrics/{connectionString,tableName,autoCreateTable}` settings; metrics sink should be best-effort (drop on failure) and accept `IInstanceIdentifier` for installation_id, initialized via DDI like other ingestors.
+- Keep PostgreSQL persistence available, and add a SQLite version of `MetricsSummaryIngestor` to support local-first while retaining remote DB for development.
 
 ## Naming Conventions
 - Prefer a naming pattern where raw, unformatted properties keep their actual type and use a 'Value' suffix (e.g., AirTemperatureValue is a double).
@@ -46,6 +49,7 @@
     - the property to be declared under that class’s `property:` list in `namespace:`
     - the property to exist on the concrete implementation, and ideally also on the associated interface if it’s exposed to MAUI DI.
   - DDI-created services don't see MAUI DI registrations; if a DDI-initialized class needs another service (e.g., MetricsLatestSnapshotStore), that dependency must be declared in DDI YAML and wired via `instance:` assignments. `exposeToMauiDi: true` in YAML registers that DDI instance into MAUI DI.
+  - DDI instance ordering matters: any instances referenced in an instance’s assignments must appear earlier in the instance list.
 
 ## Concurrency Management
 - Prefer using Interlocked-based, lock-free patterns (when appropriate) to harden concurrency and reduce brittleness.
@@ -80,4 +84,4 @@
 - The two-window issue has been fixed by removing OpenWindow/AppShell swapping and resolving AppShell from DI in App.CreateWindow.
 - SwipeCarousel currently shows only arrows (content empty) at the end of the session.
 - Prefer deterministic manual paging (host ContentView + swipe gestures + arrow:key navigation) over CarouselView when CarouselView exhibits virtualization/recycling issues like oscillation/self-swiping.
-- Prefer deterministic manual paging (host ContentView + swipe gestures + arrow:key navigation) over CarouselView when CarouselView shows virtualization/recycling issues like oscillation/self-swiping.
+- StationMetadataProvider persists station metadata to local device disk; MetricsSummaryIngestor should be migrated to SQLite for local-first. User prefers the workflow: create a plan, then execute the plan.

@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace MetWorks.Ingest.SQLite.Rollups;
+﻿namespace MetWorks.Ingest.SQLite.Rollups;
 public sealed class ObservationRollupWorker : ServiceBase
 {
     bool _isDatabaseAvailable = false;

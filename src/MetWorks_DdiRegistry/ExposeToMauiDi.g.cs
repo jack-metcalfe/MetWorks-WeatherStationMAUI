@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  ExposeToMauiDi
-// Generated On:        2026-02-09T02:55:58.0510994Z
+// Generated On:        2026-02-12T05:35:58.8534477Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -45,10 +45,6 @@ namespace MetWorks.ServiceRegistry
                         _TheLoggerFile = GetTheLoggerFile();
             services.AddSingleton<MetWorks.Interfaces.ILoggerFile>
                 (_TheLoggerFile);
-            MetWorks.Interfaces.ILoggerPostgreSQL
-                        _TheLoggerPostgreSQL = GetTheLoggerPostgreSQL();
-            services.AddSingleton<MetWorks.Interfaces.ILoggerPostgreSQL>
-                (_TheLoggerPostgreSQL);
             MetWorks.Interfaces.ILoggerSQLite
                         _TheLoggerSQLite = GetTheLoggerSQLite();
             services.AddSingleton<MetWorks.Interfaces.ILoggerSQLite>
@@ -57,6 +53,10 @@ namespace MetWorks.ServiceRegistry
                         _TheLoggerResilient = GetTheLoggerResilient();
             services.AddSingleton<MetWorks.Interfaces.ILoggerResilient>
                 (_TheLoggerResilient);
+            MetWorks.Ingest.SQLite.StationMetadataIngestor
+                        _TheSQLiteStationMetadataIngestor = GetTheSQLiteStationMetadataIngestor();
+            services.AddSingleton<MetWorks.Ingest.SQLite.StationMetadataIngestor>
+                (_TheSQLiteStationMetadataIngestor);
             MetWorks.Interfaces.IStationMetadataProvider
                         _TheStationMetadataProvider = GetTheStationMetadataProvider();
             services.AddSingleton<MetWorks.Interfaces.IStationMetadataProvider>

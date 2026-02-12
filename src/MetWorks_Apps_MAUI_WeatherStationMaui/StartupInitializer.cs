@@ -116,27 +116,6 @@ public class StartupInitializer
                 Debug.WriteLine("🔧 Initializing services...");
                 await _appRegistry!.InitializeAllAsync().ConfigureAwait(false);
 
-                // Initialize MAUI-registered services that aren't part of the generated DDI registry.
-                try
-                {
-                    var sp = Application.Current?.Handler?.MauiContext?.Services;
-                    var ingestor = sp?.GetService<MetWorks.Ingest.Postgres.StationMetadataIngestor>();
-                    if (ingestor is not null)
-                    {
-                        await ingestor.InitializeAsync(
-                            iLoggerResilient: _appRegistry!.GetTheLoggerResilient(),
-                            iSettingRepository: _appRegistry!.GetTheSettingRepository(),
-                            iEventRelayBasic: _appRegistry!.GetTheEventRelayBasic(),
-                            iInstanceIdentifier: _appRegistry!.GetTheInstanceIdentifier(),
-                            externalCancellation: _appRegistry!.GetRootCancellationTokenSource().Token
-                        ).ConfigureAwait(false);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    try { _appRegistry!.GetTheLoggerResilient().Warning($"StationMetadataIngestor initialization failed: {ex.Message}"); } catch { }
-                }
-
                 // Step 3: Cache logger after initialization
                 _iLoggerResilient = _appRegistry.GetTheLoggerResilient();
                 _iLoggerResilient?.Information("✅ All services initialized");
@@ -209,9 +188,6 @@ public class StartupInitializer
             if (_appRegistry.GetTheUdpListener() is null)
                 throw new InvalidOperationException("UDP listener failed to initialize");
 
-            if (_appRegistry.GetTheLoggerPostgreSQL() is null)
-                _iLoggerResilient?.Warning("⚠️ PostgreSQL settings repository not available");
-            
             Debug.WriteLine("✅ All critical services verified");
             _iLoggerResilient.Information("Critical services verification completed successfully");
             

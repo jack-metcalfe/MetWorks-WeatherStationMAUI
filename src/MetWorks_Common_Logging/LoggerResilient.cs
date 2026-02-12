@@ -56,9 +56,7 @@ public sealed class LoggerResilient : ServiceBase, ILoggerResilient
             // Use ServiceBase helper to wire logger, settings and linked cancellation
             var selectedLogger = iLoggerStub ?? _fallbackLogger;
 
-            if (iLoggerPostgreSQL is not null)
-                selectedLogger = iLoggerPostgreSQL;
-            else if (iLoggerFile is not null)
+            if (iLoggerFile is not null)
                 selectedLogger = iLoggerFile;
             else if (iLoggerStub is not null)
                 selectedLogger = iLoggerStub;

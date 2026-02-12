@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Instance.Factory
-// Generated On:        2026-02-09T02:55:58.0510994Z
+// Generated On:        2026-02-12T05:35:58.8534477Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -15,11 +15,11 @@ namespace MetWorks.ServiceRegistry
     // and immediately registers the created instance with the Registry.
     internal static partial class TheMetricsSummaryIngestor_InstanceFactory
     {
-        public static MetWorks.Common.Metrics.MetricsSummaryIngestor Create(Registry registry)
+        public static MetWorks.Ingest.SQLite.MetricsSummaryIngestor Create(Registry registry)
         {
             // Assignment-driven instance: construct with new().
             // This is always valid because ContainerClass is a concrete class.
-            var instance = new MetWorks.Common.Metrics.MetricsSummaryIngestor();
+            var instance = new MetWorks.Ingest.SQLite.MetricsSummaryIngestor();
 
             // Register immediately so other instances can reference it.
             registry.RegisterTheMetricsSummaryIngestor(instance);

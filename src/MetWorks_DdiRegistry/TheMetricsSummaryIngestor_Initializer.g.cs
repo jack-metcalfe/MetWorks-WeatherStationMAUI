@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Assignments.Initializer
-// Generated On:        2026-02-09T02:55:58.0510994Z
+// Generated On:        2026-02-12T05:35:58.8534477Z
 #nullable enable
 using System.Threading.Tasks;
 
@@ -27,8 +27,8 @@ namespace MetWorks.ServiceRegistry
                 iLoggerResilient: registry.GetTheLoggerResilient(),
                 iSettingRepository: registry.GetTheSettingRepository(),
                 iEventRelayBasic: registry.GetTheEventRelayBasic(),
-                installationId: registry.GetTheInstanceIdentifier().InstallationId,
-                metricsLatestSnapshotStore: registry.GetTheMetricsLatestSnapshotStore(),
+                iInstanceIdentifier: registry.GetTheInstanceIdentifier(),
+                iMetricsLatestSnapshot: registry.GetTheMetricsLatestSnapshotStore(),
                 externalCancellation: registry.GetRootCancellationTokenSource().Token,
                 provenanceTracker: registry.GetTheProvenanceTracker()
             ).ConfigureAwait(false);

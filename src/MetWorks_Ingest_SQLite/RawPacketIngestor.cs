@@ -25,6 +25,7 @@ public sealed class RawPacketIngestor : ServiceBase
 
     IInstanceIdentifier? _instanceIdentifier;
     Guid _installationIdGuid;
+    bool _shouldRotateInstallationIdOnDbCreate;
 
     public RawPacketIngestor()
     {
@@ -74,14 +75,6 @@ public sealed class RawPacketIngestor : ServiceBase
                 LookupDictionaries.JsonToSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.JsonToSQLite_dbPath)
             );
 
-            _instanceIdentifier = iInstanceIdentifier;
-            var iid = _instanceIdentifier.GetOrCreateInstallationId();
-            if (!Guid.TryParse(iid, out _installationIdGuid))
-            {
-                ILogger.Error($"Installation id '{iid}' is not a valid GUID. Aborting initialization.");
-                return false;
-            }
-
             // If a full connection string isn't provided, build a sensible default using the dbPath.
             if (string.IsNullOrWhiteSpace(_connectionString))
             {
@@ -97,6 +90,8 @@ public sealed class RawPacketIngestor : ServiceBase
                     ? _dbPath
                     : Path.Combine(appDataDir, _dbPath);
 
+                _shouldRotateInstallationIdOnDbCreate = !File.Exists(resolvedDbPath);
+
                 TryMigrateDbFromBaseDirectory(_dbPath, resolvedDbPath);
 
                 var builder = new SqliteConnectionStringBuilder
@@ -107,6 +102,16 @@ public sealed class RawPacketIngestor : ServiceBase
                 };
 
                 _connectionString = builder.ToString();
+            }
+
+            _instanceIdentifier = iInstanceIdentifier;
+            var iid = _shouldRotateInstallationIdOnDbCreate
+                ? _instanceIdentifier.CreateNewInstallationId()
+                : _instanceIdentifier.GetOrCreateInstallationId();
+            if (!Guid.TryParse(iid, out _installationIdGuid))
+            {
+                ILogger.Error($"Installation id '{iid}' is not a valid GUID. Aborting initialization.");
+                return false;
             }
 
             var connected = await TryEstablishConnectionAsync(_connectionString).ConfigureAwait(false);

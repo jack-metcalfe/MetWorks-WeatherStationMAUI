@@ -40,9 +40,9 @@ public static class SettingConstants
     public const string UnitOfMeasure_solarRadiation = "solarRadiation";
     public const string UnitOfMeasure_windSpeed = "windSpeed";
 
-    public const string XMLToPostgreSQL_groupName = "xmlToPostgreSQL";
-    public const string XMLToPostgreSQL_connectionString = "connectionString";
-    public const string XMLToPostgreSQL_enableBuffering = "enableBuffering";
+    public const string jsonToPostgreSQL_groupName = "jsonToPostgreSQL";
+    public const string jsonToPostgreSQL_connectionString = "connectionString";
+    public const string jsonToPostgreSQL_enableBuffering = "enableBuffering";
 
     public const string JsonToSQLite_groupName = "jsonToSQLite";
     public const string JsonToSQLite_connectionString = "connectionString";
@@ -74,4 +74,13 @@ public static class SettingConstants
 
     public const string Metrics_storageEnabled = "storageEnabled";
     public const string Metrics_storageTopN = "storageTopN";
+
+    public const string StreamShipping_groupName = "streamShipping";
+    public const string StreamShipping_enabled = "enabled";
+    public const string StreamShipping_endpointUrl = "endpointUrl";
+    public const string StreamShipping_shipIntervalSeconds = "shipIntervalSeconds";
+    public const string StreamShipping_maxBatchRows = "maxBatchRows";
+
+    public const string StreamShippingHttp_groupName = "streamShippingHttp";
+    public const string StreamShippingHttp_timeoutSeconds = "timeoutSeconds";
 }

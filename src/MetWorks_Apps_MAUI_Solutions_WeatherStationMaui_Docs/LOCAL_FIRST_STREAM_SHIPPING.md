@@ -92,6 +92,24 @@ Then you can later:
 1. Do you want shipping to be **lossless** (never drop unacked) or **best-effort** (keep only last N hours even if not shipped)?
 2. Do you want the server to store **raw JSON** (and derive later) or **normalized fields** (derive on device and send typed columns)?
 
+### If you choose best-effort: capturing "what might have been lost"
+Yes—treat potential loss as a first-class metric so you can detect and quantify gaps.
+
+**Local additions (per source stream):**
+- Track a separate watermark for *lossy deletions*, e.g. `last_lossy_deleted_rowid` (or `lossy_deleted_through_rowid`).
+- Track counters like `lossy_deleted_row_count` and timestamps like `last_lossy_delete_utc`.
+
+**How it works:**
+1. Normal shipping continues to use `last_acked_rowid`.
+2. Retention is allowed to delete rows older than your time window even if unacked.
+3. When retention deletes unacked rows, advance `last_lossy_deleted_rowid` to the highest deleted `rowid` and increment `lossy_deleted_row_count`.
+
+**What you can report upstream:**
+- Include `last_acked_rowid` *and* `last_lossy_deleted_rowid` in periodic `METRICS` and/or in each ingest request.
+- The server can detect possible gaps when `last_lossy_deleted_rowid > last_acked_rowid` and record a "may have been lost" interval `(last_acked_rowid, last_lossy_deleted_rowid]` for that `installationId` + `source`.
+
+This stays database-independent and gives you a pragmatic, auditable signal of data loss without requiring the device to keep all unacked rows forever.
+
 ## Local storage consumption metrics
 The app now includes a best-effort local storage size snapshot in the periodic `METRICS` JSON payload.
 

@@ -3,6 +3,22 @@
     value: "50222"
 
 definitions:
+  - path: /services/jsonToPostgreSQL/connectionString
+    defaultValue: "Host=192.168.8.9;Port=5432;Database=weather;Username=weather;Password=password"
+    description: "Connection string for PostgreSQL database"
+    expectedValueType: "String"
+    allowableValues:
+    isSecret: true
+
+  - path: /services/jsonToPostgreSQL/enableBuffering
+    defaultValue: "false"
+    description: "Enable buffering for PostgreSQL database"
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
+    isSecret: false
+
   - path: /services/instance/installationId
     defaultValue: ""
     description: "Per-installation stable identifier (GUID). Generated on first run and persisted locally."
@@ -273,6 +289,48 @@ definitions:
     isEditable: true
     isSecret: false
 
+  - path: /services/streamShipping/enabled
+    defaultValue: "false"
+    description: "Enable local-first stream shipping of SQLite-persisted data via NDJSON-over-HTTP."
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
+    isEditable: true
+    isSecret: false
+
+  - path: /services/streamShipping/endpointUrl
+    defaultValue: ""
+    description: "Stream shipping ingestion endpoint URL (e.g., https://example.com/ingest/v1/stream)."
+    expectedValueType: "String"
+    allowableValues: []
+    isEditable: true
+    isSecret: true
+
+  - path: /services/streamShipping/maxBatchRows
+    defaultValue: "500"
+    description: "Maximum number of rows to ship per batch."
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/streamShipping/shipIntervalSeconds
+    defaultValue: "10"
+    description: "How often to attempt shipping (seconds)."
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/streamShippingHttp/timeoutSeconds
+    defaultValue: "30"
+    description: "HTTP timeout (seconds) for stream shipping uploads."
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
   - path: /services/tempest/apiKey
     defaultValue: "00000000-0000-0000-0000-000000000000"
     description: "API Key for Tempest Weather Station"
@@ -381,20 +439,4 @@ definitions:
       - "knot"
       - "meter/second"
       - "mile/hour"
-    isSecret: false
-
-  - path: /services/xmlToPostgreSQL/connectionString
-    defaultValue: "Host=192.168.8.9;Port=5432;Database=weather;Username=weather;Password=password"
-    description: "Connection string for PostgreSQL database"
-    expectedValueType: "String"
-    allowableValues:
-    isSecret: true
-
-  - path: /services/xmlToPostgreSQL/enableBuffering
-    defaultValue: "false"
-    description: "Enable buffering for PostgreSQL database"
-    expectedValueType: "Boolean"
-    allowableValues:
-      - true
-      - false
     isSecret: false
