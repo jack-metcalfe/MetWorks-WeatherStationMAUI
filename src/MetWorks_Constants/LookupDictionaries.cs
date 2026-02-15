@@ -22,22 +22,10 @@ public static class LookupDictionaries
             SettingConstants.LoggerFile_rollOnFileSizeLimit
         ]
     );
-    public static readonly GroupSettingDefinition LoggerPostgreSQLGroupSettingsDefinition = new GroupSettingDefinition(
-            groupName: SettingConstants.LoggerPostgreSQL_groupName,
-            groupBasePath: SettingConstants.LoggerPostgreSQL_groupName,
-            settingNames: [
-                SettingConstants.LoggerPostgreSQL_connectionString,
-                    SettingConstants.LoggerPostgreSQL_tableName,
-                    SettingConstants.LoggerPostgreSQL_minimumLevel,
-                    SettingConstants.LoggerPostgreSQL_autoCreateTable
-            ]
-        );
-
     public static readonly GroupSettingDefinition LoggerSQLiteGroupSettingsDefinition = new GroupSettingDefinition(
         groupName: SettingConstants.LoggerSQLite_groupName,
         groupBasePath: SettingConstants.LoggerSQLite_groupName,
         settingNames: [
-            SettingConstants.LoggerSQLite_dbPath,
             SettingConstants.LoggerSQLite_tableName,
             SettingConstants.LoggerSQLite_minimumLevel,
             SettingConstants.LoggerSQLite_autoCreateTable
@@ -63,26 +51,16 @@ public static class LookupDictionaries
             SettingConstants.UnitOfMeasure_windSpeed
         ]
     );
-    public static readonly GroupSettingDefinition jsonToPostgreSQLGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.jsonToPostgreSQL_groupName,
-        groupBasePath: SettingConstants.jsonToPostgreSQL_groupName,
+    public static readonly GroupSettingDefinition SqliteGroupSettingsDefinition = new GroupSettingDefinition(
+        groupName: SettingConstants.Sqlite_groupName,
+        groupBasePath: SettingConstants.Sqlite_groupName,
         settingNames:
 
         [
-            SettingConstants.jsonToPostgreSQL_connectionString,
-            SettingConstants.jsonToPostgreSQL_enableBuffering
-        ]
-    );
-
-    public static readonly GroupSettingDefinition JsonToSQLiteGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.JsonToSQLite_groupName,
-        groupBasePath: SettingConstants.JsonToSQLite_groupName,
-        settingNames:
-
-        [
-            SettingConstants.JsonToSQLite_connectionString,
-            SettingConstants.JsonToSQLite_dbPath,
-            SettingConstants.JsonToSQLite_enableBuffering
+            SettingConstants.Sqlite_busyTimeoutMs,
+            SettingConstants.Sqlite_connectionString,
+            SettingConstants.Sqlite_dbPath,
+            SettingConstants.Sqlite_journalMode
         ]
     );
 
@@ -105,9 +83,6 @@ public static class LookupDictionaries
             SettingConstants.Metrics_enabled,
             SettingConstants.Metrics_captureIntervalSeconds,
             SettingConstants.Metrics_applicationId,
-            SettingConstants.MetricsPostgreSQL_connectionString,
-            SettingConstants.MetricsPostgreSQL_tableName,
-            SettingConstants.MetricsPostgreSQL_autoCreateTable,
             SettingConstants.Metrics_relayEnabled,
             SettingConstants.Metrics_relayTopN,
             SettingConstants.Metrics_pipelineEnabled,

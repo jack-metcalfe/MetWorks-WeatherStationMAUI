@@ -1,7 +1,7 @@
 ﻿namespace MetWorks.Interfaces;
 
 /// <summary>
-/// Marker interface for resilient loggers that support readiness.
+/// Marker interface for file-based loggers.
 /// </summary>
 public interface ILoggerFile : ILogger
 {

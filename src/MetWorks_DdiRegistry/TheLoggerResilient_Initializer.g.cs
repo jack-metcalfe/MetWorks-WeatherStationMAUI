@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Assignments.Initializer
-// Generated On:        2026-02-12T05:35:58.8534477Z
+// Generated On:        2026-02-15T03:41:55.5395261Z
 #nullable enable
 using System.Threading.Tasks;
 
@@ -31,7 +31,7 @@ namespace MetWorks.ServiceRegistry
                 iLoggerFile: registry.GetTheLoggerFile(),
                 iLoggerSQLite: registry.GetTheLoggerSQLite(),
                 maxBufferSize: 1000,
-                cancellationToken: registry.GetRootCancellationTokenSource().Token
+                cancellationToken: registry.GetTheRootCancellationTokenSource().Token
             ).ConfigureAwait(false);
         }
     }

@@ -12,15 +12,21 @@ using ILogEventSink = Serilog.Core.ILogEventSink;
 public sealed class LoggerSQLite : ILoggerSQLite
 {
     public Task<bool> InitializeAsync(
-        ILoggerFile iLoggerFile,
+        ILogger iLogger,
         ISettingRepository iSettingRepository,
         IInstanceIdentifier iInstanceIdentifier,
-        CancellationToken cancellationToken = default
+        SqliteWriteCoordinator sqliteWriteCoordinator,
+        MetWorks.Persistence.Logging.ILoggingDatabaseReadiness loggingDatabaseReadiness,
+        MetWorks.Persistence.Logging.ILoggerSqliteRepository loggerSqliteRepository,
+        CancellationToken cancellationToken
     )
     {
-        ArgumentNullException.ThrowIfNull(iLoggerFile);
+        ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
+        ArgumentNullException.ThrowIfNull(sqliteWriteCoordinator);
+        ArgumentNullException.ThrowIfNull(loggingDatabaseReadiness);
+        ArgumentNullException.ThrowIfNull(loggerSqliteRepository);
 
         if (_isInitialized)
             throw new InvalidOperationException($"{nameof(LoggerSQLite)} is already initialized.");
@@ -29,17 +35,6 @@ public sealed class LoggerSQLite : ILoggerSQLite
 
         try
         {
-            var dbPath = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildSettingPath(
-                    SettingConstants.LoggerSQLite_dbPath
-                )
-            );
-
-            var appDataDir = new DefaultPlatformPaths().AppDataDirectory;
-            var resolvedDbPath = Path.IsPathRooted(dbPath)
-                ? dbPath
-                : Path.Combine(appDataDir, dbPath);
-
             var tableName = iSettingRepository.GetValueOrDefault<string>(
                 LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildSettingPath(
                     SettingConstants.LoggerSQLite_tableName
@@ -58,7 +53,6 @@ public sealed class LoggerSQLite : ILoggerSQLite
                 )
             );
 
-            _dbPath = resolvedDbPath;
             _tableName = tableName;
 
             var loggerCfg = new LoggerConfiguration()
@@ -75,7 +69,7 @@ public sealed class LoggerSQLite : ILoggerSQLite
             }
 
             _iLogger = loggerCfg
-                .WriteTo.Sink(new SqliteSink(_dbPath, _tableName, autoCreateTable, SetHealth))
+                .WriteTo.Sink(new SqliteSink("logger_sqlite_log", autoCreateTable, sqliteWriteCoordinator, loggingDatabaseReadiness, loggerSqliteRepository, SetHealth))
                 .CreateLogger();
 
             _isInitialized = true;
@@ -92,9 +86,6 @@ public sealed class LoggerSQLite : ILoggerSQLite
     bool _isInitialized = false;
     Logger? _iLogger = null;
     Logger ILogger => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
-
-    string? _dbPath;
-    public string DbPath => NullPropertyGuard.Get(_isInitialized, _dbPath, nameof(DbPath));
 
     string? _tableName;
     public string TableName => NullPropertyGuard.Get(_isInitialized, _tableName, nameof(TableName));
@@ -255,9 +246,11 @@ public sealed class LoggerSQLite : ILoggerSQLite
 
     sealed class SqliteSink : ILogEventSink, IDisposable
     {
-        readonly string _dbPath;
         readonly string _tableName;
         readonly bool _autoCreateTable;
+        readonly MetWorks.Common.Utility.SqliteWriteCoordinator _writeCoordinator;
+        readonly MetWorks.Persistence.Logging.ILoggingDatabaseReadiness _loggingDatabaseReadiness;
+        readonly MetWorks.Persistence.Logging.ILoggerSqliteRepository _loggerSqliteRepository;
         readonly Action<bool>? _setHealth;
         readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { WriteIndented = false };
 
@@ -267,81 +260,79 @@ public sealed class LoggerSQLite : ILoggerSQLite
 
         static readonly Regex ValidIdentifier = new(@"^[A-Za-z0-9_]+$");
 
-        public SqliteSink(string dbPath, string tableName, bool autoCreateTable, Action<bool>? setHealth = null)
+        public SqliteSink(
+            string tableName,
+            bool autoCreateTable,
+            MetWorks.Common.Utility.SqliteWriteCoordinator writeCoordinator,
+            MetWorks.Persistence.Logging.ILoggingDatabaseReadiness loggingDatabaseReadiness,
+            MetWorks.Persistence.Logging.ILoggerSqliteRepository loggerSqliteRepository,
+            Action<bool>? setHealth = null)
         {
-            if (string.IsNullOrWhiteSpace(dbPath))
-                throw new ArgumentException("dbPath is required.", nameof(dbPath));
-
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new ArgumentException("tableName is required.", nameof(tableName));
 
             if (!ValidIdentifier.IsMatch(tableName))
                 throw new ArgumentException("Table name contains invalid characters. Only letters, digits and underscore are allowed.", nameof(tableName));
 
-            _dbPath = dbPath;
             _tableName = tableName;
             _autoCreateTable = autoCreateTable;
+            _writeCoordinator = writeCoordinator ?? throw new ArgumentNullException(nameof(writeCoordinator));
+            _loggingDatabaseReadiness = loggingDatabaseReadiness ?? throw new ArgumentNullException(nameof(loggingDatabaseReadiness));
+            _loggerSqliteRepository = loggerSqliteRepository ?? throw new ArgumentNullException(nameof(loggerSqliteRepository));
             _setHealth = setHealth;
-
-            if (_autoCreateTable)
-            {
-                _ensureTask = Task.Run(() => EnsureTableWithRetryAsync(_cts.Token));
-            }
         }
 
         public void Emit(LogEvent logEvent)
         {
             try
             {
-                using var conn = new SqliteConnection(BuildConnectionString(_dbPath));
-                conn.Open();
-
-                using var cmd = conn.CreateCommand();
-                cmd.CommandText = $@"
-INSERT INTO ""{_tableName}"" (timestamp_utc, level, message, exception, properties, installation_id)
-VALUES ($ts, $level, $message, $exception, json($properties), $installation_id);";
-
-                cmd.Parameters.AddWithValue("$ts", logEvent.Timestamp.UtcDateTime.ToString("O"));
-                cmd.Parameters.AddWithValue("$level", logEvent.Level.ToString());
-
-                var rendered = logEvent.RenderMessage();
-                cmd.Parameters.AddWithValue("$message", rendered ?? string.Empty);
-                cmd.Parameters.AddWithValue("$exception", logEvent.Exception?.ToString() ?? (object)DBNull.Value);
-
-                string? installationIdStr = null;
-                if (logEvent.Properties.TryGetValue("InstallationId", out var installProp))
+                _writeCoordinator.RunAsync(async token =>
                 {
-                    try
+                    var rendered = logEvent.RenderMessage();
+
+                    string? installationIdStr = null;
+                    if (logEvent.Properties.TryGetValue("InstallationId", out var installProp))
                     {
-                        if (installProp is Serilog.Events.ScalarValue sv)
+                        try
                         {
-                            if (sv.Value is Guid g) installationIdStr = g.ToString();
-                            else if (sv.Value is string s) installationIdStr = s;
-                            else installationIdStr = sv.ToString()?.Trim('"');
+                            if (installProp is Serilog.Events.ScalarValue sv)
+                            {
+                                if (sv.Value is Guid g) installationIdStr = g.ToString();
+                                else if (sv.Value is string s) installationIdStr = s;
+                                else installationIdStr = sv.ToString()?.Trim('"');
+                            }
+                            else
+                            {
+                                installationIdStr = installProp.ToString()?.Trim('"');
+                            }
                         }
-                        else
-                        {
-                            installationIdStr = installProp.ToString()?.Trim('"');
-                        }
+                        catch { installationIdStr = installProp.ToString()?.Trim('"'); }
                     }
-                    catch { installationIdStr = installProp.ToString()?.Trim('"'); }
-                }
 
-                var props = PropertiesToDictionary(logEvent);
-                if (props.ContainsKey("InstallationId")) props.Remove("InstallationId");
-                var propsJson = JsonSerializer.Serialize(props, _jsonOptions);
-                cmd.Parameters.AddWithValue("$properties", propsJson);
+                    var props = PropertiesToDictionary(logEvent);
+                    if (props.ContainsKey("InstallationId")) props.Remove("InstallationId");
+                    var propsJson = JsonSerializer.Serialize(props, _jsonOptions);
 
-                if (!string.IsNullOrWhiteSpace(installationIdStr) && Guid.TryParse(installationIdStr, out var instGuid))
-                {
-                    cmd.Parameters.AddWithValue("$installation_id", instGuid.ToString());
-                }
-                else
-                {
-                    cmd.Parameters.AddWithValue("$installation_id", DBNull.Value);
-                }
+                    if (_autoCreateTable)
+                    {
+                        await _loggingDatabaseReadiness.EnsureReadyAsync(token).ConfigureAwait(false);
+                    }
 
-                cmd.ExecuteNonQuery();
+                    var installationId = (!string.IsNullOrWhiteSpace(installationIdStr) && Guid.TryParse(installationIdStr, out var instGuid))
+                        ? instGuid.ToString()
+                        : null;
+
+                    await _loggerSqliteRepository.InsertAsync(
+                        _tableName,
+                        new MetWorks.Persistence.Logging.LoggerSqliteLogEvent(
+                            TimestampUtc: logEvent.Timestamp.UtcDateTime,
+                            Level: logEvent.Level.ToString(),
+                            Message: rendered ?? string.Empty,
+                            Exception: logEvent.Exception?.ToString(),
+                            PropertiesJson: propsJson,
+                            InstallationId: installationId),
+                        token).ConfigureAwait(false);
+                }, CancellationToken.None).GetAwaiter().GetResult();
 
                 try { _setHealth?.Invoke(true); } catch { }
             }
@@ -349,6 +340,7 @@ VALUES ($ts, $level, $message, $exception, json($properties), $installation_id);
             {
                 try { _setHealth?.Invoke(false); } catch { }
                 try { SelfLog.WriteLine("SqliteSink.Emit failed: {0}", ex.Message); } catch { }
+                try { SysDiagDebug.WriteLine($"SqliteSink.Emit failed: {ex}"); } catch { }
             }
         }
 
@@ -361,68 +353,6 @@ VALUES ($ts, $level, $message, $exception, json($properties), $installation_id);
                 catch { dict[kv.Key] = string.Empty; }
             }
             return dict;
-        }
-
-        void EnsureTable()
-        {
-            using var conn = new SqliteConnection(BuildConnectionString(_dbPath));
-            conn.Open();
-
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = $@"
-CREATE TABLE IF NOT EXISTS ""{_tableName}"" (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    timestamp_utc TEXT NOT NULL,
-    level TEXT NOT NULL,
-    message TEXT,
-    exception TEXT,
-    properties TEXT,
-    installation_id TEXT NULL
-);
-CREATE INDEX IF NOT EXISTS idx_{_tableName}_timestamp_utc ON ""{_tableName}""(timestamp_utc);
-CREATE INDEX IF NOT EXISTS idx_{_tableName}_installation_id ON ""{_tableName}""(installation_id);
-";
-            cmd.ExecuteNonQuery();
-        }
-
-        async Task EnsureTableWithRetryAsync(CancellationToken token)
-        {
-            var delay = TimeSpan.FromSeconds(5);
-            while (!token.IsCancellationRequested)
-            {
-                try
-                {
-                    EnsureTable();
-                    try { _setHealth?.Invoke(true); } catch { }
-                    try { SelfLog.WriteLine("SqliteSink: EnsureTable succeeded for table {0}", _tableName); } catch { }
-                    return;
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    try { _setHealth?.Invoke(false); } catch { }
-                    try { SelfLog.WriteLine("SqliteSink: EnsureTable failed: {0}. Retrying in {1}s", ex.Message, delay.TotalSeconds); } catch { }
-
-                    try { await Task.Delay(delay, token).ConfigureAwait(false); }
-                    catch (OperationCanceledException) { return; }
-
-                    delay = TimeSpan.FromSeconds(Math.Min(60, delay.TotalSeconds * 2));
-                }
-            }
-        }
-
-        static string BuildConnectionString(string dbPath)
-        {
-            var appDataDir = new DefaultPlatformPaths().AppDataDirectory;
-            var resolvedDbPath = Path.IsPathRooted(dbPath)
-                ? dbPath
-                : Path.Combine(appDataDir, dbPath);
-
-            return new SqliteConnectionStringBuilder
-            {
-                DataSource = resolvedDbPath,
-                Mode = SqliteOpenMode.ReadWriteCreate,
-                Cache = SqliteCacheMode.Shared
-            }.ToString();
         }
 
         public void Dispose()
@@ -445,3 +375,4 @@ CREATE INDEX IF NOT EXISTS idx_{_tableName}_installation_id ON ""{_tableName}""(
 
     #endregion
 }
+

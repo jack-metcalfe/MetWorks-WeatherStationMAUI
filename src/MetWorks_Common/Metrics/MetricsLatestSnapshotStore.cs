@@ -10,7 +10,8 @@ public sealed class MetricsLatestSnapshotStore : IMetricsLatestSnapshot
         JsonPayload: string.Empty,
         PersistStatus: "not_attempted",
         PersistAttemptUtc: null,
-        PersistErrorMessage: null);
+        PersistErrorMessage: null
+    );
 
     MetricsStructuredSnapshot? _structured;
 
@@ -18,10 +19,13 @@ public sealed class MetricsLatestSnapshotStore : IMetricsLatestSnapshot
 
     public MetricsStructuredSnapshot? CurrentStructured => Volatile.Read(ref _structured);
 
-    public void RecordCaptured(DateTime capturedUtc, int intervalSeconds, string jsonPayload)
+    public void RecordCaptured(
+        DateTime capturedUtc, 
+        int intervalSeconds, 
+        string jsonPayload
+    )
     {
-        if (string.IsNullOrWhiteSpace(jsonPayload))
-            return;
+        if (string.IsNullOrWhiteSpace(jsonPayload)) return;
 
         var parsePayload = jsonPayload;
         if (parsePayload.StartsWith("METRICS ", StringComparison.Ordinal))

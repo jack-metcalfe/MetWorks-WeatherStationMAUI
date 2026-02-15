@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MetWorks_Data_Sqlite\MetWorks_Data_Sqlite.csproj" />
+    <ProjectReference Include="..\MetWorks_InstanceIdentifier\MetWorks_InstanceIdentifier.csproj" />
+    <ProjectReference Include="..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
+    <ProjectReference Include="..\MetWorks_Resource_Store\MetWorks_Resource_Store.csproj" />
+  </ItemGroup>
+
+</Project>

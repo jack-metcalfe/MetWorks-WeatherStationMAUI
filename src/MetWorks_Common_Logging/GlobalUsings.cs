@@ -7,13 +7,10 @@ global using System.Text.RegularExpressions;
 global using System.Threading;
 global using System.Threading.Tasks;
 
-global using MetWorks.Interfaces;
 global using MetWorks.Common.Utility;
 global using MetWorks.Constants;
-
-global using Microsoft.Data.Sqlite;
-
-global using Npgsql;
+global using MetWorks.Interfaces;
+global using MetWorks.Persistence.Logging;
 
 global using Serilog;
 global using Serilog.Core;

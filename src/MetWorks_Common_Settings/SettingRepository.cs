@@ -61,13 +61,15 @@ public class SettingRepository : ISettingRepository, MetWorks.Interfaces.IServic
     /// Async initialization for DI. Accepts logger, definitions, and override provider.
     /// </summary>
     public async Task<bool> InitializeAsync(
-        ILoggerStub iLoggerStub,
+        ILogger iLogger,
         ISettingProvider iSettingProvider
     )
     {
+        ArgumentNullException.ThrowIfNull(iLogger);
+        ArgumentNullException.ThrowIfNull(iSettingProvider);
         try
         {
-            _iLogger = iLoggerStub;
+            _iLogger = iLogger;
             _iSettingProvider = iSettingProvider;
             _iEventRelayPath = new EventRelayPath();
         }

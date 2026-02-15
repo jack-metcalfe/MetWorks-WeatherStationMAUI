@@ -26,7 +26,7 @@ public enum DataStatusEnum
     Retransformed,
 
     /// <summary>
-    /// Successfully saved to PostgreSQL database.
+    /// Successfully saved to database.
     /// </summary>
     Persisted,
 

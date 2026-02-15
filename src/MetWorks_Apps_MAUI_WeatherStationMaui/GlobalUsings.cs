@@ -16,6 +16,7 @@ global using MetWorks.Apps.Maui.WeatherStationMaui.DeviceSelection.Overrides;
 global using MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;
 global using MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages;
 global using MetWorks.Apps.MAUI.WeatherStationMaui.Pages.HostPages;
+global using MetWorks.Apps.MAUI.WeatherStationMaui.Pages.Settings;
 global using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
 global using MetWorks.Common.Metrics;
 global using MetWorks.Common.Settings;
@@ -37,5 +38,3 @@ global using YamlDotNet.RepresentationModel;
 
 global using SystemTimer = System.Timers.Timer;
 global using ThreadingTimer = System.Threading.Timer;
-
-global using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;

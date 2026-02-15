@@ -3,22 +3,6 @@
     value: "50222"
 
 definitions:
-  - path: /services/jsonToPostgreSQL/connectionString
-    defaultValue: "Host=192.168.8.9;Port=5432;Database=weather;Username=weather;Password=password"
-    description: "Connection string for PostgreSQL database"
-    expectedValueType: "String"
-    allowableValues:
-    isSecret: true
-
-  - path: /services/jsonToPostgreSQL/enableBuffering
-    defaultValue: "false"
-    description: "Enable buffering for PostgreSQL database"
-    expectedValueType: "Boolean"
-    allowableValues:
-      - true
-      - false
-    isSecret: false
-
   - path: /services/instance/installationId
     defaultValue: ""
     description: "Per-installation stable identifier (GUID). Generated on first run and persisted locally."
@@ -27,7 +11,15 @@ definitions:
     isEditable: false
     isSecret: false
 
-  - path: /services/jsonToSQLite/connectionString
+  - path: /services/sqlite/busyTimeoutMs
+    defaultValue: "5000"
+    description: "SQLite busy_timeout in milliseconds for write operations"
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/sqlite/connectionString
     defaultValue: ""
     description: "SQLite connection string (leave blank to use dbPath + default connection string builder)."
     expectedValueType: "String"
@@ -35,7 +27,7 @@ definitions:
     isEditable: true
     isSecret: true
 
-  - path: /services/jsonToSQLite/dbPath
+  - path: /services/sqlite/dbPath
     defaultValue: "metworks.sqlite"
     description: "SQLite database file path (relative paths are relative to the app's data directory)."
     expectedValueType: "String"
@@ -43,13 +35,17 @@ definitions:
     isEditable: true
     isSecret: false
 
-  - path: /services/jsonToSQLite/enableBuffering
-    defaultValue: "false"
-    description: "Enable buffering for SQLite writes when the database is unavailable (e.g., locked or I/O errors)."
-    expectedValueType: "Boolean"
+  - path: /services/sqlite/journalMode
+    defaultValue: "WAL"
+    description: "SQLite journal_mode (e.g., WAL, DELETE)"
+    expectedValueType: "String"
     allowableValues:
-      - true
-      - false
+      - "WAL"
+      - "DELETE"
+      - "TRUNCATE"
+      - "PERSIST"
+      - "MEMORY"
+      - "OFF"
     isEditable: true
     isSecret: false
 
@@ -116,53 +112,11 @@ definitions:
       - "Minute"
     isSecret: false
 
-  - path: /services/loggerPostgreSQL/autoCreateTable
-    defaultValue: true
-    description: "Auto create table for PostgreSQL logging"
-    expectedValueType: "Boolean"
-    allowableValues: []
-    isSecret: false
-
-  - path: "/services/loggerPostgreSQL/connectionString"
-    defaultValue: "Host=192.168.8.9;Port=5432;Database=weather;Username=weather;Password=Sylvia3927"
-    description: "Logging Connection string for PostgreSQL database"
-    expectedValueType: "String"
-    allowableValues: []
-    isSecret: true
-
-  - path: /services/loggerPostgreSQL/minimumLevel
-    defaultValue: "Information"
-    description: "Minimum log level for PostgreSQL logging"
-    expectedValueType: "String"
-    allowableValues:
-      - "Verbose"
-      - "Debug"
-      - "Information"
-      - "Warning"
-      - "Error"
-      - "Fatal"
-    isSecret: false
-
-  - path: /services/loggerPostgreSQL/tableName
-    defaultValue: "log"
-    description: "Table name for PostgreSQL logging"
-    expectedValueType: "String"
-    allowableValues: []
-    isSecret: false
-
   - path: /services/loggerSQLite/autoCreateTable
     defaultValue: true
     description: "Auto create table for SQLite logging"
     expectedValueType: "Boolean"
     allowableValues: []
-    isSecret: false
-
-  - path: /services/loggerSQLite/dbPath
-    defaultValue: "metworks-log.sqlite"
-    description: "SQLite database file path for logging (relative paths are relative to the app's data directory)"
-    expectedValueType: "String"
-    allowableValues: []
-    isEditable: true
     isSecret: false
 
   - path: /services/loggerSQLite/minimumLevel
@@ -195,7 +149,7 @@ definitions:
 
   - path: /services/metrics/autoCreateTable
     defaultValue: "true"
-    description: "Auto create table for PostgreSQL metrics summaries"
+    description: "Auto create table for metrics summaries"
     expectedValueType: "Boolean"
     allowableValues: []
     isEditable: true
@@ -211,7 +165,7 @@ definitions:
 
   - path: /services/metrics/connectionString
     defaultValue: "Host=192.168.8.9;Port=5432;Database=weather;Username=weather;Password=password"
-    description: "Metrics persistence connection string for PostgreSQL database"
+    description: "Metrics persistence connection string for database"
     expectedValueType: "String"
     allowableValues: []
     isEditable: true
@@ -283,7 +237,7 @@ definitions:
 
   - path: /services/metrics/tableName
     defaultValue: "metrics_summary"
-    description: "Table name for PostgreSQL metrics summaries"
+    description: "Table name for metrics summaries"
     expectedValueType: "String"
     allowableValues: []
     isEditable: true

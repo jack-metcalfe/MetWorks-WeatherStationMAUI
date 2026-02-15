@@ -5,10 +5,7 @@ using MetWorks.Common.Metrics;
 public sealed class MetricsSummaryIngestor : ServiceBase, IMetricsSummaryPersister
 {
     const int DefaultSchemaVersion = 1;
-
-    string _connectionString = string.Empty;
-    string _dbPath = string.Empty;
-    string _tableName = "metrics_summary";
+    string _tableName = string.Empty;
     bool _autoCreateTable;
 
     Guid _installationIdGuid;
@@ -16,24 +13,31 @@ public sealed class MetricsSummaryIngestor : ServiceBase, IMetricsSummaryPersist
 
     int _tableEnsured;
 
+    MetWorks.Persistence.Metrics.IMetricsDatabaseReadiness? _databaseReadiness;
+    MetWorks.Persistence.Metrics.IMetricsSummaryRepository? _repository;
+
 
     public Task<bool> InitializeAsync(
-        ILoggerResilient iLoggerResilient,
+        ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         IInstanceIdentifier iInstanceIdentifier,
         IMetricsLatestSnapshot iMetricsLatestSnapshot,
+        MetWorks.Persistence.Metrics.IMetricsDatabaseReadiness metricsDatabaseReadiness,
+        MetWorks.Persistence.Metrics.IMetricsSummaryRepository metricsSummaryRepository,
         CancellationToken externalCancellation,
         ProvenanceTracker provenanceTracker
     )
     {
-        ArgumentNullException.ThrowIfNull(iLoggerResilient);
+        ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
+        ArgumentNullException.ThrowIfNull(metricsDatabaseReadiness);
+        ArgumentNullException.ThrowIfNull(metricsSummaryRepository);
 
         InitializeBase(
-            iLoggerResilient.ForContext(GetType()),
+            iLogger.ForContext(GetType()),
             iSettingRepository,
             iEventRelayBasic,
             externalCancellation,
@@ -42,26 +46,8 @@ public sealed class MetricsSummaryIngestor : ServiceBase, IMetricsSummaryPersist
 
         _ = iMetricsLatestSnapshot;
 
-        _connectionString = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.JsonToSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.JsonToSQLite_connectionString));
-
-        _dbPath = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.JsonToSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.JsonToSQLite_dbPath));
-
-        if (string.IsNullOrWhiteSpace(_connectionString) && !string.IsNullOrWhiteSpace(_dbPath))
-        {
-            var appDataDir = new DefaultPlatformPaths().AppDataDirectory;
-            var resolvedDbPath = Path.IsPathRooted(_dbPath)
-                ? _dbPath
-                : Path.Combine(appDataDir, _dbPath);
-
-            _connectionString = new SqliteConnectionStringBuilder
-            {
-                DataSource = resolvedDbPath,
-                Mode = SqliteOpenMode.ReadWriteCreate,
-                Cache = SqliteCacheMode.Shared
-            }.ToString();
-        }
+        _databaseReadiness = metricsDatabaseReadiness;
+        _repository = metricsSummaryRepository;
 
         _tableName = iSettingRepository.GetValueOrDefault<string>(
             LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_tableName));
@@ -96,118 +82,61 @@ public sealed class MetricsSummaryIngestor : ServiceBase, IMetricsSummaryPersist
     {
         await Ready.ConfigureAwait(false);
 
-        if (string.IsNullOrWhiteSpace(_connectionString)) return;
         if (string.IsNullOrWhiteSpace(jsonMetricsSummary)) return;
 
         cancellationToken.ThrowIfCancellationRequested();
 
+        var readiness = _databaseReadiness;
+        if (readiness is null)
+            throw new InvalidOperationException($"{nameof(MetWorks.Persistence.Metrics.IMetricsDatabaseReadiness)} is not initialized.");
+
+        var repository = _repository;
+        if (repository is null)
+            throw new InvalidOperationException($"{nameof(MetWorks.Persistence.Metrics.IMetricsSummaryRepository)} is not initialized.");
+
         try
         {
-            await using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
-
             if (_autoCreateTable)
-                await EnsureTableOnceAsync(conn, cancellationToken).ConfigureAwait(false);
+                await EnsureTableOnceAsync(readiness, cancellationToken).ConfigureAwait(false);
 
-            await using var cmd = conn.CreateCommand();
-            cmd.CommandText = $@"
-INSERT INTO ""{_tableName}"" (
-    comb_id,
-    installation_id,
-    captured_utc,
-    capture_interval_seconds,
-    application_id,
-    schema_version,
-    json_metrics_summary
-)
-VALUES (
-    $comb_id,
-    $installation_id,
-    $captured_utc,
-    $capture_interval_seconds,
-    $application_id,
-    $schema_version,
-    $json_metrics_summary
-);";
-
-            cmd.Parameters.AddWithValue("$comb_id", IdGenerator.CreateCombGuid().ToString());
-            cmd.Parameters.AddWithValue("$installation_id", _installationIdGuid != Guid.Empty ? _installationIdGuid.ToString() : DBNull.Value);
-            cmd.Parameters.AddWithValue("$captured_utc", capturedUtc.ToUniversalTime().ToString("O"));
-            cmd.Parameters.AddWithValue("$capture_interval_seconds", captureIntervalSeconds);
-            cmd.Parameters.AddWithValue("$application_id", _applicationIdGuid != Guid.Empty ? _applicationIdGuid.ToString() : DBNull.Value);
-            cmd.Parameters.AddWithValue("$schema_version", schemaVersion <= 0 ? DefaultSchemaVersion : schemaVersion);
-            cmd.Parameters.AddWithValue("$json_metrics_summary", jsonMetricsSummary);
-
-            await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-
+            await repository.InsertAsync(
+                new MetWorks.Persistence.Metrics.MetricsSummaryInsertRow(
+                    Table: _tableName,
+                    CombId: IdGenerator.CreateCombGuid().ToString(),
+                    InstallationId: _installationIdGuid == Guid.Empty ? null : _installationIdGuid.ToString(),
+                    CapturedUtc: capturedUtc,
+                    CaptureIntervalSeconds: captureIntervalSeconds,
+                    ApplicationId: _applicationIdGuid == Guid.Empty ? null : _applicationIdGuid.ToString(),
+                    SchemaVersion: schemaVersion <= 0 ? DefaultSchemaVersion : schemaVersion,
+                    JsonMetricsSummary: jsonMetricsSummary),
+                cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
-        catch (SqliteException ex)
-        {
-            ILogger.Warning($"MetricsSummaryIngestorSqlite write failed: {ex.Message} (code={ex.SqliteErrorCode})");
-        }
         catch (InvalidOperationException ex)
+        {
+            ILogger.Warning($"MetricsSummaryIngestorSqlite write failed: {ex.Message}");
+        }
+        catch (Exception ex)
         {
             ILogger.Warning($"MetricsSummaryIngestorSqlite write failed: {ex.Message}");
         }
     }
 
-    async Task EnsureTableOnceAsync(SqliteConnection conn, CancellationToken cancellationToken)
+    async Task EnsureTableOnceAsync(MetWorks.Persistence.Metrics.IMetricsDatabaseReadiness readiness, CancellationToken cancellationToken)
     {
         if (Interlocked.CompareExchange(ref _tableEnsured, 1, 0) != 0) return;
 
         try
         {
-            await EnsureTableAsync(conn, cancellationToken).ConfigureAwait(false);
+            await readiness.EnsureReadyAsync(_tableName, cancellationToken).ConfigureAwait(false);
         }
         catch
         {
             Interlocked.Exchange(ref _tableEnsured, 0);
             throw;
         }
-    }
-
-    async Task EnsureTableAsync(SqliteConnection conn, CancellationToken cancellationToken)
-    {
-        var safeTableName = _tableName;
-        if (!IsSafeIdentifier(safeTableName))
-            throw new InvalidOperationException($"Invalid table name '{safeTableName}'.");
-
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = $@"
-CREATE TABLE IF NOT EXISTS ""{safeTableName}""
-(
-    comb_id TEXT PRIMARY KEY,
-    installation_id TEXT NULL,
-    captured_utc TEXT NOT NULL,
-    capture_interval_seconds INTEGER NOT NULL,
-    application_id TEXT NULL,
-    schema_version INTEGER NOT NULL,
-    json_metrics_summary TEXT NOT NULL,
-    database_received_utc_timestampz TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-);
-CREATE INDEX IF NOT EXISTS idx_{safeTableName}_captured_utc ON ""{safeTableName}""(captured_utc);
-CREATE INDEX IF NOT EXISTS idx_{safeTableName}_installation_id ON ""{safeTableName}""(installation_id);
-";
-        await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    static bool IsSafeIdentifier(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return false;
-        for (var i = 0; i < value.Length; i++)
-        {
-            var c = value[i];
-            var ok =
-                (c >= 'a' && c <= 'z') ||
-                (c >= 'A' && c <= 'Z') ||
-                (c >= '0' && c <= '9') ||
-                c == '_';
-            if (!ok) return false;
-        }
-        return true;
     }
 }

@@ -10,10 +10,10 @@ public class UnitsOfMeasureInitializer
     {
     }
     public async Task<bool> InitializeAsync(
-        ILoggerResilient iLoggerResilient
+        ILogger iLogger
     )
     {
-        _iLogger = iLoggerResilient ?? throw new ArgumentNullException(nameof(iLoggerResilient));
+        _iLogger = iLogger ?? throw new ArgumentNullException(nameof(iLogger));
         try
         {
             _iLogger.Information("📐 Registering RedStar.Amounts units...");

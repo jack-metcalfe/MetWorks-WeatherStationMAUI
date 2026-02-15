@@ -8,7 +8,6 @@
 		<Deterministic>true</Deterministic>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Data.Sqlite" />
 		<PackageReference Include="Npgsql" />
 		<PackageReference Include="Serilog" />
 		<PackageReference Include="Serilog.Sinks.File" />
@@ -19,5 +18,6 @@
 		<ProjectReference Include="..\MetWorks_Common\MetWorks_Common.csproj" />
 		<ProjectReference Include="..\MetWorks_Common_Utility\MetWorks_Common_Utility.csproj" />
 		<ProjectReference Include="..\MetWorks_Constants\MetWorks_Constants.csproj" />
+		<ProjectReference Include="..\MetWorks_Persistence\MetWorks_Persistence.csproj" />
 	</ItemGroup>
 </Project>

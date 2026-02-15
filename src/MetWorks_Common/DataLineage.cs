@@ -17,7 +17,7 @@ public record DataLineage
     public Guid? TransformedReadingId { get; init; }
 
     /// <summary>
-    /// Database record ID (if successfully persisted to PostgreSQL).
+    /// Database record ID (if successfully persisted).
     /// </summary>
     public Guid? DatabaseRecordId { get; init; }
 

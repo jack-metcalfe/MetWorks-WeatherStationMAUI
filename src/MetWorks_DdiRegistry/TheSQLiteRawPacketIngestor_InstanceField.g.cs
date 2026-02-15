@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Instance.Field
-// Generated On:        2026-02-12T05:35:58.8534477Z
+// Generated On:        2026-02-15T03:41:55.5395261Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry

@@ -9,18 +9,18 @@ public sealed class TempestRestClient : ServiceBase, ITempestRestClient
     public TempestRestClient() { }
 
     public Task<bool> InitializeAsync(
-        ILoggerResilient iLoggerResilient,
+        ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         CancellationToken externalCancellation
     )
     {
-        ArgumentNullException.ThrowIfNull(iLoggerResilient);
+        ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
 
         InitializeBase(
-            iLoggerResilient.ForContext(GetType()),
+            iLogger.ForContext(GetType()),
             iSettingRepository,
             iEventRelayBasic,
             externalCancellation

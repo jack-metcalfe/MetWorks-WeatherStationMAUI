@@ -1,4 +1,7 @@
-﻿namespace MetWorks.Ingest.SQLite.Rollups;
+﻿using MetWorks.Persistence.Rollups;
+
+namespace MetWorks.Ingest.SQLite.Rollups;
+
 public sealed class ObservationRollupWorker : ServiceBase
 {
     bool _isDatabaseAvailable = false;
@@ -13,109 +16,47 @@ public sealed class ObservationRollupWorker : ServiceBase
     Timer? _timer;
     Timer? _reconnectionTimer;
 
-    string _connectionString = string.Empty;
-    string _dbPath = string.Empty;
-    string _installationId = string.Empty;
-
-    RollupWatermarkStore? _watermarkStore;
+    IRollupsDatabaseReadiness? _rollupsDatabaseReadiness;
+    IObservationRollupRepository? _observationRollupRepository;
 
     public ObservationRollupWorker()
     {
     }
 
     public async Task<bool> InitializeAsync(
-        ILoggerResilient iLoggerResilient,
+        ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
-        IInstanceIdentifier iInstanceIdentifier,
+        IRollupsDatabaseReadiness rollupsDatabaseReadiness,
+        IObservationRollupRepository observationRollupRepository,
         CancellationToken externalCancellation = default,
         ProvenanceTracker? provenanceTracker = null)
     {
-        ArgumentNullException.ThrowIfNull(iLoggerResilient);
+        ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
-        ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
+        ArgumentNullException.ThrowIfNull(rollupsDatabaseReadiness);
+        ArgumentNullException.ThrowIfNull(observationRollupRepository);
 
-        iLoggerResilient.Information($"ObservationRollupWorker(SQLite).InitializeAsync() starting - thread={Environment.CurrentManagedThreadId}");
+        iLogger.Information($"ObservationRollupWorker(SQLite).InitializeAsync() starting - thread={Environment.CurrentManagedThreadId}");
 
         try
         {
             InitializeBase(
-                iLoggerResilient.ForContext(GetType()),
+                iLogger.ForContext(GetType()),
                 iSettingRepository,
                 iEventRelayBasic,
                 externalCancellation,
                 provenanceTracker
             );
 
-            _connectionString = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.JsonToSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.JsonToSQLite_connectionString));
+            _rollupsDatabaseReadiness = rollupsDatabaseReadiness;
+            _observationRollupRepository = observationRollupRepository;
 
-            _dbPath = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.JsonToSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.JsonToSQLite_dbPath));
-
-            _installationId = iInstanceIdentifier.GetOrCreateInstallationId();
-            if (string.IsNullOrWhiteSpace(_installationId))
-            {
-                ILogger.Error("Installation id is empty. Aborting rollup worker initialization.");
-                return false;
-            }
-
-            _watermarkStore = new RollupWatermarkStore(_installationId);
-
-            if (string.IsNullOrWhiteSpace(_connectionString))
-            {
-                if (string.IsNullOrWhiteSpace(_dbPath))
-                {
-                    ILogger.Warning("⚠️ SQLite dbPath not configured. ObservationRollupWorker will not start.");
-                    return true;
-                }
-
-                var appDataDir = new DefaultPlatformPaths().AppDataDirectory;
-                var resolvedDbPath = Path.IsPathRooted(_dbPath)
-                    ? _dbPath
-                    : Path.Combine(appDataDir, _dbPath);
-
-                TryMigrateDbFromBaseDirectory(_dbPath, resolvedDbPath);
-
-                var builder = new SqliteConnectionStringBuilder
-                {
-                    DataSource = resolvedDbPath,
-                    Mode = SqliteOpenMode.ReadWriteCreate,
-                    Cache = SqliteCacheMode.Shared
-                };
-
-                _connectionString = builder.ToString();
-            }
-
-    void TryMigrateDbFromBaseDirectory(string configuredDbPath, string resolvedDbPath)
-    {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(configuredDbPath)) return;
-            if (Path.IsPathRooted(configuredDbPath)) return;
-            if (string.IsNullOrWhiteSpace(resolvedDbPath)) return;
-            if (File.Exists(resolvedDbPath)) return;
-
-            var oldPath = Path.Combine(AppContext.BaseDirectory, configuredDbPath);
-            if (!File.Exists(oldPath)) return;
-
-            var dir = Path.GetDirectoryName(resolvedDbPath);
-            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
-
-            File.Copy(oldPath, resolvedDbPath, overwrite: false);
-            try { ILogger.Information($"Migrated SQLite db from '{oldPath}' to '{resolvedDbPath}'."); } catch { }
-        }
-        catch (Exception ex)
-        {
-            try { ILogger.Warning($"Failed to migrate SQLite db to app data directory: {ex.Message}"); } catch { }
-        }
-    }
-
-            var connected = await TryEstablishConnectionAsync(_connectionString).ConfigureAwait(false);
+            var connected = await TryEnsureReadyAsync().ConfigureAwait(false);
             if (!connected)
             {
-                ILogger.Warning("⚠️ ObservationRollupWorker initial connection failed. Starting in degraded mode.");
+                ILogger.Warning("⚠️ ObservationRollupWorker initial DB readiness check failed. Starting in degraded mode.");
             }
 
             StartAsync();
@@ -125,7 +66,7 @@ public sealed class ObservationRollupWorker : ServiceBase
         }
         catch (Exception exception)
         {
-            iLoggerResilient.Error($"❌ Error during ObservationRollupWorker initialization: {exception.Message}");
+            iLogger.Error($"❌ Error during ObservationRollupWorker initialization: {exception.Message}");
             StartAsync();
             return true;
         }
@@ -170,9 +111,8 @@ public sealed class ObservationRollupWorker : ServiceBase
             try
             {
                 if (token.IsCancellationRequested) return;
-                if (string.IsNullOrWhiteSpace(_connectionString)) return;
 
-                var connected = await TryEstablishConnectionAsync(_connectionString).ConfigureAwait(false);
+                var connected = await TryEnsureReadyAsync().ConfigureAwait(false);
                 if (connected)
                     ILogger.Information("✅ ObservationRollupWorker SQLite reconnection SUCCESSFUL.");
             }
@@ -186,7 +126,7 @@ public sealed class ObservationRollupWorker : ServiceBase
         });
     }
 
-    async Task<bool> TryEstablishConnectionAsync(string connectionString)
+    async Task<bool> TryEnsureReadyAsync()
     {
         if (LinkedCancellationToken.IsCancellationRequested) return false;
 
@@ -199,27 +139,24 @@ public sealed class ObservationRollupWorker : ServiceBase
             using var testCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             using var linkedTestCts = CancellationTokenSource.CreateLinkedTokenSource(testCts.Token, LinkedCancellationToken);
 
-            await using var conn = new SqliteConnection(connectionString);
-            await conn.OpenAsync(linkedTestCts.Token).ConfigureAwait(false);
-
-            await ApplyConnectionPragmasAsync(conn, linkedTestCts.Token).ConfigureAwait(false);
-
-            await EnsureRollupSchemaAsync(conn, linkedTestCts.Token).ConfigureAwait(false);
+            if (_rollupsDatabaseReadiness is null)
+                return false;
+            await _rollupsDatabaseReadiness.EnsureReadyAsync(linkedTestCts.Token).ConfigureAwait(false);
 
             _isDatabaseAvailable = true;
             _failureCount = 0;
             return true;
         }
-        catch (OperationCanceledException operationCanceledException)
+        catch (OperationCanceledException)
         {
             _isDatabaseAvailable = false;
             return false;
         }
-        catch (SqliteException sqliteException)
+        catch (Exception ex)
         {
             _isDatabaseAvailable = false;
             _failureCount++;
-            ILogger.Warning($"⚠️ ObservationRollupWorker failed to establish SQLite connection: {sqliteException.Message} (ErrorCode: {sqliteException.SqliteErrorCode})");
+            ILogger.Warning($"⚠️ ObservationRollupWorker failed to establish SQLite connection: {ex.Message}");
             return false;
         }
         finally
@@ -245,194 +182,25 @@ public sealed class ObservationRollupWorker : ServiceBase
 
         try
         {
-            await using var conn = new SqliteConnection(_connectionString);
-            await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
+            if (_rollupsDatabaseReadiness is null || _observationRollupRepository is null) return;
 
-            await ApplyConnectionPragmasAsync(conn, cancellationToken).ConfigureAwait(false);
+            await _rollupsDatabaseReadiness.EnsureReadyAsync(cancellationToken).ConfigureAwait(false);
 
-            await EnsureRollupSchemaAsync(conn, cancellationToken).ConfigureAwait(false);
-
-            await RollupAsync(
-                conn,
-                rollupTableName: "observation_rollup_1h",
-                bucketWidthSeconds: 3600,
-                maxBucketsPerRun: 24,
-                cancellationToken).ConfigureAwait(false);
-
-            await RollupAsync(
-                conn,
-                rollupTableName: "observation_rollup_1d",
-                bucketWidthSeconds: 86400,
-                maxBucketsPerRun: 7,
-                cancellationToken).ConfigureAwait(false);
+            await _observationRollupRepository.RollupHourAsync(maxBucketsPerRun: 24, cancellationToken).ConfigureAwait(false);
+            await _observationRollupRepository.RollupDayAsync(maxBucketsPerRun: 7, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             Debug.Assert(false);
         }
-        catch (SqliteException ex) when (ex.SqliteErrorCode == 5 /* SQLITE_BUSY */)
+        catch (Exception ex)
         {
-            ILogger.Debug("ObservationRollupWorker: SQLITE_BUSY; backing off.");
-        }
-        catch (SqliteException ex)
-        {
-            ILogger.Warning($"ObservationRollupWorker: SQLite error: {ex.Message} (code={ex.SqliteErrorCode})");
+            ILogger.Warning($"ObservationRollupWorker: rollup run failed: {ex.Message}");
         }
         finally
         {
             try { _gate.Release(); } catch { }
         }
-    }
-
-    static async Task ApplyConnectionPragmasAsync(SqliteConnection conn, CancellationToken cancellationToken)
-    {
-        // Apply per-connection settings to reduce writer contention.
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;";
-        _ = await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    async Task EnsureRollupSchemaAsync(SqliteConnection conn, CancellationToken cancellationToken)
-    {
-        try
-        {
-            foreach (var script in 
-                new[] {
-                    "Ingest/SQLite/rollup_state.sql",
-                    "Ingest/SQLite/observation_rollup_1h.sql",
-                    "Ingest/SQLite/observation_rollup_1d.sql"
-                }
-            )
-            {
-                var ddl = IResourceProvider.GetString(script);
-                if (string.IsNullOrWhiteSpace(ddl))
-                {
-                    ILogger.Warning($"ObservationRollupWorker: missing embedded DDL '{script}'");
-                    continue;
-                }
-
-                await using var cmd = conn.CreateCommand();
-                cmd.CommandText = ddl;
-                cmd.CommandTimeout = 60;
-                await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-            }
-        }
-        catch(Exception exception)
-        {
-            ILogger.Warning($"ObservationRollupWorker: error ensuring rollup schema: {exception.Message}");
-        }
-    }
-
-    async Task RollupAsync(
-        SqliteConnection conn,
-        string rollupTableName,
-        int bucketWidthSeconds,
-        int maxBucketsPerRun,
-        CancellationToken cancellationToken
-    )
-    {
-        if (maxBucketsPerRun <= 0) return;
-
-        if (_watermarkStore is null) return;
-
-        var watermark = await _watermarkStore.TryGetWatermarkAsync(
-            conn,
-            ObservationRollupSql.SourceTableName,
-            bucketWidthSeconds,
-            cancellationToken
-        ).ConfigureAwait(false);
-
-        var latest = await TryGetLatestDeviceEpochAsync(conn, cancellationToken)
-            .ConfigureAwait(false);
-
-        if (latest is null) return;
-
-        var alignedLatestBucketStart = (latest.Value / bucketWidthSeconds) * bucketWidthSeconds;
-
-        long startEpoch;
-        if (watermark is null)
-        {
-            // Initialize watermark to the earliest bucket we can compute, based on first event.
-            var earliest = await TryGetEarliestDeviceEpochAsync(conn, cancellationToken)
-                .ConfigureAwait(false);
-            if (earliest is null) return;
-
-            startEpoch = (earliest.Value / bucketWidthSeconds) * bucketWidthSeconds;
-        }
-        else
-        {
-            startEpoch = watermark.Value;
-        }
-
-        // Don't roll up the current (possibly incomplete) bucket.
-        var endExclusive = alignedLatestBucketStart;
-        if (startEpoch >= endExclusive)
-            return;
-
-        // Cap work per run.
-        var maxEndExclusive = startEpoch + (long)bucketWidthSeconds * maxBucketsPerRun;
-        if (maxEndExclusive < endExclusive)
-            endExclusive = maxEndExclusive;
-
-        // Ensure endExclusive is bucket-aligned.
-        endExclusive = (endExclusive / bucketWidthSeconds) * bucketWidthSeconds;
-
-        if (endExclusive <= startEpoch)
-            return;
-
-        var sql = ObservationRollupSql.BuildUpsertRollupSql(rollupTableName, bucketWidthSeconds);
-
-        await using var tx = (SqliteTransaction)await conn.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-
-        await using (var cmd = conn.CreateCommand())
-        {
-            cmd.Transaction = tx;
-            cmd.CommandText = sql;
-            cmd.CommandTimeout = 60;
-
-            cmd.Parameters.AddWithValue("$installation_id", _installationId);
-            cmd.Parameters.AddWithValue("$range_start_epoch", startEpoch);
-            cmd.Parameters.AddWithValue("$range_end_epoch", endExclusive);
-
-            _ = await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        await _watermarkStore.UpsertWatermarkAsync(
-            conn,
-            ObservationRollupSql.SourceTableName,
-            bucketWidthSeconds,
-            watermarkDeviceEpoch: endExclusive,
-            cancellationToken).ConfigureAwait(false);
-
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-
-        ILogger.Debug($"ObservationRollupWorker: rolled up {rollupTableName} [{startEpoch}, {endExclusive})");
-    }
-
-    async Task<long?> TryGetEarliestDeviceEpochAsync(SqliteConnection conn, CancellationToken cancellationToken)
-    {
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT MIN(device_received_utc_timestamp_epoch) FROM observation WHERE installation_id = $installation_id;";
-        cmd.Parameters.AddWithValue("$installation_id", _installationId);
-
-        var scalar = await cmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
-        if (scalar is null || scalar is DBNull)
-            return null;
-
-        return Convert.ToInt64(scalar, CultureInfo.InvariantCulture);
-    }
-
-    async Task<long?> TryGetLatestDeviceEpochAsync(SqliteConnection conn, CancellationToken cancellationToken)
-    {
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT MAX(device_received_utc_timestamp_epoch) FROM observation WHERE installation_id = $installation_id;";
-        cmd.Parameters.AddWithValue("$installation_id", _installationId);
-
-        var scalar = await cmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
-        if (scalar is null || scalar is DBNull)
-            return null;
-
-        return Convert.ToInt64(scalar, CultureInfo.InvariantCulture);
     }
 
     protected override async Task OnDisposeAsync()

@@ -94,22 +94,22 @@
                 Text="{Binding Current.IntervalSeconds}"
         />
         <Label
-                Grid.Row="1" Grid.Column="21" Grid.ColumnSpan="3"
+                Grid.Row="1" Grid.Column="24" Grid.ColumnSpan="3"
                 FontSize="22" TextColor="{StaticResource GoldVikings}"
                 Text="Persist:"
         />
         <Label 
-                Grid.Row="1" Grid.Column="24" Grid.ColumnSpan="3"
+                Grid.Row="1" Grid.Column="27" Grid.ColumnSpan="6"
                 FontSize="22" TextColor="{StaticResource WhiteVikings}"
                 Text="{Binding PersistStatusDisplay}"
         />
         <Label
-                Grid.Row="1" Grid.Column="28" Grid.ColumnSpan="6"
+                Grid.Row="1" Grid.Column="35" Grid.ColumnSpan="6"
                 FontSize="22" TextColor="{StaticResource GoldVikings}" 
                 Text="Persist Attempt:" 
         />
         <Label
-                Grid.Row="1" Grid.Column="34" Grid.ColumnSpan="8"
+                Grid.Row="1" Grid.Column="41" Grid.ColumnSpan="8"
                 FontSize="22" TextColor="{StaticResource WhiteVikings}" 
                 Text="{Binding Current.PersistAttemptUtc, Converter={StaticResource TimeConverter}, StringFormat='{}{0:G}'}"
         />

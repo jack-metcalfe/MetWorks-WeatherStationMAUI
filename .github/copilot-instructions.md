@@ -11,6 +11,12 @@
 - Keep unordered lists sorted logically for discoverability; specifically, keep `settings.yaml` sections sorted lexicographically by 'path' and prefer grouping similar members (properties/constructors/methods) and sorting them by name/signature within the group.
 - Prefer the repo’s existing settings + DDI/codegen conventions: parameterless constructors with async `InitializeAsync(...)` taking services/interfaces; keep code consistent across projects; ask before diverging from established patterns.
 - DDI/codegen is a deliberate choice; avoid runtime reflection for DI. Use reflection at build/codegen time for YAML validation and signature extraction. Prefer consistency in `InitializeAsync` signatures but it's evolving; don't digress into improving DDI tooling now.
+- Stay on the currently open file/topic (e.g., `src/docs/sqlite-migration-plan.md`) and do not change context to unrelated tasks without being asked.
+- Provide periodic status updates (~every 60 seconds) during longer coding tasks to show progress and avoid looking stuck.
+- Conduct wider repo-level searches (e.g., search for `JsonToSQLite_connectionString` across all files) before proposing/removing settings/constants; avoid narrow file-only reasoning.
+- Keep a per-session date-stamped running log of touched functional areas (e.g., under `src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/session-restore-YYYY-MM-DD.md`).
+- Focus on Category B (consumers should not read DB connection details) and Category C only when UI/settings-page related; treat operational UI connection string use as leakage to remove.
+- Address project dependency hygiene to avoid cycles when centralizing persistence config (e.g., `MetWorks_Common -> MetWorks_Common_Settings -> MetWorks_Resource_Store -> MetWorks_Common`); consider refactoring/interfaces as needed.
 
 ## Instrumentation Preferences
 - Target Android primarily; emit reports to logs first.
@@ -50,6 +56,8 @@
     - the property to exist on the concrete implementation, and ideally also on the associated interface if it’s exposed to MAUI DI.
   - DDI-created services don't see MAUI DI registrations; if a DDI-initialized class needs another service (e.g., MetricsLatestSnapshotStore), that dependency must be declared in DDI YAML and wired via `instance:` assignments. `exposeToMauiDi: true` in YAML registers that DDI instance into MAUI DI.
   - DDI instance ordering matters: any instances referenced in an instance’s assignments must appear earlier in the instance list.
+- Keep the `iSettingRepository` parameter in `InitializeAsync` signatures even if currently unused, as it may be handy later.
+- DDI requirement: types constructed by the generator’s `new()` InstanceFactory must have a public parameterless constructor (e.g., SqliteDatabaseOptions cannot be positional-only).
 
 ## Concurrency Management
 - Prefer using Interlocked-based, lock-free patterns (when appropriate) to harden concurrency and reduce brittleness.
@@ -58,8 +66,8 @@
 ## Project-Specific Rules
 - InitializeAsync methods must accept a CancellationToken; the host creates a CancellationTokenSource and passes the Token.
 - Components should create an internal linked CancellationTokenSource (CTS) and use an Interlocked guard to prevent concurrent InitializeAsync calls.
-- An incremental migration approach and CI testing plan are documented in `src/docs/2026-01-18-refactor-plan.md`.
-- Session restore files are created at `src/docs/session-restore-2026-01-18.md` and `src/docs/session-restore-2026-01-18.json`.
+- An incremental migration approach and CI testing plan are documented in `src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/2026-01-18-refactor-plan.md`.
+- Session restore files are created at `src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/session-restore-2026-01-18.md` and `src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/session-restore-2026-01-18.json`.
 - Implement a resilient UDP listener/receiver in `Transformer.cs` with bind/rebind logic, provenance tracking, background receive loop, and graceful disposal. This file is currently open and contains the resilient UDP listener logic.
 - The project is a .NET MAUI application located at `C:\WinRepos\MetWorks-WeatherStationMAUI` on the `main` branch, with other open files including MAUI XAML pages under `src\weather-station-maui` (MainDeviceViews variants, WeatherPage) and `App.xaml/AppShell.xaml`.
 - Update Declarative DI (MetWorks-DeclarativeDI) to provide CancellationToken values (not CancellationTokenSource) from the generated code and support defining properties on class declarations in the DDI input YAML, allowing dotted-notation access to those properties when assigning named initialization parameters for `InitializeAsync`. Ensure that `instance:` entries appear after all their dependencies in the YAML, and every referenced class/interface has a corresponding entry under `namespace:`. Repository: [MetWorks-DeclarativeDI](https://github.com/jack-metcalfe/MetWorks-DeclarativeDI).
@@ -74,6 +82,8 @@
 - Prefer sorting YAML settings `definitions` by `path` for discoverability; duplicates should be adjacent to ease cleanup.
 - In DDI YAML, instances must be defined before first use (no forward references) within the `instance:` section; the `namespace:` section ordering is not constrained. Reorder `instance:` entries so dependencies appear earlier than dependents.
 - Prefer not to fight tool defaults (e.g., YamlDotNet default YAML quoting/serialization) unless they understand the tool well; align with default behaviors.
+- Create a new dedicated data-layer assembly named `MetWorks_Data_Sqlite`; once layering work completes it should be the only non-interface assembly in the solution that references SQLite provider packages.
+- Treat `MetWorks_Persistence_SQLite` as legacy; migrate functionality into new persistence + data-layer assemblies, then remove `MetWorks_Persistence_SQLite` as a milestone.
 
 ## Data Retention Policy
 - When the database hits max size, prefer a retention policy that preserves the last N hours (delete oldest first). Observation rollups should exclude wind and lightning fields (use wind/lightning tables for those) and focus on station pressure, air temperature, relative humidity, illuminance, UV, solar radiation, rain accumulation over the previous minute, and battery; optionally carry the reporting interval.

@@ -2,6 +2,9 @@
 
 This document is the authoritative developer-facing architecture overview for the WeatherStation MAUI service.
 
+Backlog / ToDo
+- `TODO.md`
+
 Key references
 - COMB GUID implementation: src/utility/IdGenerator.cs
 - Packet parsing: src/udp_packets/TempestPacketParser.cs

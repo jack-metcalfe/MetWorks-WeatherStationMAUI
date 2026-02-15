@@ -2,7 +2,7 @@
 public sealed class SettingsEditorViewModel : INotifyPropertyChanged
 {
     readonly ISettingRepository _iSettingRepository;
-    readonly ILoggerResilient _iLoggerResilient;
+    readonly MetWorks.Interfaces.ILogger _iLogger;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -25,14 +25,14 @@ public sealed class SettingsEditorViewModel : INotifyPropertyChanged
 
     public SettingsEditorViewModel(
         ISettingRepository iSettingRepository,
-        ILoggerResilient iLoggerResilient
+        MetWorks.Interfaces.ILogger iLogger
     )
     {
         ArgumentNullException.ThrowIfNull(iSettingRepository);
-        ArgumentNullException.ThrowIfNull(iLoggerResilient);
+        ArgumentNullException.ThrowIfNull(iLogger);
 
         _iSettingRepository = iSettingRepository;
-        _iLoggerResilient = iLoggerResilient;
+        _iLogger = iLogger;
 
         SaveCommand = new Command(Save);
         ReloadCommand = new Command(Load);
@@ -62,7 +62,7 @@ public sealed class SettingsEditorViewModel : INotifyPropertyChanged
         catch (Exception ex)
         {
             Status = "Failed to load settings.";
-            _iLoggerResilient.Error(Status, ex);
+            _iLogger.Error(Status, ex);
         }
     }
 
@@ -89,7 +89,7 @@ public sealed class SettingsEditorViewModel : INotifyPropertyChanged
         catch (Exception ex)
         {
             Status = "Save failed.";
-            _iLoggerResilient.Error(Status, ex);
+            _iLogger.Error(Status, ex);
         }
     }
 

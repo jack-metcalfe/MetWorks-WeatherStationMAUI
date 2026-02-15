@@ -50,7 +50,7 @@ public class StartupInitializer
     //NullPropertyGuard.Get(
     //IsInitialized, _appRegistry, nameof(Registry));
 
-    private static ILoggerResilient? _iLoggerResilient;
+    private static MetWorks.Interfaces.ILogger? _iLogger;
     private static bool _isInitialized = false;
     private static bool _isDatabaseAvailable = false;
     
@@ -88,7 +88,7 @@ public class StartupInitializer
             try { InitializationFailed?.Invoke(exception); } catch { }
             
             // Try to log with file logger if available
-            _iLoggerResilient?.Error($"Startup initialization failed: {exception}");
+            _iLogger?.Error($"Startup initialization failed: {exception}");
             
             // Re-throw with clear context for UI
             throw new InvalidOperationException(
@@ -117,16 +117,16 @@ public class StartupInitializer
                 await _appRegistry!.InitializeAllAsync().ConfigureAwait(false);
 
                 // Step 3: Cache logger after initialization
-                _iLoggerResilient = _appRegistry.GetTheLoggerResilient();
-                _iLoggerResilient?.Information("✅ All services initialized");
+                _iLogger = _appRegistry.GetTheLoggerResilient();
+                _iLogger?.Information("✅ All services initialized");
 
                 // Log settings source diagnostics (non-secret)
                 try
                 {
-                    var sp = _appRegistry.GetTheSettingProvider() as MetWorks.Common.Settings.SettingProvider;
+                    var sp = _appRegistry.GetTheSettingProvider() as SettingProvider;
                     if (sp is not null)
                     {
-                        _iLoggerResilient?.Information(
+                        _iLogger?.Information(
                             $"Settings loaded. templateResource='{sp.SettingsTemplateResourceName}', overrideFile='{sp.SettingsOverrideFilePath}', overrideExists={sp.SettingsOverrideFileExistsAtLoad}"
                         );
                     }
@@ -139,23 +139,12 @@ public class StartupInitializer
                 // All services initialized successfully, including database
                 _isDatabaseAvailable = true;
             }
-            catch (InvalidOperationException exception) when (
-                exception.Message.Contains("PostgreSQL") ||
-                exception.InnerException is Npgsql.NpgsqlException)
-            {
-                Debug.WriteLine($"⚠️ PostgreSQL initialization failed: {exception.Message}");
-                _iLoggerResilient?.Warning("⚠️ PostgreSQL unavailable at startup. App running in degraded mode.");
-                _iLoggerResilient?.Information("🔄 Auto-reconnection enabled - database will connect automatically when available");
-
-                _isDatabaseAvailable = false;
-                // Don't throw - app can continue without database
-            }
             catch (Exception exception)
             {
                 Debug.WriteLine($"❌ Service initialization failed: {exception.Message}");
                 Debug.WriteLine($"   Stack trace: {exception.StackTrace}");
 
-                _iLoggerResilient?.Error($"Service initialization failed: {exception}");
+                _iLogger?.Error($"Service initialization failed: {exception}");
 
                 throw;
             }
@@ -166,7 +155,7 @@ public class StartupInitializer
             Debug.WriteLine($"❌ FATAL: Startup initialization failed: {exception}");
 
             // Try to log with file logger if available
-            _iLoggerResilient?.Error($"Startup initialization failed: {exception}");
+            _iLogger?.Error($"Startup initialization failed: {exception}");
 
             // Re-throw with clear context for UI
             throw new InvalidOperationException(
@@ -189,7 +178,7 @@ public class StartupInitializer
                 throw new InvalidOperationException("UDP listener failed to initialize");
 
             Debug.WriteLine("✅ All critical services verified");
-            _iLoggerResilient.Information("Critical services verification completed successfully");
+            _iLogger.Information("Critical services verification completed successfully");
             
             await Task.CompletedTask;
         }
@@ -205,7 +194,7 @@ public class StartupInitializer
     {
         try
         {
-            _iLoggerResilient?.Information("🛑 Shutting down application services...");
+            _iLogger?.Information("🛑 Shutting down application services...");
             Debug.WriteLine("🛑 Shutting down application services...");
             
             if (_appRegistry != null)
@@ -216,7 +205,7 @@ public class StartupInitializer
             _isInitialized = false;
             _isDatabaseAvailable = false;
             
-            _iLoggerResilient?.Information("✅ Application services shut down successfully");
+            _iLogger?.Information("✅ Application services shut down successfully");
             Debug.WriteLine("✅ Application services shut down successfully");
             
             await Task.CompletedTask;
@@ -224,7 +213,7 @@ public class StartupInitializer
         catch (Exception exception)
         {
             Debug.WriteLine($"⚠️ Error during shutdown: {exception}");
-            _iLoggerResilient?.Warning($"Error during shutdown: {exception}");
+            _iLogger?.Warning($"Error during shutdown: {exception}");
         }
     }
 }

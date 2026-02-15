@@ -3,17 +3,17 @@ public partial class App : Application
 {
     Task? _initializationTask;
     CancellationTokenSource? _shutdownCts;
-    ILoggerResilient _iLoggerResilient;
+    MetWorks.Interfaces.ILogger _iLogger;
     ISettingRepository _iSettingRepository;
     IEventRelayBasic _iEventRelayBasic;
     
     public App(
-        ILoggerResilient iLoggerResilient,
+        MetWorks.Interfaces.ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic
     )
     {
-        _iLoggerResilient = iLoggerResilient;
+        _iLogger = iLogger;
         _iSettingRepository = iSettingRepository;
         _iEventRelayBasic = iEventRelayBasic;  
 

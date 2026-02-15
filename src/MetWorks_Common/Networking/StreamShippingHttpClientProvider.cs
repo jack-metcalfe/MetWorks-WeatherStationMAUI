@@ -21,18 +21,18 @@ public sealed class StreamShippingHttpClientProvider : ServiceBase
     bool _isInitialized;
 
     public Task<bool> InitializeAsync(
-        ILoggerResilient iLoggerResilient,
+        ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         CancellationToken externalCancellation = default,
         ProvenanceTracker? provenanceTracker = null)
     {
-        ArgumentNullException.ThrowIfNull(iLoggerResilient);
+        ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
 
         InitializeBase(
-            iLoggerResilient.ForContext(GetType()),
+            iLogger.ForContext(GetType()),
             iSettingRepository,
             iEventRelayBasic,
             externalCancellation,

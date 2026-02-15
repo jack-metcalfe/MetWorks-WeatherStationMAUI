@@ -12,7 +12,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         Initializing = 1,
         Initialized = 2
     }
-    readonly ILoggerResilient _iLoggerResilient;
+    readonly MetWorks.Interfaces.ILogger _iLogger;
     readonly ISettingRepository _iSettingRepository;
     readonly IEventRelayBasic _iEventRelayBasic;
     private readonly IInstanceIdentifier _iInstanceIdentifier;
@@ -26,6 +26,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     // Lightweight init guard: 0 = not started, 1 = initializing, 2 = initialized
     int _initializeState = (int)InitializeStateEnum.Uninitialized;
 
+    CancellationToken _iExternalCancellationToken;
     // Cancellation pattern for cooperative shutdown (optional)
     CancellationTokenSource? _localCancellation;
     CancellationTokenSource? _linkedCancellation;
@@ -53,18 +54,21 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     public string TimeDateDisplay => _currentTime.ToString("MMM dd");
     public string TimeDisplay => _currentTime.ToString("HH:mm");
     public WeatherViewModel(
-        ILoggerResilient iLoggerResilient,
+        MetWorks.Interfaces.ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
-        IInstanceIdentifier iInstanceIdentifier
+        IInstanceIdentifier iInstanceIdentifier,
+        CancellationTokenSource cancellationTokenSource
     )
     {
-        ArgumentNullException.ThrowIfNull(iLoggerResilient);
+        ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
 
-        _iLoggerResilient = iLoggerResilient;
+        _iExternalCancellationToken = cancellationTokenSource.Token;
+
+        _iLogger = iLogger;
         _iSettingRepository = iSettingRepository;
         _iEventRelayBasic = iEventRelayBasic;
         _iInstanceIdentifier = iInstanceIdentifier;
@@ -143,11 +147,9 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         try
         {
             // Acquire dependencies using registry (existing pattern)
-            var iExternalCancellationToken = StartupInitializer.Registry.GetRootCancellationTokenSource().Token;
-
             // Create local and linked cancellation sources so we can honor external cancellation if provided.
             _localCancellation = new CancellationTokenSource();
-            _linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(iExternalCancellationToken, _localCancellation.Token);
+            _linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(_iExternalCancellationToken, _localCancellation.Token);
 
             Interlocked.Exchange(ref _initializeState, (int)InitializeStateEnum.Initialized);
 
@@ -174,7 +176,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
                 (int)InitializeStateEnum.Uninitialized
             );
 
-            _iLoggerResilient.Error("Failed to initialize", exception);
+            _iLogger.Error("Failed to initialize", exception);
             throw;
         }
     }

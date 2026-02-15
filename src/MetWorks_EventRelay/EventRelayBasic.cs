@@ -58,7 +58,8 @@ public class EventRelayBasic : IEventRelayBasic
                             udpToTransformStart: nowUtc - raw.ReceivedTime,
                             transformDuration: TimeSpan.Zero,
                             udpToTransformEnd: nowUtc - raw.ReceivedTime,
-                            isRetransformation: false);
+                            isRetransformation: false
+                        );
                     }
                     catch { }
                 }
@@ -83,16 +84,18 @@ public class EventRelayBasic : IEventRelayBasic
 
     internal static IReadOnlyList<PipelineReadingHotspot> SnapshotTopPipelineHotspots(int topN)
         => _pipelineMetrics.SnapshotTopNAndReset(topN);
-
     public static IReadOnlyList<RelayHotspotSnapshot> GetTopRelayHotspotsSnapshot(int topN)
         => SnapshotTopRelayHotspots(topN)
-            .Select(h => new RelayHotspotSnapshot(
-                h.MessageType,
-                h.RecipientType,
-                h.Count,
-                h.TotalMilliseconds,
-                h.AverageMilliseconds,
-                h.MaxMilliseconds))
+            .Select(
+                h => new RelayHotspotSnapshot(
+                    h.MessageType,
+                    h.RecipientType,
+                    h.Count,
+                    h.TotalMilliseconds,
+                    h.AverageMilliseconds,
+                    h.MaxMilliseconds
+                )
+            )
             .ToArray();
 
     public static IReadOnlyList<FanOutHotspotSnapshot> GetTopFanOutSnapshot(int topN)

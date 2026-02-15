@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  ExposeToMauiDi
-// Generated On:        2026-02-12T05:35:58.8534477Z
+// Generated On:        2026-02-15T03:41:55.5395261Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -17,10 +17,14 @@ namespace MetWorks.ServiceRegistry
             CancellationToken cancellationToken = default
 		)
         {
-            MetWorks.Common.Metrics.IMetricsLatestSnapshot
-                        _TheMetricsLatestSnapshotStore = GetTheMetricsLatestSnapshotStore();
-            services.AddSingleton<MetWorks.Common.Metrics.IMetricsLatestSnapshot>
-                (_TheMetricsLatestSnapshotStore);
+            System.Threading.CancellationTokenSource
+                        _TheRootCancellationTokenSource = GetTheRootCancellationTokenSource();
+            services.AddSingleton<System.Threading.CancellationTokenSource>
+                (_TheRootCancellationTokenSource);
+            IPlatformPaths
+                        _TheDefaultPlatformPaths = GetTheDefaultPlatformPaths();
+            services.AddSingleton<IPlatformPaths>
+                (_TheDefaultPlatformPaths);
             MetWorks.Interfaces.IEventRelayBasic
                         _TheEventRelayBasic = GetTheEventRelayBasic();
             services.AddSingleton<MetWorks.Interfaces.IEventRelayBasic>
@@ -29,10 +33,14 @@ namespace MetWorks.ServiceRegistry
                         _TheEventRelayPath = GetTheEventRelayPath();
             services.AddSingleton<MetWorks.Interfaces.IEventRelayPath>
                 (_TheEventRelayPath);
-            MetWorks.Interfaces.ILoggerStub
-                        _TheLoggerStub = GetTheLoggerStub();
-            services.AddSingleton<MetWorks.Interfaces.ILoggerStub>
-                (_TheLoggerStub);
+            MetWorks.Common.Utility.SqliteWriteCoordinator
+                        _TheSqliteWriteCoordinator = GetTheSqliteWriteCoordinator();
+            services.AddSingleton<MetWorks.Common.Utility.SqliteWriteCoordinator>
+                (_TheSqliteWriteCoordinator);
+            MetWorks.Common.Metrics.IMetricsLatestSnapshot
+                        _TheMetricsLatestSnapshotStore = GetTheMetricsLatestSnapshotStore();
+            services.AddSingleton<MetWorks.Common.Metrics.IMetricsLatestSnapshot>
+                (_TheMetricsLatestSnapshotStore);
             MetWorks.Interfaces.ISettingRepository
                         _TheSettingRepository = GetTheSettingRepository();
             services.AddSingleton<MetWorks.Interfaces.ISettingRepository>
@@ -41,26 +49,22 @@ namespace MetWorks.ServiceRegistry
                         _TheInstanceIdentifier = GetTheInstanceIdentifier();
             services.AddSingleton<MetWorks.Interfaces.IInstanceIdentifier>
                 (_TheInstanceIdentifier);
-            MetWorks.Interfaces.ILoggerFile
-                        _TheLoggerFile = GetTheLoggerFile();
-            services.AddSingleton<MetWorks.Interfaces.ILoggerFile>
-                (_TheLoggerFile);
-            MetWorks.Interfaces.ILoggerSQLite
-                        _TheLoggerSQLite = GetTheLoggerSQLite();
-            services.AddSingleton<MetWorks.Interfaces.ILoggerSQLite>
-                (_TheLoggerSQLite);
-            MetWorks.Interfaces.ILoggerResilient
+            MetWorks.Data.Sqlite.ISqliteDatabase
+                        _TheSqliteDatabase = GetTheSqliteDatabase();
+            services.AddSingleton<MetWorks.Data.Sqlite.ISqliteDatabase>
+                (_TheSqliteDatabase);
+            MetWorks.Interfaces.ILogger
                         _TheLoggerResilient = GetTheLoggerResilient();
-            services.AddSingleton<MetWorks.Interfaces.ILoggerResilient>
+            services.AddSingleton<MetWorks.Interfaces.ILogger>
                 (_TheLoggerResilient);
-            MetWorks.Ingest.SQLite.StationMetadataIngestor
-                        _TheSQLiteStationMetadataIngestor = GetTheSQLiteStationMetadataIngestor();
-            services.AddSingleton<MetWorks.Ingest.SQLite.StationMetadataIngestor>
-                (_TheSQLiteStationMetadataIngestor);
             MetWorks.Interfaces.IStationMetadataProvider
                         _TheStationMetadataProvider = GetTheStationMetadataProvider();
             services.AddSingleton<MetWorks.Interfaces.IStationMetadataProvider>
                 (_TheStationMetadataProvider);
+            MetWorks.Ingest.SQLite.StationMetadataIngestor
+                        _TheSQLiteStationMetadataIngestor = GetTheSQLiteStationMetadataIngestor();
+            services.AddSingleton<MetWorks.Ingest.SQLite.StationMetadataIngestor>
+                (_TheSQLiteStationMetadataIngestor);
 
             await Task.CompletedTask.ConfigureAwait(false);
         }

@@ -25,7 +25,7 @@ public class SensorReadingTransformer : ServiceBase
     // Initialization
     // ========================================
     public async Task<bool> InitializeAsync(
-        ILoggerResilient iLoggerResilient,
+        ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         CancellationToken externalCancellation = default,
@@ -36,7 +36,7 @@ public class SensorReadingTransformer : ServiceBase
         try
         {
             InitializeBase(
-                iLoggerResilient.ForContext(this.GetType()),
+                iLogger.ForContext(this.GetType()),
                 iSettingRepository,
                 iEventRelayBasic,
                 externalCancellation,
@@ -44,16 +44,16 @@ public class SensorReadingTransformer : ServiceBase
             );
 
             _stationMetadataProvider = iStationMetadataProvider;
-            iLoggerResilient.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")} enabled for sensor readings");
+            iLogger.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")} enabled for sensor readings");
             // Load current unit preferences from settings
-            if (!LoadUnitPreference(iLoggerResilient, iSettingRepository))
+            if (!LoadUnitPreference(iLogger, iSettingRepository))
             {
-                iLoggerResilient.Error("Failed to load unit preferences during initialization");
+                iLogger.Error("Failed to load unit preferences during initialization");
                 return false;
             }
-            iLoggerResilient.Information("🌡️ WeatherDataTransformer initialized successfully");
+            iLogger.Information("🌡️ WeatherDataTransformer initialized successfully");
             foreach(var unitKVP in _preferredUnits)
-                iLoggerResilient.Information($"   {unitKVP.Key}: {unitKVP.Value.Name}");
+                iLogger.Information($"   {unitKVP.Key}: {unitKVP.Value.Name}");
             // Subscribe to unit setting changes for the whole group (prefix match).
             // Use the GroupSettingDefinition to build the canonical settings path prefix
             // so the value is not hard-coded (DRY).

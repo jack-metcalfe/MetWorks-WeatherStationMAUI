@@ -1,4 +1,6 @@
-﻿namespace MetWorks.Ingest.SQLite.Shipping;
+﻿using MetWorks.Persistence.StreamShipping;
+
+namespace MetWorks.Ingest.SQLite.Shipping;
 
 public sealed class WindStreamShipper : ServiceBase
 {
@@ -9,9 +11,7 @@ public sealed class WindStreamShipper : ServiceBase
     const int DefaultShipIntervalSeconds = 30;
     const int DefaultMaxBatchRows = 500;
 
-    string _connectionString = string.Empty;
-    string _dbPath = string.Empty;
-    Guid _installationIdGuid;
+    string _installationId = string.Empty;
 
     string _endpointUrl = string.Empty;
     int _shipIntervalSeconds = DefaultShipIntervalSeconds;
@@ -19,29 +19,36 @@ public sealed class WindStreamShipper : ServiceBase
 
     HttpClient? _httpClient;
 
+    IStreamShippingDatabaseReadiness? _streamShippingDatabaseReadiness;
+    IStreamShippingRepository? _streamShippingRepository;
+
     public WindStreamShipper()
     {
     }
 
     public async Task<bool> InitializeAsync(
-        ILoggerResilient iLoggerResilient,
+        ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         IInstanceIdentifier iInstanceIdentifier,
+        IStreamShippingDatabaseReadiness streamShippingDatabaseReadiness,
+        IStreamShippingRepository streamShippingRepository,
         HttpClient httpClient,
         CancellationToken externalCancellation,
         ProvenanceTracker provenanceTracker
     )
     {
-        ArgumentNullException.ThrowIfNull(iLoggerResilient);
+        ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
+        ArgumentNullException.ThrowIfNull(streamShippingDatabaseReadiness);
+        ArgumentNullException.ThrowIfNull(streamShippingRepository);
         ArgumentNullException.ThrowIfNull(httpClient);
         ArgumentNullException.ThrowIfNull(provenanceTracker);
 
         InitializeBase(
-            iLoggerResilient.ForContext(GetType()),
+            iLogger.ForContext(GetType()),
             iSettingRepository,
             iEventRelayBasic,
             externalCancellation,
@@ -49,12 +56,15 @@ public sealed class WindStreamShipper : ServiceBase
 
         _httpClient = httpClient;
 
+        _streamShippingDatabaseReadiness = streamShippingDatabaseReadiness;
+        _streamShippingRepository = streamShippingRepository;
+
         var enabled = iSettingRepository.GetValueOrDefault<bool>(
             LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_enabled));
 
         if (!enabled)
         {
-            ILogger.Information("WindStreamShipper is disabled via settings");
+            base.ILogger.Information("WindStreamShipper is disabled via settings");
             try { MarkReady(); } catch { }
             return true;
         }
@@ -74,41 +84,18 @@ public sealed class WindStreamShipper : ServiceBase
         if (_maxBatchRows <= 0)
             _maxBatchRows = DefaultMaxBatchRows;
 
-        _connectionString = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.JsonToSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.JsonToSQLite_connectionString));
-
-        _dbPath = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.JsonToSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.JsonToSQLite_dbPath));
-
-        var iid = iInstanceIdentifier.GetOrCreateInstallationId();
-        if (!Guid.TryParse(iid, out _installationIdGuid))
-            _installationIdGuid = Guid.Empty;
+        _installationId = iInstanceIdentifier.GetOrCreateInstallationId();
 
         if (string.IsNullOrWhiteSpace(_endpointUrl))
         {
-            ILogger.Warning("WindStreamShipper endpointUrl is not configured; shipper will not run.");
+            base.ILogger.Warning("WindStreamShipper endpointUrl is not configured; shipper will not run.");
             try { MarkReady(); } catch { }
             return true;
         }
 
-        if (string.IsNullOrWhiteSpace(_connectionString) && !string.IsNullOrWhiteSpace(_dbPath))
+        if (string.IsNullOrWhiteSpace(_installationId))
         {
-            var appDataDir = new DefaultPlatformPaths().AppDataDirectory;
-            var resolvedDbPath = Path.IsPathRooted(_dbPath)
-                ? _dbPath
-                : Path.Combine(appDataDir, _dbPath);
-
-            _connectionString = new SqliteConnectionStringBuilder
-            {
-                DataSource = resolvedDbPath,
-                Mode = SqliteOpenMode.ReadWriteCreate,
-                Cache = SqliteCacheMode.Shared
-            }.ToString();
-        }
-
-        if (string.IsNullOrWhiteSpace(_connectionString))
-        {
-            ILogger.Warning("WindStreamShipper has no SQLite connection configured; shipper will not run.");
+            ILogger.Warning("WindStreamShipper has no installation id; shipper will not run.");
             try { MarkReady(); } catch { }
             return true;
         }
@@ -116,7 +103,7 @@ public sealed class WindStreamShipper : ServiceBase
         StartBackground(ct => ShipLoopAsync(TimeSpan.FromSeconds(_shipIntervalSeconds), ct));
 
         try { MarkReady(); } catch { }
-        ILogger.Information($"WindStreamShipper started (interval={_shipIntervalSeconds}s, maxBatchRows={_maxBatchRows})");
+        base.ILogger.Information($"WindStreamShipper started (interval={_shipIntervalSeconds}s, maxBatchRows={_maxBatchRows})");
         return true;
     }
 
@@ -137,10 +124,6 @@ public sealed class WindStreamShipper : ServiceBase
             {
                 ILogger.Warning($"WindStreamShipper: HTTP failure: {ex.Message}");
             }
-            catch (SqliteException ex)
-            {
-                ILogger.Warning($"WindStreamShipper: SQLite failure: {ex.Message} (code={ex.SqliteErrorCode})");
-            }
             catch (InvalidOperationException ex)
             {
                 ILogger.Warning($"WindStreamShipper: failure: {ex.Message}");
@@ -153,21 +136,49 @@ public sealed class WindStreamShipper : ServiceBase
         if (_httpClient is null)
             throw new InvalidOperationException("HttpClient is not initialized.");
 
-        if (_installationIdGuid == Guid.Empty)
+        var readiness = _streamShippingDatabaseReadiness;
+        if (readiness is null)
+            throw new InvalidOperationException("Stream shipping database readiness is not initialized.");
+
+        var repo = _streamShippingRepository;
+        if (repo is null)
+            throw new InvalidOperationException("Stream shipping repository is not initialized.");
+
+        if (string.IsNullOrWhiteSpace(_installationId))
             throw new InvalidOperationException("Installation id is not initialized.");
 
-        await using var conn = new SqliteConnection(_connectionString);
-        await conn.OpenAsync(token).ConfigureAwait(false);
+        await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
 
-        await StandardReadingsStreamShipping.ShipOnceAsync(
-            conn,
-            installationId: _installationIdGuid,
-            source: Source,
+        var state = await repo.TryGetStateAsync(Source, token).ConfigureAwait(false);
+        var lastAcked = state?.LastAckedRowId ?? 0;
+
+        var rows = await repo.ReadStandardReadingsBatchAsync(
             table: Table,
-            ddlScript: DdlScript,
-            maxBatchRows: _maxBatchRows,
+            installationId: _installationId,
+            lastAckedRowId: lastAcked,
+            maxRows: _maxBatchRows,
+            cancellationToken: token).ConfigureAwait(false);
+
+        if (rows.Count == 0)
+            return;
+
+        var maxRowId = rows[^1].RowId;
+
+        var ackedUpTo = await ObservationStreamShipper.UploadNdjsonAsync(
             httpClient: _httpClient,
             endpointUrl: _endpointUrl,
-            token).ConfigureAwait(false);
+            table: Table,
+            installationId: _installationId,
+            rows: rows,
+            token: token).ConfigureAwait(false);
+
+        if (ackedUpTo is null)
+            return;
+
+        await repo.UpsertShippingProgressAsync(
+            source: Source,
+            lastShippedRowId: maxRowId,
+            lastAckedRowId: ackedUpTo.Value,
+            cancellationToken: token).ConfigureAwait(false);
     }
 }

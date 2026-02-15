@@ -33,11 +33,10 @@ public sealed class LoggerResilient : ServiceBase, ILoggerResilient
     public Task<bool> InitializeAsync(
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
-        IInstanceIdentifier? iInstanceIdentifier = null,
-        ILoggerStub? iLoggerStub = null,
-        ILoggerFile? iLoggerFile = null,
-        ILoggerPostgreSQL? iLoggerPostgreSQL = null,
-        ILoggerSQLite? iLoggerSQLite = null,
+        IInstanceIdentifier? iInstanceIdentifier,
+        ILogger iLoggerStub,
+        ILogger iLoggerFile,
+        ILogger iLoggerSQLite,
         int? maxBufferSize = null,
         CancellationToken cancellationToken = default
     )

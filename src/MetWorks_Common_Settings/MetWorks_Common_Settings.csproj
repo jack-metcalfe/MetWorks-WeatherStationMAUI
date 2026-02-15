@@ -15,6 +15,7 @@
 		<PackageReference Include="Microsoft.Maui.Controls" />
 	</ItemGroup>
 	<ItemGroup>
+	  <ProjectReference Include="..\MetWorks_Data_Sqlite\MetWorks_Data_Sqlite.csproj" />
 	  <ProjectReference Include="..\MetWorks_Common_Utility\MetWorks_Common_Utility.csproj" />
 	  <ProjectReference Include="..\MetWorks_Constants\MetWorks_Constants.csproj" />
 	  <ProjectReference Include="..\MetWorks_EventRelay\MetWorks_EventRelay.csproj" />

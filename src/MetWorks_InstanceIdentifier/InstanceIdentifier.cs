@@ -4,7 +4,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
     // Build canonical setting path from the GroupSettingDefinition to avoid hard-coded strings.
     private static string Path => LookupDictionaries.InstanceGroupSettingsDefinition.BuildSettingPath(SettingConstants.Instance_installationId);
     private ISettingProvider? _settingProvider;
-    private ILoggerStub? iLoggerStub;
+    private ILogger? _iLogger;
     private string? _cached;
 
     // Parameterless constructor for DDI creation
@@ -14,12 +14,14 @@ public partial class InstanceIdentifier : IInstanceIdentifier
 
     // Declarative DI initialize signature
     public async Task<bool> InitializeAsync(
-        ILoggerStub iLoggerStub, 
+        ILogger iLogger, 
         ISettingProvider iSettingProvider
     )
     {
-        this.iLoggerStub = iLoggerStub ?? throw new ArgumentNullException(nameof(iLoggerStub));
-        _settingProvider = iSettingProvider ?? throw new ArgumentNullException(nameof(iSettingProvider));
+        ArgumentNullException.ThrowIfNull(iLogger);
+        ArgumentNullException.ThrowIfNull(iSettingProvider);
+        _settingProvider = iSettingProvider;
+        _iLogger = iLogger;
 
         // Ensure provider is initialized - if not, we can't read values; just return true if set
         try
@@ -37,7 +39,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
         }
         catch (Exception ex)
         {
-            this.iLoggerStub.Error("InstanceIdentifier failed to initialize.", ex);
+            this._iLogger.Error("InstanceIdentifier failed to initialize.", ex);
             return false;
         }
     }
@@ -45,7 +47,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
     public string CreateNewInstallationId()
     {
         if (_settingProvider is null) throw new InvalidOperationException("InstanceIdentifier not initialized");
-        if (iLoggerStub is null) throw new InvalidOperationException("InstanceIdentifier not initialized");
+        if (_iLogger is null) throw new InvalidOperationException("InstanceIdentifier not initialized");
 
         try
         {
@@ -53,7 +55,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
             var saved = _settingProvider.SaveValueOverride(Path, guid);
             if (!saved)
             {
-                iLoggerStub.Warning("Failed to persist new installationId override, continuing with transient value.");
+                _iLogger.Warning("Failed to persist new installationId override, continuing with transient value.");
             }
 
             _cached = guid;
@@ -61,7 +63,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
         }
         catch (Exception ex)
         {
-            iLoggerStub.Error("Failed to create new installation id.", ex);
+            _iLogger.Error("Failed to create new installation id.", ex);
             _cached = Guid.NewGuid().ToString();
             return _cached;
         }
@@ -70,7 +72,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
     {
         if (!string.IsNullOrEmpty(_cached)) return _cached!;
         if (_settingProvider is null) throw new InvalidOperationException("InstanceIdentifier not initialized");
-        if (iLoggerStub is null) throw new InvalidOperationException("InstanceIdentifier not initialized");
+        if (_iLogger is null) throw new InvalidOperationException("InstanceIdentifier not initialized");
 
         try
         {
@@ -90,7 +92,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
             var saved = _settingProvider.SaveValueOverride(Path, guid);
             if (!saved)
             {
-                iLoggerStub.Warning("Failed to persist installationId override, continuing with transient value.");
+                _iLogger.Warning("Failed to persist installationId override, continuing with transient value.");
             }
 
             _cached = guid;
@@ -98,7 +100,7 @@ public partial class InstanceIdentifier : IInstanceIdentifier
         }
         catch (Exception ex)
         {
-            iLoggerStub.Error("Failed to obtain or create installation id.", ex);
+            _iLogger.Error("Failed to obtain or create installation id.", ex);
             _cached = Guid.NewGuid().ToString();
             return _cached!;
         }

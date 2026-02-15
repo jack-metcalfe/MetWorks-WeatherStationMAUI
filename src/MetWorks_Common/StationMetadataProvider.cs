@@ -11,7 +11,7 @@ public sealed class StationMetadataProvider : ServiceBase, IStationMetadataProvi
     ITempestRestClient? _tempestRestClient;
     ITempestRestClient TempestRestClient => NullPropertyGuard.Get(_isInitialized, _tempestRestClient, nameof(TempestRestClient));
     public Task<bool> InitializeAsync(
-        ILoggerResilient iLoggerResilient,
+        ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         ITempestRestClient iTempestRestClient,
@@ -19,13 +19,13 @@ public sealed class StationMetadataProvider : ServiceBase, IStationMetadataProvi
         IPlatformPaths? iPlatformPaths = null
     )
     {
-        ArgumentNullException.ThrowIfNull(iLoggerResilient);
+        ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
         ArgumentNullException.ThrowIfNull(iTempestRestClient);
 
         InitializeBase(
-            iLoggerResilient.ForContext(GetType()),
+            iLogger.ForContext(GetType()),
             iSettingRepository,
             iEventRelayBasic,
             externalCancellation

@@ -13,14 +13,7 @@ public static class SettingConstants
     public const string LoggerFile_rollingInterval = @"rollingInterval";
     public const string LoggerFile_rollOnFileSizeLimit = @"rollOnFileSizeLimit";
 
-    public const string LoggerPostgreSQL_groupName = "loggerPostgreSQL";
-    public const string LoggerPostgreSQL_connectionString = "connectionString";
-    public const string LoggerPostgreSQL_tableName = "tableName";
-    public const string LoggerPostgreSQL_minimumLevel = "minimumLevel";
-    public const string LoggerPostgreSQL_autoCreateTable = "autoCreateTable";
-
     public const string LoggerSQLite_groupName = "loggerSQLite";
-    public const string LoggerSQLite_dbPath = "dbPath";
     public const string LoggerSQLite_tableName = "tableName";
     public const string LoggerSQLite_minimumLevel = "minimumLevel";
     public const string LoggerSQLite_autoCreateTable = "autoCreateTable";
@@ -40,14 +33,12 @@ public static class SettingConstants
     public const string UnitOfMeasure_solarRadiation = "solarRadiation";
     public const string UnitOfMeasure_windSpeed = "windSpeed";
 
-    public const string jsonToPostgreSQL_groupName = "jsonToPostgreSQL";
-    public const string jsonToPostgreSQL_connectionString = "connectionString";
-    public const string jsonToPostgreSQL_enableBuffering = "enableBuffering";
-
-    public const string JsonToSQLite_groupName = "jsonToSQLite";
-    public const string JsonToSQLite_connectionString = "connectionString";
-    public const string JsonToSQLite_dbPath = "dbPath";
-    public const string JsonToSQLite_enableBuffering = "enableBuffering";
+    public const string Sqlite_groupName = "sqlite";
+    public const string Sqlite_dbPath = "dbPath";
+    public const string Sqlite_connectionString = "connectionString";
+    public const string Sqlite_journalMode = "journalMode";
+    public const string Sqlite_busyTimeoutMs = "busyTimeoutMs";
+    public const string Sqlite_enableBuffering = "enableBuffering";
 
     public const string Tempest_groupName = "tempest";
     public const string Tempest_apiKey = "apiKey";
@@ -60,11 +51,6 @@ public static class SettingConstants
     public const string Metrics_connectionString = "connectionString";
     public const string Metrics_tableName = "tableName";
     public const string Metrics_autoCreateTable = "autoCreateTable";
-    // Metrics persistence uses /services/metrics/{connectionString,tableName,autoCreateTable}
-    // Legacy compatibility aliases. Prefer Metrics_* for /services/metrics/*.
-    public const string MetricsPostgreSQL_connectionString = Metrics_connectionString;
-    public const string MetricsPostgreSQL_tableName = Metrics_tableName;
-    public const string MetricsPostgreSQL_autoCreateTable = Metrics_autoCreateTable;
 
     public const string Metrics_relayEnabled = "relayEnabled";
     public const string Metrics_relayTopN = "relayTopN";

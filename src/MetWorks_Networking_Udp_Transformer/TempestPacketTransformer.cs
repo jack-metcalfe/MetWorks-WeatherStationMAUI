@@ -1,4 +1,6 @@
 ﻿namespace MetWorks.Networking.Udp.Transformer;
+
+using System.Collections.Concurrent;
 public class TempestPacketTransformer : ServiceBase
 {
     private const int MaxRetryAttempts = 3;
@@ -9,7 +11,13 @@ public class TempestPacketTransformer : ServiceBase
     private long _totalPacketsReceived = 0;
     private long _totalPacketErrors = 0;
     private int _consecutiveErrors = 0;
+    private DateTime _lastStatsLogUtc = DateTime.MinValue;
+    private long _packetsReceivedAtLastStatsLog = 0;
     private const int MaxConsecutiveErrors = 10;
+    private static readonly TimeSpan StatsLogInterval = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan UnimplementedPacketLogInterval = TimeSpan.FromMinutes(1);
+    private readonly ConcurrentDictionary<PacketEnum, DateTime> _unimplementedLastLogUtc = new();
+    private long _unimplementedSuppressed;
     UdpClient? UdpClient { get; set; }
     // Lock to protect replacement of the UdpClient instance
     private readonly SemaphoreSlim _udpClientLock = new(1, 1);
@@ -18,7 +26,7 @@ public class TempestPacketTransformer : ServiceBase
     }
     // Accept CancellationToken (not CTS) per .NET convention
     public async Task<bool> InitializeAsync(
-        ILoggerResilient iLoggerResilient,
+        ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         CancellationToken externalCancellation = default,
@@ -28,39 +36,38 @@ public class TempestPacketTransformer : ServiceBase
         try
         {
             InitializeBase(
-                iLoggerResilient.ForContext(this.GetType()),
+                iLogger.ForContext(this.GetType()),
                 iSettingRepository,
                 iEventRelayBasic,
                 externalCancellation,
                 provenanceTracker
             );
 
-            iLoggerResilient.Ready.ConfigureAwait(false).GetAwaiter().GetResult();
+//            iLogger.Ready.ConfigureAwait(false).GetAwaiter().GetResult();
 
-            iLoggerResilient.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")} enabled for Tempest Packet Transformer");
+            iLogger.Information($"🔍 Provenance tracking {(HaveProvenanceTracker ? string.Empty : "NOT")} enabled for Tempest Packet Transformer");
 
-            // Log network interfaces for diagnostics
-            LogNetworkInterfaces();
+            // Network interface enumeration is verbose; keep it for targeted diagnostics only.
 
             // Subscribe to network events so we can rebind when connectivity changes
             SubscribeToNetworkEvents();
 
             if (!await SetupAsync().ConfigureAwait(false))
             {
-                iLoggerResilient.Error("❌ UDP listener setup failed");
+                iLogger.Error("❌ UDP listener setup failed");
                 return false;
             }
 
             if (!await StartAsync().ConfigureAwait(false))
             {
-                iLoggerResilient.Error("❌ UDP listener failed to start");
+                iLogger.Error("❌ UDP listener failed to start");
                 return false;
             }
 
             // Service is successfully initialized and background receive loop started
             try { MarkReady(); } catch { }
 
-            iLoggerResilient.Information("🛠️ UDP listener initialized successfully");
+            iLogger.Information("🛠️ UDP listener initialized successfully");
 
             return true;
         }
@@ -106,23 +113,8 @@ public class TempestPacketTransformer : ServiceBase
                     LookupDictionaries.UdpListenerGroupSettingsDefinition.BuildSettingPath(SettingConstants.UdpListener_preferredPort)
                 );
 
-            // Try preferred port first
-            if (await TryBindToPortAsync(preferredPort))
-                return true;
-
-            // If preferred port fails, try alternate ports
-            ILogger.Warning($"⚠️ Failed to bind to preferred port {preferredPort}, trying alternates...");
-
-            for (int port = preferredPort + 1; port < preferredPort + 10; port++)
-            {
-                if (await TryBindToPortAsync(port))
-                {
-                    ILogger.Information($"✅ Successfully bound to alternate port {port}");
-                    return true;
-                }
-            }
-
-            ILogger.Error("❌ Failed to bind to any UDP port after trying alternates");
+            // Tempest UDP broadcast is to a fixed destination port; binding to alternates won't receive packets.
+            return await TryBindToPortAsync(preferredPort).ConfigureAwait(false);
         }
         catch (Exception exception)
         {
@@ -237,21 +229,11 @@ public class TempestPacketTransformer : ServiceBase
         );
 
         ILogger.Information("🔁 Attempting to rebind UDP listener after connectivity change...");
-        // Attempt preferred then alternates (same as SetupAsync)
-        if (await TryBindToPortAsync(preferredPort))
-            return true;
-
-        for (int port = preferredPort + 1; port < preferredPort + 10; port++)
-        {
-            if (await TryBindToPortAsync(port))
-            {
-                ILogger.Information($"✅ Successfully rebound to alternate port {port}");
-                return true;
-            }
-        }
-
-        ILogger.Warning("⚠️ Rebind attempts failed");
-        return false;
+        // Tempest UDP broadcast is to a fixed destination port; rebinding alternates won't help.
+        var rebound = await TryBindToPortAsync(preferredPort).ConfigureAwait(false);
+        if (!rebound)
+            ILogger.Warning($"⚠️ Rebind attempt failed for UDP port {preferredPort}");
+        return rebound;
     }
     public async Task<bool> StartAsync()
     {
@@ -310,11 +292,12 @@ public class TempestPacketTransformer : ServiceBase
                     _consecutiveErrors = 0; // Reset error counter on success
                     lastWarningTime = DateTime.MinValue; // Reset warning timer
 
+                    MaybeLogStats();
+
                     // Process the packet
                     await ProcessPacketAsync(result).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested &&
-                                                          !token.IsCancellationRequested)
+                catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested && !token.IsCancellationRequested)
                 {
                     // Timeout occurred (no packet received in 10 seconds) - this is normal
                     // Check if we should warn about no data
@@ -447,6 +430,41 @@ public class TempestPacketTransformer : ServiceBase
             $"Total errors: {_totalPacketErrors}");
     }
 
+    void MaybeLogStats()
+    {
+        var nowUtc = DateTime.UtcNow;
+        if (nowUtc - _lastStatsLogUtc < StatsLogInterval) return;
+
+        var packetsSinceLast = _totalPacketsReceived - _packetsReceivedAtLastStatsLog;
+        var minutes = Math.Max(StatsLogInterval.TotalMinutes, 1);
+        var ratePerMin = packetsSinceLast / minutes;
+
+        _lastStatsLogUtc = nowUtc;
+        _packetsReceivedAtLastStatsLog = _totalPacketsReceived;
+
+        var suppressed = Interlocked.Exchange(ref _unimplementedSuppressed, 0);
+        var suppressedPart = suppressed > 0 ? $", unimplemented_suppressed={suppressed}" : string.Empty;
+
+        ILogger.Information(
+            $"📊 UDP stats: total={_totalPacketsReceived}, errors={_totalPacketErrors}, " +
+            $"rate_per_min={ratePerMin:F1}{suppressedPart}");
+    }
+
+    bool ShouldLogUnimplemented(PacketEnum packetEnum)
+    {
+        var nowUtc = DateTime.UtcNow;
+
+        if (_unimplementedLastLogUtc.TryGetValue(packetEnum, out var lastUtc) &&
+            nowUtc - lastUtc < UnimplementedPacketLogInterval)
+        {
+            Interlocked.Increment(ref _unimplementedSuppressed);
+            return false;
+        }
+
+        _unimplementedLastLogUtc[packetEnum] = nowUtc;
+        return true;
+    }
+
     private async Task ProcessPacketAsync(UdpReceiveResult result)
     {
         try
@@ -466,20 +484,19 @@ public class TempestPacketTransformer : ServiceBase
                     $"Packet type: {iRawPacketRecordTyped.PacketEnum}");
 
                 IEventRelayBasic.Send(iRawPacketRecordTyped);
-
-                ILogger.Information(
-                    $"📦 Received {iRawPacketRecordTyped.PacketEnum} packet from {result.RemoteEndPoint} " +
-                    $"({result.Buffer.Length} bytes) [Total: {_totalPacketsReceived}]");
             }
             else
             {
                 // NEW: Mark as failed
                 ProvenanceTracker?.UpdateStatus(iRawPacketRecordTyped.Id, DataStatusEnum.Failed);
 
-                ILogger.Warning(
-                    $"⚠️ Received unimplemented packet type from {result.RemoteEndPoint} " +
-                        $"({result.Buffer.Length} bytes)");
-                ILogger.Warning($"packet contents [{iRawPacketRecordTyped.RawPacketJson}]");
+                if (ShouldLogUnimplemented(iRawPacketRecordTyped.PacketEnum))
+                {
+                    ILogger.Warning(
+                        $"⚠️ Received unimplemented packet type '{iRawPacketRecordTyped.PacketEnum}' from {result.RemoteEndPoint} " +
+                            $"({result.Buffer.Length} bytes)");
+                    ILogger.Warning($"packet contents [{iRawPacketRecordTyped.RawPacketJson}]");
+                }
             }
 
             await Task.CompletedTask;

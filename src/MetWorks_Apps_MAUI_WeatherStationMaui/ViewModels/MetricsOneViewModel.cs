@@ -19,11 +19,7 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
             {
                 _current = value;
                 OnPropertyChanged();
-                var xx = _current.CapturedUtc.ToLocalTime();
-                OnPropertyChanged(nameof(CapturedUtcDisplay));
-                OnPropertyChanged(nameof(IntervalSecondsDisplay));
                 OnPropertyChanged(nameof(PersistStatusDisplay));
-                OnPropertyChanged(nameof(PersistAttemptUtcDisplay));
                 OnPropertyChanged(nameof(PersistErrorMessageDisplay));
                 OnPropertyChanged(nameof(JsonPayloadPreview));
             }
@@ -100,20 +96,11 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
         return $"{t} | n={r.Count} retrans={r.Retransforms} udp→end avg={r.UdpToTransformEndAvgMs:F1}ms max={r.UdpToTransformEndMaxMs:F1}ms";
     }
 
-    public string CapturedUtcDisplay =>
-        Current.CapturedUtc == DateTime.MinValue ? "--" : Current.CapturedUtc.ToString("G");
-
     public string CapturedUtcLocalizedDisplay =>
         Current.CapturedUtc.ToLocalTime() == DateTime.MinValue ? "--" : Current.CapturedUtc.ToLocalTime().ToString("G");
 
-    public string IntervalSecondsDisplay =>
-        Current.IntervalSeconds <= 0 ? "--" : Current.IntervalSeconds.ToString();
-
     public string PersistStatusDisplay =>
         string.IsNullOrWhiteSpace(Current.PersistStatus) ? "--" : Current.PersistStatus;
-
-    public string PersistAttemptUtcDisplay =>
-        Current.PersistAttemptUtc is null ? "--" : Current.PersistAttemptUtc.Value.ToString("u");
 
     public string PersistErrorMessageDisplay =>
         string.IsNullOrWhiteSpace(Current.PersistErrorMessage) ? "--" : Current.PersistErrorMessage!;

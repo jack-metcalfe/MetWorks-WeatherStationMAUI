@@ -55,8 +55,8 @@ public static class MauiProgram
         builder.Services.AddTransient<MainView2176x1812>();
         builder.Services.AddTransient<MainView2304x1440>();
 
-        builder.Services.AddTransient<ViewModels.SettingsEditorViewModel>();
-        builder.Services.AddTransient<Pages.Settings.SettingsEditorPage>();
+        builder.Services.AddTransient<SettingsEditorViewModel>();
+        builder.Services.AddTransient<SettingsEditorPage>();
 
         builder.Services.AddSingleton<IContentVariantCatalog, ContentVariantCatalog>();
         builder.Services.AddSingleton<IDeviceOverrideSource, YamlDeviceOverrideSource>();
