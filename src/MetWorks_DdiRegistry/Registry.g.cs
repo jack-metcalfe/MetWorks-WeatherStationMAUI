@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Registry
-// Generated On:        2026-02-15T03:41:55.5395261Z
+// Generated On:        2026-02-15T20:40:23.5606879Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -38,6 +38,9 @@ namespace MetWorks.ServiceRegistry
             TheMetricsSummaryRepository_InstanceFactory.Create(this);
             TheRollupsDatabaseReadiness_InstanceFactory.Create(this);
             TheObservationRollupRepository_InstanceFactory.Create(this);
+            ThePrecipitationRollupRepository_InstanceFactory.Create(this);
+            TheWindRollupRepository_InstanceFactory.Create(this);
+            TheLightningRollupRepository_InstanceFactory.Create(this);
             TheStreamShippingDatabaseReadiness_InstanceFactory.Create(this);
             TheStreamShippingRepository_InstanceFactory.Create(this);
             TheLoggerStreamShippingRepository_InstanceFactory.Create(this);
@@ -63,7 +66,7 @@ namespace MetWorks.ServiceRegistry
             TheWindStreamShipper_InstanceFactory.Create(this);
             TheMetricsSummaryIngestor_InstanceFactory.Create(this);
             TheMetricsSamplerService_InstanceFactory.Create(this);
-            TheObservationRollupWorker_InstanceFactory.Create(this);
+            TheRollupsWorker_InstanceFactory.Create(this);
             TheSQLiteStationMetadataIngestor_InstanceFactory.Create(this);
             TheSensorReadingTransformer_InstanceFactory.Create(this);
             TheUdpListener_InstanceFactory.Create(this);
@@ -85,6 +88,9 @@ namespace MetWorks.ServiceRegistry
             await TheMetricsSummaryRepository_Initializer.Initialize_TheMetricsSummaryRepositoryAsync(this).ConfigureAwait(false);
             await TheRollupsDatabaseReadiness_Initializer.Initialize_TheRollupsDatabaseReadinessAsync(this).ConfigureAwait(false);
             await TheObservationRollupRepository_Initializer.Initialize_TheObservationRollupRepositoryAsync(this).ConfigureAwait(false);
+            await ThePrecipitationRollupRepository_Initializer.Initialize_ThePrecipitationRollupRepositoryAsync(this).ConfigureAwait(false);
+            await TheWindRollupRepository_Initializer.Initialize_TheWindRollupRepositoryAsync(this).ConfigureAwait(false);
+            await TheLightningRollupRepository_Initializer.Initialize_TheLightningRollupRepositoryAsync(this).ConfigureAwait(false);
             await TheStreamShippingDatabaseReadiness_Initializer.Initialize_TheStreamShippingDatabaseReadinessAsync(this).ConfigureAwait(false);
             await TheStreamShippingRepository_Initializer.Initialize_TheStreamShippingRepositoryAsync(this).ConfigureAwait(false);
             await TheLoggerStreamShippingRepository_Initializer.Initialize_TheLoggerStreamShippingRepositoryAsync(this).ConfigureAwait(false);
@@ -110,7 +116,7 @@ namespace MetWorks.ServiceRegistry
             await TheWindStreamShipper_Initializer.Initialize_TheWindStreamShipperAsync(this).ConfigureAwait(false);
             await TheMetricsSummaryIngestor_Initializer.Initialize_TheMetricsSummaryIngestorAsync(this).ConfigureAwait(false);
             await TheMetricsSamplerService_Initializer.Initialize_TheMetricsSamplerServiceAsync(this).ConfigureAwait(false);
-            await TheObservationRollupWorker_Initializer.Initialize_TheObservationRollupWorkerAsync(this).ConfigureAwait(false);
+            await TheRollupsWorker_Initializer.Initialize_TheRollupsWorkerAsync(this).ConfigureAwait(false);
             await TheSQLiteStationMetadataIngestor_Initializer.Initialize_TheSQLiteStationMetadataIngestorAsync(this).ConfigureAwait(false);
             await TheSensorReadingTransformer_Initializer.Initialize_TheSensorReadingTransformerAsync(this).ConfigureAwait(false);
             await TheUdpListener_Initializer.Initialize_TheUdpListenerAsync(this).ConfigureAwait(false);

@@ -55,6 +55,20 @@ Namespace: `MetWorks.Persistence.Rollups`
   - `RollupDayAsync(int maxBucketsPerRun, CancellationToken cancellationToken)`
   - Purpose: create/refresh aggregated observation rollups.
 
+- `IPrecipitationRollupRepository`
+  - `AdvanceWatermarkAsync(int bucketWidthSeconds, int maxBucketsPerRun, CancellationToken cancellationToken)`
+  - Purpose: advance `rollup_state` for `precipitation` on the shared rollups cadence.
+  - Note: precipitation is currently treated as an event-only source, so this rollup is watermark-only (no rollup table).
+
+- `IWindRollupRepository`
+  - `RollupHourAsync(int maxBucketsPerRun, CancellationToken cancellationToken)`
+  - `RollupDayAsync(int maxBucketsPerRun, CancellationToken cancellationToken)`
+  - Purpose: create/refresh aggregated wind rollups.
+
+- `ILightningRollupRepository`
+  - `RollupDayAsync(int maxBucketsPerRun, CancellationToken cancellationToken)`
+  - Purpose: create/refresh aggregated lightning rollups.
+
 #### DDL ownership
 
 `MetWorks.Persistence.Rollups.RollupsSqlScripts` currently declares the script set:
@@ -62,6 +76,9 @@ Namespace: `MetWorks.Persistence.Rollups`
 - `rollup_state`
 - `observation_rollup_1h`
 - `observation_rollup_1d`
+- `wind_rollup_1h`
+- `wind_rollup_1d`
+- `lightning_rollup_1d`
 
 ### Stream shipping (vertical slice 2)
 
@@ -208,6 +225,7 @@ Both guards should be non-blocking (no backlog). If a tick arrives while a run/p
   - probe-driven “active vs degraded” gate via `_isDatabaseAvailable`
   - readiness probe is guarded by `_isInitializing`
   - work run is guarded by `_gate`
+  - intended to be a single rollups worker cadence; additional rollup repositories can be added without introducing new workers unless needed
 
 - `RawPacketIngestor`
   - uses `_isDatabaseAvailable` and periodic health reporting via a timer (`StartHealthMonitoring`)

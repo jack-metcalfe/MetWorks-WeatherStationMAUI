@@ -64,7 +64,7 @@ internal static class SqliteSchemaBootstrapper
 
     static async Task<int> ApplyLogTableAsync(SqliteConnection connection, CancellationToken cancellationToken)
     {
-        const string tableName = "log";
+        const string tableName = "logger_sqlite_log";
 
         var sql = $@"
 CREATE TABLE IF NOT EXISTS ""{tableName}"" (

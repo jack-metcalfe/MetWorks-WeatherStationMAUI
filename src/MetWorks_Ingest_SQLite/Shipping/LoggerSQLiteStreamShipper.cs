@@ -9,11 +9,15 @@ namespace MetWorks.Ingest.SQLite.Shipping;
 public sealed class LoggerSQLiteStreamShipper : ServiceBase
 {
     const string Source = "logger_sqlite";
+    const string DefaultLoggerTableName = "logger_sqlite_log";
 
     const int DefaultShipIntervalSeconds = 30;
     const int DefaultMaxBatchRows = 500;
 
-    string _tableName = "log";
+    const int MinShipIntervalSeconds = 1;
+    const int MaxShipIntervalSeconds = 24 * 60 * 60;
+
+    string _tableName = DefaultLoggerTableName;
     string _installationId = string.Empty;
 
     string _endpointUrl = string.Empty;
@@ -86,6 +90,11 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         if (_shipIntervalSeconds <= 0)
             _shipIntervalSeconds = DefaultShipIntervalSeconds;
 
+        if (_shipIntervalSeconds < MinShipIntervalSeconds)
+            _shipIntervalSeconds = MinShipIntervalSeconds;
+        else if (_shipIntervalSeconds > MaxShipIntervalSeconds)
+            _shipIntervalSeconds = MaxShipIntervalSeconds;
+
         _maxBatchRows = iSettingRepository.GetValueOrDefault<int>(
             LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_maxBatchRows));
 
@@ -96,7 +105,7 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
             LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerSQLite_tableName));
 
         if (string.IsNullOrWhiteSpace(_tableName))
-            _tableName = "log";
+            _tableName = DefaultLoggerTableName;
 
         _installationId = iInstanceIdentifier.GetOrCreateInstallationId();
 
@@ -173,6 +182,7 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
             loggerRepo,
             stateRepo,
             state,
+            _tableName,
             token).ConfigureAwait(false);
 
         var lastAcked = state?.LastAckedRowId ?? 0;
@@ -267,8 +277,12 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         ILoggerStreamShippingRepository loggerRepo,
         IStreamShippingRepository stateRepo,
         ShipperStateSnapshot? state,
+        string tableName,
         CancellationToken token)
     {
+        if (string.IsNullOrWhiteSpace(tableName))
+            throw new ArgumentException("Table is required.", nameof(tableName));
+
         var retention = new LoggerRetentionOptions(
             RetainFor: TimeSpan.FromDays(7),
             PurgeInterval: TimeSpan.FromHours(1));
@@ -291,7 +305,7 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         var cutoff = now - retention.RetainFor;
 
         var deleted = await loggerRepo.PurgeAckedOlderThanAsync(
-            table: "log",
+            table: tableName,
             ackedUpToRowId: acked,
             cutoffUtc: cutoff,
             cancellationToken: token).ConfigureAwait(false);

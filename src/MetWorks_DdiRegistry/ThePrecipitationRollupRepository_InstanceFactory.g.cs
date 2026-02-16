@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Instance.Factory
-// Generated On:        2026-02-15T03:41:55.5395261Z
+// Generated On:        2026-02-15T20:40:23.5606879Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -13,16 +13,16 @@ namespace MetWorks.ServiceRegistry
     // Declared as partial to allow modularization if needed.
     // It handles both element-driven and assignment-driven construction,
     // and immediately registers the created instance with the Registry.
-    internal static partial class TheObservationRollupWorker_InstanceFactory
+    internal static partial class ThePrecipitationRollupRepository_InstanceFactory
     {
-        public static MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker Create(Registry registry)
+        public static MetWorks.Persistence.Rollups.PrecipitationRollupRepository Create(Registry registry)
         {
             // Assignment-driven instance: construct with new().
             // This is always valid because ContainerClass is a concrete class.
-            var instance = new MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker();
+            var instance = new MetWorks.Persistence.Rollups.PrecipitationRollupRepository();
 
             // Register immediately so other instances can reference it.
-            registry.RegisterTheObservationRollupWorker(instance);
+            registry.RegisterThePrecipitationRollupRepository(instance);
 
             return instance;
         }

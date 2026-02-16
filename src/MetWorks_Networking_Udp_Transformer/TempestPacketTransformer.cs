@@ -15,7 +15,7 @@ public class TempestPacketTransformer : ServiceBase
     private long _packetsReceivedAtLastStatsLog = 0;
     private const int MaxConsecutiveErrors = 10;
     private static readonly TimeSpan StatsLogInterval = TimeSpan.FromMinutes(1);
-    private static readonly TimeSpan UnimplementedPacketLogInterval = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan UnimplementedPacketLogInterval = TimeSpan.FromMinutes(30);
     private readonly ConcurrentDictionary<PacketEnum, DateTime> _unimplementedLastLogUtc = new();
     private long _unimplementedSuppressed;
     UdpClient? UdpClient { get; set; }

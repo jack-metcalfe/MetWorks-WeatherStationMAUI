@@ -2,7 +2,7 @@
 
 namespace MetWorks.Ingest.SQLite.Rollups;
 
-public sealed class ObservationRollupWorker : ServiceBase
+public class RollupsWorker : ServiceBase
 {
     bool _isDatabaseAvailable = false;
     int _isInitializing = 0;
@@ -18,8 +18,11 @@ public sealed class ObservationRollupWorker : ServiceBase
 
     IRollupsDatabaseReadiness? _rollupsDatabaseReadiness;
     IObservationRollupRepository? _observationRollupRepository;
+    IPrecipitationRollupRepository? _precipitationRollupRepository;
+    IWindRollupRepository? _windRollupRepository;
+    ILightningRollupRepository? _lightningRollupRepository;
 
-    public ObservationRollupWorker()
+    public RollupsWorker()
     {
     }
 
@@ -29,6 +32,9 @@ public sealed class ObservationRollupWorker : ServiceBase
         IEventRelayBasic iEventRelayBasic,
         IRollupsDatabaseReadiness rollupsDatabaseReadiness,
         IObservationRollupRepository observationRollupRepository,
+        IPrecipitationRollupRepository precipitationRollupRepository,
+        IWindRollupRepository windRollupRepository,
+        ILightningRollupRepository lightningRollupRepository,
         CancellationToken externalCancellation = default,
         ProvenanceTracker? provenanceTracker = null)
     {
@@ -37,8 +43,11 @@ public sealed class ObservationRollupWorker : ServiceBase
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
         ArgumentNullException.ThrowIfNull(rollupsDatabaseReadiness);
         ArgumentNullException.ThrowIfNull(observationRollupRepository);
+        ArgumentNullException.ThrowIfNull(precipitationRollupRepository);
+        ArgumentNullException.ThrowIfNull(windRollupRepository);
+        ArgumentNullException.ThrowIfNull(lightningRollupRepository);
 
-        iLogger.Information($"ObservationRollupWorker(SQLite).InitializeAsync() starting - thread={Environment.CurrentManagedThreadId}");
+        iLogger.Information($"RollupsWorker(SQLite).InitializeAsync() starting - thread={Environment.CurrentManagedThreadId}");
 
         try
         {
@@ -52,11 +61,14 @@ public sealed class ObservationRollupWorker : ServiceBase
 
             _rollupsDatabaseReadiness = rollupsDatabaseReadiness;
             _observationRollupRepository = observationRollupRepository;
+            _precipitationRollupRepository = precipitationRollupRepository;
+            _windRollupRepository = windRollupRepository;
+            _lightningRollupRepository = lightningRollupRepository;
 
             var connected = await TryEnsureReadyAsync().ConfigureAwait(false);
             if (!connected)
             {
-                ILogger.Warning("⚠️ ObservationRollupWorker initial DB readiness check failed. Starting in degraded mode.");
+                ILogger.Warning("⚠️ RollupsWorker initial DB readiness check failed. Starting in degraded mode.");
             }
 
             StartAsync();
@@ -66,7 +78,7 @@ public sealed class ObservationRollupWorker : ServiceBase
         }
         catch (Exception exception)
         {
-            iLogger.Error($"❌ Error during ObservationRollupWorker initialization: {exception.Message}");
+            iLogger.Error($"❌ Error during RollupsWorker initialization: {exception.Message}");
             StartAsync();
             return true;
         }
@@ -114,14 +126,14 @@ public sealed class ObservationRollupWorker : ServiceBase
 
                 var connected = await TryEnsureReadyAsync().ConfigureAwait(false);
                 if (connected)
-                    ILogger.Information("✅ ObservationRollupWorker SQLite reconnection SUCCESSFUL.");
+                    ILogger.Information("✅ RollupsWorker SQLite reconnection SUCCESSFUL.");
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
             }
             catch (Exception ex)
             {
-                ILogger.Warning($"⚠️ ObservationRollupWorker reconnection task failed: {ex.Message}");
+                ILogger.Warning($"⚠️ RollupsWorker reconnection task failed: {ex.Message}");
             }
         });
     }
@@ -156,7 +168,7 @@ public sealed class ObservationRollupWorker : ServiceBase
         {
             _isDatabaseAvailable = false;
             _failureCount++;
-            ILogger.Warning($"⚠️ ObservationRollupWorker failed to establish SQLite connection: {ex.Message}");
+            ILogger.Warning($"⚠️ RollupsWorker failed to establish SQLite connection: {ex.Message}");
             return false;
         }
         finally
@@ -182,12 +194,27 @@ public sealed class ObservationRollupWorker : ServiceBase
 
         try
         {
-            if (_rollupsDatabaseReadiness is null || _observationRollupRepository is null) return;
+            if (_rollupsDatabaseReadiness is null
+                || _observationRollupRepository is null
+                || _precipitationRollupRepository is null
+                || _windRollupRepository is null
+                || _lightningRollupRepository is null)
+                return;
 
             await _rollupsDatabaseReadiness.EnsureReadyAsync(cancellationToken).ConfigureAwait(false);
 
             await _observationRollupRepository.RollupHourAsync(maxBucketsPerRun: 24, cancellationToken).ConfigureAwait(false);
             await _observationRollupRepository.RollupDayAsync(maxBucketsPerRun: 7, cancellationToken).ConfigureAwait(false);
+
+            await _precipitationRollupRepository.AdvanceWatermarkAsync(
+                bucketWidthSeconds: 86400,
+                maxBucketsPerRun: 7,
+                cancellationToken).ConfigureAwait(false);
+
+            await _windRollupRepository.RollupHourAsync(maxBucketsPerRun: 24, cancellationToken).ConfigureAwait(false);
+            await _windRollupRepository.RollupDayAsync(maxBucketsPerRun: 7, cancellationToken).ConfigureAwait(false);
+
+            await _lightningRollupRepository.RollupDayAsync(maxBucketsPerRun: 7, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -195,7 +222,7 @@ public sealed class ObservationRollupWorker : ServiceBase
         }
         catch (Exception ex)
         {
-            ILogger.Warning($"ObservationRollupWorker: rollup run failed: {ex.Message}");
+            ILogger.Warning($"RollupsWorker: rollup run failed: {ex.Message}");
         }
         finally
         {

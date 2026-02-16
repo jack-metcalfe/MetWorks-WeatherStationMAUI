@@ -32,7 +32,8 @@ sealed class SqliteSession(SqliteConnection connection) : ISqliteSession, IAsync
         if (scalar is null || scalar is DBNull)
             return default;
 
-        return (T)Convert.ChangeType(scalar, typeof(T), CultureInfo.InvariantCulture);
+        var targetType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+        return (T)Convert.ChangeType(scalar, targetType, CultureInfo.InvariantCulture);
     }
 
     public async Task<IReadOnlyList<T>> QueryAsync<T>(

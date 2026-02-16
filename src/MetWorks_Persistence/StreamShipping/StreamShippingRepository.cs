@@ -108,7 +108,8 @@ WHERE installation_id = $installation_id AND source = $source;
         string source,
         long? lastShippedRowId,
         long? lastAckedRowId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         if (string.IsNullOrWhiteSpace(source))
             throw new ArgumentException("Source is required.", nameof(source));
@@ -173,28 +174,53 @@ LIMIT $limit;
 
         await using var session = await sqliteDatabase.OpenSessionAsync(cancellationToken).ConfigureAwait(false);
 
-        var rows = await session.QueryAsync(
-            sql,
-            [
-                new DbParam("$installation_id", installationId),
+        IReadOnlyList<StandardReadingRow> rows = Array.Empty<StandardReadingRow>();
+        try
+        {
+            rows = await session.QueryAsync(
+                sql,
+                [
+                    new DbParam("$installation_id", installationId),
                 new DbParam("$last_acked_rowid", lastAckedRowId),
                 new DbParam("$limit", maxRows),
-            ],
-            row =>
-            {
-                _ = row.TryGetInt64("rowid", out var rowId);
-                _ = row.TryGetString("id", out var id);
-                _ = row.TryGetInt64("application_received_utc_timestampz", out var applicationReceivedUtc);
-                _ = row.TryGetString("json_document_original", out var json);
+                ],
+                row =>
+                {
+                    _ = row.TryGetInt64("rowid", out var rowId);
+                    _ = row.TryGetString("id", out var id);
+                var applicationReceivedUtc = 0L;
+                if (row.TryGetString("application_received_utc_timestampz", out var applicationReceivedText)
+                    && !string.IsNullOrWhiteSpace(applicationReceivedText)
+                    && DateTimeOffset.TryParse(applicationReceivedText, out var applicationReceivedDto))
+                {
+                    applicationReceivedUtc = applicationReceivedDto.ToUnixTimeSeconds();
+                }
+                else
+                {
+                    try
+                    {
+                        _ = row.TryGetInt64("application_received_utc_timestampz", out applicationReceivedUtc);
+                    }
+                    catch (FormatException)
+                    {
+                        applicationReceivedUtc = 0;
+                    }
+                }
+                    _ = row.TryGetString("json_document_original", out var json);
 
-                return new StandardReadingRow(
-                    RowId: rowId,
-                    Id: id ?? string.Empty,
-                    ApplicationReceivedUtcEpoch: applicationReceivedUtc,
-                    JsonDocumentOriginal: json ?? string.Empty);
-            },
-            cancellationToken).ConfigureAwait(false);
-
+                    return new StandardReadingRow(
+                        RowId: rowId,
+                        Id: id ?? string.Empty,
+                        ApplicationReceivedUtcEpoch: applicationReceivedUtc,
+                        JsonDocumentOriginal: json ?? string.Empty);
+                },
+                cancellationToken).ConfigureAwait(false);
+        
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error reading standard readings batch from table '{table}' for installation '{installationId}'.", ex);
+}
         return rows;
     }
 }

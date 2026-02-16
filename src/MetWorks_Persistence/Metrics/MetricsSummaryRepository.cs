@@ -45,7 +45,7 @@ public sealed class MetricsSummaryRepository : IMetricsSummaryRepository
         var schemaVersion = row.SchemaVersion <= 0 ? 1 : row.SchemaVersion;
 
         var sql = $"""
-INSERT INTO ""{row.Table}"" (
+INSERT INTO "{row.Table}" (
     comb_id,
     installation_id,
     captured_utc,

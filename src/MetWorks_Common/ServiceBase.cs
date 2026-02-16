@@ -1,4 +1,5 @@
 ﻿namespace MetWorks.Common;
+using System.Runtime.CompilerServices;
 /// <summary>
 /// Lightweight base for long-running services:
 /// - standard linked CancellationTokenSource pattern
@@ -78,9 +79,25 @@ public abstract class ServiceBase : IAsyncDisposable, IServiceReady
     /// <summary>
     /// Start and track a background task that observes the linked cancellation token.
     /// </summary>
-    protected void StartBackground(Func<CancellationToken, Task> backgroundWork)
+    protected void StartBackground(
+        Func<CancellationToken, Task> backgroundWork,
+        [CallerMemberName] string callerMemberName = "",
+        [CallerFilePath] string callerFilePath = "",
+        [CallerLineNumber] int callerLineNumber = 0)
     {
         if (backgroundWork == null) throw new ArgumentNullException(nameof(backgroundWork));
+        StartBackground(caller: BuildCallerJson(callerMemberName, callerFilePath, callerLineNumber), backgroundWork);
+    }
+
+    /// <summary>
+    /// Start and track a background task that observes the linked cancellation token.
+    /// The caller label is included in cancellation/exception logs to aid diagnosis.
+    /// </summary>
+    protected void StartBackground(string caller, Func<CancellationToken, Task> backgroundWork)
+    {
+        if (string.IsNullOrWhiteSpace(caller)) throw new ArgumentException("Caller is required.", nameof(caller));
+        if (backgroundWork == null) throw new ArgumentNullException(nameof(backgroundWork));
+
         var token = LinkedCancellationToken;
         var t = Task.Run(async () =>
         {
@@ -90,11 +107,11 @@ public abstract class ServiceBase : IAsyncDisposable, IServiceReady
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
-                try { ILogger.Debug("Background task cancelled"); } catch { }
+                try { ILogger.Debug($"Background task cancelled ({caller})"); } catch { }
             }
             catch (Exception ex)
             {
-                try { ILogger.Error($"Unhandled background task exception: {ex.Message}"); } catch { }
+                try { ILogger.Error($"Unhandled background task exception ({caller}): {ex.Message}"); } catch { }
                 throw;
             }
         }, token);
@@ -103,6 +120,27 @@ public abstract class ServiceBase : IAsyncDisposable, IServiceReady
         {
             _backgroundTasks.Add(t);
         }
+    }
+
+    string BuildCallerJson(string callerMemberName, string callerFilePath, int callerLineNumber)
+    {
+        var typeName = GetType().Name;
+
+        var file = callerFilePath;
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(file))
+                file = Path.GetFileName(file);
+        }
+        catch
+        {
+        }
+
+        var member = string.IsNullOrWhiteSpace(callerMemberName) ? "?" : callerMemberName;
+        var line = callerLineNumber <= 0 ? 0 : callerLineNumber;
+
+        // Keep this compact and safe to embed into log lines.
+        return $"{{\"type\":\"{typeName}\",\"member\":\"{member}\",\"file\":\"{file}\",\"line\":{line}}}";
     }
 
     protected async Task WaitForBackgroundTasksAsync(TimeSpan timeout)

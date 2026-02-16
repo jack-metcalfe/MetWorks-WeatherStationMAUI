@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-02-15T03:41:55.5395261Z
+// Generated On:        2026-02-15T20:40:23.5606879Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -285,6 +285,51 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Rollups.ObservationRollupRepository GetTheObservationRollupRepository_Internal() =>
             _TheObservationRollupRepositoryInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterThePrecipitationRollupRepository(MetWorks.Persistence.Rollups.PrecipitationRollupRepository instance) =>
+            _ThePrecipitationRollupRepositoryInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Persistence.Rollups.IPrecipitationRollupRepository GetThePrecipitationRollupRepository() =>
+            _ThePrecipitationRollupRepositoryInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Persistence.Rollups.PrecipitationRollupRepository GetThePrecipitationRollupRepository_Internal() =>
+            _ThePrecipitationRollupRepositoryInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheWindRollupRepository(MetWorks.Persistence.Rollups.WindRollupRepository instance) =>
+            _TheWindRollupRepositoryInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Persistence.Rollups.IWindRollupRepository GetTheWindRollupRepository() =>
+            _TheWindRollupRepositoryInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Persistence.Rollups.WindRollupRepository GetTheWindRollupRepository_Internal() =>
+            _TheWindRollupRepositoryInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheLightningRollupRepository(MetWorks.Persistence.Rollups.LightningRollupRepository instance) =>
+            _TheLightningRollupRepositoryInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Persistence.Rollups.ILightningRollupRepository GetTheLightningRollupRepository() =>
+            _TheLightningRollupRepositoryInstance;
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Persistence.Rollups.LightningRollupRepository GetTheLightningRollupRepository_Internal() =>
+            _TheLightningRollupRepositoryInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
@@ -665,16 +710,16 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheObservationRollupWorker(MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker instance) =>
-            _TheObservationRollupWorkerInstance = instance;
+        public void RegisterTheRollupsWorker(MetWorks.Ingest.SQLite.Rollups.RollupsWorker instance) =>
+            _TheRollupsWorkerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker GetTheObservationRollupWorker() =>
-            _TheObservationRollupWorkerInstance;
+        public MetWorks.Ingest.SQLite.Rollups.RollupsWorker GetTheRollupsWorker() =>
+            _TheRollupsWorkerInstance;
 
         // Internal accessor: always returns the concrete class.
-        internal MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker GetTheObservationRollupWorker_Internal() =>
-            _TheObservationRollupWorkerInstance;
+        internal MetWorks.Ingest.SQLite.Rollups.RollupsWorker GetTheRollupsWorker_Internal() =>
+            _TheRollupsWorkerInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors

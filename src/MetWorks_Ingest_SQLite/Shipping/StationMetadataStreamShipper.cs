@@ -10,6 +10,9 @@ public sealed class StationMetadataStreamShipper : ServiceBase
     const int DefaultShipIntervalSeconds = 30;
     const int DefaultMaxBatchRows = 200;
 
+    const int MinShipIntervalSeconds = 1;
+    const int MaxShipIntervalSeconds = 24 * 60 * 60;
+
     string _installationId = string.Empty;
 
     string _endpointUrl = string.Empty;
@@ -78,6 +81,11 @@ public sealed class StationMetadataStreamShipper : ServiceBase
         if (_shipIntervalSeconds <= 0)
             _shipIntervalSeconds = DefaultShipIntervalSeconds;
 
+        if (_shipIntervalSeconds < MinShipIntervalSeconds)
+            _shipIntervalSeconds = MinShipIntervalSeconds;
+        else if (_shipIntervalSeconds > MaxShipIntervalSeconds)
+            _shipIntervalSeconds = MaxShipIntervalSeconds;
+
         _maxBatchRows = iSettingRepository.GetValueOrDefault<int>(
             LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_maxBatchRows));
 
@@ -133,52 +141,61 @@ public sealed class StationMetadataStreamShipper : ServiceBase
 
     async Task ShipOnceAsync(CancellationToken token)
     {
-        if (_httpClient is null)
-            throw new InvalidOperationException("HttpClient is not initialized.");
+        try
+        {
+            if (_httpClient is null)
+                throw new InvalidOperationException("HttpClient is not initialized.");
 
-        var readiness = _streamShippingDatabaseReadiness;
-        if (readiness is null)
-            throw new InvalidOperationException("Stream shipping database readiness is not initialized.");
+            var readiness = _streamShippingDatabaseReadiness;
+            if (readiness is null)
+                throw new InvalidOperationException("Stream shipping database readiness is not initialized.");
 
-        var repo = _streamShippingRepository;
-        if (repo is null)
-            throw new InvalidOperationException("Stream shipping repository is not initialized.");
+            var repo = _streamShippingRepository;
+            if (repo is null)
+                throw new InvalidOperationException("Stream shipping repository is not initialized.");
 
-        if (string.IsNullOrWhiteSpace(_installationId))
-            throw new InvalidOperationException("Installation id is not initialized.");
+            if (string.IsNullOrWhiteSpace(_installationId))
+                throw new InvalidOperationException("Installation id is not initialized.");
 
-        await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
+            await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
 
-        var state = await repo.TryGetStateAsync(Source, token).ConfigureAwait(false);
-        var lastAcked = state?.LastAckedRowId ?? 0;
+            var state = await repo.TryGetStateAsync(Source, token).ConfigureAwait(false);
+            var lastAcked = state?.LastAckedRowId ?? 0;
 
-        var rows = await repo.ReadStandardReadingsBatchAsync(
-            table: Table,
-            installationId: _installationId,
-            lastAckedRowId: lastAcked,
-            maxRows: _maxBatchRows,
-            cancellationToken: token).ConfigureAwait(false);
+            var rows = await repo.ReadStandardReadingsBatchAsync(
+                table: Table,
+                installationId: _installationId,
+                lastAckedRowId: lastAcked,
+                maxRows: _maxBatchRows,
+                cancellationToken: token).ConfigureAwait(false);
 
-        if (rows.Count == 0)
-            return;
+            if (rows.Count == 0)
+                return;
 
-        var maxRowId = rows[^1].RowId;
+            var maxRowId = rows[^1].RowId;
 
-        var ackedUpTo = await ObservationStreamShipper.UploadNdjsonAsync(
-            httpClient: _httpClient,
-            endpointUrl: _endpointUrl,
-            table: Table,
-            installationId: _installationId,
-            rows: rows,
-            token: token).ConfigureAwait(false);
+            var ackedUpTo = await ObservationStreamShipper.UploadNdjsonAsync(
+                httpClient: _httpClient,
+                endpointUrl: _endpointUrl,
+                table: Table,
+                installationId: _installationId,
+                rows: rows,
+                token: token).ConfigureAwait(false);
 
-        if (ackedUpTo is null)
-            return;
+            if (ackedUpTo is null)
+                return;
 
-        await repo.UpsertShippingProgressAsync(
-            source: Source,
-            lastShippedRowId: maxRowId,
-            lastAckedRowId: ackedUpTo.Value,
-            cancellationToken: token).ConfigureAwait(false);
+            await repo.UpsertShippingProgressAsync(
+                source: Source,
+                lastShippedRowId: maxRowId,
+                lastAckedRowId: ackedUpTo.Value,
+                cancellationToken: token).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (
+            !(ex is OperationCanceledException)
+        )
+        {
+            ILogger.Error("StationMetadataStreamShipper: error during shipping", ex);
+        }
     }
 }

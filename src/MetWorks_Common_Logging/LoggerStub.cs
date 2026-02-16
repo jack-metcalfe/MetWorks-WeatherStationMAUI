@@ -6,19 +6,7 @@
 /// </summary>
 public sealed class LoggerStub : ILoggerStub
 {
-    public Task<bool> InitializeAsync(
-        int fileSizeLimitBytes,
-        string minimumLevel,
-        string outputTemplate,
-        string relativeLogPath,
-        int retainedFileCountLimit,
-        string rollingInterval,
-        bool rollOnFileSizeLimit
-    )
-    {
-        return Task.FromResult(true);
-    }
-
+    public LoggerStub() { }
     public void Information(string message) { }
     public void Warning(string message) { }
     public void Error(string message, Exception exception) { }

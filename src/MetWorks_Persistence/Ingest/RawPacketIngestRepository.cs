@@ -24,7 +24,7 @@ public sealed class RawPacketIngestRepository : IRawPacketIngestRepository
     ISqliteDatabase GetInitializedSqliteDatabase() =>
         _sqliteDatabase ?? throw new InvalidOperationException($"{nameof(RawPacketIngestRepository)} has not been initialized.");
 
-    public async Task ProbeJson1Async(CancellationToken cancellationToken)
+    public async Task ProbeJsonAsync(CancellationToken cancellationToken)
     {
         await using var session = await GetInitializedSqliteDatabase().OpenSessionAsync(cancellationToken).ConfigureAwait(false);
 

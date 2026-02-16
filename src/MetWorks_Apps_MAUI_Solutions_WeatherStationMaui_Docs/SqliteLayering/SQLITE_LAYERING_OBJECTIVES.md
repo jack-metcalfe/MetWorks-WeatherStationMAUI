@@ -88,7 +88,7 @@ Suggested namespaces (adjust naming as needed):
 - `MetWorks.Persistence.Rollups`
 - `MetWorks.Persistence.Metrics`
 - `MetWorks.Persistence.Logging`
-- `MetWorks.Persistence.Shipping`
+- `MetWorks.Persistence.StreamShipping`
 
 Each namespace should expose consumer-facing services/repositories like:
 - `IObservationRepository`
@@ -118,5 +118,4 @@ Each namespace should expose consumer-facing services/repositories like:
 
 - `DATA_LAYER_SQLITE.md`
 - `PERSISTENCE_LAYER_SQLITE.md`
-- `SETTINGS.md` (settings conventions)
-- `DI_AND_INITIALIZEASYNC.md` (DDI patterns)
+- `../README.md` (docs folder index)

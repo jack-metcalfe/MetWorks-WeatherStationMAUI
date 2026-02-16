@@ -124,3 +124,5 @@ Payload node:
   - `logger_sqlite_bytes`
   - `readings_sqlite_bytes`
   - `top_log_files[]` (`path`, `bytes`)
+
+Note: the solution now uses a unified SQLite database configuration under `/services/sqlite/*`. `logger_sqlite_bytes` and `readings_sqlite_bytes` may currently resolve to the same underlying file path depending on configuration.

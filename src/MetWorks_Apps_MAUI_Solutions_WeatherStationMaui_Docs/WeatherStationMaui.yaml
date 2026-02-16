@@ -561,6 +561,9 @@ namespace:
     interface:
       - name: "IRollupsDatabaseReadiness"
       - name: "IObservationRollupRepository"
+      - name: "IPrecipitationRollupRepository"
+      - name: "IWindRollupRepository"
+      - name: "ILightningRollupRepository"
     class:
       - name: "RollupsDatabaseReadiness"
         interface: "MetWorks.Persistence.Rollups.IRollupsDatabaseReadiness"
@@ -574,6 +577,47 @@ namespace:
         property: []
       - name: "ObservationRollupRepository"
         interface: "MetWorks.Persistence.Rollups.IObservationRollupRepository"
+        parameter:
+          - name: "sqliteDatabase"
+            class: null
+            interface: "MetWorks.Data.Sqlite.ISqliteDatabase"
+          - name: "instanceIdentifier"
+            class: null
+            interface: "MetWorks.Interfaces.IInstanceIdentifier"
+          - name: "cancellationToken"
+            class: "System.Threading.CancellationToken"
+            interface: null
+        property: []
+      - name: "PrecipitationRollupRepository"
+        interface: "MetWorks.Persistence.Rollups.IPrecipitationRollupRepository"
+        parameter:
+          - name: "sqliteDatabase"
+            class: null
+            interface: "MetWorks.Data.Sqlite.ISqliteDatabase"
+          - name: "instanceIdentifier"
+            class: null
+            interface: "MetWorks.Interfaces.IInstanceIdentifier"
+          - name: "cancellationToken"
+            class: "System.Threading.CancellationToken"
+            interface: null
+        property: []
+
+      - name: "WindRollupRepository"
+        interface: "MetWorks.Persistence.Rollups.IWindRollupRepository"
+        parameter:
+          - name: "sqliteDatabase"
+            class: null
+            interface: "MetWorks.Data.Sqlite.ISqliteDatabase"
+          - name: "instanceIdentifier"
+            class: null
+            interface: "MetWorks.Interfaces.IInstanceIdentifier"
+          - name: "cancellationToken"
+            class: "System.Threading.CancellationToken"
+            interface: null
+        property: []
+
+      - name: "LightningRollupRepository"
+        interface: "MetWorks.Persistence.Rollups.ILightningRollupRepository"
         parameter:
           - name: "sqliteDatabase"
             class: null
@@ -858,7 +902,7 @@ namespace:
   - name: "MetWorks.Ingest.SQLite.Rollups"
     interface: []
     class:
-      - name: "ObservationRollupWorker"
+      - name: "RollupsWorker"
         interface: null
         parameter:
           - name: "iLogger"
@@ -876,6 +920,15 @@ namespace:
           - name: "observationRollupRepository"
             class: null
             interface: "MetWorks.Persistence.Rollups.IObservationRollupRepository"
+          - name: "precipitationRollupRepository"
+            class: null
+            interface: "MetWorks.Persistence.Rollups.IPrecipitationRollupRepository"
+          - name: "windRollupRepository"
+            class: null
+            interface: "MetWorks.Persistence.Rollups.IWindRollupRepository"
+          - name: "lightningRollupRepository"
+            class: null
+            interface: "MetWorks.Persistence.Rollups.ILightningRollupRepository"
           - name: "externalCancellation"
             class: "System.Threading.CancellationToken"
             interface: null
@@ -1109,6 +1162,51 @@ instance:
 
   - name: "TheObservationRollupRepository"
     class: "MetWorks.Persistence.Rollups.ObservationRollupRepository"
+    exposeToMauiDi: false
+    assignment:
+      - name: "sqliteDatabase"
+        literal: null
+        instance: "TheSqliteDatabase"
+      - name: "instanceIdentifier"
+        literal: null
+        instance: "TheInstanceIdentifier"
+      - name: "cancellationToken"
+        literal: null
+        instance: "TheRootCancellationTokenSource.Token"
+    element: []
+
+  - name: "ThePrecipitationRollupRepository"
+    class: "MetWorks.Persistence.Rollups.PrecipitationRollupRepository"
+    exposeToMauiDi: false
+    assignment:
+      - name: "sqliteDatabase"
+        literal: null
+        instance: "TheSqliteDatabase"
+      - name: "instanceIdentifier"
+        literal: null
+        instance: "TheInstanceIdentifier"
+      - name: "cancellationToken"
+        literal: null
+        instance: "TheRootCancellationTokenSource.Token"
+    element: []
+
+  - name: "TheWindRollupRepository"
+    class: "MetWorks.Persistence.Rollups.WindRollupRepository"
+    exposeToMauiDi: false
+    assignment:
+      - name: "sqliteDatabase"
+        literal: null
+        instance: "TheSqliteDatabase"
+      - name: "instanceIdentifier"
+        literal: null
+        instance: "TheInstanceIdentifier"
+      - name: "cancellationToken"
+        literal: null
+        instance: "TheRootCancellationTokenSource.Token"
+    element: []
+
+  - name: "TheLightningRollupRepository"
+    class: "MetWorks.Persistence.Rollups.LightningRollupRepository"
     exposeToMauiDi: false
     assignment:
       - name: "sqliteDatabase"
@@ -1665,8 +1763,8 @@ instance:
         instance: "TheProvenanceTracker"
     element: []
 
-  - name: "TheObservationRollupWorker"
-    class: "MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker"
+  - name: "TheRollupsWorker"
+    class: "MetWorks.Ingest.SQLite.Rollups.RollupsWorker"
     exposeToMauiDi: false
     assignment:
       - name: "iLogger"
@@ -1684,6 +1782,15 @@ instance:
       - name: "observationRollupRepository"
         literal: null
         instance: "TheObservationRollupRepository"
+      - name: "precipitationRollupRepository"
+        literal: null
+        instance: "ThePrecipitationRollupRepository"
+      - name: "windRollupRepository"
+        literal: null
+        instance: "TheWindRollupRepository"
+      - name: "lightningRollupRepository"
+        literal: null
+        instance: "TheLightningRollupRepository"
       - name: "externalCancellation"
         literal: null
         instance: "TheRootCancellationTokenSource.Token"

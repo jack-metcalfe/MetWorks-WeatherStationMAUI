@@ -64,6 +64,7 @@ public class SettingProvider : ISettingProvider
                     }
                 }
                 _isInitialized = true;
+                iLogger.Information($"SettingProvider initialized successfully with {settingModel.Definitions.Count} definitions and {settingModel.Values.Count} values.");
             }
         }
         catch(Exception exception)

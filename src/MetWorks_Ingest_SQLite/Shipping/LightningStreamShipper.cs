@@ -10,6 +10,9 @@ public sealed class LightningStreamShipper : ServiceBase
     const int DefaultShipIntervalSeconds = 30;
     const int DefaultMaxBatchRows = 500;
 
+    const int MinShipIntervalSeconds = 1;
+    const int MaxShipIntervalSeconds = 24 * 60 * 60;
+
     string _installationId = string.Empty;
 
     string _endpointUrl = string.Empty;
@@ -76,6 +79,11 @@ public sealed class LightningStreamShipper : ServiceBase
 
         if (_shipIntervalSeconds <= 0)
             _shipIntervalSeconds = DefaultShipIntervalSeconds;
+
+        if (_shipIntervalSeconds < MinShipIntervalSeconds)
+            _shipIntervalSeconds = MinShipIntervalSeconds;
+        else if (_shipIntervalSeconds > MaxShipIntervalSeconds)
+            _shipIntervalSeconds = MaxShipIntervalSeconds;
 
         _maxBatchRows = iSettingRepository.GetValueOrDefault<int>(
             LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_maxBatchRows));

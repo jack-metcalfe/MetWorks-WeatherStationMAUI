@@ -4,5 +4,5 @@ public interface IRawPacketIngestRepository
 {
     Task InsertAsync(RawPacketRecord record, CancellationToken cancellationToken);
 
-    Task ProbeJson1Async(CancellationToken cancellationToken);
+    Task ProbeJsonAsync(CancellationToken cancellationToken);
 }

@@ -143,7 +143,7 @@ public sealed class RawPacketIngestor : ServiceBase
             }
 
             // Make sure JSON1 functions are available.
-            await rawPacketIngestRepository.ProbeJson1Async(linkedTestCts.Token).ConfigureAwait(false);
+            await rawPacketIngestRepository.ProbeJsonAsync(linkedTestCts.Token).ConfigureAwait(false);
 
             Interlocked.Exchange(ref _schemaInitialized, 1);
 

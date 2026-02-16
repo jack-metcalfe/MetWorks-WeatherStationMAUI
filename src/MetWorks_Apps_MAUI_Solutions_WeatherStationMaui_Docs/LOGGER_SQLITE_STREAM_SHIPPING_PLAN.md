@@ -1,5 +1,7 @@
 ﻿# LoggerSQLite stream shipping plan
 
+Status note: parts of this document describe the original implementation plan. A `LoggerSQLiteStreamShipper` now exists in code, and SQLite settings have been unified under `/services/sqlite/*`.
+
 ## Steps
 1. Inspect LoggerSQLite schema
    - Confirm table shape created by `LoggerSQLite.SqliteSink.EnsureTable()`.
@@ -8,11 +10,10 @@
    - Note indexes on `timestamp_utc` and `installation_id` for queries/retention.
 
 2. Inspect SQLite logging settings
-   - Verify settings paths exist in `src/MetWorks_Resource_Store/data/settings.yaml` under `/services/loggerSQLite/*`.
-   - Confirm relative `dbPath` resolution is app-data-dir based (matches shippers’ pattern).
+   - Verify logging settings paths exist under `/services/loggerSQLite/*`.
+   - Database path/connection are owned by `/services/sqlite/{dbPath,connectionString,...}`.
    - Identify any “ship logs” knobs needed (likely under `/services/streamShipping/*` to match other shippers).
-   - Confirmed current settings in `settings.yaml`:
-     - `/services/loggerSQLite/dbPath` (default: `metworks-log.sqlite`)
+   - Confirmed current logging settings in `settings.yaml`:
      - `/services/loggerSQLite/tableName` (default: `log`)
      - `/services/loggerSQLite/minimumLevel` (default: `Information`)
      - `/services/loggerSQLite/autoCreateTable` (default: `true`)

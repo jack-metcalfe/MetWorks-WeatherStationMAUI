@@ -8,7 +8,9 @@ using MetWorks.Constants;
 
 public sealed class StreamShippingHttpClientProvider : ServiceBase
 {
-    const int DefaultTimeoutSeconds = 30;
+    const int DefaultTimeoutSeconds = 120;
+    const int MinTimeoutSeconds = 5;
+    const int MaxTimeoutSeconds = 10 * 60;
 
     HttpClient? _client;
 
@@ -25,7 +27,8 @@ public sealed class StreamShippingHttpClientProvider : ServiceBase
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         CancellationToken externalCancellation = default,
-        ProvenanceTracker? provenanceTracker = null)
+        ProvenanceTracker? provenanceTracker = null
+    )
     {
         ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
@@ -36,13 +39,19 @@ public sealed class StreamShippingHttpClientProvider : ServiceBase
             iSettingRepository,
             iEventRelayBasic,
             externalCancellation,
-            provenanceTracker);
+            provenanceTracker
+        );
 
         var timeoutSeconds = iSettingRepository.GetValueOrDefault<int>(
-            LookupDictionaries.StreamShippingHttpGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShippingHttp_timeoutSeconds));
+LookupDictionaries.StreamShippingHttpGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShippingHttp_timeoutSeconds));
 
         if (timeoutSeconds <= 0)
             timeoutSeconds = DefaultTimeoutSeconds;
+
+        if (timeoutSeconds < MinTimeoutSeconds)
+            timeoutSeconds = MinTimeoutSeconds;
+        else if (timeoutSeconds > MaxTimeoutSeconds)
+            timeoutSeconds = MaxTimeoutSeconds;
 
         _client = new HttpClient
         {

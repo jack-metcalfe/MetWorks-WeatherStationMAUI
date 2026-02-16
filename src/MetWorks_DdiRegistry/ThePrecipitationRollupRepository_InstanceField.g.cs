@@ -4,13 +4,13 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Instance.Field
-// Generated On:        2026-02-15T03:41:55.5395261Z
+// Generated On:        2026-02-15T20:40:23.5606879Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
 {
     public partial class Registry
     {
-        private MetWorks.Ingest.SQLite.Rollups.ObservationRollupWorker _TheObservationRollupWorkerInstance;
+        private MetWorks.Persistence.Rollups.PrecipitationRollupRepository _ThePrecipitationRollupRepositoryInstance;
     }
 }

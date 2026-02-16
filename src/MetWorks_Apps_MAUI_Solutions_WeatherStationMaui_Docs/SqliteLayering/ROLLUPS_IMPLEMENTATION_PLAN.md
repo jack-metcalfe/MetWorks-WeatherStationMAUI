@@ -31,8 +31,33 @@
 - Watermark is a **device epoch** representing “up to but not including this epoch has been rolled up”.
 
 ### Scheduling
-- A background `ServiceBase` worker in the MAUI host process:
+- A background `ServiceBase` worker in the MAUI host process (current implementation: `MetWorks.Ingest.SQLite.Rollups.RollupsWorker`):
   - runs periodically (e.g., every 30–60s)
-  - processes in small batches
+  - processes in small batches (bounded per tick)
   - yields/cancels promptly
   - logs progress sparingly
+
+#### Intent: single cadence
+
+Even though raw readings arrive at different rates (wind faster than observation; lightning/precipitation can be sparse), rollups should default to a **single cadence** driven by the observation rollup cadence.
+
+Rationale:
+- Observation rows are typically larger (JSON fan-out into columns), and observation rollups provide most of the UX/query value.
+- For sparse sources, a rollup tick is usually a cheap no-op when there are no new rows.
+- One worker with a single run guard reduces SQLite contention and avoids scheduling drift.
+
+When/if we add wind/precipitation/lightning rollups:
+- Prefer adding additional repository calls inside `RollupsWorker.RunOnceAsync(...)` rather than creating additional workers, unless there is a demonstrated need for separate cadences.
+
+## Current rollup sources (implemented)
+
+The single-cadence rollups worker (`MetWorks.Ingest.SQLite.Rollups.RollupsWorker`) now runs these rollup repositories sequentially per tick:
+
+- `IObservationRollupRepository`
+  - 1h + 1d rollups into `observation_rollup_1h` / `observation_rollup_1d`
+- `IPrecipitationRollupRepository`
+  - watermark-only advancement of `rollup_state` for `precipitation` (no rollup table)
+- `IWindRollupRepository`
+  - 1h + 1d rollups into `wind_rollup_1h` / `wind_rollup_1d`
+- `ILightningRollupRepository`
+  - 1d rollups into `lightning_rollup_1d`

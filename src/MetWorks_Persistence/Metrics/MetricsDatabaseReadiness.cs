@@ -34,6 +34,8 @@ public sealed class MetricsDatabaseReadiness : IMetricsDatabaseReadiness
                 "Table name contains invalid characters. Only letters, digits and underscore are allowed.",
                 nameof(table));
 
-        return GetInitializedSqliteDatabase().ExecuteDdlAsync(MetricsSqlScripts.GetForTable(table), cancellationToken);
+        var sqlScript = MetricsSqlScripts.GetForTable(table);
+
+        return GetInitializedSqliteDatabase().ExecuteDdlAsync(sqlScript, cancellationToken);
     }
 }

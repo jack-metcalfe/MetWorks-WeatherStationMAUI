@@ -1,5 +1,7 @@
 ﻿# Local-first stream shipping – implementation plan (readings-first)
 
+Status note: this document is a living plan and has been updated to reflect the current repository implementation. For broader layering direction (Data layer vs Persistence layer), see `SQLITE_LAYERING_OBJECTIVES.md`.
+
 This document captures the implementation approach for **local-first shipping via file/stream** (NDJSON-over-HTTP) in this solution, starting with *readings* tables (e.g., `observation`) and expanding to all SQLite-persisted data.
 
 It is intended to be readable both by developers and by automated agents working in this repo.
@@ -15,20 +17,32 @@ It is intended to be readable both by developers and by automated agents working
 ### Implemented
 
 - `shipper_state` schema embedded resource: `Ingest/SQLite/shipper_state.sql`
-- A first shipper service: `MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper`
-  - ships `observation` rows using `(installation_id, rowid)` as the monotonic cursor
-  - sends NDJSON over HTTP with gzip
-  - persists `last_shipped_rowid` and `last_acked_rowid` in `shipper_state`
+- Shipper services (NDJSON-over-HTTP + gzip, watermarking via `shipper_state`):
+  - `MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper` (`source=observation`)
+  - `MetWorks.Ingest.SQLite.Shipping.WindStreamShipper` (`source=wind`)
+  - `MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper` (`source=precipitation`)
+  - `MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper` (`source=lightning`)
+  - `MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper` (`source=station_metadata`)
+  - `MetWorks.Ingest.SQLite.Shipping.LoggerSQLiteStreamShipper` (`source=logger_sqlite`)
+  - All ship batches use `(installation_id, rowid)` (or log `id`) as the monotonic cursor
+  - All shippers call `IStreamShippingDatabaseReadiness.EnsureReadyAsync(...)` before reading
 - Settings wiring:
   - `SettingConstants.StreamShipping_*`
   - `LookupDictionaries.StreamShippingGroupSettingsDefinition`
-- DDI class definition added to `WeatherStationMaui.yaml`
+- HTTP client provider:
+  - `StreamShippingHttpClientProvider` reads `/services/streamShippingHttp/timeoutSeconds`
+- Persistence-side helpers:
+  - `MetWorks.Persistence.StreamShipping.StreamShippingRepository` (ships state + standard reading batches)
+
+Note: SQLite DB settings are now unified under `/services/sqlite/*` (see `sqlite-migration-plan.md`).
 
 ### Not implemented yet
 
-- `instance:` entry for the shipper in `WeatherStationMaui.yaml` (required to actually construct/run it)
-- Additional shippers for other tables (`wind`, `precipitation`, `lightning`, `station_metadata`, `metrics_summary`, SQLite logger tables, etc.)
+- Confirm/complete `instance:` wiring for all shippers in `WeatherStationMaui.yaml` (required to actually construct/run them)
+- Additional shippers for other tables (e.g. `metrics_summary`, and any future rollup/aux tables)
 - Best-effort retention cleanup that can delete unacked rows + record `last_lossy_deleted_rowid`
+
+Status update: stream shipping `instance:` wiring is implemented in `WeatherStationMaui.yaml` for all current shippers.
 
 ## Concepts and patterns
 
@@ -111,7 +125,7 @@ Recommended settings under `/services/streamShipping/*`:
 - `shipIntervalSeconds` (int)
 - `maxBatchRows` (int)
 
-SQLite db settings are currently under `/services/jsonToSQLite/*` and are reused by shippers.
+SQLite db settings are under `/services/sqlite/*`.
 
 ## Implementation steps (incremental)
 
@@ -126,16 +140,45 @@ Add a new instance entry *after* all required dependencies exist (must appear ea
 - `TheInstanceIdentifier`
 - A centralized `HttpClient` provider instance (recommended)
 
-Then add:
+Then add (authoritative instance names in this repo as of this writing):
 
-- `TheObservationStreamShipper`
-  - assignment:
-    - `iLoggerResilient` -> `TheLoggerResilient`
+- `TheStreamShippingHttpClientProvider`
+  - `iLogger` -> `TheLoggerResilient`
+  - `iSettingRepository` -> `TheSettingRepository`
+  - `iEventRelayBasic` -> `TheEventRelayBasic`
+  - `externalCancellation` -> `TheRootCancellationTokenSource.Token`
+  - `provenanceTracker` -> `TheProvenanceTracker`
+
+- `TheStreamShippingDatabaseReadiness`
+  - `sqliteDatabase` -> `TheSqliteDatabase`
+  - `cancellationToken` -> `TheRootCancellationTokenSource.Token`
+
+- `TheStreamShippingRepository`
+  - `sqliteDatabase` -> `TheSqliteDatabase`
+  - `instanceIdentifier` -> `TheInstanceIdentifier`
+  - `cancellationToken` -> `TheRootCancellationTokenSource.Token`
+
+- `TheLoggerStreamShippingRepository` (used by `logger_sqlite` shipping only)
+  - `sqliteDatabase` -> `TheSqliteDatabase`
+  - `streamShippingRepository` -> `TheStreamShippingRepository`
+  - `cancellationToken` -> `TheRootCancellationTokenSource.Token`
+
+- Shippers (all current shippers use the same pattern and share dependencies):
+  - `TheObservationStreamShipper`
+  - `TheWindStreamShipper`
+  - `ThePrecipitationStreamShipper`
+  - `TheLightningStreamShipper`
+  - `TheStationMetadataStreamShipper`
+  - `TheLoggerSQLiteStreamShipper` (also assigns `loggerStreamShippingRepository` -> `TheLoggerStreamShippingRepository`)
+  - Common assignments:
+    - `iLogger` -> `TheLoggerResilient`
     - `iSettingRepository` -> `TheSettingRepository`
     - `iEventRelayBasic` -> `TheEventRelayBasic`
     - `iInstanceIdentifier` -> `TheInstanceIdentifier`
+    - `streamShippingDatabaseReadiness` -> `TheStreamShippingDatabaseReadiness`
+    - `streamShippingRepository` -> `TheStreamShippingRepository`
     - `httpClient` -> `TheStreamShippingHttpClientProvider.Client` (dotted property access)
-    - `externalCancellation` -> `RootCancellationTokenSource.Token`
+    - `externalCancellation` -> `TheRootCancellationTokenSource.Token`
     - `provenanceTracker` -> `TheProvenanceTracker`
 
 Notes:
