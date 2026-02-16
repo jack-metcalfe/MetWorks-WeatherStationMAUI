@@ -47,7 +47,6 @@ Search keys included: `jsonToPostgreSQL_connectionString`, `NpgsqlConnection`, `
 
 Files implicated:
 - `src/MetWorks_Ingest_Postgres/RawPacketIngestor.cs` (reads connection string, constructs connections)
-- `src/MetWorks_Common_Logging/LoggerPostgreSQL.cs`
 - `src/MetWorks_Common/Metrics/MetricsSamplerService.cs` (metrics persistence connection string)
 - Central definitions: `src/MetWorks_Constants/SettingConstants.cs`, `src/MetWorks_Constants/LookupDictionaries.cs`
 - UI usage observed in search results: `src/MetWorks_Apps_MAUI_WeatherStationMaui/Pages/HostPages/MainSwipeHostPage.xaml.cs`

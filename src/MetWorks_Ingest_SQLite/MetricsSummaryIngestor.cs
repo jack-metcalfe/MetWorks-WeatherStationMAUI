@@ -50,20 +50,20 @@ public sealed class MetricsSummaryIngestor : ServiceBase, IMetricsSummaryPersist
         _repository = metricsSummaryRepository;
 
         _tableName = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_tableName));
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_tableName));
 
         if (string.IsNullOrWhiteSpace(_tableName))
             _tableName = "metrics_summary";
 
         _autoCreateTable = iSettingRepository.GetValueOrDefault<bool>(
-            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_autoCreateTable));
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_autoCreateTable));
 
         var installationIdRaw = iInstanceIdentifier.GetOrCreateInstallationId();
         if (!Guid.TryParse(installationIdRaw, out _installationIdGuid))
             _installationIdGuid = Guid.Empty;
 
         var appIdRaw = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_applicationId));
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_applicationId));
 
         if (!Guid.TryParse(appIdRaw, out _applicationIdGuid))
             _applicationIdGuid = Guid.Empty;

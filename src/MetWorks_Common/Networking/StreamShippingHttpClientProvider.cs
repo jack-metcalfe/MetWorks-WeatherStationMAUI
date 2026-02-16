@@ -43,7 +43,7 @@ public sealed class StreamShippingHttpClientProvider : ServiceBase
         );
 
         var timeoutSeconds = iSettingRepository.GetValueOrDefault<int>(
-LookupDictionaries.StreamShippingHttpGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShippingHttp_timeoutSeconds));
+LookupDictionaries.StreamShippingHttpGroupSettingsDefinition.BuildPath(SettingConstants.StreamShippingHttp_timeoutSeconds));
 
         if (timeoutSeconds <= 0)
             timeoutSeconds = DefaultTimeoutSeconds;

@@ -9,11 +9,7 @@ public class SettingProvider : ISettingProvider
     public bool SettingsOverrideFileExistsAtLoad { get; private set; }
     bool _isInitialized = false;
     ILogger? _iLogger = null;
-    ILogger ILogger
-    {
-        get => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
-        set => _iLogger = value;
-    }
+    ILogger ILogger => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
     ISettingDefinitionDictionary? _iSettingDefinitionDictionary;
     public ISettingDefinitionDictionary ISettingDefinitionDictionary
     {
@@ -45,7 +41,8 @@ public class SettingProvider : ISettingProvider
     {
         try
         {
-            ILogger = iLogger;
+            _iLogger = iLogger;
+            _isInitialized = true;
             var settingModel = Load();
             if (settingModel is not null)
             {
@@ -113,13 +110,14 @@ public class SettingProvider : ISettingProvider
                     // Merge values: overrides replace or add values
                     foreach (var val in overrideModel.Values)
                     {
-                        var found = templateModel.Values.FirstOrDefault(v => v.Path == val.Path);
+                        var found = templateModel.Values?.FirstOrDefault(v => v.Path == val.Path);
                         if (found is not null)
                         {
                             found.Value = val.Value;
                         }
                         else
-                        {
+                        {   
+                            templateModel.Values ??= new List<SettingValue>();
                             templateModel.Values.Add(new SettingValue { Path = val.Path, Value = val.Value });
                         }
                     }

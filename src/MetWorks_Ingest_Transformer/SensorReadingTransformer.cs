@@ -85,42 +85,42 @@ public class SensorReadingTransformer : ServiceBase
         try
         {
             var unitOfMeasure_airPressure = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_airPressure)
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildPath(SettingConstants.UnitOfMeasure_airPressure)
                 );
             _preferredUnits[MeasurementTypeEnum.AirPressure] = Unit.Parse(unitOfMeasure_airPressure);
 
             var unitOfMeasure_airTemperature = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_airTemperature)
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildPath(SettingConstants.UnitOfMeasure_airTemperature)
                 );
             _preferredUnits[MeasurementTypeEnum.AirTemperature] = Unit.Parse(unitOfMeasure_airTemperature);
 
             var unitOfMeasure_batteryLevel = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_batteryLevel)
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildPath(SettingConstants.UnitOfMeasure_batteryLevel)
                 );
             _preferredUnits[MeasurementTypeEnum.BatteryLevel] = Unit.Parse(unitOfMeasure_batteryLevel);
 
             var unitOfMeasure_illuminance = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_illuminance)
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildPath(SettingConstants.UnitOfMeasure_illuminance)
                 );
             _preferredUnits[MeasurementTypeEnum.Illuminance] = Unit.Parse(unitOfMeasure_illuminance);
 
             var unitOfMeasure_lightningDistance = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_lightningDistance)
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildPath(SettingConstants.UnitOfMeasure_lightningDistance)
                 );
             _preferredUnits[MeasurementTypeEnum.LightningDistance] = Unit.Parse(unitOfMeasure_lightningDistance);
 
             var unitOfMeasure_rainAccumulation = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_rainAccumulation)
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildPath(SettingConstants.UnitOfMeasure_rainAccumulation)
                 );
             _preferredUnits[MeasurementTypeEnum.RainAccumulation] = Unit.Parse(unitOfMeasure_rainAccumulation);
 
             var unitOfMeasure_solarRadiation = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_solarRadiation)
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildPath(SettingConstants.UnitOfMeasure_solarRadiation)
                 );
             _preferredUnits[MeasurementTypeEnum.SolarRadiation] = Unit.Parse(unitOfMeasure_solarRadiation);
 
             var unitOfMeasure_windSpeed = iSettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildSettingPath(SettingConstants.UnitOfMeasure_windSpeed)
+                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildPath(SettingConstants.UnitOfMeasure_windSpeed)
                 );
             _preferredUnits[MeasurementTypeEnum.WindSpeed] = Unit.Parse(unitOfMeasure_windSpeed);
 

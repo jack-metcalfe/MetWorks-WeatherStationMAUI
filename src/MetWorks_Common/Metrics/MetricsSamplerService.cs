@@ -34,7 +34,7 @@ public sealed class MetricsSamplerService : ServiceBase
 //        await iLogger.Ready.ConfigureAwait(false);
 
         var enabled = ISettingRepository.GetValueOrDefault<bool>(
-            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_enabled));
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_enabled));
 
         if (!enabled)
         {
@@ -44,38 +44,38 @@ public sealed class MetricsSamplerService : ServiceBase
         }
 
         var intervalSeconds = ISettingRepository.GetValueOrDefault<int>(
-            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_captureIntervalSeconds));
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_captureIntervalSeconds));
 
         if (intervalSeconds <= 0)
             intervalSeconds = DefaultCaptureIntervalSeconds;
 
         var relayEnabled = ISettingRepository.GetValueOrDefault<bool>(
-            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_relayEnabled));
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_relayEnabled));
 
         EventRelayBasic.RelayMetricsEnabled = relayEnabled;
 
         var relayTopN = ISettingRepository.GetValueOrDefault<int>(
-            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_relayTopN));
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_relayTopN));
 
         if (relayTopN <= 0)
             relayTopN = 10;
 
         var pipelineEnabled = ISettingRepository.GetValueOrDefault<bool>(
-            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_pipelineEnabled));
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_pipelineEnabled));
 
         EventRelayBasic.PipelineMetricsEnabled = pipelineEnabled;
 
         var pipelineTopN = ISettingRepository.GetValueOrDefault<int>(
-            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_pipelineTopN));
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_pipelineTopN));
 
         if (pipelineTopN <= 0)
             pipelineTopN = 10;
 
         var storageEnabled = ISettingRepository.GetValueOrDefault<bool>(
-            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_storageEnabled));
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_storageEnabled));
 
         var storageTopN = ISettingRepository.GetValueOrDefault<int>(
-            LookupDictionaries.MetricsGroupSettingsDefinition.BuildSettingPath(SettingConstants.Metrics_storageTopN));
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_storageTopN));
 
         if (storageTopN <= 0)
             storageTopN = 10;
@@ -308,7 +308,7 @@ public sealed class MetricsSamplerService : ServiceBase
             if (string.IsNullOrWhiteSpace(appDataDirectory)) return null;
 
             var relativeLogPath = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerFile_relativeLogPath));
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildPath(SettingConstants.LoggerFile_relativeLogPath));
 
             if (string.IsNullOrWhiteSpace(relativeLogPath)) return null;
 

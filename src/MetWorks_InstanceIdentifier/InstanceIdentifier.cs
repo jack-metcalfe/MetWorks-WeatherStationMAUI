@@ -2,7 +2,7 @@
 public partial class InstanceIdentifier : IInstanceIdentifier
 {
     // Build canonical setting path from the GroupSettingDefinition to avoid hard-coded strings.
-    private static string Path => LookupDictionaries.InstanceGroupSettingsDefinition.BuildSettingPath(SettingConstants.Instance_installationId);
+    private static string Path => LookupDictionaries.InstanceGroupSettingsDefinition.BuildPath(SettingConstants.Instance_installationId);
     private ISettingProvider? _settingProvider;
     private ILogger? _iLogger;
     private string? _cached;

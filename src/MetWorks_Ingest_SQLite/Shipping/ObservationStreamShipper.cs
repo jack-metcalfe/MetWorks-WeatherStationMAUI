@@ -63,7 +63,7 @@ public sealed class ObservationStreamShipper : ServiceBase
         _streamShippingRepository = streamShippingRepository;
 
         var enabled = iSettingRepository.GetValueOrDefault<bool>(
-            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_enabled));
+            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildPath(SettingConstants.StreamShipping_enabled));
 
         if (!enabled)
         {
@@ -73,16 +73,16 @@ public sealed class ObservationStreamShipper : ServiceBase
         }
 
         _endpointUrl = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_endpointUrl));
+            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildPath(SettingConstants.StreamShipping_endpointUrl));
 
         _shipIntervalSeconds = iSettingRepository.GetValueOrDefault<int>(
-            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_shipIntervalSeconds));
+            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildPath(SettingConstants.StreamShipping_shipIntervalSeconds));
 
         if (_shipIntervalSeconds <= 0)
             _shipIntervalSeconds = DefaultShipIntervalSeconds;
 
         _maxBatchRows = iSettingRepository.GetValueOrDefault<int>(
-            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_maxBatchRows));
+            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildPath(SettingConstants.StreamShipping_maxBatchRows));
 
         if (_maxBatchRows <= 0)
             _maxBatchRows = DefaultMaxBatchRows;

@@ -21,7 +21,7 @@ public static class SettingConstants
     public const string ProviderFilename = @"data.settings.yaml";
 
     public const string UdpListener_groupName = "udpListener";
-    public const string UdpListener_preferredPort = "preferredPort";
+    public const string UdpListener_Port = "udpListenerPort";
 
     public const string UnitOfMeasure_groupName = "unitOfMeasure";
     public const string UnitOfMeasure_airPressure = "airPressure";

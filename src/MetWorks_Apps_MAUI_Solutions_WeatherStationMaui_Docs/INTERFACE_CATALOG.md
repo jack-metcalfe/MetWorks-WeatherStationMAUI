@@ -78,15 +78,10 @@ Note: the ingestion/parsing layer (`src/MetWorks_IoT_UDP_Tempest`) also defines 
   - `SettingProvider.InitializeAsync(...)`
   - `SettingRepository.InitializeAsync(...)`
   - `InstanceIdentifier.InitializeAsync(...)`
-  - `LoggerFile/LoggerPostgreSQL/LoggerResilient` initialization (as part of the logger stack)
 
 ### `ILoggerFile`
 - Defined: `src/MetWorks_Interfaces/ILoggerFile.cs`
 - Implemented by: `src/MetWorks_Common_Logging/LoggerFile.cs`
-
-### `ILoggerPostgreSQL`
-- Defined: `src/MetWorks_Interfaces/ILoggerPostgreSQL.cs`
-- Implemented by: `src/MetWorks_Common_Logging/LoggerPostgreSQL.cs`
 
 ### `ILoggerResilient`
 - Defined: `src/MetWorks_Interfaces/ILoggerResilient.cs`
@@ -237,7 +232,6 @@ Before removing any interface, confirm:
 | Interface | Likely implementations | Primary usage | Candidate action | Notes |
 |---|---:|---|---|---|
 | `ILoggerFile` | 1 | Logging stack | Consider folding into `ILoggerResilient` config | Only if nothing consumes this directly as a DI boundary |
-| `ILoggerPostgreSQL` | 1 | Logging stack | Consider folding into `ILoggerResilient` config | Same caution as above |
 | `ILoggerStub` | 1 | Bootstrapping, settings init | Keep (for now) | Often used at startup; low complexity |
 | `IPlatformPaths` | 1 | Station snapshot persistence | Consider concrete dependency | If never substituted per-platform, could become `DefaultPlatformPaths` |
 | `IStationMetadataPersister` | 1 | Postgres persistence | Consider removing only if no alternate persisters planned | Useful seam if you add other sinks later |

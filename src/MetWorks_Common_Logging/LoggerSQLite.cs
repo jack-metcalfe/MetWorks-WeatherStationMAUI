@@ -16,8 +16,8 @@ public sealed class LoggerSQLite : ILoggerSQLite
         ISettingRepository iSettingRepository,
         IInstanceIdentifier iInstanceIdentifier,
         SqliteWriteCoordinator sqliteWriteCoordinator,
-        MetWorks.Persistence.Logging.ILoggingDatabaseReadiness loggingDatabaseReadiness,
-        MetWorks.Persistence.Logging.ILoggerSqliteRepository loggerSqliteRepository,
+        ILoggingDatabaseReadiness loggingDatabaseReadiness,
+        ILoggerSqliteRepository loggerSqliteRepository,
         CancellationToken cancellationToken
     )
     {
@@ -36,19 +36,22 @@ public sealed class LoggerSQLite : ILoggerSQLite
         try
         {
             var tableName = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildSettingPath(
+                LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildPath(
                     SettingConstants.LoggerSQLite_tableName
                 )
             );
 
+            if (string.IsNullOrWhiteSpace(tableName))
+                tableName = DatabaseConstants.DefaultLoggerSqliteTableName;
+
             var minimumLevel = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildSettingPath(
+                LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildPath(
                     SettingConstants.LoggerSQLite_minimumLevel
                 )
             );
 
             var autoCreateTable = iSettingRepository.GetValueOrDefault<bool>(
-                LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildSettingPath(
+                LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildPath(
                     SettingConstants.LoggerSQLite_autoCreateTable
                 )
             );
@@ -69,7 +72,7 @@ public sealed class LoggerSQLite : ILoggerSQLite
             }
 
             _iLogger = loggerCfg
-                .WriteTo.Sink(new SqliteSink("logger_sqlite_log", autoCreateTable, sqliteWriteCoordinator, loggingDatabaseReadiness, loggerSqliteRepository, SetHealth))
+                .WriteTo.Sink(new SqliteSink(tableName, autoCreateTable, sqliteWriteCoordinator, loggingDatabaseReadiness, loggerSqliteRepository, SetHealth))
                 .CreateLogger();
 
             _isInitialized = true;
@@ -263,9 +266,9 @@ public sealed class LoggerSQLite : ILoggerSQLite
         public SqliteSink(
             string tableName,
             bool autoCreateTable,
-            MetWorks.Common.Utility.SqliteWriteCoordinator writeCoordinator,
-            MetWorks.Persistence.Logging.ILoggingDatabaseReadiness loggingDatabaseReadiness,
-            MetWorks.Persistence.Logging.ILoggerSqliteRepository loggerSqliteRepository,
+            SqliteWriteCoordinator writeCoordinator,
+            ILoggingDatabaseReadiness loggingDatabaseReadiness,
+            ILoggerSqliteRepository loggerSqliteRepository,
             Action<bool>? setHealth = null)
         {
             if (string.IsNullOrWhiteSpace(tableName))
@@ -315,7 +318,7 @@ public sealed class LoggerSQLite : ILoggerSQLite
 
                     if (_autoCreateTable)
                     {
-                        await _loggingDatabaseReadiness.EnsureReadyAsync(token).ConfigureAwait(false);
+                        await _loggingDatabaseReadiness.EnsureReadyAsync(_tableName, token).ConfigureAwait(false);
                     }
 
                     var installationId = (!string.IsNullOrWhiteSpace(installationIdStr) && Guid.TryParse(installationIdStr, out var instGuid))

@@ -40,8 +40,8 @@ public sealed class TempestRestClient : ServiceBase, ITempestRestClient
     {
         await Ready.ConfigureAwait(false);
 
-        var apiKeySettingPath = LookupDictionaries.TempestGroupSettingsDefinition.BuildSettingPath(SettingConstants.Tempest_apiKey);
-        var stationIdSettingPath = LookupDictionaries.TempestGroupSettingsDefinition.BuildSettingPath(SettingConstants.Tempest_stationId);
+        var apiKeySettingPath = LookupDictionaries.TempestGroupSettingsDefinition.BuildPath(SettingConstants.Tempest_apiKey);
+        var stationIdSettingPath = LookupDictionaries.TempestGroupSettingsDefinition.BuildPath(SettingConstants.Tempest_stationId);
 
         var apiKey = ISettingRepository.GetValueOrDefault<string>(apiKeySettingPath);
         var stationIdString = ISettingRepository.GetValueOrDefault<string>(stationIdSettingPath);

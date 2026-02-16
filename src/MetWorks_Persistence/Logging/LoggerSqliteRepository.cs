@@ -1,7 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using MetWorks.Data.Sqlite;
-
-namespace MetWorks.Persistence.Logging;
+﻿namespace MetWorks.Persistence.Logging;
 
 public sealed class LoggerSqliteRepository : ILoggerSqliteRepository
 {

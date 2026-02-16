@@ -3,15 +3,13 @@
 public static class LookupDictionaries
 {
     public static readonly GroupSettingDefinition InstanceGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.Instance_groupName,
-        groupBasePath: SettingConstants.Instance_groupName,
+        basePath: SettingConstants.Instance_groupName,
         settingNames: [
             SettingConstants.Instance_installationId
         ]
     );
     public static readonly GroupSettingDefinition LoggerFileGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.LoggerFile_groupName,
-        groupBasePath: SettingConstants.LoggerFile_groupName,
+        basePath: SettingConstants.LoggerFile_groupName,
         settingNames: [
             SettingConstants.LoggerFile_fileSizeLimitBytes,
             SettingConstants.LoggerFile_minimumLevel,
@@ -23,8 +21,7 @@ public static class LookupDictionaries
         ]
     );
     public static readonly GroupSettingDefinition LoggerSQLiteGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.LoggerSQLite_groupName,
-        groupBasePath: SettingConstants.LoggerSQLite_groupName,
+        basePath: SettingConstants.LoggerSQLite_groupName,
         settingNames: [
             SettingConstants.LoggerSQLite_tableName,
             SettingConstants.LoggerSQLite_minimumLevel,
@@ -32,15 +29,13 @@ public static class LookupDictionaries
         ]
     );
     public static readonly GroupSettingDefinition UdpListenerGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.UdpListener_groupName,
-        groupBasePath: SettingConstants.UdpListener_groupName,
+        basePath: SettingConstants.UdpListener_groupName,
         settingNames: [
-            SettingConstants.UdpListener_preferredPort
+            SettingConstants.UdpListener_Port
         ]
     );
     public static readonly GroupSettingDefinition UnitOfMeasureGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.UnitOfMeasure_groupName,
-        groupBasePath: SettingConstants.UnitOfMeasure_groupName,
+        basePath: SettingConstants.UnitOfMeasure_groupName,
         settingNames: [
             SettingConstants.UnitOfMeasure_airPressure,
             SettingConstants.UnitOfMeasure_airTemperature,
@@ -52,8 +47,7 @@ public static class LookupDictionaries
         ]
     );
     public static readonly GroupSettingDefinition SqliteGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.Sqlite_groupName,
-        groupBasePath: SettingConstants.Sqlite_groupName,
+        basePath: SettingConstants.Sqlite_groupName,
         settingNames:
 
         [
@@ -65,8 +59,7 @@ public static class LookupDictionaries
     );
 
     public static readonly GroupSettingDefinition TempestGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.Tempest_groupName,
-        groupBasePath: SettingConstants.Tempest_groupName,
+        basePath: SettingConstants.Tempest_groupName,
         settingNames:
 
         [
@@ -76,8 +69,7 @@ public static class LookupDictionaries
     );
 
     public static readonly GroupSettingDefinition MetricsGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.Metrics_groupName,
-        groupBasePath: SettingConstants.Metrics_groupName,
+        basePath: SettingConstants.Metrics_groupName,
         settingNames:
         [
             SettingConstants.Metrics_enabled,
@@ -91,8 +83,7 @@ public static class LookupDictionaries
     );
 
     public static readonly GroupSettingDefinition StreamShippingGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.StreamShipping_groupName,
-        groupBasePath: SettingConstants.StreamShipping_groupName,
+        basePath: SettingConstants.StreamShipping_groupName,
         settingNames:
         [
             SettingConstants.StreamShipping_enabled,
@@ -103,8 +94,7 @@ public static class LookupDictionaries
     );
 
     public static readonly GroupSettingDefinition StreamShippingHttpGroupSettingsDefinition = new GroupSettingDefinition(
-        groupName: SettingConstants.StreamShippingHttp_groupName,
-        groupBasePath: SettingConstants.StreamShippingHttp_groupName,
+        basePath: SettingConstants.StreamShippingHttp_groupName,
         settingNames:
         [
             SettingConstants.StreamShippingHttp_timeoutSeconds

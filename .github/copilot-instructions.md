@@ -21,6 +21,7 @@
 - Prefer using EventRelay-based maintenance messaging (begin/end) with optional acknowledgements so services can pause DB writes (buffering if needed) during DB maintenance/retention, leveraging existing resilience paths.
 - Report runtime exceptions with exact caller-info JSON; keep using caller-info to pinpoint failures to specific line numbers/blocks.
 - Prefer using SQLite-compatible square bracket quoting ([identifier]) for SQL identifiers to avoid reserved-word/quoting issues.
+- Prefer per-project `GlobalUsings.cs` files to centralize common using directives and reduce repetition.
 
 ## Instrumentation Preferences
 - Target Android primarily; emit reports to logs first.

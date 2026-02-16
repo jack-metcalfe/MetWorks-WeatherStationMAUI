@@ -23,16 +23,16 @@ public sealed class SqliteDatabaseOptionsFactory
         ArgumentNullException.ThrowIfNull(iPlatformPaths);
 
         var connectionString = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.SqliteGroupSettingsDefinition.BuildSettingPath(SettingConstants.Sqlite_connectionString));
+            LookupDictionaries.SqliteGroupSettingsDefinition.BuildPath(SettingConstants.Sqlite_connectionString));
 
         var dbPath = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.SqliteGroupSettingsDefinition.BuildSettingPath(SettingConstants.Sqlite_dbPath));
+            LookupDictionaries.SqliteGroupSettingsDefinition.BuildPath(SettingConstants.Sqlite_dbPath));
 
         var journalMode = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.SqliteGroupSettingsDefinition.BuildSettingPath(SettingConstants.Sqlite_journalMode));
+            LookupDictionaries.SqliteGroupSettingsDefinition.BuildPath(SettingConstants.Sqlite_journalMode));
 
         var busyTimeoutMs = iSettingRepository.GetValueOrDefault<int>(
-            LookupDictionaries.SqliteGroupSettingsDefinition.BuildSettingPath(SettingConstants.Sqlite_busyTimeoutMs));
+            LookupDictionaries.SqliteGroupSettingsDefinition.BuildPath(SettingConstants.Sqlite_busyTimeoutMs));
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {

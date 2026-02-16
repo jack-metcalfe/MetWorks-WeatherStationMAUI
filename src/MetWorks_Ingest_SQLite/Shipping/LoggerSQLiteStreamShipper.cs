@@ -9,7 +9,7 @@ namespace MetWorks.Ingest.SQLite.Shipping;
 public sealed class LoggerSQLiteStreamShipper : ServiceBase
 {
     const string Source = "logger_sqlite";
-    const string DefaultLoggerTableName = "logger_sqlite_log";
+    const string DefaultLoggerTableName = DatabaseConstants.DefaultLoggerSqliteTableName;
 
     const int DefaultShipIntervalSeconds = 30;
     const int DefaultMaxBatchRows = 500;
@@ -72,7 +72,7 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         _loggerStreamShippingRepository = loggerStreamShippingRepository;
 
         var enabled = iSettingRepository.GetValueOrDefault<bool>(
-            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_enabled));
+            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildPath(SettingConstants.StreamShipping_enabled));
 
         if (!enabled)
         {
@@ -82,10 +82,10 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         }
 
         _endpointUrl = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_endpointUrl));
+            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildPath(SettingConstants.StreamShipping_endpointUrl));
 
         _shipIntervalSeconds = iSettingRepository.GetValueOrDefault<int>(
-            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_shipIntervalSeconds));
+            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildPath(SettingConstants.StreamShipping_shipIntervalSeconds));
 
         if (_shipIntervalSeconds <= 0)
             _shipIntervalSeconds = DefaultShipIntervalSeconds;
@@ -96,13 +96,13 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
             _shipIntervalSeconds = MaxShipIntervalSeconds;
 
         _maxBatchRows = iSettingRepository.GetValueOrDefault<int>(
-            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildSettingPath(SettingConstants.StreamShipping_maxBatchRows));
+            LookupDictionaries.StreamShippingGroupSettingsDefinition.BuildPath(SettingConstants.StreamShipping_maxBatchRows));
 
         if (_maxBatchRows <= 0)
             _maxBatchRows = DefaultMaxBatchRows;
 
         _tableName = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerSQLite_tableName));
+            LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildPath(SettingConstants.LoggerSQLite_tableName));
 
         if (string.IsNullOrWhiteSpace(_tableName))
             _tableName = DefaultLoggerTableName;

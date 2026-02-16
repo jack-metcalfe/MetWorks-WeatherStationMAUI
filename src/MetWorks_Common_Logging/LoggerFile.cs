@@ -20,41 +20,41 @@ public class LoggerFile : ILogger
         try
         {
             var fileSizeLimitBytes = iSettingRepository.GetValueOrDefault<int>(
-                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(SettingConstants.LoggerFile_fileSizeLimitBytes)
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildPath(SettingConstants.LoggerFile_fileSizeLimitBytes)
             );
 
             var minimumLevel = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildPath(
                     SettingConstants.LoggerFile_minimumLevel
                 )
             );
 
             var outputTemplate = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildPath(
                     SettingConstants.LoggerFile_outputTemplate
                 )
             );
 
             var relativeLogPath = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildPath(
                     SettingConstants.LoggerFile_relativeLogPath
                 )
             );
 
             var retainedFileCountLimit = iSettingRepository.GetValueOrDefault<int>(
-                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildPath(
                     SettingConstants.LoggerFile_retainedFileCountLimit
                 )
             );
 
             var rollingInterval = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildPath(
                     SettingConstants.LoggerFile_rollingInterval
                 )
             );
 
             var rollOnFileSizeLimit = iSettingRepository.GetValueOrDefault<bool>(
-                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildSettingPath(
+                LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildPath(
                     SettingConstants.LoggerFile_rollOnFileSizeLimit
                 )
             );

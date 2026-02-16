@@ -109,12 +109,12 @@ public class TempestPacketTransformer : ServiceBase
     {
         try
         {
-            var preferredPort = ISettingRepository.GetValueOrDefault<int>(
-                    LookupDictionaries.UdpListenerGroupSettingsDefinition.BuildSettingPath(SettingConstants.UdpListener_preferredPort)
+            var udpListenerPort = ISettingRepository.GetValueOrDefault<int>(
+                    LookupDictionaries.UdpListenerGroupSettingsDefinition.BuildPath(SettingConstants.UdpListener_Port)
                 );
 
             // Tempest UDP broadcast is to a fixed destination port; binding to alternates won't receive packets.
-            return await TryBindToPortAsync(preferredPort).ConfigureAwait(false);
+            return await TryBindToPortAsync(udpListenerPort).ConfigureAwait(false);
         }
         catch (Exception exception)
         {
@@ -224,15 +224,15 @@ public class TempestPacketTransformer : ServiceBase
         if (token.IsCancellationRequested)
             return false;
 
-        var preferredPort = ISettingRepository.GetValueOrDefault<int>(
-            LookupDictionaries.UdpListenerGroupSettingsDefinition.BuildSettingPath(SettingConstants.UdpListener_preferredPort)
+        var udpListenerPort = ISettingRepository.GetValueOrDefault<int>(
+            LookupDictionaries.UdpListenerGroupSettingsDefinition.BuildPath(SettingConstants.UdpListener_Port)
         );
 
         ILogger.Information("🔁 Attempting to rebind UDP listener after connectivity change...");
         // Tempest UDP broadcast is to a fixed destination port; rebinding alternates won't help.
-        var rebound = await TryBindToPortAsync(preferredPort).ConfigureAwait(false);
+        var rebound = await TryBindToPortAsync(udpListenerPort).ConfigureAwait(false);
         if (!rebound)
-            ILogger.Warning($"⚠️ Rebind attempt failed for UDP port {preferredPort}");
+            ILogger.Warning($"⚠️ Rebind attempt failed for UDP port {udpListenerPort}");
         return rebound;
     }
     public async Task<bool> StartAsync()
