@@ -30,5 +30,8 @@ public sealed class StreamShippingDatabaseReadiness : IStreamShippingDatabaseRea
     }
 
     public Task EnsureReadyAsync(CancellationToken cancellationToken)
-        => GetInitializedSqliteDatabase().ExecuteDdlAsync(StreamShippingSqlScripts.GetAll(), cancellationToken);
+    {
+        var sqlScripts = StreamShippingSqlScripts.GetAll();
+        return GetInitializedSqliteDatabase().ExecuteDdlAsync(sqlScripts, cancellationToken);
+    } 
 }

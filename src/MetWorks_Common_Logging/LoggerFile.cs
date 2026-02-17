@@ -19,6 +19,14 @@ public class LoggerFile : ILogger
 
         try
         {
+            try
+            {
+                Serilog.Debugging.SelfLog.Enable(msg => System.Diagnostics.Debug.WriteLine($"[Serilog.SelfLog] {msg}"));
+            }
+            catch
+            {
+            }
+
             var fileSizeLimitBytes = iSettingRepository.GetValueOrDefault<int>(
                 LookupDictionaries.LoggerFileGroupSettingsDefinition.BuildPath(SettingConstants.LoggerFile_fileSizeLimitBytes)
             );
@@ -103,10 +111,16 @@ public class LoggerFile : ILogger
                     retainedFileCountLimit: retainedFileCountLimit
                 );
 
-            ILogger = loggerCfg.CreateLogger();
+            _iLogger = loggerCfg.CreateLogger();
             AbsoluteLogFilePath = absoluteLogFilePath;
+            _logFilePathPattern = absoluteLogFilePath;
+            _absoluteLogDirectory = Path.GetDirectoryName(absoluteLogFilePath);
             _isInitialized = true;
-            ILogger.Information(@"FileLogger initialized");
+            _iLogger.Information(@"FileLogger initialized");
+            _iLogger.Information($"Log file path pattern: {LogFilePathPattern}");
+            _iLogger.Information($"Log directory: {AbsoluteLogDirectory}");
+
+            _iLogger.Error("FileLogger test error entry");
         }
 
         catch (OperationCanceledException)
@@ -124,11 +138,7 @@ public class LoggerFile : ILogger
     bool _isInitialized = false;
 
     Logger? _iLogger = null;
-    Logger ILogger
-    {
-        get => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
-        set => _iLogger = value;
-    }
+    Logger ILogger => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
 
     string? _absoluteLogFilePath = null;
     public string AbsoluteLogFilePath
@@ -140,6 +150,12 @@ public class LoggerFile : ILogger
         );
         private set => _absoluteLogFilePath = value;
     }
+
+    string? _absoluteLogDirectory;
+    public string AbsoluteLogDirectory => NullPropertyGuard.Get(_isInitialized, _absoluteLogDirectory, nameof(AbsoluteLogDirectory));
+
+    string? _logFilePathPattern;
+    public string LogFilePathPattern => NullPropertyGuard.Get(_isInitialized, _logFilePathPattern, nameof(LogFilePathPattern));
     public LoggerFile()
     {
     }

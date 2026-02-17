@@ -30,5 +30,16 @@ public sealed class StationMetadataDatabaseReadiness : IStationMetadataDatabaseR
     }
 
     public Task EnsureReadyAsync(CancellationToken cancellationToken)
-        => GetInitializedSqliteDatabase().ExecuteDdlAsync(StationMetadataSqlScripts.GetAll(), cancellationToken);
+    { 
+        try
+        {
+            var sqlScripts = StationMetadataSqlScripts.GetAll();
+            var sql = sqlScripts[0].Sql;
+            return GetInitializedSqliteDatabase().ExecuteDdlAsync(sqlScripts, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Failed to ensure StationMetadata database readiness.", ex);
+        }
+    }
 }

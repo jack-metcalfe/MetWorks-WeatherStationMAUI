@@ -1,33 +1,35 @@
 ﻿using System.Globalization;
-using MetWorks.Data.Sqlite;
 using MetWorks.Interfaces;
-
+using MetWorks.Common.Utility;
 namespace MetWorks.Persistence.StreamShipping;
-
 public sealed class StreamShippingRepository : IStreamShippingRepository
 {
     ISqliteDatabase? _sqliteDatabase;
     IInstanceIdentifier? _instanceIdentifier;
-
+    bool _isInitialized = false;
+    ILogger? _iLogger = null;
+    ILogger ILogger => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
     public StreamShippingRepository()
     {
     }
 
     public Task<bool> InitializeAsync(
+        ILogger iLogger,
         ISqliteDatabase sqliteDatabase,
         IInstanceIdentifier instanceIdentifier,
         CancellationToken cancellationToken
     )
     {
+        ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(sqliteDatabase);
         ArgumentNullException.ThrowIfNull(instanceIdentifier);
 
         _sqliteDatabase = sqliteDatabase;
         _instanceIdentifier = instanceIdentifier;
-
+        _iLogger = iLogger;
+        _isInitialized = true;    
         return Task.FromResult(true);
     }
-
     (ISqliteDatabase SqliteDatabase, IInstanceIdentifier InstanceIdentifier) GetInitialized()
     {
         var sqliteDatabase = _sqliteDatabase;
@@ -62,46 +64,54 @@ SELECT
 FROM shipper_state
 WHERE installation_id = $installation_id AND source = $source;
 """;
+        try
+        {
+            await using var session = await sqliteDatabase.OpenSessionAsync(cancellationToken).ConfigureAwait(false);
 
-        await using var session = await sqliteDatabase.OpenSessionAsync(cancellationToken).ConfigureAwait(false);
-
-        var rows = await session.QueryAsync(
-            sql,
-            [
-                new DbParam("$installation_id", installationId),
-                new DbParam("$source", source),
-            ],
-            row =>
-            {
-                _ = row.TryGetInt64("last_shipped_rowid", out var lastShipped);
-                _ = row.TryGetInt64("last_acked_rowid", out var lastAcked);
-                _ = row.TryGetInt64("last_lossy_deleted_rowid", out var lastLossyDeleted);
-                _ = row.TryGetInt64("lossy_deleted_row_count", out var lossyDeletedRowCount);
-                _ = row.TryGetString("last_lossy_delete_utc", out var lastLossyDeleteUtcRaw);
-
-                DateTime? lastLossyDeleteUtc = null;
-                if (!string.IsNullOrWhiteSpace(lastLossyDeleteUtcRaw) &&
-                    DateTime.TryParse(
-                        lastLossyDeleteUtcRaw,
-                        CultureInfo.InvariantCulture,
-                        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
-                        out var parsed))
+            var rows = await session.QueryAsync(
+                sql,
+                [
+                    new DbParam("$installation_id", installationId),
+                    new DbParam("$source", source),
+                ],
+                row =>
                 {
-                    lastLossyDeleteUtc = parsed;
-                }
+                    _ = row.TryGetInt64("last_shipped_rowid", out var lastShipped);
+                    _ = row.TryGetInt64("last_acked_rowid", out var lastAcked);
+                    _ = row.TryGetInt64("last_lossy_deleted_rowid", out var lastLossyDeleted);
+                    _ = row.TryGetInt64("lossy_deleted_row_count", out var lossyDeletedRowCount);
+                    _ = row.TryGetString("last_lossy_delete_utc", out var lastLossyDeleteUtcRaw);
 
-                return new ShipperStateSnapshot(
-                    InstallationId: installationId,
-                    Source: source,
-                    LastShippedRowId: lastShipped,
-                    LastAckedRowId: lastAcked,
-                    LastLossyDeletedRowId: lastLossyDeleted,
-                    LossyDeletedRowCount: lossyDeletedRowCount,
-                    LastLossyDeleteUtc: lastLossyDeleteUtc);
-            },
-            cancellationToken).ConfigureAwait(false);
+                    DateTime? lastLossyDeleteUtc = null;
+                    if (!string.IsNullOrWhiteSpace(lastLossyDeleteUtcRaw) &&
+                        DateTime.TryParse(
+                            lastLossyDeleteUtcRaw,
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
+                            out var parsed))
+                    {
+                        lastLossyDeleteUtc = parsed;
+                    }
 
-        return rows.Count == 0 ? null : rows[0];
+                    return new ShipperStateSnapshot(
+                        InstallationId: installationId,
+                        Source: source,
+                        LastShippedRowId: lastShipped,
+                        LastAckedRowId: lastAcked,
+                        LastLossyDeletedRowId: lastLossyDeleted,
+                        LossyDeletedRowCount: lossyDeletedRowCount,
+                        LastLossyDeleteUtc: lastLossyDeleteUtc);
+                },
+                cancellationToken).ConfigureAwait(false);
+
+            return rows.Count == 0 ? null : rows[0];
+        }
+        catch (Exception exception)
+        {
+            var message = $"Error reading shipper state for source '{source}' and installation '{installationId}' exception[{exception}].";
+            ILogger.Error($"{message} Exception: {exception}");
+            throw new Exception(message, exception);
+        }
     }
 
     public async Task UpsertShippingProgressAsync(
@@ -130,17 +140,26 @@ DO UPDATE SET
     updated_utc_timestampz = strftime('%Y-%m-%dT%H:%M:%fZ','now');
 """;
 
-        await using var session = await sqliteDatabase.OpenSessionAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await using var session = await sqliteDatabase.OpenSessionAsync(cancellationToken).ConfigureAwait(false);
 
-        _ = await session.ExecuteAsync(
-            sql,
-            [
-                new DbParam("$installation_id", installationId),
+            _ = await session.ExecuteAsync(
+                sql,
+                [
+                    new DbParam("$installation_id", installationId),
                 new DbParam("$source", source),
                 new DbParam("$last_shipped_rowid", lastShippedRowId is null ? DBNull.Value : lastShippedRowId.Value),
                 new DbParam("$last_acked_rowid", lastAckedRowId is null ? DBNull.Value : lastAckedRowId.Value),
-            ],
-            cancellationToken).ConfigureAwait(false);
+                ],
+                cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            var message = $"Error upserting shipping progress for source '{source}' and installation '{installationId}' exception[{exception}].";
+            ILogger.Error($"{message} Exception: {exception}");
+            throw new Exception(message, exception);
+        }
     }
 
     public async Task<IReadOnlyList<StandardReadingRow>> ReadStandardReadingsBatchAsync(
@@ -162,9 +181,11 @@ DO UPDATE SET
         if (maxRows <= 0)
             throw new ArgumentOutOfRangeException(nameof(maxRows));
 
-        var (sqliteDatabase, _) = GetInitialized();
+        try
+        {
+            var (sqliteDatabase, _) = GetInitialized();
 
-        var sql = $"""
+            var sql = $"""
 SELECT rowid, id, application_received_utc_timestampz, json_document_original
 FROM {table}
 WHERE installation_id = $installation_id AND rowid > $last_acked_rowid
@@ -172,40 +193,38 @@ ORDER BY rowid
 LIMIT $limit;
 """;
 
-        await using var session = await sqliteDatabase.OpenSessionAsync(cancellationToken).ConfigureAwait(false);
+            await using var session = await sqliteDatabase.OpenSessionAsync(cancellationToken).ConfigureAwait(false);
 
-        IReadOnlyList<StandardReadingRow> rows = Array.Empty<StandardReadingRow>();
-        try
-        {
+            IReadOnlyList<StandardReadingRow> rows = Array.Empty<StandardReadingRow>();
             rows = await session.QueryAsync(
                 sql,
                 [
                     new DbParam("$installation_id", installationId),
-                new DbParam("$last_acked_rowid", lastAckedRowId),
-                new DbParam("$limit", maxRows),
+                    new DbParam("$last_acked_rowid", lastAckedRowId),
+                    new DbParam("$limit", maxRows),
                 ],
                 row =>
                 {
                     _ = row.TryGetInt64("rowid", out var rowId);
                     _ = row.TryGetString("id", out var id);
-                var applicationReceivedUtc = 0L;
-                if (row.TryGetString("application_received_utc_timestampz", out var applicationReceivedText)
-                    && !string.IsNullOrWhiteSpace(applicationReceivedText)
-                    && DateTimeOffset.TryParse(applicationReceivedText, out var applicationReceivedDto))
-                {
-                    applicationReceivedUtc = applicationReceivedDto.ToUnixTimeSeconds();
-                }
-                else
-                {
-                    try
+                    var applicationReceivedUtc = 0L;
+                    if (row.TryGetString("application_received_utc_timestampz", out var applicationReceivedText)
+                        && !string.IsNullOrWhiteSpace(applicationReceivedText)
+                        && DateTimeOffset.TryParse(applicationReceivedText, out var applicationReceivedDto))
                     {
-                        _ = row.TryGetInt64("application_received_utc_timestampz", out applicationReceivedUtc);
+                        applicationReceivedUtc = applicationReceivedDto.ToUnixTimeSeconds();
                     }
-                    catch (FormatException)
+                    else
                     {
-                        applicationReceivedUtc = 0;
+                        try
+                        {
+                            _ = row.TryGetInt64("application_received_utc_timestampz", out applicationReceivedUtc);
+                        }
+                        catch (FormatException)
+                        {
+                            applicationReceivedUtc = 0;
+                        }
                     }
-                }
                     _ = row.TryGetString("json_document_original", out var json);
 
                     return new StandardReadingRow(
@@ -215,12 +234,14 @@ LIMIT $limit;
                         JsonDocumentOriginal: json ?? string.Empty);
                 },
                 cancellationToken).ConfigureAwait(false);
-        
+
+            return rows;
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            throw new Exception($"Error reading standard readings batch from table '{table}' for installation '{installationId}'.", ex);
-}
-        return rows;
+            var message = $"Error reading standard readings batch from table '{table}' for installation '{installationId}' exception[{exception}].";
+            ILogger.Error($"{message} Exception: {exception}");
+            throw new Exception(message, exception);
+        }
     }
 }

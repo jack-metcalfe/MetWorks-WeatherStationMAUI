@@ -9,7 +9,7 @@ internal static class StationMetadataSqlScripts
         new(
             Name: "station_metadata",
             Sql: """
-CREATE TABLE IF NOT EXISTS station_metadata
+CREATE TABLE IF NOT EXISTS [station_metadata]
 (
     id TEXT PRIMARY KEY,
     application_received_utc_timestampz TEXT NOT NULL,

@@ -11,6 +11,7 @@ using ILogEventSink = Serilog.Core.ILogEventSink;
 /// </summary>
 public sealed class LoggerSQLite : ILoggerSQLite
 {
+    ILogger? _iBackupLogger;
     public Task<bool> InitializeAsync(
         ILogger iLogger,
         ISettingRepository iSettingRepository,
@@ -22,6 +23,7 @@ public sealed class LoggerSQLite : ILoggerSQLite
     )
     {
         ArgumentNullException.ThrowIfNull(iLogger);
+        _iBackupLogger = iLogger;
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
         ArgumentNullException.ThrowIfNull(sqliteWriteCoordinator);
@@ -77,10 +79,14 @@ public sealed class LoggerSQLite : ILoggerSQLite
 
             _isInitialized = true;
             _iLogger.Information("SQLite logger initialized for table {TableName}", tableName);
+            _iLogger.Error("SQLite logger error test");
+            _iBackupLogger.Error("SQLite logger error test done");
         }
         catch (Exception exception)
         {
-            throw new InvalidOperationException("Failed to read settings configuration for SQLite logger.", exception);
+            var message = "Failed to initialize SQLite logger.";
+            _iBackupLogger?.Error(message, exception);
+            throw new InvalidOperationException(message, exception);
         }
 
         return Task.FromResult(true);

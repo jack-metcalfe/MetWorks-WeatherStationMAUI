@@ -91,6 +91,7 @@ public class SettingProvider : ISettingProvider
             SettingModel templateModel = templateString is null
                 ? new SettingModel()
                 : deserializer.Deserialize<SettingModel>(templateString) ?? new SettingModel();
+            templateModel.Values ??= new List<SettingValue>();
 
             // If overrides exist, read and merge values over the template model
             if (!string.IsNullOrWhiteSpace(localDir) && File.Exists(overridePath))
@@ -117,7 +118,6 @@ public class SettingProvider : ISettingProvider
                         }
                         else
                         {   
-                            templateModel.Values ??= new List<SettingValue>();
                             templateModel.Values.Add(new SettingValue { Path = val.Path, Value = val.Value });
                         }
                     }

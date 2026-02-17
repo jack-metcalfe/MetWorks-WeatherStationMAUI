@@ -151,6 +151,10 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
             {
                 ILogger.Warning($"LoggerSQLiteStreamShipper: failure: {ex.Message}");
             }
+            catch (Exception ex)
+            {
+                ILogger.Warning($"LoggerSQLiteStreamShipper: failure: {ex.Message}");
+            }
         }
     }
 
@@ -186,7 +190,7 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
             token).ConfigureAwait(false);
 
         var lastAcked = state?.LastAckedRowId ?? 0;
-        var rows = await loggerRepo.ReadLoggerBatchAsync(_tableName, lastAcked, _maxBatchRows, token).ConfigureAwait(false);
+       var rows = await loggerRepo.ReadLoggerBatchAsync(_tableName, lastAcked, _maxBatchRows, token).ConfigureAwait(false);
         if (rows.Count == 0)
             return;
 

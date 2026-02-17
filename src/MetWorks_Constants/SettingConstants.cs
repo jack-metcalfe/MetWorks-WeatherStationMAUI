@@ -48,7 +48,6 @@ public static class SettingConstants
     public const string Metrics_enabled = "enabled";
     public const string Metrics_captureIntervalSeconds = "captureIntervalSeconds";
     public const string Metrics_applicationId = "applicationId";
-    public const string Metrics_connectionString = "connectionString";
     public const string Metrics_tableName = "tableName";
     public const string Metrics_autoCreateTable = "autoCreateTable";
 
@@ -69,4 +68,6 @@ public static class SettingConstants
 
     public const string StreamShippingHttp_groupName = "streamShippingHttp";
     public const string StreamShippingHttp_timeoutSeconds = "timeoutSeconds";
+
+    public const string StreamShippingHttp_allowInvalidTlsForEndpointHost = "allowInvalidTlsForEndpointHost";
 }

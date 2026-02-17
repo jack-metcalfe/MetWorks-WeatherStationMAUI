@@ -80,7 +80,7 @@ definitions:
     isSecret: false
 
   - path: /services/loggerSQLite/minimumLevel
-    defaultValue: "Information"
+    defaultValue: "Error"
     description: "Minimum log level for SQLite logging"
     expectedValueType: "String"
     allowableValues:
@@ -116,23 +116,15 @@ definitions:
     isSecret: false
 
   - path: /services/metrics/captureIntervalSeconds
-    defaultValue: "30"
+    defaultValue: "10"
     description: "Metrics collection interval in seconds"
     expectedValueType: "Int32"
     allowableValues: []
     isEditable: true
     isSecret: false
 
-  - path: /services/metrics/connectionString
-    defaultValue: "Host=192.168.8.9;Port=5432;Database=weather;Username=weather;Password=password"
-    description: "Metrics persistence connection string for database"
-    expectedValueType: "String"
-    allowableValues: []
-    isEditable: true
-    isSecret: true
-
   - path: /services/metrics/enabled
-    defaultValue: "false"
+    defaultValue: "true"
     description: "Enable metrics collection and persistence (intended for wall-device tuning; typically off for field deployments)"
     expectedValueType: "Boolean"
     allowableValues:
@@ -142,7 +134,7 @@ definitions:
     isSecret: false
 
   - path: /services/metrics/pipelineEnabled
-    defaultValue: "false"
+    defaultValue: "true"
     description: "Enable provenance-based pipeline timing summaries for weather readings (UDP→transform and transform durations)"
     expectedValueType: "Boolean"
     allowableValues:
@@ -160,7 +152,7 @@ definitions:
     isSecret: false
 
   - path: /services/metrics/relayEnabled
-    defaultValue: "false"
+    defaultValue: "true"
     description: "Enable EventRelayBasic handler timing aggregation"
     expectedValueType: "Boolean"
     allowableValues:
@@ -242,7 +234,7 @@ definitions:
     isSecret: false
 
   - path: /services/streamShipping/enabled
-    defaultValue: "false"
+    defaultValue: "true"
     description: "Enable local-first stream shipping of SQLite-persisted data via NDJSON-over-HTTP."
     expectedValueType: "Boolean"
     allowableValues:
@@ -252,7 +244,7 @@ definitions:
     isSecret: false
 
   - path: /services/streamShipping/endpointUrl
-    defaultValue: ""
+    defaultValue: "http://192.168.8.9:5157/ingest/v1/stream"
     description: "Stream shipping ingestion endpoint URL (e.g., https://example.com/ingest/v1/stream)."
     expectedValueType: "String"
     allowableValues: []
@@ -268,7 +260,7 @@ definitions:
     isSecret: false
 
   - path: /services/streamShipping/shipIntervalSeconds
-    defaultValue: "10"
+    defaultValue: "45"
     description: "How often to attempt shipping (seconds)."
     expectedValueType: "Int32"
     allowableValues: []
@@ -276,15 +268,23 @@ definitions:
     isSecret: false
 
   - path: /services/streamShippingHttp/timeoutSeconds
-    defaultValue: "30"
+    defaultValue: "15"
     description: "HTTP timeout (seconds) for stream shipping uploads."
     expectedValueType: "Int32"
     allowableValues: []
     isEditable: true
     isSecret: false
 
+  - path: /services/streamShippingHttp/allowInvalidTlsForEndpointHost
+    defaultValue: ""
+    description: "Host for which to allow invalid TLS certificates when shipping streams over HTTPS (only applicable in DEBUG mode)."
+    expectedValueType: "String"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
   - path: /services/tempest/apiKey
-    defaultValue: "00000000-0000-0000-0000-000000000000"
+    defaultValue: "c83c3cb2-a6d2-4c6f-b2f4-56aa9ab7306e"
     description: "API Key for Tempest Weather Station"
     expectedValueType: "String"
     allowableValues: []
@@ -292,7 +292,7 @@ definitions:
     isSecret: true
 
   - path: /services/tempest/stationId
-    defaultValue: "0"
+    defaultValue: "160805"
     description: "Station ID for Tempest Weather Station"
     expectedValueType: "Int32"
     allowableValues: []

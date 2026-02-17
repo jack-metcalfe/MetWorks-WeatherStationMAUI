@@ -1,4 +1,5 @@
 ﻿using MetWorks.Persistence.StreamShipping;
+using MetWorks.Persistence.StationMetadata;
 
 namespace MetWorks.Ingest.SQLite.Shipping;
 
@@ -23,6 +24,7 @@ public sealed class StationMetadataStreamShipper : ServiceBase
 
     IStreamShippingDatabaseReadiness? _streamShippingDatabaseReadiness;
     IStreamShippingRepository? _streamShippingRepository;
+    IStationMetadataDatabaseReadiness? _stationMetadataDatabaseReadiness;
 
     public StationMetadataStreamShipper()
     {
@@ -33,6 +35,7 @@ public sealed class StationMetadataStreamShipper : ServiceBase
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         IInstanceIdentifier iInstanceIdentifier,
+        IStationMetadataDatabaseReadiness stationMetadataDatabaseReadiness,
         IStreamShippingDatabaseReadiness streamShippingDatabaseReadiness,
         IStreamShippingRepository streamShippingRepository,
         HttpClient httpClient,
@@ -44,6 +47,7 @@ public sealed class StationMetadataStreamShipper : ServiceBase
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
+        ArgumentNullException.ThrowIfNull(stationMetadataDatabaseReadiness);
         ArgumentNullException.ThrowIfNull(streamShippingDatabaseReadiness);
         ArgumentNullException.ThrowIfNull(streamShippingRepository);
         ArgumentNullException.ThrowIfNull(httpClient);
@@ -59,6 +63,7 @@ public sealed class StationMetadataStreamShipper : ServiceBase
 
         _httpClient = httpClient;
 
+        _stationMetadataDatabaseReadiness = stationMetadataDatabaseReadiness;
         _streamShippingDatabaseReadiness = streamShippingDatabaseReadiness;
         _streamShippingRepository = streamShippingRepository;
 
@@ -150,6 +155,10 @@ public sealed class StationMetadataStreamShipper : ServiceBase
             if (readiness is null)
                 throw new InvalidOperationException("Stream shipping database readiness is not initialized.");
 
+            var stationMetadataReadiness = _stationMetadataDatabaseReadiness;
+            if (stationMetadataReadiness is null)
+                throw new InvalidOperationException("Station metadata database readiness is not initialized.");
+
             var repo = _streamShippingRepository;
             if (repo is null)
                 throw new InvalidOperationException("Stream shipping repository is not initialized.");
@@ -158,6 +167,7 @@ public sealed class StationMetadataStreamShipper : ServiceBase
                 throw new InvalidOperationException("Installation id is not initialized.");
 
             await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
+            await stationMetadataReadiness.EnsureReadyAsync(token).ConfigureAwait(false);
 
             var state = await repo.TryGetStateAsync(Source, token).ConfigureAwait(false);
             var lastAcked = state?.LastAckedRowId ?? 0;
@@ -167,7 +177,8 @@ public sealed class StationMetadataStreamShipper : ServiceBase
                 installationId: _installationId,
                 lastAckedRowId: lastAcked,
                 maxRows: _maxBatchRows,
-                cancellationToken: token).ConfigureAwait(false);
+                cancellationToken: token
+            ).ConfigureAwait(false);
 
             if (rows.Count == 0)
                 return;
@@ -189,13 +200,12 @@ public sealed class StationMetadataStreamShipper : ServiceBase
                 source: Source,
                 lastShippedRowId: maxRowId,
                 lastAckedRowId: ackedUpTo.Value,
-                cancellationToken: token).ConfigureAwait(false);
+                cancellationToken: token
+            ).ConfigureAwait(false);
         }
-        catch (Exception ex) when (
-            !(ex is OperationCanceledException)
-        )
+        catch (Exception exception) when (!(exception is OperationCanceledException))
         {
-            ILogger.Error("StationMetadataStreamShipper: error during shipping", ex);
+            ILogger.Error("StationMetadataStreamShipper: error during shipping", exception);
         }
     }
 }

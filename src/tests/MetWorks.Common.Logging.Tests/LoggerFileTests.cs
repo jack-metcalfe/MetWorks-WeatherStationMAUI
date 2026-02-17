@@ -29,13 +29,16 @@ public class InMemorySettingRepository : ISettingRepository
     }
     public IEnumerable<ISettingDefinition> GetAllDefinitions() => Enumerable.Empty<ISettingDefinition>();
     public IEnumerable<ISettingValue> GetAllValues() => Enumerable.Empty<ISettingValue>();
+    public bool ApplyOverrides(IEnumerable<ISettingValue> overrides) => true;
     public void RegisterForSettingChangeMessages(string path, Action<ISettingValue> handler) { }
     public IEventRelayPath IEventRelayPath => throw new NotImplementedException();
 }
 
 sealed class TestInstanceIdentifier : IInstanceIdentifier
 {
+    public string InstallationId => Guid.Empty.ToString();
     public string GetOrCreateInstallationId() => Guid.Empty.ToString();
+    public string CreateNewInstallationId() => Guid.NewGuid().ToString();
     public bool SetInstallationId(string installationId) => true;
     public bool ResetInstallationId() => true;
 }
@@ -69,6 +72,10 @@ public class LoggerFileTests
 
         Assert.True(ok);
         Assert.StartsWith(temp, fileLogger.AbsoluteLogFilePath);
+
+        Assert.True(Directory.Exists(fileLogger.AbsoluteLogDirectory));
+        var files = Directory.GetFiles(fileLogger.AbsoluteLogDirectory);
+        Assert.True(files.Length > 0);
 
         // cleanup
         try { Directory.Delete(temp, true); } catch { }

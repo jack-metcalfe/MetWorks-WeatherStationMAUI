@@ -8,12 +8,14 @@ public interface IStreamShippingRepository
         string source,
         long? lastShippedRowId,
         long? lastAckedRowId,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken
+    );
 
     Task<IReadOnlyList<StandardReadingRow>> ReadStandardReadingsBatchAsync(
         string table,
         string installationId,
         long lastAckedRowId,
         int maxRows,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken
+    );
 }

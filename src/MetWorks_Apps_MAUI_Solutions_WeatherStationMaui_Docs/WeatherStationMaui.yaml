@@ -410,6 +410,9 @@ namespace:
           - name: "iInstanceIdentifier"
             class: null
             interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
+          - name: "stationMetadataDatabaseReadiness"
+            class: null
+            interface: "MetWorks.Persistence.StationMetadata.IStationMetadataDatabaseReadiness"
           - name: "streamShippingDatabaseReadiness"
             class: null
             interface: "MetWorks.Persistence.StreamShipping.IStreamShippingDatabaseReadiness"
@@ -549,6 +552,9 @@ namespace:
       - name: "SqliteDatabase"
         interface: "MetWorks.Data.Sqlite.ISqliteDatabase"
         parameter:
+          - name: iLogger
+            class: null
+            interface: "MetWorks.Interfaces.ILogger"
           - name: "options"
             class: "MetWorks.Data.Sqlite.SqliteDatabaseOptions"
             interface: null
@@ -649,6 +655,9 @@ namespace:
       - name: "StreamShippingRepository"
         interface: "MetWorks.Persistence.StreamShipping.IStreamShippingRepository"
         parameter:
+          - name: "iLogger"
+            class: null
+            interface: "MetWorks.Interfaces.ILogger"
           - name: "sqliteDatabase"
             class: null
             interface: "MetWorks.Data.Sqlite.ISqliteDatabase"
@@ -1116,6 +1125,9 @@ instance:
     class: "MetWorks.Data.Sqlite.SqliteDatabase"
     exposeToMauiDi: true
     assignment:
+      - name: "iLogger"
+        literal: null
+        instance: "TheLoggerFile"
       - name: "options"
         literal: null
         instance: "TheSqliteDatabaseOptions"
@@ -1236,6 +1248,9 @@ instance:
     class: "MetWorks.Persistence.StreamShipping.StreamShippingRepository"
     exposeToMauiDi: false
     assignment:
+      - name: "iLogger"
+        literal: null
+        instance: "TheLoggerFile"
       - name: "sqliteDatabase"
         literal: null
         instance: "TheSqliteDatabase"
@@ -1518,6 +1533,9 @@ instance:
       - name: "iInstanceIdentifier"
         literal: null
         instance: "TheInstanceIdentifier"
+      - name: "stationMetadataDatabaseReadiness"
+        literal: null
+        instance: "TheStationMetadataDatabaseReadiness"
       - name: "streamShippingDatabaseReadiness"
         literal: null
         instance: "TheStreamShippingDatabaseReadiness"

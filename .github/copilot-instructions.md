@@ -43,6 +43,7 @@
 - Logger must not fail initialization when the database/network is unavailable.
 - Acceptable to lose log events when the network is down.
 - Logger should automatically recover and resume logging when connectivity returns.
+- LoggerFile file creation depends on minimum log level; if minimum level is Error and only Information is logged during init, no file appears until an Error is logged. Ensure init emits at least one event at >= minimum level or clarify expectations.
 - LoggerResilient should be implemented as a shared singleton to ensure consistent logging behavior across components.
 
 ## Service Management

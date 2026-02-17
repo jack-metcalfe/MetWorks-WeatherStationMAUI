@@ -71,6 +71,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <AndroidResource Remove="Platforms\Android\Resources\xml\network_security_config.xml" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Compile Remove="Pages\GuestPages\MainView1080x2400 .xaml.cs" />
 		<Compile Remove="Pages\GuestPages\MainView1080x2400.xaml.cs" />
 		<Compile Remove="Pages\GuestPages\MainView2400x1080.xaml.cs" />

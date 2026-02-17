@@ -97,6 +97,7 @@ public static class LookupDictionaries
         basePath: SettingConstants.StreamShippingHttp_groupName,
         settingNames:
         [
+            SettingConstants.StreamShippingHttp_allowInvalidTlsForEndpointHost,
             SettingConstants.StreamShippingHttp_timeoutSeconds
         ]
     );
