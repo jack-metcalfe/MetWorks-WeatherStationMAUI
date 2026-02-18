@@ -9,6 +9,7 @@ public sealed class LoggerStub : ILoggerStub
     public LoggerStub() { }
     public void Information(string message) { }
     public void Warning(string message) { }
+    public void Warning(string message, Exception exception) { }
     public void Error(string message, Exception exception) { }
     public void Error(string message) { }
     public void Debug(string message) { }

@@ -162,7 +162,29 @@ public class LoggerFile : ILogger
 
     public void Information(string message) => ILogger.Information(message);
     public void Warning(string message) => ILogger.Warning(message);
-    public void Error(string message, Exception exception) => ILogger.Error(message, exception);
+    public void Warning(string message, Exception exception)
+    {
+        if (exception is null)
+        {
+            ILogger.Warning(message);
+            return;
+        }
+
+        // Always render exception into the message so output templates that omit {Exception} still capture details.
+        ILogger.Warning(exception, $"{message}{Environment.NewLine}{exception}");
+    }
+
+    public void Error(string message, Exception exception)
+    {
+        if (exception is null)
+        {
+            ILogger.Error(message);
+            return;
+        }
+
+        // Always render exception into the message so output templates that omit {Exception} still capture details.
+        ILogger.Error(exception, $"{message}{Environment.NewLine}{exception}");
+    }
     public void Error(string message) => ILogger.Error(message);
     public void Debug(string message) => ILogger.Debug(message);
     public void Trace(string message) => ILogger.Verbose(message);
@@ -201,6 +223,16 @@ public class LoggerFile : ILogger
 
         public void Information(string message) => _logger.Information(message);
         public void Warning(string message) => _logger.Warning(message);
+        public void Warning(string message, Exception exception)
+        {
+            if (exception is null)
+            {
+                _logger.Warning(message);
+                return;
+            }
+
+            _logger.Warning(exception, $"{message}{Environment.NewLine}{exception}");
+        }
         public void Error(string message, Exception exception) => _logger.Error(exception, message);
         public void Error(string message) => _logger.Error(message);
         public void Debug(string message) => _logger.Debug(message);
@@ -237,6 +269,16 @@ public class LoggerFile : ILogger
 
             public void Information(string message) => _logger.Information(message);
             public void Warning(string message) => _logger.Warning(message);
+            public void Warning(string message, Exception exception)
+            {
+                if (exception is null)
+                {
+                    _logger.Warning(message);
+                    return;
+                }
+
+                _logger.Warning(exception, $"{message}{Environment.NewLine}{exception}");
+            }
             public void Error(string message, Exception exception) => _logger.Error(exception, message);
             public void Error(string message) => _logger.Error(message);
             public void Debug(string message) => _logger.Debug(message);

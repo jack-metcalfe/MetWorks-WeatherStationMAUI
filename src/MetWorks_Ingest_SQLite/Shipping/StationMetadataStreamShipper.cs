@@ -135,11 +135,15 @@ public sealed class StationMetadataStreamShipper : ServiceBase
             }
             catch (HttpRequestException ex)
             {
-                ILogger.Warning($"StationMetadataStreamShipper: HTTP failure: {ex.Message}");
+                ILogger.Warning("StationMetadataStreamShipper: HTTP failure", ex);
             }
             catch (InvalidOperationException ex)
             {
-                ILogger.Warning($"StationMetadataStreamShipper: failure: {ex.Message}");
+                ILogger.Warning("StationMetadataStreamShipper: failure", ex);
+            }
+            catch (Exception ex)
+            {
+                ILogger.Error("StationMetadataStreamShipper: unexpected failure", ex);
             }
         }
     }
@@ -203,9 +207,21 @@ public sealed class StationMetadataStreamShipper : ServiceBase
                 cancellationToken: token
             ).ConfigureAwait(false);
         }
-        catch (Exception exception) when (!(exception is OperationCanceledException))
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
-            ILogger.Error("StationMetadataStreamShipper: error during shipping", exception);
+            throw;
+        }
+        catch (HttpRequestException exception)
+        {
+            ILogger.Warning("StationMetadataStreamShipper: HTTP failure during shipping", exception);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ILogger.Warning("StationMetadataStreamShipper: failure during shipping", exception);
+        }
+        catch (Exception exception)
+        {
+            ILogger.Error("StationMetadataStreamShipper: unexpected error during shipping", exception);
         }
     }
 }

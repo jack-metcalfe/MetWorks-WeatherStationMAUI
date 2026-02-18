@@ -3,6 +3,7 @@ public interface ILogger
 {
     void Information(string message);
     void Warning(string message);
+    void Warning(string message, Exception exception);
     void Error(string message, Exception exception);
     void Error(string message);
     void Debug(string message);

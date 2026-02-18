@@ -145,73 +145,92 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
             }
             catch (HttpRequestException ex)
             {
-                ILogger.Warning($"LoggerSQLiteStreamShipper: HTTP failure: {ex.Message}");
+                ILogger.Warning("LoggerSQLiteStreamShipper: HTTP failure", ex);
             }
             catch (InvalidOperationException ex)
             {
-                ILogger.Warning($"LoggerSQLiteStreamShipper: failure: {ex.Message}");
+                ILogger.Warning("LoggerSQLiteStreamShipper: failure", ex);
             }
             catch (Exception ex)
             {
-                ILogger.Warning($"LoggerSQLiteStreamShipper: failure: {ex.Message}");
+                ILogger.Error("LoggerSQLiteStreamShipper: unexpected failure", ex);
             }
         }
     }
 
     async Task ShipOnceAsync(CancellationToken token)
     {
-        if (_httpClient is null)
-            throw new InvalidOperationException("HttpClient is not initialized.");
+        try
+        {
+            if (_httpClient is null)
+                throw new InvalidOperationException("HttpClient is not initialized.");
 
-        var readiness = _streamShippingDatabaseReadiness;
-        if (readiness is null)
-            throw new InvalidOperationException("Stream shipping database readiness is not initialized.");
+            var readiness = _streamShippingDatabaseReadiness;
+            if (readiness is null)
+                throw new InvalidOperationException("Stream shipping database readiness is not initialized.");
 
-        var stateRepo = _streamShippingRepository;
-        if (stateRepo is null)
-            throw new InvalidOperationException("Stream shipping repository is not initialized.");
+            var stateRepo = _streamShippingRepository;
+            if (stateRepo is null)
+                throw new InvalidOperationException("Stream shipping repository is not initialized.");
 
-        var loggerRepo = _loggerStreamShippingRepository;
-        if (loggerRepo is null)
-            throw new InvalidOperationException("Logger stream shipping repository is not initialized.");
+            var loggerRepo = _loggerStreamShippingRepository;
+            if (loggerRepo is null)
+                throw new InvalidOperationException("Logger stream shipping repository is not initialized.");
 
-        if (string.IsNullOrWhiteSpace(_installationId))
-            throw new InvalidOperationException("Installation id is not initialized.");
+            if (string.IsNullOrWhiteSpace(_installationId))
+                throw new InvalidOperationException("Installation id is not initialized.");
 
-        await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
+            await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
 
-        var state = await stateRepo.TryGetStateAsync(Source, token).ConfigureAwait(false);
+            var state = await stateRepo.TryGetStateAsync(Source, token).ConfigureAwait(false);
 
-        await TryPurgeOldRowsAsync(
-            loggerRepo,
-            stateRepo,
-            state,
-            _tableName,
-            token).ConfigureAwait(false);
+            await TryPurgeOldRowsAsync(
+                loggerRepo,
+                stateRepo,
+                state,
+                _tableName,
+                token).ConfigureAwait(false);
 
-        var lastAcked = state?.LastAckedRowId ?? 0;
-       var rows = await loggerRepo.ReadLoggerBatchAsync(_tableName, lastAcked, _maxBatchRows, token).ConfigureAwait(false);
-        if (rows.Count == 0)
-            return;
+            var lastAcked = state?.LastAckedRowId ?? 0;
+            var rows = await loggerRepo.ReadLoggerBatchAsync(_tableName, lastAcked, _maxBatchRows, token).ConfigureAwait(false);
+            if (rows.Count == 0)
+                return;
 
-        var maxId = rows[^1].Id;
+            var maxId = rows[^1].Id;
 
-        var ackedUpTo = await UploadNdjsonAsync(
-            httpClient: _httpClient,
-            endpointUrl: _endpointUrl,
-            table: _tableName,
-            installationId: _installationId,
-            rows: rows,
-            token: token).ConfigureAwait(false);
+            var ackedUpTo = await UploadNdjsonAsync(
+                httpClient: _httpClient,
+                endpointUrl: _endpointUrl,
+                table: _tableName,
+                installationId: _installationId,
+                rows: rows,
+                token: token).ConfigureAwait(false);
 
-        if (ackedUpTo is null)
-            return;
+            if (ackedUpTo is null)
+                return;
 
-        await stateRepo.UpsertShippingProgressAsync(
-            source: Source,
-            lastShippedRowId: maxId,
-            lastAckedRowId: ackedUpTo.Value,
-            cancellationToken: token).ConfigureAwait(false);
+            await stateRepo.UpsertShippingProgressAsync(
+                source: Source,
+                lastShippedRowId: maxId,
+                lastAckedRowId: ackedUpTo.Value,
+                cancellationToken: token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (HttpRequestException exception)
+        {
+            ILogger.Warning("LoggerSQLiteStreamShipper: HTTP failure during shipping", exception);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ILogger.Warning("LoggerSQLiteStreamShipper: failure during shipping", exception);
+        }
+        catch (Exception exception)
+        {
+            ILogger.Error("LoggerSQLiteStreamShipper: unexpected error during shipping", exception);
+        }
     }
 
     static async Task<long?> UploadNdjsonAsync(

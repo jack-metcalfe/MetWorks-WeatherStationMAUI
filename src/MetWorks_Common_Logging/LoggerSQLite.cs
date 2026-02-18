@@ -117,10 +117,29 @@ public sealed class LoggerSQLite : ILoggerSQLite
         ILogger.Warning(message);
     }
 
+    public void Warning(string message, Exception exception)
+    {
+        SysDiagDebug.WriteLine(message);
+        if (exception is null)
+        {
+            ILogger.Warning(message);
+            return;
+        }
+
+        ILogger.Warning(exception, $"{message}{Environment.NewLine}{exception}");
+    }
+
     public void Error(string message, Exception exception)
     {
         SysDiagDebug.WriteLine(message);
-        ILogger.Error(message, exception);
+        if (exception is null)
+        {
+            ILogger.Error(message);
+            return;
+        }
+
+        // Render exception into the message so SQLite logs retain details even if exception field is later omitted.
+        ILogger.Error(exception, $"{message}{Environment.NewLine}{exception}");
     }
 
     public void Error(string message)
@@ -175,6 +194,16 @@ public sealed class LoggerSQLite : ILoggerSQLite
 
         public void Information(string message) => _logger.Information(message);
         public void Warning(string message) => _logger.Warning(message);
+        public void Warning(string message, Exception exception)
+        {
+            if (exception is null)
+            {
+                _logger.Warning(message);
+                return;
+            }
+
+            _logger.Warning(exception, $"{message}{Environment.NewLine}{exception}");
+        }
         public void Error(string message, Exception exception) => _logger.Error(exception, message);
         public void Error(string message) => _logger.Error(message);
         public void Debug(string message) => _logger.Debug(message);
@@ -211,6 +240,16 @@ public sealed class LoggerSQLite : ILoggerSQLite
 
             public void Information(string message) => _logger.Information(message);
             public void Warning(string message) => _logger.Warning(message);
+            public void Warning(string message, Exception exception)
+            {
+                if (exception is null)
+                {
+                    _logger.Warning(message);
+                    return;
+                }
+
+                _logger.Warning(exception, $"{message}{Environment.NewLine}{exception}");
+            }
             public void Error(string message, Exception exception) => _logger.Error(exception, message);
             public void Error(string message) => _logger.Error(message);
             public void Debug(string message) => _logger.Debug(message);

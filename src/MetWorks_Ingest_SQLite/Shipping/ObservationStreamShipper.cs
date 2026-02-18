@@ -125,64 +125,87 @@ public sealed class ObservationStreamShipper : ServiceBase
             }
             catch (HttpRequestException ex)
             {
-                ILogger.Warning($"ObservationStreamShipper: HTTP failure: {ex.Message}");
+                ILogger.Warning("ObservationStreamShipper: HTTP failure", ex);
             }
             catch (InvalidOperationException ex)
             {
-                ILogger.Warning($"ObservationStreamShipper: failure: {ex.Message}");
+                ILogger.Warning("ObservationStreamShipper: failure", ex);
+            }
+            catch (Exception ex)
+            {
+                ILogger.Error("ObservationStreamShipper: unexpected failure", ex);
             }
         }
     }
 
     async Task ShipOnceAsync(CancellationToken token)
     {
-        if (_httpClient is null)
-            throw new InvalidOperationException("HttpClient is not initialized.");
+        try
+        {
+            if (_httpClient is null)
+                throw new InvalidOperationException("HttpClient is not initialized.");
 
-        var readiness = _streamShippingDatabaseReadiness;
-        if (readiness is null)
-            throw new InvalidOperationException("Stream shipping database readiness is not initialized.");
+            var readiness = _streamShippingDatabaseReadiness;
+            if (readiness is null)
+                throw new InvalidOperationException("Stream shipping database readiness is not initialized.");
 
-        var repo = _streamShippingRepository;
-        if (repo is null)
-            throw new InvalidOperationException("Stream shipping repository is not initialized.");
+            var repo = _streamShippingRepository;
+            if (repo is null)
+                throw new InvalidOperationException("Stream shipping repository is not initialized.");
 
-        if (string.IsNullOrWhiteSpace(_installationId))
-            throw new InvalidOperationException("Installation id is not initialized.");
+            if (string.IsNullOrWhiteSpace(_installationId))
+                throw new InvalidOperationException("Installation id is not initialized.");
 
-        await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
+            await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
 
-        var state = await repo.TryGetStateAsync(Source, token).ConfigureAwait(false);
-        var lastAcked = state?.LastAckedRowId ?? 0;
+            var state = await repo.TryGetStateAsync(Source, token).ConfigureAwait(false);
+            var lastAcked = state?.LastAckedRowId ?? 0;
 
-        var rows = await repo.ReadStandardReadingsBatchAsync(
-            table: Table,
-            installationId: _installationId,
-            lastAckedRowId: lastAcked,
-            maxRows: _maxBatchRows,
-            cancellationToken: token).ConfigureAwait(false);
+            var rows = await repo.ReadStandardReadingsBatchAsync(
+                table: Table,
+                installationId: _installationId,
+                lastAckedRowId: lastAcked,
+                maxRows: _maxBatchRows,
+                cancellationToken: token).ConfigureAwait(false);
 
-        if (rows.Count == 0)
-            return;
+            if (rows.Count == 0)
+                return;
 
-        var maxRowId = rows[^1].RowId;
+            var maxRowId = rows[^1].RowId;
 
-        var ackedUpTo = await UploadNdjsonAsync(
-            httpClient: _httpClient,
-            endpointUrl: _endpointUrl,
-            table: Table,
-            installationId: _installationId,
-            rows: rows,
-            token: token).ConfigureAwait(false);
+            var ackedUpTo = await UploadNdjsonAsync(
+                httpClient: _httpClient,
+                endpointUrl: _endpointUrl,
+                table: Table,
+                installationId: _installationId,
+                rows: rows,
+                token: token).ConfigureAwait(false);
 
-        if (ackedUpTo is null)
-            return;
+            if (ackedUpTo is null)
+                return;
 
-        await repo.UpsertShippingProgressAsync(
-            source: Source,
-            lastShippedRowId: maxRowId,
-            lastAckedRowId: ackedUpTo.Value,
-            cancellationToken: token).ConfigureAwait(false);
+            await repo.UpsertShippingProgressAsync(
+                source: Source,
+                lastShippedRowId: maxRowId,
+                lastAckedRowId: ackedUpTo.Value,
+                cancellationToken: token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (HttpRequestException ex)
+        {
+            ILogger.Warning("ObservationStreamShipper: HTTP failure", ex);
+        }
+        catch (InvalidOperationException ex)
+        {
+            ILogger.Warning("ObservationStreamShipper: failure", ex);
+        }
+        catch (Exception ex)
+        {
+            ILogger.Error("ObservationStreamShipper: error during shipping", ex);
+        }
     }
 
     internal static async Task<long?> UploadNdjsonAsync(

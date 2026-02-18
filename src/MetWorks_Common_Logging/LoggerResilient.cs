@@ -230,7 +230,10 @@ public sealed class LoggerResilient : ServiceBase, ILoggerResilient
         switch (entry.Level)
         {
             case LogLevel.Information: logger.Information(entry.Message); break;
-            case LogLevel.Warning: logger.Warning(entry.Message); break;
+            case LogLevel.Warning:
+                if (entry.Exception is not null) logger.Warning(entry.Message, entry.Exception);
+                else logger.Warning(entry.Message);
+                break;
             case LogLevel.Error:
                 if (entry.Exception is not null) logger.Error(entry.Message, entry.Exception);
                 else logger.Error(entry.Message);
@@ -262,6 +265,7 @@ public sealed class LoggerResilient : ServiceBase, ILoggerResilient
     // ILogger implementation: all methods are non-blocking and resilient.
     public void Information(string message) => BufferOrDispatch(new LogEntry(LogLevel.Information, message ?? string.Empty, null));
     public void Warning(string message) => BufferOrDispatch(new LogEntry(LogLevel.Warning, message ?? string.Empty, null));
+    public void Warning(string message, Exception exception) => BufferOrDispatch(new LogEntry(LogLevel.Warning, message ?? string.Empty, exception));
     public void Error(string message, Exception exception) => BufferOrDispatch(new LogEntry(LogLevel.Error, message ?? string.Empty, exception));
     public void Error(string message) => BufferOrDispatch(new LogEntry(LogLevel.Error, message ?? string.Empty, null));
     public void Debug(string message) => BufferOrDispatch(new LogEntry(LogLevel.Debug, message ?? string.Empty, null));

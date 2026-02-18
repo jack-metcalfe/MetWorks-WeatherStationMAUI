@@ -17,7 +17,7 @@ definitions:
     isSecret: false
 
   - path: /services/loggerFile/minimumLevel
-    defaultValue: "Error"
+    defaultValue: "Warning"
     description: "Minimum log level"
     expectedValueType: "String"
     allowableValues:

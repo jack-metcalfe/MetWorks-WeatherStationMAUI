@@ -55,8 +55,7 @@ LookupDictionaries.StreamShippingHttpGroupSettingsDefinition.BuildPath(SettingCo
         else if (timeoutSeconds > MaxTimeoutSeconds)
             timeoutSeconds = MaxTimeoutSeconds;
 
-        var allowInvalidTlsForEndpointHost = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.StreamShippingHttpGroupSettingsDefinition.BuildPath(SettingConstants.StreamShippingHttp_allowInvalidTlsForEndpointHost));
+        var allowInvalidTlsForEndpointHost = iSettingRepository.GetValueOrDefault<string>(LookupDictionaries.StreamShippingHttpGroupSettingsDefinition.BuildPath(SettingConstants.StreamShippingHttp_allowInvalidTlsForEndpointHost));
 
         HttpMessageHandler handler;
         if (!string.IsNullOrWhiteSpace(allowInvalidTlsForEndpointHost))

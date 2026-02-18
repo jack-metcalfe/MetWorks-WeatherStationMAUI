@@ -18,6 +18,7 @@ internal sealed class ContextualLogger : ILogger
 
     public void Information(string message) => _inner.Information(_prefix + (message ?? string.Empty));
     public void Warning(string message) => _inner.Warning(_prefix + (message ?? string.Empty));
+    public void Warning(string message, Exception exception) => _inner.Warning(_prefix + (message ?? string.Empty), exception);
     public void Error(string message, Exception exception) => _inner.Error(_prefix + (message ?? string.Empty), exception);
     public void Error(string message) => _inner.Error(_prefix + (message ?? string.Empty));
     public void Debug(string message) => _inner.Debug(_prefix + (message ?? string.Empty));
