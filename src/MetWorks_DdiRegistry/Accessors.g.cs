@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-02-20T04:40:12.7254449Z
+// Generated On:        2026-02-20T19:15:35.0065298Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -1113,6 +1113,42 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.StationMetadataProvider GetTheStationMetadataProvider_Internal() =>
             _TheStationMetadataProviderInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheTempestForecastProvider(MetWorks.Common.TempestForecastProvider instance) =>
+            _TheTempestForecastProviderInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Interfaces.ITempestForecastProvider GetTheTempestForecastProvider()
+        {
+            var initTask = _initTask_TheTempestForecastProvider;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestForecastProvider' was accessed before initialization started. Await registry.WhenTheTempestForecastProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheTempestForecastProvider().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestForecastProvider' was accessed before initialization completed. Await registry.WhenTheTempestForecastProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheTempestForecastProvider().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestForecastProvider' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestForecastProvider' initialization failed.",
+                    initTask.Exception);
+
+            return _TheTempestForecastProviderInstance;
+        }
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.TempestForecastProvider GetTheTempestForecastProvider_Internal() =>
+            _TheTempestForecastProviderInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors

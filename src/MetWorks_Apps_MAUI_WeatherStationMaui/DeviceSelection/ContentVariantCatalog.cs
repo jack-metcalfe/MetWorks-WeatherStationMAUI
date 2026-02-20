@@ -11,8 +11,24 @@ public sealed class ContentVariantCatalog : IContentVariantCatalog
 
         viewType = default!;
 
-        if (content != LogicalContentKey.HomePage && content != LogicalContentKey.MetricsOne && content != LogicalContentKey.LiveWind)
+        if (content != LogicalContentKey.HomePage && content != LogicalContentKey.MetricsOne && content != LogicalContentKey.LiveWind && content != LogicalContentKey.ForecastHours)
             return false;
+
+        // Baseline fallback mapping for unknown devices or missing curated overrides.
+        // This prevents crashes when the selector chooses Placeholder.Default.
+        if (variantKey == VariantKeys.Placeholder.Default)
+        {
+            viewType = content switch
+            {
+                LogicalContentKey.HomePage => typeof(MainView1920x1200),
+                LogicalContentKey.LiveWind => typeof(LiveWindAdaptive),
+                LogicalContentKey.MetricsOne => typeof(MetricsOne1920x1200),
+                LogicalContentKey.ForecastHours => typeof(ForecastHoursAdaptive),
+                _ => null
+            };
+
+            return viewType is not null;
+        }
 
         viewType = variantKey switch
         {

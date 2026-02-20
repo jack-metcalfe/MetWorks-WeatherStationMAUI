@@ -24,6 +24,7 @@
 - Prefer per-project `GlobalUsings.cs` files to centralize common using directives and reduce repetition.
 - Generated DDI output should not be emitted under a project folder where it will be picked up by default `Compile` globs; generation output should go to a non-compiled directory (e.g., outside the project, `obj/`, or excluded via csproj).
 - When refactoring DDI/codegen, prioritize clean code; incremental steps that take longer are acceptable if they keep the design tidy and maintainable.
+- Initialize new services (like Tempest forecast) via DDI and publish updates event-driven via EventRelay on a regular refresh interval (e.g., hourly) rather than pull-only.
 
 ## Instrumentation Preferences
 - Target Android primarily; emit reports to logs first.
@@ -104,3 +105,4 @@
 - SwipeCarousel currently shows only arrows (content empty) at the end of the session.
 - Prefer deterministic manual paging (host ContentView + swipe gestures + arrow:key navigation) over CarouselView when CarouselView exhibits virtualization/recycling issues like oscillation/self-swiping.
 - StationMetadataProvider persists station metadata to local device disk; MetricsSummaryIngestor should be migrated to SQLite for local-first. User prefers the workflow: create a plan, then execute the plan.
+- For forecast/hourly table layouts, keep header Grid column definitions identical to the data row Grid to preserve alignment; place extra controls (e.g., auto-scroll button) using overlay/column-span rather than adding columns.

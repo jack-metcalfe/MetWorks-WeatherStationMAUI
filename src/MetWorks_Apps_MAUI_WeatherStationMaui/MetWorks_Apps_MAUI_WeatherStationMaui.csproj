@@ -143,6 +143,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<MauiXaml Update="Pages\GuestPages\ForecastHoursAdaptive.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Pages\GuestPages\LiveWind2176x1812.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

@@ -68,6 +68,15 @@ public static class LookupDictionaries
         ]
     );
 
+    public static readonly GroupSettingDefinition TempestForecastGroupSettingsDefinition = new GroupSettingDefinition(
+        basePath: SettingConstants.TempestForecast_groupName,
+        settingNames:
+
+        [
+            SettingConstants.TempestForecast_refreshIntervalMinutes
+        ]
+    );
+
     public static readonly GroupSettingDefinition MetricsGroupSettingsDefinition = new GroupSettingDefinition(
         basePath: SettingConstants.Metrics_groupName,
         settingNames:

@@ -1,0 +1,16 @@
+// Template:            Instance.Field
+// Version:             1.1
+// Template Requested:  Instance.Field
+// Template:            File.Header
+// Version:             1.1
+// Template Requested:  Instance.Field
+// Generated On:        2026-02-20T19:15:35.0065298Z
+#nullable enable
+
+namespace MetWorks.ServiceRegistry
+{
+    public partial class Registry
+    {
+        private MetWorks.Common.TempestForecastProvider _TheTempestForecastProviderInstance;
+    }
+}

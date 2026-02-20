@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Registry
-// Generated On:        2026-02-20T04:40:12.7254449Z
+// Generated On:        2026-02-20T19:15:35.0065298Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -269,6 +269,15 @@ namespace MetWorks.ServiceRegistry
                 ? WhenTheStationMetadataProviderInitializedAsync().WaitAsync(cancellationToken)
                 : WhenTheStationMetadataProviderInitializedAsync();
 
+        private Task? _initTask_TheTempestForecastProvider;
+        public Task WhenTheTempestForecastProviderInitializedAsync()
+            => EnsureInitialized(ref _initTask_TheTempestForecastProvider, () => TheTempestForecastProvider_Initializer.Initialize_TheTempestForecastProviderAsync(this));
+
+        public Task WhenTheTempestForecastProviderInitializedAsync(CancellationToken cancellationToken)
+            => cancellationToken.CanBeCanceled
+                ? WhenTheTempestForecastProviderInitializedAsync().WaitAsync(cancellationToken)
+                : WhenTheTempestForecastProviderInitializedAsync();
+
         private Task? _initTask_TheUnitsOfMeasureInitializer;
         public Task WhenTheUnitsOfMeasureInitializerInitializedAsync()
             => EnsureInitialized(ref _initTask_TheUnitsOfMeasureInitializer, () => TheUnitsOfMeasureInitializer_Initializer.Initialize_TheUnitsOfMeasureInitializerAsync(this));
@@ -453,6 +462,7 @@ namespace MetWorks.ServiceRegistry
             TheStreamShippingHttpClientProvider_InstanceFactory.Create(this);
             TheTempestRestClient_InstanceFactory.Create(this);
             TheStationMetadataProvider_InstanceFactory.Create(this);
+            TheTempestForecastProvider_InstanceFactory.Create(this);
             TheUnitsOfMeasureInitializer_InstanceFactory.Create(this);
             TheRawPacketDatabaseReadiness_InstanceFactory.Create(this);
             TheRawPacketIngestRepository_InstanceFactory.Create(this);
@@ -508,6 +518,7 @@ namespace MetWorks.ServiceRegistry
                 WhenTheStreamShippingHttpClientProviderInitializedAsync(),
                 WhenTheTempestRestClientInitializedAsync(),
                 WhenTheStationMetadataProviderInitializedAsync(),
+                WhenTheTempestForecastProviderInitializedAsync(),
                 WhenTheUnitsOfMeasureInitializerInitializedAsync(),
                 WhenTheRawPacketDatabaseReadinessInitializedAsync(),
                 WhenTheRawPacketIngestRepositoryInitializedAsync(),

@@ -299,6 +299,14 @@ definitions:
     isEditable: true
     isSecret: false
 
+  - path: /services/tempestForecast/refreshIntervalMinutes
+    defaultValue: "60"
+    description: "How often to refresh Better Forecast over REST (minutes)."
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
   - path: /services/udpListener/udpListenerPort
     defaultValue: "50222"
     description: "UDP Port for listening for readings from Tempest Weather Station"

@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels"
+             x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages.ForecastHoursAdaptive"
+             x:DataType="viewmodels:ForecastHoursViewModel">
+
+    <Grid Padding="12" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                <Label FontSize="28" TextColor="{StaticResource GoldVikings}"
+                       Text="Next hours (Temp / Gust / Precip / UV / Humidity)" />
+                <Label FontSize="22" TextColor="{StaticResource WhiteVikings}"
+                       Text="{Binding StatusLine}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Column="1" Spacing="6" HorizontalOptions="End">
+                <HorizontalStackLayout Spacing="8" HorizontalOptions="End">
+                    <Label FontSize="22" TextColor="{StaticResource GoldVikings}" Text="Hours" />
+                    <Label FontSize="22" TextColor="{StaticResource WhiteVikings}" Text="{Binding HoursToShow}" />
+                    <Stepper Minimum="{Binding HoursToShowMin}"
+                             Maximum="{Binding HoursToShowMax}"
+                             Increment="1"
+                             Value="{Binding HoursToShow}" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="18" HorizontalOptions="End">
+                    <Label FontSize="22" TextColor="{StaticResource GoldVikings}" Text="Low" />
+                    <Label FontSize="22" TextColor="{StaticResource WhiteVikings}" Text="{Binding MinTemp, StringFormat='{}{0:0}'}" />
+                    <Label FontSize="22" TextColor="{StaticResource GoldVikings}" Text="High" />
+                    <Label FontSize="22" TextColor="{StaticResource WhiteVikings}" Text="{Binding MaxTemp, StringFormat='{}{0:0}'}" />
+                    <Label FontSize="22" TextColor="{StaticResource GoldVikings}" Text="Max Gust" />
+                    <Label FontSize="22" TextColor="{StaticResource WhiteVikings}" Text="{Binding MaxGust, StringFormat='{}{0:0}'}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
+
+        <Grid Grid.Row="1" Padding="0" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="Hour" />
+            <Label Grid.Column="1" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="Temp" />
+            <Label Grid.Column="2" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="Gust" />
+            <Label Grid.Column="3" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="Precip" />
+            <Label Grid.Column="4" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="UV" />
+            <Label Grid.Column="5" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="Hum" />
+
+            <Button Grid.Column="0" Grid.ColumnSpan="6"
+                    x:Name="AutoScrollButton"
+                    FontSize="18"
+                    HorizontalOptions="End"
+                    Text="Auto scroll: Off" />
+        </Grid>
+
+        <CollectionView Grid.Row="2"
+                        x:Name="HoursList"
+                        ItemsSource="{Binding Hours}"
+                        ItemsLayout="VerticalList"
+                        SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:ForecastHoursViewModel+ForecastHourRow">
+                    <Grid Padding="0" ColumnSpacing="12" RowSpacing="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Column="0" FontSize="34" TextColor="{StaticResource WhiteVikings}" Text="{Binding HourDisplay}" />
+                            <Label Grid.Column="1" FontSize="34" TextColor="{StaticResource WhiteVikings}" Text="{Binding AirTemperature, StringFormat='{}{0:0}'}" />
+                            <Label Grid.Column="2" FontSize="34" TextColor="{StaticResource WhiteVikings}" Text="{Binding WindGust, StringFormat='{}{0:0}'}" />
+                            <Label Grid.Column="3" FontSize="34" TextColor="{StaticResource WhiteVikings}" Text="{Binding PrecipProbability, StringFormat='{}{0}%'}" />
+                            <Label Grid.Column="4" FontSize="34" TextColor="{StaticResource WhiteVikings}" Text="{Binding Uv, StringFormat='{}{0:0.#}'}" />
+                            <Label Grid.Column="5" FontSize="34" TextColor="{StaticResource WhiteVikings}" Text="{Binding RelativeHumidity, StringFormat='{}{0}%'}" />
+                        </Grid>
+
+                        <BoxView Grid.Row="1"
+                                 HeightRequest="2"
+                                 HorizontalOptions="Fill"
+                                 Color="{StaticResource GoldVikings}"
+                                 Opacity="0.8" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+</ContentView>

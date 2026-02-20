@@ -211,8 +211,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" FontSize="Body" TextColor="{StaticResource GoldVikings}" Text="Json:" />
-            <StackLayout Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+            <StackLayout IsVisible="False" Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="6">
                 <Button x:Name="btnJsonUp" Text="▲" FontSize="18" Padding="8,2" />
                 <Button x:Name="btnJsonDown" Text="▼" FontSize="18" Padding="8,2" />
             </StackLayout>

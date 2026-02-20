@@ -27,14 +27,26 @@ public sealed class ContentViewFactory : IContentViewFactory
     {
         var variantKey = SelectVariantKey(content, deviceContext);
 
-        if (
-            !_catalog.TryGetViewType(
-                content, variantKey, out var viewType
+        var viewType = default(Type);
+        if (!_catalog.TryGetViewType(content, variantKey, out viewType))
+        {
+            var selectedVariantKey = variantKey;
+            var fallbackVariantKey = VariantKeys.Placeholder.Default;
+
+            if (
+                !string.Equals(selectedVariantKey, fallbackVariantKey, StringComparison.Ordinal)
+                && _catalog.TryGetViewType(content, fallbackVariantKey, out viewType)
             )
-        )
-            throw new InvalidOperationException(
-                $"No view type registered for {content} / {variantKey}."
-            );
+            {
+                variantKey = fallbackVariantKey;
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    $"No view type registered for {content} / {selectedVariantKey} (and no fallback {fallbackVariantKey})."
+                );
+            }
+        }
 
         var view = ActivatorUtilities.CreateInstance(
             _services, viewType
@@ -58,6 +70,9 @@ public sealed class ContentViewFactory : IContentViewFactory
                 => VariantKeys.Placeholder.Default,
 
             LogicalContentKey.MetricsOne
+                => VariantKeys.Placeholder.Default,
+
+            LogicalContentKey.ForecastHours
                 => VariantKeys.Placeholder.Default,
 
             LogicalContentKey.HomePage

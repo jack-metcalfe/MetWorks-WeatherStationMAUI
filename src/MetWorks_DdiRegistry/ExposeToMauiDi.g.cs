@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  ExposeToMauiDi
-// Generated On:        2026-02-20T04:40:12.7254449Z
+// Generated On:        2026-02-20T19:15:35.0065298Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -58,6 +58,10 @@ namespace MetWorks.ServiceRegistry
                         _TheStationMetadataProvider = GetTheStationMetadataProvider_Internal();
             services.AddSingleton<MetWorks.Interfaces.IStationMetadataProvider>
                 (_TheStationMetadataProvider);
+            MetWorks.Interfaces.ITempestForecastProvider
+                        _TheTempestForecastProvider = GetTheTempestForecastProvider_Internal();
+            services.AddSingleton<MetWorks.Interfaces.ITempestForecastProvider>
+                (_TheTempestForecastProvider);
             MetWorks.Ingest.SQLite.StationMetadataIngestor
                         _TheSQLiteStationMetadataIngestor = GetTheSQLiteStationMetadataIngestor_Internal();
             services.AddSingleton<MetWorks.Ingest.SQLite.StationMetadataIngestor>

@@ -44,6 +44,9 @@ public static class SettingConstants
     public const string Tempest_apiKey = "apiKey";
     public const string Tempest_stationId = "stationId";
 
+    public const string TempestForecast_groupName = "tempestForecast";
+    public const string TempestForecast_refreshIntervalMinutes = "refreshIntervalMinutes";
+
     public const string Metrics_groupName = "metrics";
     public const string Metrics_enabled = "enabled";
     public const string Metrics_captureIntervalSeconds = "captureIntervalSeconds";

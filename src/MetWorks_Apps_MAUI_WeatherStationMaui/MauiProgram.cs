@@ -51,6 +51,8 @@ public static class MauiProgram
 
         builder.Services.AddTransient<WeatherViewModel>();
         builder.Services.AddTransient<LiveWindAdaptive>();
+        builder.Services.AddTransient<ForecastHoursViewModel>();
+        builder.Services.AddTransient<ForecastHoursAdaptive>();
         builder.Services.AddTransient<MainView1920x1200>();
         builder.Services.AddTransient<MainView2176x1812>();
         builder.Services.AddTransient<MainView2304x1440>();
