@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-02-17T04:12:33.7258009Z
+// Generated On:        2026-02-20T04:40:12.7254449Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -24,8 +24,11 @@ namespace MetWorks.ServiceRegistry
             _TheRootCancellationTokenSourceInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public System.Threading.CancellationTokenSource GetTheRootCancellationTokenSource() =>
-            _TheRootCancellationTokenSourceInstance;
+        public System.Threading.CancellationTokenSource GetTheRootCancellationTokenSource()
+        {
+
+            return _TheRootCancellationTokenSourceInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal System.Threading.CancellationTokenSource GetTheRootCancellationTokenSource_Internal() =>
@@ -39,8 +42,11 @@ namespace MetWorks.ServiceRegistry
             _TheDefaultPlatformPathsInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public IPlatformPaths GetTheDefaultPlatformPaths() =>
-            _TheDefaultPlatformPathsInstance;
+        public IPlatformPaths GetTheDefaultPlatformPaths()
+        {
+
+            return _TheDefaultPlatformPathsInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.DefaultPlatformPaths GetTheDefaultPlatformPaths_Internal() =>
@@ -54,8 +60,11 @@ namespace MetWorks.ServiceRegistry
             _TheEventRelayBasicInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Interfaces.IEventRelayBasic GetTheEventRelayBasic() =>
-            _TheEventRelayBasicInstance;
+        public MetWorks.Interfaces.IEventRelayBasic GetTheEventRelayBasic()
+        {
+
+            return _TheEventRelayBasicInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.EventRelay.EventRelayBasic GetTheEventRelayBasic_Internal() =>
@@ -69,8 +78,11 @@ namespace MetWorks.ServiceRegistry
             _TheEventRelayPathInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Interfaces.IEventRelayPath GetTheEventRelayPath() =>
-            _TheEventRelayPathInstance;
+        public MetWorks.Interfaces.IEventRelayPath GetTheEventRelayPath()
+        {
+
+            return _TheEventRelayPathInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.EventRelay.EventRelayPath GetTheEventRelayPath_Internal() =>
@@ -84,8 +96,11 @@ namespace MetWorks.ServiceRegistry
             _TheLoggerStubInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Interfaces.ILogger GetTheLoggerStub() =>
-            _TheLoggerStubInstance;
+        public MetWorks.Interfaces.ILogger GetTheLoggerStub()
+        {
+
+            return _TheLoggerStubInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Logging.LoggerStub GetTheLoggerStub_Internal() =>
@@ -99,8 +114,11 @@ namespace MetWorks.ServiceRegistry
             _TheSqliteWriteCoordinatorInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Common.Utility.SqliteWriteCoordinator GetTheSqliteWriteCoordinator() =>
-            _TheSqliteWriteCoordinatorInstance;
+        public MetWorks.Common.Utility.SqliteWriteCoordinator GetTheSqliteWriteCoordinator()
+        {
+
+            return _TheSqliteWriteCoordinatorInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Utility.SqliteWriteCoordinator GetTheSqliteWriteCoordinator_Internal() =>
@@ -114,8 +132,11 @@ namespace MetWorks.ServiceRegistry
             _TheMetricsLatestSnapshotStoreInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Common.Metrics.IMetricsLatestSnapshot GetTheMetricsLatestSnapshotStore() =>
-            _TheMetricsLatestSnapshotStoreInstance;
+        public MetWorks.Common.Metrics.IMetricsLatestSnapshot GetTheMetricsLatestSnapshotStore()
+        {
+
+            return _TheMetricsLatestSnapshotStoreInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Metrics.MetricsLatestSnapshotStore GetTheMetricsLatestSnapshotStore_Internal() =>
@@ -129,8 +150,29 @@ namespace MetWorks.ServiceRegistry
             _TheSettingProviderInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Interfaces.ISettingProvider GetTheSettingProvider() =>
-            _TheSettingProviderInstance;
+        public MetWorks.Interfaces.ISettingProvider GetTheSettingProvider()
+        {
+            var initTask = _initTask_TheSettingProvider;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSettingProvider' was accessed before initialization started. Await registry.WhenTheSettingProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSettingProvider().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSettingProvider' was accessed before initialization completed. Await registry.WhenTheSettingProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSettingProvider().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSettingProvider' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSettingProvider' initialization failed.",
+                    initTask.Exception);
+
+            return _TheSettingProviderInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Settings.SettingProvider GetTheSettingProvider_Internal() =>
@@ -144,8 +186,29 @@ namespace MetWorks.ServiceRegistry
             _TheSettingRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Interfaces.ISettingRepository GetTheSettingRepository() =>
-            _TheSettingRepositoryInstance;
+        public MetWorks.Interfaces.ISettingRepository GetTheSettingRepository()
+        {
+            var initTask = _initTask_TheSettingRepository;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSettingRepository' was accessed before initialization started. Await registry.WhenTheSettingRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSettingRepository().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSettingRepository' was accessed before initialization completed. Await registry.WhenTheSettingRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSettingRepository().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSettingRepository' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSettingRepository' initialization failed.",
+                    initTask.Exception);
+
+            return _TheSettingRepositoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Settings.SettingRepository GetTheSettingRepository_Internal() =>
@@ -159,8 +222,29 @@ namespace MetWorks.ServiceRegistry
             _TheInstanceIdentifierInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Interfaces.IInstanceIdentifier GetTheInstanceIdentifier() =>
-            _TheInstanceIdentifierInstance;
+        public MetWorks.Interfaces.IInstanceIdentifier GetTheInstanceIdentifier()
+        {
+            var initTask = _initTask_TheInstanceIdentifier;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheInstanceIdentifier' was accessed before initialization started. Await registry.WhenTheInstanceIdentifierInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheInstanceIdentifier().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheInstanceIdentifier' was accessed before initialization completed. Await registry.WhenTheInstanceIdentifierInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheInstanceIdentifier().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheInstanceIdentifier' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheInstanceIdentifier' initialization failed.",
+                    initTask.Exception);
+
+            return _TheInstanceIdentifierInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.InstanceIdentifier.InstanceIdentifier GetTheInstanceIdentifier_Internal() =>
@@ -174,8 +258,29 @@ namespace MetWorks.ServiceRegistry
             _TheLoggerFileInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Interfaces.ILogger GetTheLoggerFile() =>
-            _TheLoggerFileInstance;
+        public MetWorks.Interfaces.ILogger GetTheLoggerFile()
+        {
+            var initTask = _initTask_TheLoggerFile;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerFile' was accessed before initialization started. Await registry.WhenTheLoggerFileInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerFile().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerFile' was accessed before initialization completed. Await registry.WhenTheLoggerFileInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerFile().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerFile' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerFile' initialization failed.",
+                    initTask.Exception);
+
+            return _TheLoggerFileInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Logging.LoggerFile GetTheLoggerFile_Internal() =>
@@ -189,8 +294,29 @@ namespace MetWorks.ServiceRegistry
             _TheSqliteDatabaseOptionsFactoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Common.Settings.SqliteDatabaseOptionsFactory GetTheSqliteDatabaseOptionsFactory() =>
-            _TheSqliteDatabaseOptionsFactoryInstance;
+        public MetWorks.Common.Settings.SqliteDatabaseOptionsFactory GetTheSqliteDatabaseOptionsFactory()
+        {
+            var initTask = _initTask_TheSqliteDatabaseOptionsFactory;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabaseOptionsFactory' was accessed before initialization started. Await registry.WhenTheSqliteDatabaseOptionsFactoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSqliteDatabaseOptionsFactory().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabaseOptionsFactory' was accessed before initialization completed. Await registry.WhenTheSqliteDatabaseOptionsFactoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSqliteDatabaseOptionsFactory().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabaseOptionsFactory' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabaseOptionsFactory' initialization failed.",
+                    initTask.Exception);
+
+            return _TheSqliteDatabaseOptionsFactoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Settings.SqliteDatabaseOptionsFactory GetTheSqliteDatabaseOptionsFactory_Internal() =>
@@ -204,8 +330,29 @@ namespace MetWorks.ServiceRegistry
             _TheSqliteDatabaseOptionsInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Data.Sqlite.SqliteDatabaseOptions GetTheSqliteDatabaseOptions() =>
-            _TheSqliteDatabaseOptionsInstance;
+        public MetWorks.Data.Sqlite.SqliteDatabaseOptions GetTheSqliteDatabaseOptions()
+        {
+            var initTask = _initTask_TheSqliteDatabaseOptions;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabaseOptions' was accessed before initialization started. Await registry.WhenTheSqliteDatabaseOptionsInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSqliteDatabaseOptions().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabaseOptions' was accessed before initialization completed. Await registry.WhenTheSqliteDatabaseOptionsInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSqliteDatabaseOptions().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabaseOptions' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabaseOptions' initialization failed.",
+                    initTask.Exception);
+
+            return _TheSqliteDatabaseOptionsInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Data.Sqlite.SqliteDatabaseOptions GetTheSqliteDatabaseOptions_Internal() =>
@@ -219,8 +366,29 @@ namespace MetWorks.ServiceRegistry
             _TheSqliteDatabaseInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Data.Sqlite.ISqliteDatabase GetTheSqliteDatabase() =>
-            _TheSqliteDatabaseInstance;
+        public MetWorks.Data.Sqlite.ISqliteDatabase GetTheSqliteDatabase()
+        {
+            var initTask = _initTask_TheSqliteDatabase;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabase' was accessed before initialization started. Await registry.WhenTheSqliteDatabaseInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSqliteDatabase().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabase' was accessed before initialization completed. Await registry.WhenTheSqliteDatabaseInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSqliteDatabase().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabase' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSqliteDatabase' initialization failed.",
+                    initTask.Exception);
+
+            return _TheSqliteDatabaseInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Data.Sqlite.SqliteDatabase GetTheSqliteDatabase_Internal() =>
@@ -234,8 +402,29 @@ namespace MetWorks.ServiceRegistry
             _TheMetricsDatabaseReadinessInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.Metrics.IMetricsDatabaseReadiness GetTheMetricsDatabaseReadiness() =>
-            _TheMetricsDatabaseReadinessInstance;
+        public MetWorks.Persistence.Metrics.IMetricsDatabaseReadiness GetTheMetricsDatabaseReadiness()
+        {
+            var initTask = _initTask_TheMetricsDatabaseReadiness;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsDatabaseReadiness' was accessed before initialization started. Await registry.WhenTheMetricsDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheMetricsDatabaseReadiness().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsDatabaseReadiness' was accessed before initialization completed. Await registry.WhenTheMetricsDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheMetricsDatabaseReadiness().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsDatabaseReadiness' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsDatabaseReadiness' initialization failed.",
+                    initTask.Exception);
+
+            return _TheMetricsDatabaseReadinessInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Metrics.MetricsDatabaseReadiness GetTheMetricsDatabaseReadiness_Internal() =>
@@ -249,8 +438,29 @@ namespace MetWorks.ServiceRegistry
             _TheMetricsSummaryRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.Metrics.IMetricsSummaryRepository GetTheMetricsSummaryRepository() =>
-            _TheMetricsSummaryRepositoryInstance;
+        public MetWorks.Persistence.Metrics.IMetricsSummaryRepository GetTheMetricsSummaryRepository()
+        {
+            var initTask = _initTask_TheMetricsSummaryRepository;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSummaryRepository' was accessed before initialization started. Await registry.WhenTheMetricsSummaryRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheMetricsSummaryRepository().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSummaryRepository' was accessed before initialization completed. Await registry.WhenTheMetricsSummaryRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheMetricsSummaryRepository().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSummaryRepository' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSummaryRepository' initialization failed.",
+                    initTask.Exception);
+
+            return _TheMetricsSummaryRepositoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Metrics.MetricsSummaryRepository GetTheMetricsSummaryRepository_Internal() =>
@@ -264,8 +474,29 @@ namespace MetWorks.ServiceRegistry
             _TheRollupsDatabaseReadinessInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.Rollups.IRollupsDatabaseReadiness GetTheRollupsDatabaseReadiness() =>
-            _TheRollupsDatabaseReadinessInstance;
+        public MetWorks.Persistence.Rollups.IRollupsDatabaseReadiness GetTheRollupsDatabaseReadiness()
+        {
+            var initTask = _initTask_TheRollupsDatabaseReadiness;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRollupsDatabaseReadiness' was accessed before initialization started. Await registry.WhenTheRollupsDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheRollupsDatabaseReadiness().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRollupsDatabaseReadiness' was accessed before initialization completed. Await registry.WhenTheRollupsDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheRollupsDatabaseReadiness().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRollupsDatabaseReadiness' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRollupsDatabaseReadiness' initialization failed.",
+                    initTask.Exception);
+
+            return _TheRollupsDatabaseReadinessInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Rollups.RollupsDatabaseReadiness GetTheRollupsDatabaseReadiness_Internal() =>
@@ -279,8 +510,29 @@ namespace MetWorks.ServiceRegistry
             _TheObservationRollupRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.Rollups.IObservationRollupRepository GetTheObservationRollupRepository() =>
-            _TheObservationRollupRepositoryInstance;
+        public MetWorks.Persistence.Rollups.IObservationRollupRepository GetTheObservationRollupRepository()
+        {
+            var initTask = _initTask_TheObservationRollupRepository;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheObservationRollupRepository' was accessed before initialization started. Await registry.WhenTheObservationRollupRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheObservationRollupRepository().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheObservationRollupRepository' was accessed before initialization completed. Await registry.WhenTheObservationRollupRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheObservationRollupRepository().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheObservationRollupRepository' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheObservationRollupRepository' initialization failed.",
+                    initTask.Exception);
+
+            return _TheObservationRollupRepositoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Rollups.ObservationRollupRepository GetTheObservationRollupRepository_Internal() =>
@@ -294,8 +546,29 @@ namespace MetWorks.ServiceRegistry
             _ThePrecipitationRollupRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.Rollups.IPrecipitationRollupRepository GetThePrecipitationRollupRepository() =>
-            _ThePrecipitationRollupRepositoryInstance;
+        public MetWorks.Persistence.Rollups.IPrecipitationRollupRepository GetThePrecipitationRollupRepository()
+        {
+            var initTask = _initTask_ThePrecipitationRollupRepository;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'ThePrecipitationRollupRepository' was accessed before initialization started. Await registry.WhenThePrecipitationRollupRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetThePrecipitationRollupRepository().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'ThePrecipitationRollupRepository' was accessed before initialization completed. Await registry.WhenThePrecipitationRollupRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetThePrecipitationRollupRepository().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'ThePrecipitationRollupRepository' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'ThePrecipitationRollupRepository' initialization failed.",
+                    initTask.Exception);
+
+            return _ThePrecipitationRollupRepositoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Rollups.PrecipitationRollupRepository GetThePrecipitationRollupRepository_Internal() =>
@@ -309,8 +582,29 @@ namespace MetWorks.ServiceRegistry
             _TheWindRollupRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.Rollups.IWindRollupRepository GetTheWindRollupRepository() =>
-            _TheWindRollupRepositoryInstance;
+        public MetWorks.Persistence.Rollups.IWindRollupRepository GetTheWindRollupRepository()
+        {
+            var initTask = _initTask_TheWindRollupRepository;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWindRollupRepository' was accessed before initialization started. Await registry.WhenTheWindRollupRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheWindRollupRepository().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWindRollupRepository' was accessed before initialization completed. Await registry.WhenTheWindRollupRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheWindRollupRepository().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWindRollupRepository' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWindRollupRepository' initialization failed.",
+                    initTask.Exception);
+
+            return _TheWindRollupRepositoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Rollups.WindRollupRepository GetTheWindRollupRepository_Internal() =>
@@ -324,8 +618,29 @@ namespace MetWorks.ServiceRegistry
             _TheLightningRollupRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.Rollups.ILightningRollupRepository GetTheLightningRollupRepository() =>
-            _TheLightningRollupRepositoryInstance;
+        public MetWorks.Persistence.Rollups.ILightningRollupRepository GetTheLightningRollupRepository()
+        {
+            var initTask = _initTask_TheLightningRollupRepository;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLightningRollupRepository' was accessed before initialization started. Await registry.WhenTheLightningRollupRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLightningRollupRepository().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLightningRollupRepository' was accessed before initialization completed. Await registry.WhenTheLightningRollupRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLightningRollupRepository().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLightningRollupRepository' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLightningRollupRepository' initialization failed.",
+                    initTask.Exception);
+
+            return _TheLightningRollupRepositoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Rollups.LightningRollupRepository GetTheLightningRollupRepository_Internal() =>
@@ -339,8 +654,29 @@ namespace MetWorks.ServiceRegistry
             _TheStreamShippingDatabaseReadinessInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.StreamShipping.IStreamShippingDatabaseReadiness GetTheStreamShippingDatabaseReadiness() =>
-            _TheStreamShippingDatabaseReadinessInstance;
+        public MetWorks.Persistence.StreamShipping.IStreamShippingDatabaseReadiness GetTheStreamShippingDatabaseReadiness()
+        {
+            var initTask = _initTask_TheStreamShippingDatabaseReadiness;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingDatabaseReadiness' was accessed before initialization started. Await registry.WhenTheStreamShippingDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStreamShippingDatabaseReadiness().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingDatabaseReadiness' was accessed before initialization completed. Await registry.WhenTheStreamShippingDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStreamShippingDatabaseReadiness().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingDatabaseReadiness' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingDatabaseReadiness' initialization failed.",
+                    initTask.Exception);
+
+            return _TheStreamShippingDatabaseReadinessInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.StreamShipping.StreamShippingDatabaseReadiness GetTheStreamShippingDatabaseReadiness_Internal() =>
@@ -354,8 +690,29 @@ namespace MetWorks.ServiceRegistry
             _TheStreamShippingRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.StreamShipping.IStreamShippingRepository GetTheStreamShippingRepository() =>
-            _TheStreamShippingRepositoryInstance;
+        public MetWorks.Persistence.StreamShipping.IStreamShippingRepository GetTheStreamShippingRepository()
+        {
+            var initTask = _initTask_TheStreamShippingRepository;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingRepository' was accessed before initialization started. Await registry.WhenTheStreamShippingRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStreamShippingRepository().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingRepository' was accessed before initialization completed. Await registry.WhenTheStreamShippingRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStreamShippingRepository().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingRepository' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingRepository' initialization failed.",
+                    initTask.Exception);
+
+            return _TheStreamShippingRepositoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.StreamShipping.StreamShippingRepository GetTheStreamShippingRepository_Internal() =>
@@ -369,8 +726,29 @@ namespace MetWorks.ServiceRegistry
             _TheLoggerStreamShippingRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.StreamShipping.ILoggerStreamShippingRepository GetTheLoggerStreamShippingRepository() =>
-            _TheLoggerStreamShippingRepositoryInstance;
+        public MetWorks.Persistence.StreamShipping.ILoggerStreamShippingRepository GetTheLoggerStreamShippingRepository()
+        {
+            var initTask = _initTask_TheLoggerStreamShippingRepository;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerStreamShippingRepository' was accessed before initialization started. Await registry.WhenTheLoggerStreamShippingRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerStreamShippingRepository().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerStreamShippingRepository' was accessed before initialization completed. Await registry.WhenTheLoggerStreamShippingRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerStreamShippingRepository().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerStreamShippingRepository' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerStreamShippingRepository' initialization failed.",
+                    initTask.Exception);
+
+            return _TheLoggerStreamShippingRepositoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.StreamShipping.LoggerStreamShippingRepository GetTheLoggerStreamShippingRepository_Internal() =>
@@ -384,8 +762,29 @@ namespace MetWorks.ServiceRegistry
             _TheStationMetadataDatabaseReadinessInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.StationMetadata.IStationMetadataDatabaseReadiness GetTheStationMetadataDatabaseReadiness() =>
-            _TheStationMetadataDatabaseReadinessInstance;
+        public MetWorks.Persistence.StationMetadata.IStationMetadataDatabaseReadiness GetTheStationMetadataDatabaseReadiness()
+        {
+            var initTask = _initTask_TheStationMetadataDatabaseReadiness;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataDatabaseReadiness' was accessed before initialization started. Await registry.WhenTheStationMetadataDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStationMetadataDatabaseReadiness().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataDatabaseReadiness' was accessed before initialization completed. Await registry.WhenTheStationMetadataDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStationMetadataDatabaseReadiness().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataDatabaseReadiness' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataDatabaseReadiness' initialization failed.",
+                    initTask.Exception);
+
+            return _TheStationMetadataDatabaseReadinessInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.StationMetadata.StationMetadataDatabaseReadiness GetTheStationMetadataDatabaseReadiness_Internal() =>
@@ -399,8 +798,29 @@ namespace MetWorks.ServiceRegistry
             _TheStationMetadataRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.StationMetadata.IStationMetadataRepository GetTheStationMetadataRepository() =>
-            _TheStationMetadataRepositoryInstance;
+        public MetWorks.Persistence.StationMetadata.IStationMetadataRepository GetTheStationMetadataRepository()
+        {
+            var initTask = _initTask_TheStationMetadataRepository;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataRepository' was accessed before initialization started. Await registry.WhenTheStationMetadataRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStationMetadataRepository().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataRepository' was accessed before initialization completed. Await registry.WhenTheStationMetadataRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStationMetadataRepository().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataRepository' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataRepository' initialization failed.",
+                    initTask.Exception);
+
+            return _TheStationMetadataRepositoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.StationMetadata.StationMetadataRepository GetTheStationMetadataRepository_Internal() =>
@@ -414,8 +834,29 @@ namespace MetWorks.ServiceRegistry
             _TheLoggingDatabaseReadinessInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.Logging.ILoggingDatabaseReadiness GetTheLoggingDatabaseReadiness() =>
-            _TheLoggingDatabaseReadinessInstance;
+        public MetWorks.Persistence.Logging.ILoggingDatabaseReadiness GetTheLoggingDatabaseReadiness()
+        {
+            var initTask = _initTask_TheLoggingDatabaseReadiness;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggingDatabaseReadiness' was accessed before initialization started. Await registry.WhenTheLoggingDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggingDatabaseReadiness().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggingDatabaseReadiness' was accessed before initialization completed. Await registry.WhenTheLoggingDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggingDatabaseReadiness().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggingDatabaseReadiness' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggingDatabaseReadiness' initialization failed.",
+                    initTask.Exception);
+
+            return _TheLoggingDatabaseReadinessInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Logging.LoggingDatabaseReadiness GetTheLoggingDatabaseReadiness_Internal() =>
@@ -429,8 +870,29 @@ namespace MetWorks.ServiceRegistry
             _TheLoggerSqliteRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.Logging.ILoggerSqliteRepository GetTheLoggerSqliteRepository() =>
-            _TheLoggerSqliteRepositoryInstance;
+        public MetWorks.Persistence.Logging.ILoggerSqliteRepository GetTheLoggerSqliteRepository()
+        {
+            var initTask = _initTask_TheLoggerSqliteRepository;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSqliteRepository' was accessed before initialization started. Await registry.WhenTheLoggerSqliteRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerSqliteRepository().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSqliteRepository' was accessed before initialization completed. Await registry.WhenTheLoggerSqliteRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerSqliteRepository().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSqliteRepository' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSqliteRepository' initialization failed.",
+                    initTask.Exception);
+
+            return _TheLoggerSqliteRepositoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Logging.LoggerSqliteRepository GetTheLoggerSqliteRepository_Internal() =>
@@ -444,8 +906,29 @@ namespace MetWorks.ServiceRegistry
             _TheLoggerSQLiteInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Interfaces.ILogger GetTheLoggerSQLite() =>
-            _TheLoggerSQLiteInstance;
+        public MetWorks.Interfaces.ILogger GetTheLoggerSQLite()
+        {
+            var initTask = _initTask_TheLoggerSQLite;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSQLite' was accessed before initialization started. Await registry.WhenTheLoggerSQLiteInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerSQLite().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSQLite' was accessed before initialization completed. Await registry.WhenTheLoggerSQLiteInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerSQLite().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSQLite' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSQLite' initialization failed.",
+                    initTask.Exception);
+
+            return _TheLoggerSQLiteInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Logging.LoggerSQLite GetTheLoggerSQLite_Internal() =>
@@ -459,8 +942,29 @@ namespace MetWorks.ServiceRegistry
             _TheLoggerResilientInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Interfaces.ILogger GetTheLoggerResilient() =>
-            _TheLoggerResilientInstance;
+        public MetWorks.Interfaces.ILogger GetTheLoggerResilient()
+        {
+            var initTask = _initTask_TheLoggerResilient;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerResilient' was accessed before initialization started. Await registry.WhenTheLoggerResilientInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerResilient().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerResilient' was accessed before initialization completed. Await registry.WhenTheLoggerResilientInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerResilient().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerResilient' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerResilient' initialization failed.",
+                    initTask.Exception);
+
+            return _TheLoggerResilientInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Logging.LoggerResilient GetTheLoggerResilient_Internal() =>
@@ -474,8 +978,29 @@ namespace MetWorks.ServiceRegistry
             _TheProvenanceTrackerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Common.ProvenanceTracker GetTheProvenanceTracker() =>
-            _TheProvenanceTrackerInstance;
+        public MetWorks.Common.ProvenanceTracker GetTheProvenanceTracker()
+        {
+            var initTask = _initTask_TheProvenanceTracker;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheProvenanceTracker' was accessed before initialization started. Await registry.WhenTheProvenanceTrackerInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheProvenanceTracker().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheProvenanceTracker' was accessed before initialization completed. Await registry.WhenTheProvenanceTrackerInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheProvenanceTracker().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheProvenanceTracker' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheProvenanceTracker' initialization failed.",
+                    initTask.Exception);
+
+            return _TheProvenanceTrackerInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.ProvenanceTracker GetTheProvenanceTracker_Internal() =>
@@ -489,8 +1014,29 @@ namespace MetWorks.ServiceRegistry
             _TheStreamShippingHttpClientProviderInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Common.Networking.StreamShippingHttpClientProvider GetTheStreamShippingHttpClientProvider() =>
-            _TheStreamShippingHttpClientProviderInstance;
+        public MetWorks.Common.Networking.StreamShippingHttpClientProvider GetTheStreamShippingHttpClientProvider()
+        {
+            var initTask = _initTask_TheStreamShippingHttpClientProvider;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingHttpClientProvider' was accessed before initialization started. Await registry.WhenTheStreamShippingHttpClientProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStreamShippingHttpClientProvider().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingHttpClientProvider' was accessed before initialization completed. Await registry.WhenTheStreamShippingHttpClientProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStreamShippingHttpClientProvider().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingHttpClientProvider' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStreamShippingHttpClientProvider' initialization failed.",
+                    initTask.Exception);
+
+            return _TheStreamShippingHttpClientProviderInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Networking.StreamShippingHttpClientProvider GetTheStreamShippingHttpClientProvider_Internal() =>
@@ -504,8 +1050,29 @@ namespace MetWorks.ServiceRegistry
             _TheTempestRestClientInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public ITempestRestClient GetTheTempestRestClient() =>
-            _TheTempestRestClientInstance;
+        public ITempestRestClient GetTheTempestRestClient()
+        {
+            var initTask = _initTask_TheTempestRestClient;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestRestClient' was accessed before initialization started. Await registry.WhenTheTempestRestClientInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheTempestRestClient().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestRestClient' was accessed before initialization completed. Await registry.WhenTheTempestRestClientInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheTempestRestClient().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestRestClient' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestRestClient' initialization failed.",
+                    initTask.Exception);
+
+            return _TheTempestRestClientInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.TempestRestClient GetTheTempestRestClient_Internal() =>
@@ -519,8 +1086,29 @@ namespace MetWorks.ServiceRegistry
             _TheStationMetadataProviderInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Interfaces.IStationMetadataProvider GetTheStationMetadataProvider() =>
-            _TheStationMetadataProviderInstance;
+        public MetWorks.Interfaces.IStationMetadataProvider GetTheStationMetadataProvider()
+        {
+            var initTask = _initTask_TheStationMetadataProvider;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataProvider' was accessed before initialization started. Await registry.WhenTheStationMetadataProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStationMetadataProvider().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataProvider' was accessed before initialization completed. Await registry.WhenTheStationMetadataProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStationMetadataProvider().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataProvider' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataProvider' initialization failed.",
+                    initTask.Exception);
+
+            return _TheStationMetadataProviderInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.StationMetadataProvider GetTheStationMetadataProvider_Internal() =>
@@ -534,8 +1122,29 @@ namespace MetWorks.ServiceRegistry
             _TheUnitsOfMeasureInitializerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer GetTheUnitsOfMeasureInitializer() =>
-            _TheUnitsOfMeasureInitializerInstance;
+        public MetWorks.RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer GetTheUnitsOfMeasureInitializer()
+        {
+            var initTask = _initTask_TheUnitsOfMeasureInitializer;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheUnitsOfMeasureInitializer' was accessed before initialization started. Await registry.WhenTheUnitsOfMeasureInitializerInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheUnitsOfMeasureInitializer().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheUnitsOfMeasureInitializer' was accessed before initialization completed. Await registry.WhenTheUnitsOfMeasureInitializerInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheUnitsOfMeasureInitializer().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheUnitsOfMeasureInitializer' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheUnitsOfMeasureInitializer' initialization failed.",
+                    initTask.Exception);
+
+            return _TheUnitsOfMeasureInitializerInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer GetTheUnitsOfMeasureInitializer_Internal() =>
@@ -549,8 +1158,29 @@ namespace MetWorks.ServiceRegistry
             _TheRawPacketDatabaseReadinessInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.Ingest.IRawPacketDatabaseReadiness GetTheRawPacketDatabaseReadiness() =>
-            _TheRawPacketDatabaseReadinessInstance;
+        public MetWorks.Persistence.Ingest.IRawPacketDatabaseReadiness GetTheRawPacketDatabaseReadiness()
+        {
+            var initTask = _initTask_TheRawPacketDatabaseReadiness;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRawPacketDatabaseReadiness' was accessed before initialization started. Await registry.WhenTheRawPacketDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheRawPacketDatabaseReadiness().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRawPacketDatabaseReadiness' was accessed before initialization completed. Await registry.WhenTheRawPacketDatabaseReadinessInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheRawPacketDatabaseReadiness().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRawPacketDatabaseReadiness' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRawPacketDatabaseReadiness' initialization failed.",
+                    initTask.Exception);
+
+            return _TheRawPacketDatabaseReadinessInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Ingest.RawPacketDatabaseReadiness GetTheRawPacketDatabaseReadiness_Internal() =>
@@ -564,8 +1194,29 @@ namespace MetWorks.ServiceRegistry
             _TheRawPacketIngestRepositoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Persistence.Ingest.IRawPacketIngestRepository GetTheRawPacketIngestRepository() =>
-            _TheRawPacketIngestRepositoryInstance;
+        public MetWorks.Persistence.Ingest.IRawPacketIngestRepository GetTheRawPacketIngestRepository()
+        {
+            var initTask = _initTask_TheRawPacketIngestRepository;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRawPacketIngestRepository' was accessed before initialization started. Await registry.WhenTheRawPacketIngestRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheRawPacketIngestRepository().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRawPacketIngestRepository' was accessed before initialization completed. Await registry.WhenTheRawPacketIngestRepositoryInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheRawPacketIngestRepository().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRawPacketIngestRepository' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRawPacketIngestRepository' initialization failed.",
+                    initTask.Exception);
+
+            return _TheRawPacketIngestRepositoryInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Persistence.Ingest.RawPacketIngestRepository GetTheRawPacketIngestRepository_Internal() =>
@@ -579,8 +1230,29 @@ namespace MetWorks.ServiceRegistry
             _TheSQLiteRawPacketIngestorInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.RawPacketIngestor GetTheSQLiteRawPacketIngestor() =>
-            _TheSQLiteRawPacketIngestorInstance;
+        public MetWorks.Ingest.SQLite.RawPacketIngestor GetTheSQLiteRawPacketIngestor()
+        {
+            var initTask = _initTask_TheSQLiteRawPacketIngestor;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSQLiteRawPacketIngestor' was accessed before initialization started. Await registry.WhenTheSQLiteRawPacketIngestorInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSQLiteRawPacketIngestor().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSQLiteRawPacketIngestor' was accessed before initialization completed. Await registry.WhenTheSQLiteRawPacketIngestorInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSQLiteRawPacketIngestor().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSQLiteRawPacketIngestor' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSQLiteRawPacketIngestor' initialization failed.",
+                    initTask.Exception);
+
+            return _TheSQLiteRawPacketIngestorInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.SQLite.RawPacketIngestor GetTheSQLiteRawPacketIngestor_Internal() =>
@@ -594,8 +1266,29 @@ namespace MetWorks.ServiceRegistry
             _TheStationMetadataStreamShipperInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper GetTheStationMetadataStreamShipper() =>
-            _TheStationMetadataStreamShipperInstance;
+        public MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper GetTheStationMetadataStreamShipper()
+        {
+            var initTask = _initTask_TheStationMetadataStreamShipper;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataStreamShipper' was accessed before initialization started. Await registry.WhenTheStationMetadataStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStationMetadataStreamShipper().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataStreamShipper' was accessed before initialization completed. Await registry.WhenTheStationMetadataStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStationMetadataStreamShipper().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataStreamShipper' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheStationMetadataStreamShipper' initialization failed.",
+                    initTask.Exception);
+
+            return _TheStationMetadataStreamShipperInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper GetTheStationMetadataStreamShipper_Internal() =>
@@ -609,8 +1302,29 @@ namespace MetWorks.ServiceRegistry
             _TheLightningStreamShipperInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper GetTheLightningStreamShipper() =>
-            _TheLightningStreamShipperInstance;
+        public MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper GetTheLightningStreamShipper()
+        {
+            var initTask = _initTask_TheLightningStreamShipper;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLightningStreamShipper' was accessed before initialization started. Await registry.WhenTheLightningStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLightningStreamShipper().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLightningStreamShipper' was accessed before initialization completed. Await registry.WhenTheLightningStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLightningStreamShipper().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLightningStreamShipper' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLightningStreamShipper' initialization failed.",
+                    initTask.Exception);
+
+            return _TheLightningStreamShipperInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper GetTheLightningStreamShipper_Internal() =>
@@ -624,8 +1338,29 @@ namespace MetWorks.ServiceRegistry
             _TheLoggerSQLiteStreamShipperInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Shipping.LoggerSQLiteStreamShipper GetTheLoggerSQLiteStreamShipper() =>
-            _TheLoggerSQLiteStreamShipperInstance;
+        public MetWorks.Ingest.SQLite.Shipping.LoggerSQLiteStreamShipper GetTheLoggerSQLiteStreamShipper()
+        {
+            var initTask = _initTask_TheLoggerSQLiteStreamShipper;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSQLiteStreamShipper' was accessed before initialization started. Await registry.WhenTheLoggerSQLiteStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerSQLiteStreamShipper().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSQLiteStreamShipper' was accessed before initialization completed. Await registry.WhenTheLoggerSQLiteStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLoggerSQLiteStreamShipper().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSQLiteStreamShipper' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheLoggerSQLiteStreamShipper' initialization failed.",
+                    initTask.Exception);
+
+            return _TheLoggerSQLiteStreamShipperInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.SQLite.Shipping.LoggerSQLiteStreamShipper GetTheLoggerSQLiteStreamShipper_Internal() =>
@@ -639,8 +1374,29 @@ namespace MetWorks.ServiceRegistry
             _TheObservationStreamShipperInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper GetTheObservationStreamShipper() =>
-            _TheObservationStreamShipperInstance;
+        public MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper GetTheObservationStreamShipper()
+        {
+            var initTask = _initTask_TheObservationStreamShipper;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheObservationStreamShipper' was accessed before initialization started. Await registry.WhenTheObservationStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheObservationStreamShipper().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheObservationStreamShipper' was accessed before initialization completed. Await registry.WhenTheObservationStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheObservationStreamShipper().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheObservationStreamShipper' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheObservationStreamShipper' initialization failed.",
+                    initTask.Exception);
+
+            return _TheObservationStreamShipperInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper GetTheObservationStreamShipper_Internal() =>
@@ -654,8 +1410,29 @@ namespace MetWorks.ServiceRegistry
             _ThePrecipitationStreamShipperInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper GetThePrecipitationStreamShipper() =>
-            _ThePrecipitationStreamShipperInstance;
+        public MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper GetThePrecipitationStreamShipper()
+        {
+            var initTask = _initTask_ThePrecipitationStreamShipper;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'ThePrecipitationStreamShipper' was accessed before initialization started. Await registry.WhenThePrecipitationStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetThePrecipitationStreamShipper().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'ThePrecipitationStreamShipper' was accessed before initialization completed. Await registry.WhenThePrecipitationStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetThePrecipitationStreamShipper().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'ThePrecipitationStreamShipper' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'ThePrecipitationStreamShipper' initialization failed.",
+                    initTask.Exception);
+
+            return _ThePrecipitationStreamShipperInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper GetThePrecipitationStreamShipper_Internal() =>
@@ -669,8 +1446,29 @@ namespace MetWorks.ServiceRegistry
             _TheWindStreamShipperInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Shipping.WindStreamShipper GetTheWindStreamShipper() =>
-            _TheWindStreamShipperInstance;
+        public MetWorks.Ingest.SQLite.Shipping.WindStreamShipper GetTheWindStreamShipper()
+        {
+            var initTask = _initTask_TheWindStreamShipper;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWindStreamShipper' was accessed before initialization started. Await registry.WhenTheWindStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheWindStreamShipper().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWindStreamShipper' was accessed before initialization completed. Await registry.WhenTheWindStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheWindStreamShipper().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWindStreamShipper' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWindStreamShipper' initialization failed.",
+                    initTask.Exception);
+
+            return _TheWindStreamShipperInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.SQLite.Shipping.WindStreamShipper GetTheWindStreamShipper_Internal() =>
@@ -684,8 +1482,29 @@ namespace MetWorks.ServiceRegistry
             _TheMetricsSummaryIngestorInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public IMetricsSummaryPersister GetTheMetricsSummaryIngestor() =>
-            _TheMetricsSummaryIngestorInstance;
+        public IMetricsSummaryPersister GetTheMetricsSummaryIngestor()
+        {
+            var initTask = _initTask_TheMetricsSummaryIngestor;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSummaryIngestor' was accessed before initialization started. Await registry.WhenTheMetricsSummaryIngestorInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheMetricsSummaryIngestor().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSummaryIngestor' was accessed before initialization completed. Await registry.WhenTheMetricsSummaryIngestorInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheMetricsSummaryIngestor().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSummaryIngestor' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSummaryIngestor' initialization failed.",
+                    initTask.Exception);
+
+            return _TheMetricsSummaryIngestorInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.SQLite.MetricsSummaryIngestor GetTheMetricsSummaryIngestor_Internal() =>
@@ -699,8 +1518,29 @@ namespace MetWorks.ServiceRegistry
             _TheMetricsSamplerServiceInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Common.Metrics.MetricsSamplerService GetTheMetricsSamplerService() =>
-            _TheMetricsSamplerServiceInstance;
+        public MetWorks.Common.Metrics.MetricsSamplerService GetTheMetricsSamplerService()
+        {
+            var initTask = _initTask_TheMetricsSamplerService;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSamplerService' was accessed before initialization started. Await registry.WhenTheMetricsSamplerServiceInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheMetricsSamplerService().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSamplerService' was accessed before initialization completed. Await registry.WhenTheMetricsSamplerServiceInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheMetricsSamplerService().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSamplerService' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheMetricsSamplerService' initialization failed.",
+                    initTask.Exception);
+
+            return _TheMetricsSamplerServiceInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.Metrics.MetricsSamplerService GetTheMetricsSamplerService_Internal() =>
@@ -714,8 +1554,29 @@ namespace MetWorks.ServiceRegistry
             _TheRollupsWorkerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Rollups.RollupsWorker GetTheRollupsWorker() =>
-            _TheRollupsWorkerInstance;
+        public MetWorks.Ingest.SQLite.Rollups.RollupsWorker GetTheRollupsWorker()
+        {
+            var initTask = _initTask_TheRollupsWorker;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRollupsWorker' was accessed before initialization started. Await registry.WhenTheRollupsWorkerInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheRollupsWorker().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRollupsWorker' was accessed before initialization completed. Await registry.WhenTheRollupsWorkerInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheRollupsWorker().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRollupsWorker' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheRollupsWorker' initialization failed.",
+                    initTask.Exception);
+
+            return _TheRollupsWorkerInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.SQLite.Rollups.RollupsWorker GetTheRollupsWorker_Internal() =>
@@ -729,8 +1590,29 @@ namespace MetWorks.ServiceRegistry
             _TheSQLiteStationMetadataIngestorInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.StationMetadataIngestor GetTheSQLiteStationMetadataIngestor() =>
-            _TheSQLiteStationMetadataIngestorInstance;
+        public MetWorks.Ingest.SQLite.StationMetadataIngestor GetTheSQLiteStationMetadataIngestor()
+        {
+            var initTask = _initTask_TheSQLiteStationMetadataIngestor;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSQLiteStationMetadataIngestor' was accessed before initialization started. Await registry.WhenTheSQLiteStationMetadataIngestorInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSQLiteStationMetadataIngestor().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSQLiteStationMetadataIngestor' was accessed before initialization completed. Await registry.WhenTheSQLiteStationMetadataIngestorInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSQLiteStationMetadataIngestor().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSQLiteStationMetadataIngestor' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSQLiteStationMetadataIngestor' initialization failed.",
+                    initTask.Exception);
+
+            return _TheSQLiteStationMetadataIngestorInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.SQLite.StationMetadataIngestor GetTheSQLiteStationMetadataIngestor_Internal() =>
@@ -744,8 +1626,29 @@ namespace MetWorks.ServiceRegistry
             _TheSensorReadingTransformerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.Transformer.SensorReadingTransformer GetTheSensorReadingTransformer() =>
-            _TheSensorReadingTransformerInstance;
+        public MetWorks.Ingest.Transformer.SensorReadingTransformer GetTheSensorReadingTransformer()
+        {
+            var initTask = _initTask_TheSensorReadingTransformer;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSensorReadingTransformer' was accessed before initialization started. Await registry.WhenTheSensorReadingTransformerInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSensorReadingTransformer().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSensorReadingTransformer' was accessed before initialization completed. Await registry.WhenTheSensorReadingTransformerInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheSensorReadingTransformer().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSensorReadingTransformer' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheSensorReadingTransformer' initialization failed.",
+                    initTask.Exception);
+
+            return _TheSensorReadingTransformerInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.Transformer.SensorReadingTransformer GetTheSensorReadingTransformer_Internal() =>
@@ -759,8 +1662,29 @@ namespace MetWorks.ServiceRegistry
             _TheUdpListenerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Networking.Udp.Transformer.TempestPacketTransformer GetTheUdpListener() =>
-            _TheUdpListenerInstance;
+        public MetWorks.Networking.Udp.Transformer.TempestPacketTransformer GetTheUdpListener()
+        {
+            var initTask = _initTask_TheUdpListener;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheUdpListener' was accessed before initialization started. Await registry.WhenTheUdpListenerInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheUdpListener().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheUdpListener' was accessed before initialization completed. Await registry.WhenTheUdpListenerInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheUdpListener().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheUdpListener' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheUdpListener' initialization failed.",
+                    initTask.Exception);
+
+            return _TheUdpListenerInstance;
+        }
 
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Networking.Udp.Transformer.TempestPacketTransformer GetTheUdpListener_Internal() =>

@@ -1,0 +1,45 @@
+﻿codeGen:
+  registryClass: "Registry"
+  codePath: "C:/Temp/GeneratedCode"
+  namespace: "Test.Generated"
+  initializer: "InitializeAsync"
+
+namespace:
+  - name: "System"
+    interface: []
+    class:
+      - name: "String"
+        interface: null
+        parameter: []
+        property: []
+
+  - name: "SyntaxLoader.Tests.Fakes"
+    interface: []
+    class:
+      - name: "ChainRoot"
+        interface: null
+        parameter: []
+        property:
+          - name: "Missing"
+            class: "System.String"
+            interface: null
+
+      - name: "DottedPropertyInitService"
+        interface: null
+        parameter:
+          - name: "value"
+            class: "System.String"
+            interface: null
+        property: []
+
+instance:
+  - name: "TheInitService"
+    class: "SyntaxLoader.Tests.Fakes.DottedPropertyInitService"
+    exposeToMauiDi: false
+    assignment:
+      - name: "value"
+        instance: "TheChainRoot.Missing"
+
+  - name: "TheChainRoot"
+    class: "SyntaxLoader.Tests.Fakes.ChainRoot"
+    exposeToMauiDi: false

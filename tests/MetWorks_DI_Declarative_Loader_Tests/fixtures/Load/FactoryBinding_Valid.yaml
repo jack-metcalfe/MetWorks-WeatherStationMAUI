@@ -1,0 +1,38 @@
+﻿codeGen:
+  registryClass: "Registry"
+  codePath: "C:/Temp/GeneratedCode"
+  namespace: "Test.Generated"
+  initializer: "InitializeAsync"
+
+namespace:
+  - name: "System"
+    interface: []
+    class:
+      - name: "String"
+        interface: null
+        parameter: []
+        property: []
+
+  - name: "Test.FactoryBinding"
+    interface: []
+    class:
+      - name: "Widget"
+        interface: null
+        parameter: []
+        property: []
+
+      - name: "WidgetFactory"
+        interface: null
+        parameter: []
+        property: []
+
+instance:
+  - name: "TheWidgetFactory"
+    class: "Test.FactoryBinding.WidgetFactory"
+    exposeToMauiDi: false
+
+  - name: "TheWidget"
+    class: "Test.FactoryBinding.Widget"
+    exposeToMauiDi: false
+    factoryInstance: "TheWidgetFactory"
+    factoryMethod: "CreateWidget"

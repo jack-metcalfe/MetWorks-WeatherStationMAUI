@@ -22,6 +22,8 @@
 - Report runtime exceptions with exact caller-info JSON; keep using caller-info to pinpoint failures to specific line numbers/blocks.
 - Prefer using SQLite-compatible square bracket quoting ([identifier]) for SQL identifiers to avoid reserved-word/quoting issues.
 - Prefer per-project `GlobalUsings.cs` files to centralize common using directives and reduce repetition.
+- Generated DDI output should not be emitted under a project folder where it will be picked up by default `Compile` globs; generation output should go to a non-compiled directory (e.g., outside the project, `obj/`, or excluded via csproj).
+- When refactoring DDI/codegen, prioritize clean code; incremental steps that take longer are acceptable if they keep the design tidy and maintainable.
 
 ## Instrumentation Preferences
 - Target Android primarily; emit reports to logs first.
@@ -64,6 +66,7 @@
   - DDI instance ordering matters: any instances referenced in an instance’s assignments must appear earlier in the instance list.
 - Keep the `iSettingRepository` parameter in `InitializeAsync` signatures even if currently unused, as it may be handy later.
 - DDI requirement: types constructed by the generator’s `new()` InstanceFactory must have a public parameterless constructor (e.g., SqliteDatabaseOptions cannot be positional-only).
+- For DDI F1 (explicit factory bindings), prefer option 2: create the factory as a named instance and call an instance factory method (factory instance method). Option 1 (static factory) may be added later.
 
 ## Concurrency Management
 - Prefer using Interlocked-based, lock-free patterns (when appropriate) to harden concurrency and reduce brittleness.

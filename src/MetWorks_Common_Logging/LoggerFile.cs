@@ -1,7 +1,7 @@
 ﻿namespace MetWorks.Common.Logging;
 public class LoggerFile : ILogger
 {
-    public Task<bool> InitializeAsync(
+    public async Task<bool> InitializeAsync(
         ILogger iLogger,
         ISettingRepository iSettingRepository,
         IInstanceIdentifier iInstanceIdentifier,
@@ -15,13 +15,13 @@ public class LoggerFile : ILogger
         if (_isInitialized)
             throw new InvalidOperationException($"{nameof(LoggerFile)} is already initialized.");
 
-        if (cancellationToken.IsCancellationRequested) return Task.FromResult(false);
+        if (cancellationToken.IsCancellationRequested) return false;
 
         try
         {
             try
             {
-                Serilog.Debugging.SelfLog.Enable(msg => System.Diagnostics.Debug.WriteLine($"[Serilog.SelfLog] {msg}"));
+                SelfLog.Enable(msg => SysDiagDebug.WriteLine($"[Serilog.SelfLog] {msg}"));
             }
             catch
             {
@@ -125,14 +125,14 @@ public class LoggerFile : ILogger
 
         catch (OperationCanceledException)
         {
-            return Task.FromResult(false);
+            return false;
         }
         catch (Exception exception)
         {
             throw new InvalidOperationException("Failed to read settings configuration from the provided path.", exception);
         }
 
-        return Task.FromResult(true);
+        return true;
     }
 
     bool _isInitialized = false;

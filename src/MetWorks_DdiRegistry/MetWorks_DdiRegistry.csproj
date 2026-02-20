@@ -16,4 +16,34 @@
 	  <ProjectReference Include="..\MetWorks_Networking_Udp_Transformer\MetWorks_Networking_Udp_Transformer.csproj" />
 	  <ProjectReference Include="..\RedStar_Amounts_WeatherExtensions\RedStar_Amounts_WeatherExtensions.csproj" />
 	</ItemGroup>
+
+	<PropertyGroup>
+	  <DdiInputYaml>$(MSBuildThisFileDirectory)..\MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs\WeatherStationMaui.yaml</DdiInputYaml>
+	  <DdiCodeGenToolProject>$(MSBuildThisFileDirectory)..\MetWorks_DI_Declarative_CodeGenTool\MetWorks_DI_Declarative_CodeGenTool.csproj</DdiCodeGenToolProject>
+	  <DdiCodeGenStampFile>$(IntermediateOutputPath)ddi.codegen.stamp</DdiCodeGenStampFile>
+	  <DdiReferenceAssemblyListFile>$([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', 'ddi.reference-assemblies.txt'))</DdiReferenceAssemblyListFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <DdiCodeGenToolSources Include="$(MSBuildThisFileDirectory)..\MetWorks_DI_Declarative_CodeGenTool\**\*.cs" />
+	  <DdiGeneratorSources Include="$(MSBuildThisFileDirectory)..\MetWorks_DI_Declarative_Generator\**\*.cs" />
+	  <DdiLoaderSources Include="$(MSBuildThisFileDirectory)..\MetWorks_DI_Declarative_Loader\**\*.cs" />
+	  <DdiResourcesSources Include="$(MSBuildThisFileDirectory)..\MetWorks_DI_Declarative_Resources\**\*.cs" />
+	  <DdiResourcesSources Include="$(MSBuildThisFileDirectory)..\MetWorks_DI_Declarative_Resources\**\*.hbs" />
+	</ItemGroup>
+
+	<Target Name="GenerateDdiRegistryCode"
+	        BeforeTargets="CoreCompile"
+	        Condition="'$(DesignTimeBuild)' != 'true'"
+	        Inputs="$(DdiInputYaml);@(DdiCodeGenToolSources);@(DdiGeneratorSources);@(DdiLoaderSources);@(DdiResourcesSources)"
+	        Outputs="$(DdiCodeGenStampFile)">
+	  <Message Importance="High" Text="DDI: generating registry code from $(DdiInputYaml)" />
+	  <MSBuild Projects="$(DdiCodeGenToolProject)" Targets="Restore;Build" Properties="Configuration=$(Configuration)" />
+	  <PropertyGroup>
+	    <DdiCodeGenToolExe>$(MSBuildThisFileDirectory)..\MetWorks_DI_Declarative_CodeGenTool\bin\$(Configuration)\net10.0\MetWorks_DI_Declarative_CodeGenTool.dll</DdiCodeGenToolExe>
+	  </PropertyGroup>
+	  <WriteLinesToFile File="$(DdiReferenceAssemblyListFile)" Lines="@(ReferencePath)" Overwrite="true" />
+	  <Exec Command="dotnet &quot;$(DdiCodeGenToolExe)&quot; --yaml &quot;$(DdiInputYaml)&quot; --out &quot;$(MSBuildProjectDirectory)&quot; --refsFile &quot;$(DdiReferenceAssemblyListFile)&quot;" />
+	  <WriteLinesToFile File="$(DdiCodeGenStampFile)" Lines="Generated: $([System.DateTime]::UtcNow.ToString('o'))" Overwrite="true" />
+	</Target>
 </Project>

@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Instance.Factory
-// Generated On:        2026-02-17T04:12:33.7258009Z
+// Generated On:        2026-02-20T04:40:12.7254449Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -20,6 +20,7 @@ namespace MetWorks.ServiceRegistry
             // Assignment-driven instance: construct with new().
             // This is always valid because ContainerClass is a concrete class.
             var instance = new MetWorks.RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer();
+            
 
             // Register immediately so other instances can reference it.
             registry.RegisterTheUnitsOfMeasureInitializer(instance);

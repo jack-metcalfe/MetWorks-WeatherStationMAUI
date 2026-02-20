@@ -12,7 +12,7 @@ public partial class InitializationSplashPage : ContentPage
             RetryButton.IsVisible = false;
             Spinner.IsRunning = true;
             StatusLabel.Text = "Retrying initialization...";
-            await Task.Run(async () => await StartupInitializer.InitializeAsync().ConfigureAwait(false));
+            await Task.Run(async () => await StartupInitializer.InitializeWithTimeoutAsync(TimeSpan.FromMinutes(2)).ConfigureAwait(false));
         };
 
         SubscribeToStartupEvents();
@@ -33,7 +33,7 @@ public partial class InitializationSplashPage : ContentPage
         {
             try
             {
-                await StartupInitializer.InitializeAsync().ConfigureAwait(false);
+                await StartupInitializer.InitializeWithTimeoutAsync(TimeSpan.FromMinutes(2)).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

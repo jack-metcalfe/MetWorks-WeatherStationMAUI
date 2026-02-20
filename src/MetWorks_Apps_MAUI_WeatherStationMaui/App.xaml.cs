@@ -26,7 +26,7 @@ public partial class App : Application
         {
             try
             {
-                await StartupInitializer.InitializeAsync().ConfigureAwait(false);
+                await StartupInitializer.InitializeAsync(_shutdownCts?.Token ?? CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

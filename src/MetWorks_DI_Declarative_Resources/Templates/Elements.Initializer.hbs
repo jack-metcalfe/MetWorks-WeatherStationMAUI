@@ -1,0 +1,18 @@
+// Template:            Elements.Initializer
+// Version:             1.1
+// Template Requested:  {{TemplateRequested}}
+{{> File.Header}}
+
+namespace {{Namespace}}
+{
+    // The ElementsInitializer builds element-driven instances.
+    // All element expressions are fully computed by the pipeline.
+    internal static partial class {{Instance.Name}}_ElementsInitializer
+    {
+        public static {{Instance.ClassQualified}}{{#if Instance.IsArray}}[]{{else}}{{/if}} CreateElements({{ContainerClass}} registry)
+        {
+            // Construct the instance using element-driven values.
+            return {{{Instance.ElementsConstructionExpression}}};
+        }
+    }
+}

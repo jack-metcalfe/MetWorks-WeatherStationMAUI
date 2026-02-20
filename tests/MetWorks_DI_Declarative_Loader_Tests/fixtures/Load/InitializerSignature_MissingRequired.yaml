@@ -1,0 +1,45 @@
+﻿codeGen:
+  registryClass: "Registry"
+  codePath: "C:/Temp/GeneratedCode"
+  namespace: "Test.Generated"
+  initializer: "InitializeAsync"
+
+namespace:
+  - name: "System"
+    interface: []
+    class:
+      - name: "String"
+        interface: null
+        parameter: []
+        property: []
+
+  - name: "SyntaxLoader.Tests.Fakes"
+    interface:
+      - name: "IBar"
+    class:
+      - name: "Bar"
+        interface: "SyntaxLoader.Tests.Fakes.IBar"
+        parameter: []
+        property: []
+      - name: "InitService"
+        interface: null
+        parameter:
+          - name: "iBar"
+            class: null
+            interface: "SyntaxLoader.Tests.Fakes.IBar"
+          - name: "connectionString"
+            class: "System.String"
+            interface: null
+        property: []
+
+instance:
+  - name: "TheInitService"
+    class: "SyntaxLoader.Tests.Fakes.InitService"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iBar"
+        instance: "TheBar"
+
+  - name: "TheBar"
+    class: "SyntaxLoader.Tests.Fakes.Bar"
+    exposeToMauiDi: false

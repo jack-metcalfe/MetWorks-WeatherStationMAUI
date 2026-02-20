@@ -1,0 +1,30 @@
+codeGen:
+  registryClass: Registry
+  codePath: C:/Temp/GeneratedCode
+  namespace: Test.Generated
+  initializer: InitializeAsync
+namespace:
+- name: System
+  interface: []
+  class:
+  - name: Int32
+    interface: null
+    parameter: []
+    property: []
+- name: Test.Formatting
+  interface: []
+  class:
+  - name: A
+    interface: null
+    parameter:
+    - name: maxBufferSize
+      class: System.Int32
+      interface: null
+    property: []
+instance:
+- name: TheA
+  class: Test.Formatting.A
+  exposeToMauiDi: false
+  assignment:
+  - maxBufferSize: 1000
+...

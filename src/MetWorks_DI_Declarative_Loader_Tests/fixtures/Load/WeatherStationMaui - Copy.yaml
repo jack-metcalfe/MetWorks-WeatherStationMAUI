@@ -1,0 +1,596 @@
+﻿#maximal-valid
+codeGen:
+  registryClass: "Registry"
+  codePath: "C:/Temp/GeneratedCode"
+  namespace: "MetWorks.ServiceRegistry"
+  initializer: "InitializeAsync"
+
+namespace:
+  - name: "MetWorks.Interfaces"
+    interface:
+      - name: "IEventRelayBasic"
+      - name: "IEventRelayPath"
+      - name: "ILoggerStub"
+      - name: "ILoggerFile"
+      - name: "ILoggerPostgreSQL"
+      - name: "ILoggerResilient"
+      - name: "ISettingProvider"
+      - name: "ISettingRepository"
+      - name: "ITempestRestClient"
+      - name: "IStationMetadataProvider"
+      - name: "IPlatformPaths"
+    class: []
+
+  - name: "System"
+    interface: []
+    class:
+      - name: "String"
+        interface: null
+        parameter: []
+        property: []
+      - name: "Boolean"
+        interface: null
+        parameter: []
+        property: []
+      - name: "Int32"
+        interface: null
+        parameter: []
+        property: []
+
+  - name: "System.Threading"
+    interface: []
+    class:
+      - name: "CancellationToken"
+        interface: null
+        parameter: []
+        property: []
+      - name: "CancellationTokenSource"
+        interface: null
+        parameter: []
+        property:
+          - name: "Token"
+            class: "System.Threading.CancellationToken"
+            interface: null
+
+  - name: "System.Net.Http"
+    interface: []
+    class:
+      - name: "HttpClient"
+        interface: null
+        parameter: []
+        property: []
+
+  - name: "MetWorks.EventRelay"
+    interface: []
+    class:
+      - name: "EventRelayBasic"
+        interface: "MetWorks.Interfaces.IEventRelayBasic"
+        parameter: []
+        property: []
+      - name: "EventRelayPath"
+        interface: "MetWorks.Interfaces.IEventRelayPath"
+        parameter: []
+        property: []
+
+  - name: "MetWorks.Common"
+    interface: []
+    class:
+      - name: "ProvenanceTracker"
+        interface: null
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+        property: []
+      - name: "TempestRestClient"
+        interface: ITempestRestClient
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "MetWorks.Interfaces.IEventRelayBasic"
+          - name: "externalCancellation"
+            class: System.Threading.CancellationToken
+            interface: null
+          - name: "httpClient"
+            class: "System.Net.Http.HttpClient"
+            interface: null
+        property: []
+
+      - name: "StationMetadataProvider"
+        interface: "MetWorks.Interfaces.IStationMetadataProvider"
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "MetWorks.Interfaces.IEventRelayBasic"
+          - name: "iTempestRestClient"
+            class: null
+            interface: ITempestRestClient
+          - name: "externalCancellation"
+            class: "System.Threading.CancellationToken"
+            interface: null
+          - name: "iPlatformPaths"
+            class: null
+            interface: "MetWorks.Interfaces.IPlatformPaths"
+        property: []
+
+  - name: "MetWorks.Common.Logging"
+    interface: []
+    class:
+      - name: "LoggerStub"
+        interface: MetWorks.Interfaces.ILoggerStub
+        parameter: []
+        property: []
+      - name: "LoggerFile"
+        interface: MetWorks.Interfaces.ILoggerFile
+        parameter:
+          - name: "iLoggerStub"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerStub"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iInstanceIdentifier"
+            class: null
+            interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
+        property: []
+      - name: "LoggerPostgreSQL"
+        interface: MetWorks.Interfaces.ILoggerPostgreSQL
+        parameter:
+          - name: "iLoggerFile"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerFile"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iInstanceIdentifier"
+            class: null
+            interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
+        property: []
+      - name: "LoggerResilient"
+        interface: MetWorks.Interfaces.ILoggerResilient
+        parameter:
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "MetWorks.Interfaces.IEventRelayBasic"
+          - name: "iInstanceIdentifier"
+            class: null
+            interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
+          - name: "iLoggerStub"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerStub"
+          - name: "iLoggerFile"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerFile"
+          - name: "iLoggerPostgreSQL"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerPostgreSQL"
+          - name: "maxBufferSize"
+            class: System.Int32
+            interface: null
+          - name: "cancellationToken"
+            class: System.Threading.CancellationToken
+            interface: null
+        property: []
+
+  - name: "MetWorks.Common.Metrics"
+    class:
+      - name: "MetricsSamplerService"
+        interface: null
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "MetWorks.Interfaces.IEventRelayBasic"
+          - name: "externalCancellation"
+            class: "System.Threading.CancellationToken"
+            interface: null
+          - name: "provenanceTracker"
+            class: "MetWorks.Common.ProvenanceTracker"
+            interface: null
+        property: []
+
+  - name: "MetWorks.Common.Settings"
+    interface: []
+    class:
+      - name: "SettingProvider"
+        interface: MetWorks.Interfaces.ISettingProvider
+        parameter:
+          - name: "iLoggerStub"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerStub"
+        property: []
+      - name: "SettingRepository"
+        interface: MetWorks.Interfaces.ISettingRepository
+        parameter:
+          - name: "iLoggerStub"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerStub"
+          - name: "iSettingProvider"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingProvider"
+        property: []
+
+  - name: "MetWorks.RedStar.Amounts.WeatherExtensions"
+    interface: []
+    class:
+      - name: "UnitsOfMeasureInitializer"
+        interface: null
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+        property: []
+
+  - name: "MetWorks.InstanceIdentifier"
+    interface: []
+    class:
+      - name: "InstanceIdentifier"
+        interface: null
+        parameter:
+          - name: "iLoggerStub"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerStub"
+          - name: "iSettingProvider"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingProvider"
+        property: []
+
+  - name: "MetWorks.Ingest.Transformer"
+    interface: []
+    class:
+      - name: "SensorReadingTransformer"
+        interface: null
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "MetWorks.Interfaces.IEventRelayBasic"
+          - name: "externalCancellation"
+            class: "System.Threading.CancellationToken"
+            interface: null
+          - name: "provenanceTracker"
+            class: "MetWorks.Common.ProvenanceTracker"
+            interface: null
+          - name: "iStationMetadataProvider"
+            class: null
+            interface: "MetWorks.Interfaces.IStationMetadataProvider"
+        property: []
+
+  - name: "MetWorks.Networking.Udp.Transformer"
+    interface: []
+    class:
+      - name: "TempestPacketTransformer"
+        interface: null
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "MetWorks.Interfaces.IEventRelayBasic"
+          - name: "externalCancellation"
+            class: "System.Threading.CancellationToken"
+            interface: null
+          - name: "provenanceTracker"
+            class: "MetWorks.Common.ProvenanceTracker"
+            interface: null
+        property: []
+
+  - name: "MetWorks.Ingest.Postgres"
+    interface: []
+    class:
+      - name: "RawPacketIngestor"
+        interface: null
+        parameter:
+          - name: "iLoggerResilient"
+            class: null
+            interface: "MetWorks.Interfaces.ILoggerResilient"
+          - name: "iSettingRepository"
+            class: null
+            interface: "MetWorks.Interfaces.ISettingRepository"
+          - name: "iEventRelayBasic"
+            class: null
+            interface: "MetWorks.Interfaces.IEventRelayBasic"
+          - name: "iInstanceIdentifier"
+            class: null
+            interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
+          - name: "externalCancellation"
+            class: "System.Threading.CancellationToken"
+            interface: null
+          - name: "provenanceTracker"
+            class: "MetWorks.Common.ProvenanceTracker"
+            interface: null
+        property: []
+
+instance:
+  - name: "RootCancellationTokenSource"
+    class: "System.Threading.CancellationTokenSource"
+    exposeToMauiDi: false
+    assignment: []
+    element: []
+
+  - name: "TheEventRelayBasic"
+    class: "MetWorks.EventRelay.EventRelayBasic"
+    exposeToMauiDi: true
+    assignment: []
+    element: []
+
+  - name: "TheEventRelayPath"
+    class: "MetWorks.EventRelay.EventRelayPath"
+    exposeToMauiDi: true
+    assignment: []
+    element: []
+
+  - name: "TheLoggerStub"
+    class: "MetWorks.Common.Logging.LoggerStub"
+    exposeToMauiDi: true
+    assignment: []
+    element: []
+
+  - name: "TheSettingProvider"
+    class: "MetWorks.Common.Settings.SettingProvider"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerStub"
+        literal: null
+        instance: "TheLoggerStub"
+    element: []
+
+  - name: "TheSettingRepository"
+    class: "MetWorks.Common.Settings.SettingRepository"
+    exposeToMauiDi: true
+    assignment:
+      - name: "iLoggerStub"
+        literal: null
+        instance: "TheLoggerStub"
+      - name: "iSettingProvider"
+        literal: null
+        instance: "TheSettingProvider"
+    element: []
+
+  - name: "TheInstanceIdentifier"
+    class: "MetWorks.InstanceIdentifier.InstanceIdentifier"
+    exposeToMauiDi: true
+    assignment:
+      - name: "iLoggerStub"
+        literal: null
+        instance: "TheLoggerStub"
+      - name: "iSettingProvider"
+        literal: null
+        instance: "TheSettingProvider"
+    element: []
+
+  - name: "TheLoggerFile"
+    class: "MetWorks.Common.Logging.LoggerFile"
+    exposeToMauiDi: true
+    assignment:
+      - name: "iLoggerStub"
+        literal: null
+        instance: "TheLoggerStub"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iInstanceIdentifier"
+        literal: null
+        instance: "TheInstanceIdentifier"
+    element: []
+
+  - name: "TheLoggerPostgreSQL"
+    class: "MetWorks.Common.Logging.LoggerPostgreSQL"
+    exposeToMauiDi: true
+    assignment:
+      - name: "iLoggerFile"
+        literal: null
+        instance: "TheLoggerFile"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iInstanceIdentifier"
+        literal: null
+        instance: "TheInstanceIdentifier"
+    element: []
+
+  - name: "TheLoggerResilient"
+    class: "MetWorks.Common.Logging.LoggerResilient"
+    exposeToMauiDi: true
+    assignment:
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+      - name: "iInstanceIdentifier"
+        literal: null
+        instance: "TheInstanceIdentifier"
+      - name: "iLoggerStub"
+        literal: null
+        instance: "TheLoggerStub"
+      - name: "iLoggerFile"
+        literal: null
+        instance: "TheLoggerFile"
+      - name: "iLoggerPostgreSQL"
+        literal: null
+        instance: "TheLoggerPostgreSQL"
+      - name: "maxBufferSize"
+        literal: 1000
+        instance: null
+      - name: "cancellationToken"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+    element: []
+
+  - name: "TheProvenanceTracker"
+    class: "MetWorks.Common.ProvenanceTracker"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+    element: []
+
+  - name: "TheMetricsSampler"
+    class: "MetWorks.Common.Metrics.MetricsSamplerService"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+      - name: "externalCancellation"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+      - name: "provenanceTracker"
+        literal: null
+        instance: "TheProvenanceTracker"
+    element: []
+
+  - name: "TheTempestRestClient"
+    class: "MetWorks.Common.TempestRestClient"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+      - name: "externalCancellation"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+    element: []
+
+  - name: "TheStationMetadataProvider"
+    class: "MetWorks.Common.StationMetadataProvider"
+    exposeToMauiDi: true
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+      - name: "iTempestRestClient"
+        literal: null
+        instance: "TheTempestRestClient"
+      - name: "externalCancellation"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+    element: []
+
+  - name: "TheUnitsOfMeasureInitializer"
+    class: "MetWorks.RedStar.Amounts.WeatherExtensions.UnitsOfMeasureInitializer"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+    element: []
+
+  - name: "TheSensorReadingTransformer"
+    class: "MetWorks.Ingest.Transformer.SensorReadingTransformer"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+      - name: "externalCancellation"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+      - name: "provenanceTracker"
+        literal: null
+        instance: "TheProvenanceTracker"
+      - name: "iStationMetadataProvider"
+        literal: null
+        instance: "TheStationMetadataProvider"
+    element: []
+
+  - name: "TheUdpListener"
+    class: "MetWorks.Networking.Udp.Transformer.TempestPacketTransformer"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+      - name: "externalCancellation"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+      - name: "provenanceTracker"
+        literal: null
+        instance: "TheProvenanceTracker"
+    element: []
+
+  - name: "ThePostgresRawPacketIngestor"
+    class: "MetWorks.Ingest.Postgres.RawPacketIngestor"
+    exposeToMauiDi: false
+    assignment:
+      - name: "iLoggerResilient"
+        literal: null
+        instance: "TheLoggerResilient"
+      - name: "iSettingRepository"
+        literal: null
+        instance: "TheSettingRepository"
+      - name: "iEventRelayBasic"
+        literal: null
+        instance: "TheEventRelayBasic"
+      - name: "iInstanceIdentifier"
+        literal: null
+        instance: "TheInstanceIdentifier"
+      - name: "externalCancellation"
+        literal: null
+        instance: "RootCancellationTokenSource.Token"
+      - name: "provenanceTracker"
+        literal: null
+        instance: "TheProvenanceTracker"
+    element: []

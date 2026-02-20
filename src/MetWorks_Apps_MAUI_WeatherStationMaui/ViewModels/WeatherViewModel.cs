@@ -58,7 +58,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         IInstanceIdentifier iInstanceIdentifier,
-        CancellationTokenSource cancellationTokenSource
+        CancellationToken externalCancellation
     )
     {
         ArgumentNullException.ThrowIfNull(iLogger);
@@ -66,7 +66,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
 
-        _iExternalCancellationToken = cancellationTokenSource.Token;
+        _iExternalCancellationToken = externalCancellation;
 
         _iLogger = iLogger;
         _iSettingRepository = iSettingRepository;

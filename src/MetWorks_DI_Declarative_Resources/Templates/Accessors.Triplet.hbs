@@ -1,0 +1,38 @@
+﻿        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  {{TemplateRequested}}
+
+        // Register method: stores the concrete instance in the backing field.
+        public void Register{{Name}}({{{ClassQualified}}}{{#if IsArray}}[]{{else}}{{/if}} instance) =>
+            _{{Name}}Instance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public {{#if InterfaceQualified}}{{InterfaceQualified}}{{else}}{{ClassQualified}}{{/if}}{{#if IsArray}}[]{{else}}{{/if}} Get{{Name}}()
+        {
+            {{#if HasAssignments}}
+            var initTask = _initTask_{{Name}};
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance '{{Name}}' was accessed before initialization started. Await registry.When{{Name}}InitializedAsync() (or registry.InitializeAllAsync()) before calling Get{{Name}}().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance '{{Name}}' was accessed before initialization completed. Await registry.When{{Name}}InitializedAsync() (or registry.InitializeAllAsync()) before calling Get{{Name}}().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance '{{Name}}' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance '{{Name}}' initialization failed.",
+                    initTask.Exception);
+            {{/if}}
+
+            return _{{Name}}Instance;
+        }
+
+        // Internal accessor: always returns the concrete class.
+        internal {{{ClassQualified}}}{{#if IsArray}}[]{{else}}{{/if}} Get{{Name}}_Internal() =>
+            _{{Name}}Instance;

@@ -1,0 +1,89 @@
+﻿// Template:            Registry
+// Version:             1.1
+// Template Requested:  {{TemplateRequested}}
+{{> File.Header}}
+
+namespace {{Namespace}}
+{
+    // The Registry class orchestrates the full lifecycle of all named instances.
+    // Phase 1: Creation (synchronous)
+    // Phase 2: Initialization (asynchronous)
+    // Phase 3: Disposal (optional)
+    public partial class {{ContainerClass}}
+    {
+        private static Task EnsureInitialized(ref Task? taskField, Func<Task> factory)
+        {
+            var existing = System.Threading.Volatile.Read(ref taskField);
+            if (existing is not null)
+                return existing;
+
+            var created = factory();
+            var prior = System.Threading.Interlocked.CompareExchange(ref taskField, created, null);
+            return prior ?? created;
+        }
+
+{{#each Instances}}
+{{#if HasAssignments}}
+        private Task? _initTask_{{Name}};
+        public Task When{{Name}}InitializedAsync()
+            => EnsureInitialized(ref _initTask_{{Name}}, () => {{Name}}_Initializer.Initialize_{{Name}}Async(this));
+
+        public Task When{{Name}}InitializedAsync(CancellationToken cancellationToken)
+            => cancellationToken.CanBeCanceled
+                ? When{{Name}}InitializedAsync().WaitAsync(cancellationToken)
+                : When{{Name}}InitializedAsync();
+
+{{/if}}
+{{/each}}
+
+        // Phase 1: Creation (synchronous, safe).
+        // Each instance is created via its dedicated InstanceFactory.
+        // Element-driven and assignment-driven construction logic is encapsulated per instance.
+        public void CreateAll()
+        {
+{{#each Instances}}
+            {{Name}}_InstanceFactory.Create(this);
+{{/each}}
+        }
+
+        // Phase 2: Initialization (async, potentially slow).
+        // Only instances with assignments require async initialization.
+        // Element-driven instances are fully constructed during creation.
+        public Task InitializeAllAsync()
+            => InitializeAllAsync(CancellationToken.None);
+
+        public async Task InitializeAllAsync(CancellationToken cancellationToken)
+        {
+            var tasks = new Task[]
+            {
+{{#each Instances}}
+{{#if HasAssignments}}
+                When{{Name}}InitializedAsync(),
+{{/if}}
+{{/each}}
+            };
+
+            await Task.WhenAll(tasks)
+                .WaitAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        public Task InitializeAllAsync(TimeSpan timeout, CancellationToken cancellationToken = default)
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(timeout);
+            return InitializeAllAsync(cts.Token);
+        }
+
+        // Phase 3: Disposal (optional).
+        // Emitted only for instances that require cleanup.
+        public void DisposeAll()
+        {
+{{#each Instances}}
+{{#if HasDisposable}}
+{{Name}}_Disposer.Dispose(this);
+{{/if}}
+{{/each}}
+        }
+    }
+}

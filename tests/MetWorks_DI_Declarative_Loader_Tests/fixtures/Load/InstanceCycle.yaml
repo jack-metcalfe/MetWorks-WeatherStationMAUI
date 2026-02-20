@@ -1,0 +1,50 @@
+﻿codeGen:
+  registryClass: "Registry"
+  codePath: "C:/Temp/GeneratedCode"
+  namespace: "Test.Generated"
+  initializer: "InitializeAsync"
+
+namespace:
+  - name: "System"
+    interface: []
+    class:
+      - name: "String"
+        interface: null
+        parameter: []
+        property: []
+
+  - name: "Test"
+    interface:
+      - name: "IA"
+      - name: "IB"
+    class:
+      - name: "A"
+        interface: "Test.IA"
+        parameter:
+          - name: "b"
+            class: null
+            interface: "Test.IB"
+        property: []
+
+      - name: "B"
+        interface: "Test.IB"
+        parameter:
+          - name: "a"
+            class: null
+            interface: "Test.IA"
+        property: []
+
+instance:
+  - name: "TheA"
+    class: "Test.A"
+    exposeToMauiDi: false
+    assignment:
+      - name: "b"
+        instance: "TheB"
+
+  - name: "TheB"
+    class: "Test.B"
+    exposeToMauiDi: false
+    assignment:
+      - name: "a"
+        instance: "TheA"

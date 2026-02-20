@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<AssemblyName>MetWorks.DI.Declarative.Resources</AssemblyName>
+		<RootNamespace>MetWorks.DI.Declarative.Resources</RootNamespace>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<!-- Ensure embedded resources are always fresh - Slower but this is a small project -->
+		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Templates/**/*.hbs">
+			<!-- Build the logical name with normalized paths -->
+			<LogicalName>
+				$(AssemblyName).Templates.$([System.String]::Copy('%(RecursiveDir)').Replace('\', '.').Replace('/',
+				'.'))%(Filename)%(Extension)
+			</LogicalName>
+		</EmbeddedResource>
+
+		<Compile Remove="Templates/**/*.hbs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\MetWorks_DI_Declarative_EnumDefinitions\MetWorks_DI_Declarative_EnumDefinitions.csproj" />
+	  <ProjectReference Include="..\MetWorks_DI_Declarative_Interfaces\MetWorks_DI_Declarative_Interfaces.csproj" />
+	</ItemGroup>
+
+	<!-- Diagnostic: fail build if any template files end up in Compile.
+       Uses MSBuild property function to evaluate StartsWith correctly. -->
+	<Target Name="FailIfTemplatesCompiled" AfterTargets="CoreCompile">
+		<ItemGroup>
+			<!-- Use the MSBuild property function form to test each Compile identity.
+           Note: we escape the backslash in the literal as '\\' inside the function call. -->
+			<_TemplatesInCompile Include="@(Compile)" Condition="$([System.String]::Copy('%(Compile.Identity)').StartsWith('Templates\\'))" />
+		</ItemGroup>
+
+		<Error Text="Template files were included in Compile: @(_TemplatesInCompile)" Condition="'@(_TemplatesInCompile)' != ''" />
+	</Target>
+
+</Project>

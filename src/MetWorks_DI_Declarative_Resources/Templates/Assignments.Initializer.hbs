@@ -1,0 +1,35 @@
+﻿// Template:            Assignments.Initializer
+// Version:             1.1
+// Template Requested:  {{TemplateRequested}}
+{{> File.Header}}
+using System.Threading.Tasks;
+
+namespace {{Namespace}}
+{
+    // Per-instance async initializer.
+    // Declared as partial to allow modularization if needed.
+    // Only emitted for instances that have assignment-driven initialization.
+    internal static partial class {{Instance.Name}}_Initializer
+    {
+{{#if Instance.HasAssignments}}
+        public static async Task Initialize_{{Instance.Name}}Async({{ContainerClass}} registry)
+        {
+            // Step 1: retrieve the created instance from the registry.
+            // Internal accessor ensures we always get the concrete class.
+            var instance = registry.Get{{Instance.Name}}_Internal();
+
+{{#each Instance.InitializationDependencies}}
+            await registry.When{{this}}InitializedAsync().ConfigureAwait(false);
+{{/each}}
+
+            // Step 2: call its async initializer with assignment values.
+            // All argument expressions are fully computed by the pipeline.
+            await instance.{{InitializerName}}(
+{{#each Instance.Assignments}}
+                {{{InitializerArgumentExpression}}}{{#unless @last}},{{/unless}}
+{{/each}}
+            ).ConfigureAwait(false);
+        }
+{{/if}}
+    }
+}

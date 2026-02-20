@@ -20,4 +20,20 @@ This is a living backlog of technical debt, missing features, and architectural 
 
 ## DDI / initialization
 
-- [ ] Review `ToDo_Candidates.txt` and migrate items that are still relevant into this file.
+Consolidated from `ToDo_Candidates.txt`.
+
+### Implemented (for reference)
+
+- [x] Reduce sync-over-async and global init gate behavior (two-phase startup)
+  - Notes: `DDI_Changes/ImplementationNotes/DDI_D1_AsyncStartupTwoPhase.md`
+- [x] Standardize async guidance (timeouts, cancellation, `ConfigureAwait(false)`)
+  - Notes: `DDI_Changes/ImplementationNotes/DDI_D2_AsyncGuidance_CancellationTimeouts.md`
+- [x] Generator passes `CancellationToken` values (not `CancellationTokenSource`) and supports defining properties on class declarations
+  - Notes: `DDI_Changes/ImplementationNotes/DDI_D3_CancellationTokenValues_AndModelProperties.md`
+- [x] Make two-phase init safer by contract (`InitializeAsync` exactly once, use-before-init guards)
+  - Notes: `DDI_Changes/ImplementationNotes/DDI_D4_InitOnce_UseBeforeInitGuards.md`
+
+### Remaining ideas
+
+- [ ] Per-service readiness gates (instead of/alongside a single global “all initialized” gate)
+  - Candidate: `Task Ready` + `bool IsReady` per long-running service.

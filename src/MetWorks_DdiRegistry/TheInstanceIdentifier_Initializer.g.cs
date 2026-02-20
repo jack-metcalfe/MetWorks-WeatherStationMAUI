@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Assignments.Initializer
-// Generated On:        2026-02-17T04:12:33.7258009Z
+// Generated On:        2026-02-20T04:40:12.7254449Z
 #nullable enable
 using System.Threading.Tasks;
 
@@ -20,6 +20,8 @@ namespace MetWorks.ServiceRegistry
             // Step 1: retrieve the created instance from the registry.
             // Internal accessor ensures we always get the concrete class.
             var instance = registry.GetTheInstanceIdentifier_Internal();
+
+            await registry.WhenTheSettingProviderInitializedAsync().ConfigureAwait(false);
 
             // Step 2: call its async initializer with assignment values.
             // All argument expressions are fully computed by the pipeline.

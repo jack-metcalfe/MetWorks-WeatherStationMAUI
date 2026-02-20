@@ -1,0 +1,18 @@
+// Template:            Accessors
+// Version:             1.1
+// Template Requested:  {{TemplateRequested}}
+{{> File.Header}}
+
+namespace {{Namespace}}
+{
+    // The Registry class provides dual accessors for each named instance.
+    // External accessors return interfaces when available, ensuring API safety.
+    // Internal accessors always return concrete types, enabling initialization and internal wiring.
+    // Register methods accept concrete instances and populate backing fields.
+    public partial class {{ContainerClass}}
+    {
+        {{#each Instances}}
+{{> Accessors.Triplet TemplateRequested=../TemplateRequested}}
+        {{/each}}
+    }
+}

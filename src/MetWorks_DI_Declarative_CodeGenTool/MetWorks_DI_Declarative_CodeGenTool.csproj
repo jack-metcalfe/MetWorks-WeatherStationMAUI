@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MetWorks_DI_Declarative_Generator\MetWorks_DI_Declarative_Generator.csproj" />
+    <ProjectReference Include="..\MetWorks_DI_Declarative_Loader\MetWorks_DI_Declarative_Loader.csproj" />
+    <ProjectReference Include="..\MetWorks_DI_Declarative_Resources\MetWorks_DI_Declarative_Resources.csproj" />
+  </ItemGroup>
+
+</Project>

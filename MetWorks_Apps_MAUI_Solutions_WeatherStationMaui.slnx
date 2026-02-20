@@ -1,4 +1,5 @@
 <Solution>
+	<Folder Name="/Solution Items/" />
 	<Folder Name="/src/">
 		<Project Path="src/MetWorks_Data_Sqlite/MetWorks_Data_Sqlite.csproj" />
 		<Project Path="src/MetWorks_Persistence/MetWorks_Persistence.csproj" />
@@ -8,6 +9,13 @@
 		<Project Path="src/MetWorks_Common_Settings/MetWorks_Common_Settings.csproj" />
 		<Project Path="src/MetWorks_Common_Utility/MetWorks_Common_Utility.csproj" />
 		<Project Path="src/MetWorks_Constants/MetWorks_Constants.csproj" />
+		<Project Path="src/MetWorks_DI_Declarative_Diagnostics/MetWorks_DI_Declarative_Diagnostics.csproj" />
+		<Project Path="src/MetWorks_DI_Declarative_EnumDefinitions/MetWorks_DI_Declarative_EnumDefinitions.csproj" />
+		<Project Path="src/MetWorks_DI_Declarative_Interfaces/MetWorks_DI_Declarative_Interfaces.csproj" />
+		<Project Path="src/MetWorks_DI_Declarative_Loader/MetWorks_DI_Declarative_Loader.csproj" />
+		<Project Path="src/MetWorks_DI_Declarative_Resources/MetWorks_DI_Declarative_Resources.csproj" />
+		<Project Path="src/MetWorks_DI_Declarative_Generator/MetWorks_DI_Declarative_Generator.csproj" />
+		<Project Path="src/MetWorks_DI_Declarative_Loader_Tests/MetWorks_DI_Declarative_Loader_Tests.csproj" />
 		<Project Path="src/MetWorks_DdiRegistry/MetWorks_DdiRegistry.csproj" />
 		<Project Path="src/MetWorks_EnumDefinitions/MetWorks_EnumDefinitions.csproj" />
 		<Project Path="src/MetWorks_EventRelay/MetWorks_EventRelay.csproj" />
@@ -27,6 +35,7 @@
 		<Project Path="src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs.csproj" />
 	</Folder>
 	<Project Path="src/MetWorks_Apps_MAUI_WeatherStationMaui/MetWorks_Apps_MAUI_WeatherStationMaui.csproj">
-		<Deploy Solution="Debug|*" />
+		<Deploy />
 	</Project>
+	<Project Path="tests/MetWorks_DI_Declarative_Loader_Tests/MetWorks_DI_Declarative_Loader_Tests.csproj" />
 </Solution>

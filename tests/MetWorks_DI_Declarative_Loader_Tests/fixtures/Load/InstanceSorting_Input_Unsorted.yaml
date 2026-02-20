@@ -1,0 +1,52 @@
+﻿codeGen:
+  registryClass: Registry
+  codePath: C:/Temp/GeneratedCode
+  namespace: Test.Generated
+  initializer: InitializeAsync
+
+namespace:
+- name: System
+  interface: []
+  class:
+  - name: String
+    interface: null
+    parameter: []
+    property: []
+
+- name: Test.Sorting
+  interface: []
+  class:
+  - name: A
+    interface: null
+    parameter:
+    - name: name
+      class: System.String
+      interface: null
+    property: []
+  - name: B
+    interface: null
+    parameter:
+    - name: a
+      class: null
+      interface: Test.Sorting.A
+    property: []
+
+instance:
+# Intentionally out of order: B depends on A.
+- name: TheB
+  class: Test.Sorting.B
+  exposeToMauiDi: false
+  assignment:
+  - name: a
+    literal: null
+    instance: TheA
+  element: []
+
+- name: TheA
+  class: Test.Sorting.A
+  exposeToMauiDi: false
+  assignment:
+  - name: name
+    literal: hello
+    instance: null
+  element: []

@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <LangVersion>11</LangVersion>
+    <AssemblyName>SyntaxLoader.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="YamlDotNet" />
+    <!-- Add other test packages here if needed -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="fixtures\*.yaml" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Code generation output (test-driven) lives under fixtures but must not be compiled. -->
+    <Compile Remove="fixtures\Testing\**\*.cs" />
+    <None Include="fixtures\Testing\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MetWorks_DI_Declarative_Generator\MetWorks_DI_Declarative_Generator.csproj" />
+    <ProjectReference Include="..\..\src\MetWorks_DI_Declarative_Loader\MetWorks_DI_Declarative_Loader.csproj" />
+    <ProjectReference Include="..\..\src\MetWorks_DI_Declarative_Resources\MetWorks_DI_Declarative_Resources.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="fixtures\Testing\" />
+  </ItemGroup>
+</Project>

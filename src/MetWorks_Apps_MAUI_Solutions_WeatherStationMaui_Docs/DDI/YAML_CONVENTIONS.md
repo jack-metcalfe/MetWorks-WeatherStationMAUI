@@ -17,6 +17,23 @@ A typical DDI input file has these top-level sections:
 
 ## Core rules
 
+## Formatting (F3)
+
+DDI YAML should be formatted to align with YamlDotNet’s default emitter output (minimal quoting, consistent indentation, stable list/mapping style).
+
+### Canonical formatter
+
+Use `MetWorks_DI_Declarative_CodeGenTool` to format in-place:
+
+- `--formatYaml` rewrites the YAML file using YamlDotNet defaults.
+- `--checkYamlFormat` fails if the YAML is not already canonical (useful for CI).
+
+### Instance list sorting (F4)
+
+If you’ve added/edited instances and the `instance:` list is no longer in define-before-use order, you can auto-sort it:
+
+- `--sortInstances` rewrites the YAML file in-place with `instance:` entries topologically sorted by dependency.
+
 ### 1) Define-before-use (instance ordering)
 
 The `instance:` section is ordered.
@@ -74,6 +91,24 @@ DDI YAML assignments are limited to:
 
 - `literal:` values
 - `instance:` references (including dotted property access)
+
+### Compact literal assignment syntax (F2)
+
+For simple literal values, `assignment:` list items can use a compact one-entry mapping form:
+
+- Expanded (always supported):
+  - `- name: "maxBufferSize"`
+    `literal: 1000`
+
+- Compact (literal-only):
+  - `- maxBufferSize: 1000`
+  - `- enabled: true`
+  - `- name: hello`
+
+Notes:
+
+- The compact form is **literal-only** (no `instance:` / dotted references).
+- If you need an `instance:` reference, keep using the expanded form.
 
 If you need to build complex objects from settings (e.g., `SqliteDatabaseOptions` from `/services/sqlite/*`), use a small factory class that follows the DDI initialization pattern.
 

@@ -1,0 +1,36 @@
+﻿// Template:            ExposeToMauiDi
+// Version:             1.1
+// Template Requested:  {{TemplateRequested}}
+{{> File.Header}}
+
+namespace {{Namespace}}
+{
+    public partial class {{ContainerClass}}
+    {
+        public void RegisterSingletonsInMaui(
+            IServiceCollection services
+		)
+        {
+            {{#each Instances}}
+            {{ServiceTypeQualified}}
+                        _{{Name}} = {{{ResolveExpression}}};
+            {{#if UseNonGenericServiceRegistration}}
+            services.AddSingleton(typeof({{ServiceTypeQualified}}), _{{Name}});
+            {{else}}
+            services.AddSingleton<{{ServiceTypeQualified}}>
+                (_{{Name}});
+            {{/if}}
+            {{/each}}
+        }
+
+        // This is the method MauiProgram.cs is calling.
+        public Task RegisterSingletonsInMauiAsync(
+            IServiceCollection services,
+            CancellationToken cancellationToken = default
+		)
+        {
+            RegisterSingletonsInMaui(services);
+            return Task.CompletedTask;
+        }
+    }
+}

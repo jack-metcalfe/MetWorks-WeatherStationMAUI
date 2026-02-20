@@ -1,11 +1,11 @@
 ﻿namespace MetWorks.Common.Settings;
-using ISettingDefinitionDictionary = System.Collections.Generic.Dictionary<string, ISettingDefinition>;
-using ISettingValueDictionary = System.Collections.Generic.Dictionary<string, ISettingValue>;
+using ISettingDefinitionDictionary = Dictionary<string, ISettingDefinition>;
+using ISettingValueDictionary = Dictionary<string, ISettingValue>;
 /// <summary>
 /// Central repository for settings definition, value, and override.
 /// Implements ISettingsRepository for DI integration.
 /// </summary>
-public class SettingRepository : ISettingRepository, MetWorks.Interfaces.IServiceReady
+public class SettingRepository : ISettingRepository, IServiceReady
 {
     bool _isInitialized = false;
 

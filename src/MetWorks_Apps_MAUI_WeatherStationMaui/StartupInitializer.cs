@@ -9,6 +9,8 @@ public class StartupInitializer
 
     private static Registry? _appRegistry;
     private static readonly object _registryLock = new();
+    private static Exception? _createPhaseException;
+    private static bool _createPhaseCompleted;
     /// <summary>
     /// Create the registry (create phase) and register the uninitialized instances into the provided
     /// IServiceCollection. This performs only the create phase so registrations can occur before
@@ -20,18 +22,29 @@ public class StartupInitializer
 
         lock (_registryLock)
         {
+            if (_createPhaseException is not null)
+                throw new InvalidOperationException("DDI create phase previously failed.", _createPhaseException);
+
             if (_appRegistry is null)
             {
-                _appRegistry = new Registry();
-                _appRegistry.CreateAll();
+                try
+                {
+                    _appRegistry = new Registry();
+                    _appRegistry.CreateAll();
+                    _createPhaseCompleted = true;
+                }
+                catch (Exception ex)
+                {
+                    _createPhaseException = ex;
+                    throw;
+                }
             }
 
             try
             {
                 // Register concrete instances into MAUI DI. This calls generated code that expects
                 // the create phase to have been run so GetTheXyz() returns valid objects.
-                CancellationToken token = CancellationToken.None;
-                try { _appRegistry.RegisterSingletonsInMauiAsync(services, token).GetAwaiter().GetResult(); }
+                try { _appRegistry.RegisterSingletonsInMaui(services); }
                 catch (Exception ex)
                 {
                     try { Debug.WriteLine($"Failed to register DDI singletons into MAUI DI: {ex.Message}"); } catch { }
@@ -62,7 +75,17 @@ public class StartupInitializer
     // Check database availability
     public static bool IsDatabaseAvailable => _isDatabaseAvailable;
     
-    public static async Task InitializeAsync()
+    public static Task InitializeAsync()
+        => InitializeAsync(CancellationToken.None);
+
+    public static Task InitializeWithTimeoutAsync(TimeSpan timeout, CancellationToken cancellationToken = default)
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(timeout);
+        return InitializeAsync(cts.Token);
+    }
+
+    public static async Task InitializeAsync(CancellationToken cancellationToken)
     {
         // Prevent concurrent initialization
         if (Interlocked.CompareExchange(ref _initGuard, 1, 0) != 0)
@@ -74,7 +97,7 @@ public class StartupInitializer
         {
             Debug.WriteLine("🚀 Starting application services initialization...");
             StatusChanged?.Invoke("Starting initialization...");
-            await RegisterServices().ConfigureAwait(false);
+            await RegisterServices(cancellationToken).ConfigureAwait(false);
             _isInitialized = true;
             StatusChanged?.Invoke("Initialization complete");
             try { Initialized?.Invoke(); } catch { }
@@ -97,33 +120,39 @@ public class StartupInitializer
         }
     }
     
-    private static async Task RegisterServices()
+    private static async Task RegisterServices(CancellationToken cancellationToken)
     {
         try
         {
-            // Ensure registry is created (create phase only)
-            Debug.WriteLine("📦 Ensuring service registry is created...");
-            if (_appRegistry is null)
+            cancellationToken.ThrowIfCancellationRequested();
+
+            Registry registry;
+            lock (_registryLock)
             {
-                _appRegistry = new Registry();
-                _appRegistry.CreateAll();
-                Debug.WriteLine("✅ Service registry created");
+                if (_createPhaseException is not null)
+                    throw new InvalidOperationException("DDI create phase failed earlier; see inner exception.", _createPhaseException);
+
+                if (_appRegistry is null || !_createPhaseCompleted)
+                    throw new InvalidOperationException("DDI registry was not created during MAUI startup. Ensure CreateRegistryAndRegisterServices() is called from CreateMauiApp() before App construction.");
+
+                registry = _appRegistry;
             }
 
             try
             {
                 // Step 2: Initialize all services (initialization phase)
                 Debug.WriteLine("🔧 Initializing services...");
-                await _appRegistry!.InitializeAllAsync().ConfigureAwait(false);
+                await registry.InitializeAllAsync(cancellationToken).ConfigureAwait(false);
 
                 // Step 3: Cache logger after initialization
-                _iLogger = _appRegistry.GetTheLoggerResilient();
+                await registry.WhenTheLoggerResilientInitializedAsync(cancellationToken);
+                _iLogger = registry.GetTheLoggerResilient();
                 _iLogger?.Information("✅ All services initialized");
 
                 // Log settings source diagnostics (non-secret)
                 try
                 {
-                    var sp = _appRegistry.GetTheSettingProvider() as SettingProvider;
+                    var sp = registry.GetTheSettingProvider() as SettingProvider;
                     if (sp is not null)
                     {
                         _iLogger?.Information(
@@ -134,7 +163,7 @@ public class StartupInitializer
                 catch { }
 
                 // Step 4: Verify critical services
-                await VerifyCriticalServicesAsync().ConfigureAwait(false);
+                await VerifyCriticalServicesAsync(cancellationToken).ConfigureAwait(false);
 
                 // All services initialized successfully, including database
                 _isDatabaseAvailable = true;
@@ -164,16 +193,20 @@ public class StartupInitializer
         }
     }
     
-    private static async Task VerifyCriticalServicesAsync()
+    private static async Task VerifyCriticalServicesAsync(CancellationToken cancellationToken)
     {
         if (_appRegistry is null)
             throw new InvalidOperationException("Registry is null after initialization");
         
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await _appRegistry.WhenTheSettingRepositoryInitializedAsync().ConfigureAwait(false);
             if (_appRegistry.GetTheSettingRepository() is null)
                 throw new InvalidOperationException("UDP settings repository failed to initialize");
 
+            await _appRegistry.WhenTheUdpListenerInitializedAsync().ConfigureAwait(false);
             if (_appRegistry.GetTheUdpListener() is null)
                 throw new InvalidOperationException("UDP listener failed to initialize");
 
