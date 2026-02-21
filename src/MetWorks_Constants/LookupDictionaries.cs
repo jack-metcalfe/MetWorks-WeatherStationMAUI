@@ -77,6 +77,26 @@ public static class LookupDictionaries
         ]
     );
 
+    public static readonly GroupSettingDefinition TempestObservationsGroupSettingsDefinition = new GroupSettingDefinition(
+        basePath: SettingConstants.TempestObservations_groupName,
+        settingNames:
+
+        [
+            SettingConstants.TempestObservations_refreshIntervalMinutes
+        ]
+    );
+
+    public static readonly GroupSettingDefinition WeatherIngestGroupSettingsDefinition = new GroupSettingDefinition(
+        basePath: SettingConstants.WeatherIngest_groupName,
+        settingNames:
+
+        [
+            SettingConstants.WeatherIngest_restStaleMinutes,
+            SettingConstants.WeatherIngest_sourceMode,
+            SettingConstants.WeatherIngest_udpStaleSeconds
+        ]
+    );
+
     public static readonly GroupSettingDefinition MetricsGroupSettingsDefinition = new GroupSettingDefinition(
         basePath: SettingConstants.Metrics_groupName,
         settingNames:

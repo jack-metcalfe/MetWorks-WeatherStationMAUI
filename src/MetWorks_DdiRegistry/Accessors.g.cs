@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-02-20T19:15:35.0065298Z
+// Generated On:        2026-02-21T03:45:20.3939932Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -1082,6 +1082,42 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheTempestRestObservationsProvider(MetWorks.Common.TempestRestObservationsProvider instance) =>
+            _TheTempestRestObservationsProviderInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Interfaces.ITempestRestObservationsProvider GetTheTempestRestObservationsProvider()
+        {
+            var initTask = _initTask_TheTempestRestObservationsProvider;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestRestObservationsProvider' was accessed before initialization started. Await registry.WhenTheTempestRestObservationsProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheTempestRestObservationsProvider().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestRestObservationsProvider' was accessed before initialization completed. Await registry.WhenTheTempestRestObservationsProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheTempestRestObservationsProvider().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestRestObservationsProvider' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestRestObservationsProvider' initialization failed.",
+                    initTask.Exception);
+
+            return _TheTempestRestObservationsProviderInstance;
+        }
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.TempestRestObservationsProvider GetTheTempestRestObservationsProvider_Internal() =>
+            _TheTempestRestObservationsProviderInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
         public void RegisterTheStationMetadataProvider(MetWorks.Common.StationMetadataProvider instance) =>
             _TheStationMetadataProviderInstance = instance;
 
@@ -1689,6 +1725,42 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.Transformer.SensorReadingTransformer GetTheSensorReadingTransformer_Internal() =>
             _TheSensorReadingTransformerInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheWeatherReadingMux(MetWorks.Ingest.Transformer.WeatherReadingMux instance) =>
+            _TheWeatherReadingMuxInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Ingest.Transformer.WeatherReadingMux GetTheWeatherReadingMux()
+        {
+            var initTask = _initTask_TheWeatherReadingMux;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWeatherReadingMux' was accessed before initialization started. Await registry.WhenTheWeatherReadingMuxInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheWeatherReadingMux().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWeatherReadingMux' was accessed before initialization completed. Await registry.WhenTheWeatherReadingMuxInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheWeatherReadingMux().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWeatherReadingMux' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheWeatherReadingMux' initialization failed.",
+                    initTask.Exception);
+
+            return _TheWeatherReadingMuxInstance;
+        }
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Ingest.Transformer.WeatherReadingMux GetTheWeatherReadingMux_Internal() =>
+            _TheWeatherReadingMuxInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors

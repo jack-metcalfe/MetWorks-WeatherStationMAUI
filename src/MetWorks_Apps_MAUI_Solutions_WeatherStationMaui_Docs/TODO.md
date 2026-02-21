@@ -13,6 +13,15 @@ This is a living backlog of technical debt, missing features, and architectural 
       - precipitation
     - Or implement a deletion-based retention policy (delete oldest first), ensuring shipping/ack semantics remain correct.
 
+## Tempest REST snapshot persistence to SQLite (high)
+
+- [ ] Persist Tempest Better Forecast raw JSON snapshots to SQLite (instead of `tempest.forecast.snapshot.json`).
+  - Forecast payload is large; SQLite retention/purge needs to ship with this.
+- [ ] Persist Tempest REST observations raw JSON snapshots to SQLite (instead of `tempest.observations.snapshot.json` + `.meta.json`).
+- [ ] Implement purge policy for snapshot tables (delete oldest first).
+  - Candidate: keep last N hours/days or last N snapshots.
+  - Must run soon after adding snapshot tables to avoid unbounded growth.
+
 ## Rollups (follow-ups)
 
 - [ ] Decide whether rollups should run in a single worker or per-table workers.

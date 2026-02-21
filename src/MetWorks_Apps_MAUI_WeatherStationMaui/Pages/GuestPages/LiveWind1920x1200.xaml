@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:interfaces="clr-namespace:MetWorks.Interfaces;assembly=MetWorks_Interfaces"
              xmlns:viewmodels="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels"
              x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages.LiveWind1920x1200"
              x:DataType="viewmodels:WeatherViewModel"
@@ -202,21 +203,45 @@
         </Label>
         <Label Grid.Row="0" Grid.Column="1" FontSize="36" TextColor="{StaticResource WhiteVikings}" 
                Text="" />
-        <Label Grid.Row="0" Grid.Column="2" FontSize="36" TextColor="{StaticResource WhiteVikings}">
-            <Label.FormattedText>
-                <FormattedString>
-                    <Span Text="Station Pressure: " />
-                    <Span>
-                        <Span.Text>
-                            <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
-                                <Binding Path="CurrentObservation.StationPressure" />
-                                <Binding Path="CurrentObservation.StationPressure.Unit.Symbol" />
-                            </MultiBinding>
-                        </Span.Text>
-                    </Span>
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
+        <Grid Grid.Row="0" Grid.Column="2" RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto">
+            <Label Grid.Row="0" Grid.ColumnSpan="2" FontSize="36" TextColor="{StaticResource WhiteVikings}">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="Station Pressure: " />
+                        <Span>
+                            <Span.Text>
+                                <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                    <Binding Path="CurrentObservation.StationPressure" />
+                                    <Binding Path="CurrentObservation.StationPressure.Unit.Symbol" />
+                                </MultiBinding>
+                            </Span.Text>
+                        </Span>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+
+            <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2" HorizontalOptions="End" Spacing="8">
+                <Border WidthRequest="14" HeightRequest="14" StrokeThickness="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="7" />
+                    </Border.StrokeShape>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveIngestSource}" Value="{x:Static interfaces:WeatherIngestSource.Udp}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource GoldVikings}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveIngestSource}" Value="{x:Static interfaces:WeatherIngestSource.Rest}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource PurpleVikings}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding ActiveIngestSource}" Value="{x:Static interfaces:WeatherIngestSource.None}">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Gray500}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                </Border>
+
+                <Label FontSize="20" TextColor="{StaticResource WhiteVikings}"
+                       Text="{Binding ActiveIngestSource, StringFormat='{}Source: {0}'}" />
+            </HorizontalStackLayout>
+        </Grid>
         <Label Grid.Row="1" Grid.Column="2" FontSize="36" TextColor="{StaticResource WhiteVikings}"
             Text="{Binding CurrentObservation.UvIndex, FallbackValue='UV Index: --', StringFormat='{}UV Index: {0}'}"/>
         <Label Grid.Row="2" Grid.Column="2" FontSize="36" TextColor="{StaticResource WhiteVikings}">

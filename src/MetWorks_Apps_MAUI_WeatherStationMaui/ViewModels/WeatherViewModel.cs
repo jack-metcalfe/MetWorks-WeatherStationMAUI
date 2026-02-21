@@ -1,4 +1,6 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
+
+using MetWorks.Models.Observables.Weather;
 /// <summary>
 /// ViewModel for displaying current weather readings.
 /// Subscribes to weather reading streams via ISingletonEventRelay.
@@ -18,10 +20,18 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     private readonly IInstanceIdentifier _iInstanceIdentifier;
     IWindReading? _currentWind;
     IObservationReading? _currentObservation;
+    WeatherIngestStatus? _weatherIngestStatus;
     SystemTimer? _clockTimer;
     ThreadingTimer? _statusCheckTimer;
     string? _lastServiceStatusLine;
     DateTime _currentTime = DateTime.Now;
+
+    public WeatherIngestSource ActiveIngestSource => _weatherIngestStatus?.ActiveSource ?? WeatherIngestSource.None;
+    public string ActiveIngestSourceDisplay => ActiveIngestSource.ToString();
+    public bool RestIsFresh => _weatherIngestStatus?.RestIsFresh ?? false;
+    public bool UdpIsFresh => _weatherIngestStatus?.UdpIsFresh ?? false;
+    public DateTimeOffset? RestLastRetrievedUtc => _weatherIngestStatus?.RestLastRetrievedUtc;
+    public DateTimeOffset? UdpLastReceivedUtc => _weatherIngestStatus?.UdpLastReceivedUtc;
 
     // Lightweight init guard: 0 = not started, 1 = initializing, 2 = initialized
     int _initializeState = (int)InitializeStateEnum.Uninitialized;
@@ -160,9 +170,10 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
                 _statusCheckTimer = null;
             }
 
-            // Register for events
-            _iEventRelayBasic.Register<IWindReading>(this, OnWindReceived);
-            _iEventRelayBasic.Register<IObservationReading>(this, OnObservationReceived);
+            // Register for events (consume mux-published canonical readings)
+            _iEventRelayBasic.Register<WindReading>(this, OnWindReceived);
+            _iEventRelayBasic.Register<ObservationReading>(this, OnObservationReceived);
+            _iEventRelayBasic.Register<WeatherIngestStatus>(this, OnWeatherIngestStatusReceived);
 
             InitializeClockTimer();
 
@@ -230,10 +241,24 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
             OnPropertyChanged(nameof(TimeDisplay));
         });
     }
+
+    void OnWeatherIngestStatusReceived(WeatherIngestStatus status)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            _weatherIngestStatus = status;
+            OnPropertyChanged(nameof(ActiveIngestSource));
+            OnPropertyChanged(nameof(ActiveIngestSourceDisplay));
+            OnPropertyChanged(nameof(RestIsFresh));
+            OnPropertyChanged(nameof(UdpIsFresh));
+            OnPropertyChanged(nameof(RestLastRetrievedUtc));
+            OnPropertyChanged(nameof(UdpLastReceivedUtc));
+        });
+    }
     // ========================================
     // Event Handlers
     // ========================================
-    private void OnWindReceived(IWindReading reading)
+    private void OnWindReceived(WindReading reading)
     {
         // Update on main thread for UI safety
         MainThread.BeginInvokeOnMainThread(() =>
@@ -241,7 +266,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
             CurrentWind = reading;
         });
     }
-    private void OnObservationReceived(IObservationReading reading)
+    private void OnObservationReceived(ObservationReading reading)
     {
         // Update on main thread for UI safety
         MainThread.BeginInvokeOnMainThread(() =>
@@ -292,8 +317,9 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         }
 
         // Unregister from event relay
-        try { _iEventRelayBasic.Unregister<IWindReading>(this); } catch { }
-        try { _iEventRelayBasic.Unregister<IObservationReading>(this); } catch { }
+        try { _iEventRelayBasic.Unregister<WindReading>(this); } catch { }
+        try { _iEventRelayBasic.Unregister<ObservationReading>(this); } catch { }
+        try { _iEventRelayBasic.Unregister<WeatherIngestStatus>(this); } catch { }
 
         // Stop and dispose clock timer
         try

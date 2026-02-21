@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MetWorks_Common\MetWorks_Common.csproj" />
+    <ProjectReference Include="..\..\src\MetWorks_Constants\MetWorks_Constants.csproj" />
+    <ProjectReference Include="..\..\src\MetWorks_EnumDefinitions\MetWorks_EnumDefinitions.csproj" />
+    <ProjectReference Include="..\..\src\MetWorks_EventRelay\MetWorks_EventRelay.csproj" />
+    <ProjectReference Include="..\..\src\MetWorks_Ingest_Transformer\MetWorks_Ingest_Transformer.csproj" />
+    <ProjectReference Include="..\..\src\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
+    <ProjectReference Include="..\..\src\MetWorks_Models_Observables\MetWorks_Models_Observables.csproj" />
+    <ProjectReference Include="..\..\src\RedStar_Amounts_WeatherExtensions\RedStar_Amounts_WeatherExtensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\src\MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs\tempest-rest-observations\GetStationObservationResultSample.json" Link="Fixtures\GetStationObservationResultSample.json" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+</Project>

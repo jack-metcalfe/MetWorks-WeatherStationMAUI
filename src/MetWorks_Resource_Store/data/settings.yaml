@@ -307,6 +307,14 @@ definitions:
     isEditable: true
     isSecret: false
 
+  - path: /services/tempestObservations/refreshIntervalMinutes
+    defaultValue: "15"
+    description: "How often to refresh station observations over REST (minutes)."
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
   - path: /services/udpListener/udpListenerPort
     defaultValue: "50222"
     description: "UDP Port for listening for readings from Tempest Weather Station"
@@ -399,4 +407,31 @@ definitions:
       - "knot"
       - "meter/second"
       - "mile/hour"
+    isSecret: false
+
+  - path: /services/weatherIngest/restStaleMinutes
+    defaultValue: "20"
+    description: "How old the last successful REST observations fetch can be before REST is considered stale/unavailable (minutes)."
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/weatherIngest/sourceMode
+    defaultValue: "Auto"
+    description: "Weather ingest source selection mode. Auto prefers UDP when fresh, falls back to REST when UDP is stale."
+    expectedValueType: "String"
+    allowableValues:
+      - "Auto"
+      - "RestOnly"
+      - "UdpOnly"
+    isEditable: true
+    isSecret: false
+
+  - path: /services/weatherIngest/udpStaleSeconds
+    defaultValue: "90"
+    description: "How old the last received UDP reading can be before UDP is considered stale/unavailable (seconds)."
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
     isSecret: false

@@ -16,6 +16,7 @@ namespace:
   - name: ISettingRepository
   - name: IStationMetadataProvider
   - name: ITempestForecastProvider
+  - name: ITempestRestObservationsProvider
   - name: ITempestRestClient
   class: []
 - name: System
@@ -135,6 +136,31 @@ namespace:
     - name: iTempestRestClient
       class: null
       interface: ITempestRestClient
+    - name: externalCancellation
+      class: System.Threading.CancellationToken
+      interface: null
+    - name: iPlatformPaths
+      class: null
+      interface: MetWorks.Interfaces.IPlatformPaths
+    - name: provenanceTracker
+      class: MetWorks.Common.ProvenanceTracker
+      interface: null
+    property: []
+  - name: TempestRestObservationsProvider
+    interface: MetWorks.Interfaces.ITempestRestObservationsProvider
+    parameter:
+    - name: iLogger
+      class: null
+      interface: MetWorks.Interfaces.ILogger
+    - name: iSettingRepository
+      class: null
+      interface: MetWorks.Interfaces.ISettingRepository
+    - name: iEventRelayBasic
+      class: null
+      interface: MetWorks.Interfaces.IEventRelayBasic
+    - name: iTempestRestClient
+      class: null
+      interface: MetWorks.Interfaces.ITempestRestClient
     - name: externalCancellation
       class: System.Threading.CancellationToken
       interface: null
@@ -958,6 +984,28 @@ namespace:
       class: null
       interface: MetWorks.Interfaces.IStationMetadataProvider
     property: []
+  - name: WeatherReadingMux
+    interface: null
+    parameter:
+    - name: iLogger
+      class: null
+      interface: MetWorks.Interfaces.ILogger
+    - name: iSettingRepository
+      class: null
+      interface: MetWorks.Interfaces.ISettingRepository
+    - name: iEventRelayBasic
+      class: null
+      interface: MetWorks.Interfaces.IEventRelayBasic
+    - name: externalCancellation
+      class: System.Threading.CancellationToken
+      interface: null
+    - name: provenanceTracker
+      class: MetWorks.Common.ProvenanceTracker
+      interface: null
+    - name: iStationMetadataProvider
+      class: null
+      interface: MetWorks.Interfaces.IStationMetadataProvider
+    property: []
 - name: MetWorks.Networking.Udp.Transformer
   interface: []
   class:
@@ -1362,6 +1410,32 @@ instance:
   - name: externalCancellation
     literal: null
     instance: TheRootCancellationTokenSource.Token
+  - name: provenanceTracker
+    literal: null
+    instance: TheProvenanceTracker
+  element: []
+- name: TheTempestRestObservationsProvider
+  class: MetWorks.Common.TempestRestObservationsProvider
+  exposeToMauiDi: false
+  assignment:
+  - name: iLogger
+    literal: null
+    instance: TheLoggerResilient
+  - name: iSettingRepository
+    literal: null
+    instance: TheSettingRepository
+  - name: iEventRelayBasic
+    literal: null
+    instance: TheEventRelayBasic
+  - name: iTempestRestClient
+    literal: null
+    instance: TheTempestRestClient
+  - name: externalCancellation
+    literal: null
+    instance: TheRootCancellationTokenSource.Token
+  - name: iPlatformPaths
+    literal: null
+    instance: TheDefaultPlatformPaths
   - name: provenanceTracker
     literal: null
     instance: TheProvenanceTracker
@@ -1810,6 +1884,29 @@ instance:
   element: []
 - name: TheSensorReadingTransformer
   class: MetWorks.Ingest.Transformer.SensorReadingTransformer
+  exposeToMauiDi: false
+  assignment:
+  - name: iLogger
+    literal: null
+    instance: TheLoggerResilient
+  - name: iSettingRepository
+    literal: null
+    instance: TheSettingRepository
+  - name: iEventRelayBasic
+    literal: null
+    instance: TheEventRelayBasic
+  - name: externalCancellation
+    literal: null
+    instance: TheRootCancellationTokenSource.Token
+  - name: provenanceTracker
+    literal: null
+    instance: TheProvenanceTracker
+  - name: iStationMetadataProvider
+    literal: null
+    instance: TheStationMetadataProvider
+  element: []
+- name: TheWeatherReadingMux
+  class: MetWorks.Ingest.Transformer.WeatherReadingMux
   exposeToMauiDi: false
   assignment:
   - name: iLogger

@@ -25,6 +25,7 @@
 - Generated DDI output should not be emitted under a project folder where it will be picked up by default `Compile` globs; generation output should go to a non-compiled directory (e.g., outside the project, `obj/`, or excluded via csproj).
 - When refactoring DDI/codegen, prioritize clean code; incremental steps that take longer are acceptable if they keep the design tidy and maintainable.
 - Initialize new services (like Tempest forecast) via DDI and publish updates event-driven via EventRelay on a regular refresh interval (e.g., hourly) rather than pull-only.
+- Phase 11 manual validation should account for this dev machine having two WiFi connections: one network interface can see Tempest UDP broadcasts and the other cannot (useful for UDP-only vs REST-only test scenarios).
 
 ## Instrumentation Preferences
 - Target Android primarily; emit reports to logs first.

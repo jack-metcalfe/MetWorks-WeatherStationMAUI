@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Registry
-// Generated On:        2026-02-20T19:15:35.0065298Z
+// Generated On:        2026-02-21T03:45:20.3939932Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -260,6 +260,15 @@ namespace MetWorks.ServiceRegistry
                 ? WhenTheTempestRestClientInitializedAsync().WaitAsync(cancellationToken)
                 : WhenTheTempestRestClientInitializedAsync();
 
+        private Task? _initTask_TheTempestRestObservationsProvider;
+        public Task WhenTheTempestRestObservationsProviderInitializedAsync()
+            => EnsureInitialized(ref _initTask_TheTempestRestObservationsProvider, () => TheTempestRestObservationsProvider_Initializer.Initialize_TheTempestRestObservationsProviderAsync(this));
+
+        public Task WhenTheTempestRestObservationsProviderInitializedAsync(CancellationToken cancellationToken)
+            => cancellationToken.CanBeCanceled
+                ? WhenTheTempestRestObservationsProviderInitializedAsync().WaitAsync(cancellationToken)
+                : WhenTheTempestRestObservationsProviderInitializedAsync();
+
         private Task? _initTask_TheStationMetadataProvider;
         public Task WhenTheStationMetadataProviderInitializedAsync()
             => EnsureInitialized(ref _initTask_TheStationMetadataProvider, () => TheStationMetadataProvider_Initializer.Initialize_TheStationMetadataProviderAsync(this));
@@ -413,6 +422,15 @@ namespace MetWorks.ServiceRegistry
                 ? WhenTheSensorReadingTransformerInitializedAsync().WaitAsync(cancellationToken)
                 : WhenTheSensorReadingTransformerInitializedAsync();
 
+        private Task? _initTask_TheWeatherReadingMux;
+        public Task WhenTheWeatherReadingMuxInitializedAsync()
+            => EnsureInitialized(ref _initTask_TheWeatherReadingMux, () => TheWeatherReadingMux_Initializer.Initialize_TheWeatherReadingMuxAsync(this));
+
+        public Task WhenTheWeatherReadingMuxInitializedAsync(CancellationToken cancellationToken)
+            => cancellationToken.CanBeCanceled
+                ? WhenTheWeatherReadingMuxInitializedAsync().WaitAsync(cancellationToken)
+                : WhenTheWeatherReadingMuxInitializedAsync();
+
         private Task? _initTask_TheUdpListener;
         public Task WhenTheUdpListenerInitializedAsync()
             => EnsureInitialized(ref _initTask_TheUdpListener, () => TheUdpListener_Initializer.Initialize_TheUdpListenerAsync(this));
@@ -461,6 +479,7 @@ namespace MetWorks.ServiceRegistry
             TheProvenanceTracker_InstanceFactory.Create(this);
             TheStreamShippingHttpClientProvider_InstanceFactory.Create(this);
             TheTempestRestClient_InstanceFactory.Create(this);
+            TheTempestRestObservationsProvider_InstanceFactory.Create(this);
             TheStationMetadataProvider_InstanceFactory.Create(this);
             TheTempestForecastProvider_InstanceFactory.Create(this);
             TheUnitsOfMeasureInitializer_InstanceFactory.Create(this);
@@ -478,6 +497,7 @@ namespace MetWorks.ServiceRegistry
             TheRollupsWorker_InstanceFactory.Create(this);
             TheSQLiteStationMetadataIngestor_InstanceFactory.Create(this);
             TheSensorReadingTransformer_InstanceFactory.Create(this);
+            TheWeatherReadingMux_InstanceFactory.Create(this);
             TheUdpListener_InstanceFactory.Create(this);
         }
 
@@ -517,6 +537,7 @@ namespace MetWorks.ServiceRegistry
                 WhenTheProvenanceTrackerInitializedAsync(),
                 WhenTheStreamShippingHttpClientProviderInitializedAsync(),
                 WhenTheTempestRestClientInitializedAsync(),
+                WhenTheTempestRestObservationsProviderInitializedAsync(),
                 WhenTheStationMetadataProviderInitializedAsync(),
                 WhenTheTempestForecastProviderInitializedAsync(),
                 WhenTheUnitsOfMeasureInitializerInitializedAsync(),
@@ -534,6 +555,7 @@ namespace MetWorks.ServiceRegistry
                 WhenTheRollupsWorkerInitializedAsync(),
                 WhenTheSQLiteStationMetadataIngestorInitializedAsync(),
                 WhenTheSensorReadingTransformerInitializedAsync(),
+                WhenTheWeatherReadingMuxInitializedAsync(),
                 WhenTheUdpListenerInitializedAsync(),
             };
 

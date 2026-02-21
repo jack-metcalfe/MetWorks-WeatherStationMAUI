@@ -87,12 +87,51 @@ public sealed class TempestRestClient : ServiceBase, ITempestRestClient
                     parsedStationId = sidVal;
                 }
             }
+
         }
         catch { }
 
         var rawJson = root.GetRawText();
         return new TempestStationSnapshot(
             StationId: parsedStationId,
+            RetrievedUtc: DateTimeOffset.UtcNow,
+            RawJson: rawJson
+        );
+    }
+
+    public async Task<TempestStationObservationsSnapshot> GetStationObservationsAsync(CancellationToken cancellationToken = default)
+    {
+        await Ready.ConfigureAwait(false);
+
+        var apiKeySettingPath = LookupDictionaries.TempestGroupSettingsDefinition.BuildPath(SettingConstants.Tempest_apiKey);
+        var stationIdSettingPath = LookupDictionaries.TempestGroupSettingsDefinition.BuildPath(SettingConstants.Tempest_stationId);
+
+        var apiKey = ISettingRepository.GetValueOrDefault<string>(apiKeySettingPath);
+        var stationIdString = ISettingRepository.GetValueOrDefault<string>(stationIdSettingPath);
+
+        if (string.IsNullOrWhiteSpace(apiKey) || apiKey == "00000000-0000-0000-0000-000000000000")
+            throw new InvalidOperationException($"Tempest API key is not configured (setting: '{apiKeySettingPath}').");
+
+        if (!long.TryParse(stationIdString, NumberStyles.Integer, CultureInfo.InvariantCulture, out var stationId) || stationId <= 0)
+            throw new InvalidOperationException($"Tempest station id is not configured (setting: '{stationIdSettingPath}').");
+
+        // Swagger (expected): GET /observations/station/{station_id}
+        // Auth (expected): apiKey in query param 'token' (consistent with /better_forecast).
+        var url = $"observations/station/{stationId.ToString(CultureInfo.InvariantCulture)}?token={Uri.EscapeDataString(apiKey)}";
+
+        using var req = new HttpRequestMessage(HttpMethod.Get, url);
+
+        using var res = await HttpClient.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+            .ConfigureAwait(false);
+
+        res.EnsureSuccessStatusCode();
+
+        await using var stream = await res.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        var rawJson = doc.RootElement.GetRawText();
+        return new TempestStationObservationsSnapshot(
+            StationId: stationId,
             RetrievedUtc: DateTimeOffset.UtcNow,
             RawJson: rawJson
         );

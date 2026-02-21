@@ -126,9 +126,14 @@ MESSAGE CONTAINS:
   - TransformerVersion - "1.0" or "1.0-retransform"
 
 RECEIVED BY:
+- Component: `WeatherReadingMux`
+- Location: `src/MetWorks_Ingest_Transformer/WeatherReadingMux.cs`
+- Registration: `IEventRelayBasic.Register<IObservationReading>(this, ...)`
+
+FORWARDED TO UI AS:
 - Component: `WeatherViewModel`
 - Location: `src/MetWorks_Apps_MAUI_WeatherStationMaui/ViewModels/WeatherViewModel.cs`
-- Registration: `_iEventRelayBasic.Register<IObservationReading>(this, OnObservationReceived);`
+- Registration: `_iEventRelayBasic.Register<ObservationReading>(this, OnObservationReceived);`
 
 WHAT RECEIVER DOES:
 1. Marshals to main thread (MainThread.BeginInvokeOnMainThread)
@@ -162,9 +167,14 @@ MESSAGE CONTAINS:
 - Provenance - Complete lineage (same structure as Observation)
 
 RECEIVED BY:
+- Component: `WeatherReadingMux`
+- Location: `src/MetWorks_Ingest_Transformer/WeatherReadingMux.cs`
+- Registration: `IEventRelayBasic.Register<IWindReading>(this, ...)`
+
+FORWARDED TO UI AS:
 - Component: `WeatherViewModel`
 - Location: `src/MetWorks_Apps_MAUI_WeatherStationMaui/ViewModels/WeatherViewModel.cs`
-- Registration: `_iEventRelayBasic.Register<IWindReading>(this, OnWindReceived);`
+- Registration: `_iEventRelayBasic.Register<WindReading>(this, OnWindReceived);`
 
 WHAT RECEIVER DOES:
 1. Marshals to main thread
@@ -221,6 +231,81 @@ RECEIVED BY:
 - Component: `StationMetadataIngestor` (PostgreSQL sink)
 - Location: `src/MetWorks_Ingest_Postgres/StationMetadataIngestor.cs`
 - Registration: `IEventRelayBasic.Register<StationMetadata>(this, md => StartBackground(ct => PersistAsync(md, ct)));`
+
+---
+
+## REST OBSERVATIONS + UDP/REST MUX (PLANNED / IN-PROGRESS)
+
+This section describes the planned message flow to support fetching observations from Tempest's REST API in addition to UDP.
+
+Reference docs:
+- `src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/tempest-rest-observations/mini-spec.md`
+- `src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/tempest-rest-observations/implementation-plan.md`
+
+### New REST snapshot type (client-level)
+
+AVAILABLE VIA:
+- Interface: `ITempestRestClient`
+- File: `src/MetWorks_Interfaces/ITempestRestClient.cs`
+
+METHOD:
+- `GetStationObservationsAsync(CancellationToken ct = default)`
+
+RETURNS:
+- `TempestStationObservationsSnapshot`
+  - `StationId`
+  - `RetrievedUtc`
+  - `RawJson`
+
+Notes:
+- The snapshot preserves the full JSON payload to avoid binding to a rigid external schema.
+- This is a pull-based REST call; a later provider will poll on an interval and publish a superset message via `IEventRelayBasic`.
+
+### Planned: `TempestRestObservationsSnapshot` (event relay)
+
+PLANNED MESSAGE:
+- `TempestRestObservationsSnapshot`
+  - File: `src/MetWorks_Interfaces/TempestRestObservationsSnapshot.cs`
+  - Fields: `StationId`, `RetrievedUtc`, `RawJson`
+
+Notes:
+- This is the superset message published via `IEventRelayBasic` by `TempestRestObservationsProvider`.
+
+SENT BY (IMPLEMENTED):
+- Component: `TempestRestObservationsProvider`
+- File: `src/MetWorks_Common/TempestRestObservationsProvider.cs`
+
+### Planned: `WeatherIngestStatus`
+
+Planned status message to surface ingest health in the UI:
+- Which source is currently active for UI display (UDP vs REST)
+- Whether UDP and/or REST are available/fresh
+- What happens when neither is available
+
+Type:
+- `WeatherIngestStatus`
+  - File: `src/MetWorks_Interfaces/WeatherIngestStatus.cs`
+
+### Planned: canonical UI stream via mux
+
+Goal: continue publishing exactly one canonical stream of:
+- `IObservationReading`
+- `IWindReading`
+
+...selected by a mux so UDP and REST do not race each other and cause UI thrash.
+
+### REST snapshot -> UI readings mapping (IMPLEMENTED)
+
+IMPLEMENTED MAPPER:
+- `TempestRestReadingsMapper`
+  - File: `src/MetWorks_Ingest_Transformer/TempestRestReadingsMapper.cs`
+  - Input: `TempestRestObservationsSnapshot`
+  - Output: `IObservationReading` + `IWindReading` (best-effort)
+
+Provenance strategy (REST-derived):
+- `ReadingProvenance.RawPacketId = Guid.Empty`
+- `IWeatherReading.SourcePacketId = Guid.Empty`
+- `ReadingProvenance.TransformerVersion = "rest-1.0"`
 
 ## SETTINGS CHANGE NOTIFICATIONS (`IEventRelayPath`)
 

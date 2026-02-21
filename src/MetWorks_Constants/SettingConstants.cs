@@ -47,6 +47,14 @@ public static class SettingConstants
     public const string TempestForecast_groupName = "tempestForecast";
     public const string TempestForecast_refreshIntervalMinutes = "refreshIntervalMinutes";
 
+    public const string TempestObservations_groupName = "tempestObservations";
+    public const string TempestObservations_refreshIntervalMinutes = "refreshIntervalMinutes";
+
+    public const string WeatherIngest_groupName = "weatherIngest";
+    public const string WeatherIngest_restStaleMinutes = "restStaleMinutes";
+    public const string WeatherIngest_sourceMode = "sourceMode";
+    public const string WeatherIngest_udpStaleSeconds = "udpStaleSeconds";
+
     public const string Metrics_groupName = "metrics";
     public const string Metrics_enabled = "enabled";
     public const string Metrics_captureIntervalSeconds = "captureIntervalSeconds";
