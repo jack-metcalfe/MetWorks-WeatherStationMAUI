@@ -1,12 +1,16 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
 using MetWorks.Constants;
+using MetWorks.Common;
 using MetWorks.EnumDefinitions;
 using MetWorks.EventRelay;
 using MetWorks.Ingest.Transformer.Tests.Fakes;
 using MetWorks.Interfaces;
 using MetWorks.Models.Observables.Weather;
 using MetWorks.RedStar.Amounts.WeatherExtensions;
+using RedStar.Amounts;
+using RedStar.Amounts.StandardUnits;
+using Xunit;
 
 namespace MetWorks.Ingest.Transformer.Tests;
 
@@ -95,7 +99,7 @@ public sealed class WeatherReadingMuxTests
             SerialNumber = "device",
             Timestamp = nowUtc,
             ReceivedUtc = nowUtc,
-            Provenance = new ReadingProvenance { UdpReceiptTime = nowUtc, TransformStartTime = nowUtc, TransformEndTime = nowUtc },
+            Provenance = new ReadingProvenance { RawPacketId = Guid.NewGuid(), UdpReceiptTime = nowUtc, TransformStartTime = nowUtc, TransformEndTime = nowUtc },
             AirTemperature = new Amount(10, TemperatureUnits.DegreeCelsius),
             StationPressure = new Amount(1000, PressureUnits.MilliBar),
             RelativeHumidity = 50,
@@ -103,6 +107,7 @@ public sealed class WeatherReadingMuxTests
             UvIndex = 0,
             SolarRadiation = new Amount(0, SolarRadiationUnits.WattPerSquareMeter),
             RainAccumulation = new Amount(0, LengthUnits.MilliMeter),
+            PrecipitationType = 0,
             LightningStrikeAverageDistance = new Amount(0, LengthUnits.KiloMeter),
             LightningStrikeCount = 0,
             BatteryLevel = new Amount(3, ElectricUnits.Volt),
@@ -132,7 +137,7 @@ public sealed class WeatherReadingMuxTests
             SerialNumber = "device",
             Timestamp = nowUtc,
             ReceivedUtc = nowUtc,
-            Provenance = new ReadingProvenance { UdpReceiptTime = nowUtc, TransformStartTime = nowUtc, TransformEndTime = nowUtc },
+            Provenance = new ReadingProvenance { RawPacketId = Guid.NewGuid(), UdpReceiptTime = nowUtc, TransformStartTime = nowUtc, TransformEndTime = nowUtc },
             DeviceReceivedUtcTimestampEpoch = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             Speed = new Amount(1, SpeedUnits.MeterPerSecond),
             DirectionDegrees = 90,
@@ -153,6 +158,73 @@ public sealed class WeatherReadingMuxTests
         relay.Unregister<ObservationReading>(recipient);
         relay.Unregister<WindReading>(recipient);
         relay.Unregister<WeatherIngestStatus>(recipient);
+    }
+
+    [Fact]
+    public async Task WhenRestSnapshotArrivesThenMuxPublishesRestObservationInPreferredUnits()
+    {
+        await EnsureUnitsInitializedAsync();
+
+        var settings = CreateDefaultSettings();
+        settings[LookupDictionaries.WeatherIngestGroupSettingsDefinition.BuildPath(SettingConstants.WeatherIngest_sourceMode)] = WeatherIngestSourceMode.RestOnly.ToString();
+        settings[LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildPath(SettingConstants.UnitOfMeasure_airTemperature)] = "degree fahrenheit";
+
+        var relay = new EventRelayBasic();
+        var settingRepository = new InMemorySettingRepository(settings);
+        var logger = new TestLogger("mux");
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+        var mux = new WeatherReadingMux();
+        await mux.InitializeAsync(logger, settingRepository, relay, cts.Token);
+
+        var observations = new ConcurrentQueue<ObservationReading>();
+        object recipient = new();
+        relay.Register<ObservationReading>(recipient, observations.Enqueue);
+
+        // Mimic a Tempest REST payload where `station_units` indicates imperial, but values are metric.
+        var json = """
+        {
+          "timezone_offset_minutes": -360,
+          "station_units": { "units_temp": "f", "units_pressure": "inhg", "units_wind": "mph", "units_distance": "mi", "units_precip": "in" },
+          "obs": [
+            {
+              "timestamp": 1771642103,
+              "air_temperature": 10.4,
+              "station_pressure": 999.9,
+              "relative_humidity": 76,
+              "wind_avg": 0.4,
+              "wind_direction": 24,
+              "wind_gust": 0.9,
+              "wind_lull": 0.0,
+              "solar_radiation": 0,
+              "brightness": 0,
+              "precip": 0,
+              "lightning_strike_last_distance": 25,
+              "lightning_strike_count": 0,
+              "uv": 0,
+              "sea_level_pressure": 1012.2
+            }
+          ]
+        }
+        """;
+
+        var restSnapshot = new TempestRestObservationsSnapshot(
+            StationId: 123,
+            RetrievedUtc: DateTimeOffset.UtcNow,
+            RawJson: json);
+
+        relay.Send(restSnapshot);
+
+        await WaitForAsync(() => !observations.IsEmpty, cts.Token);
+
+        var obs = observations.Last();
+        Assert.NotNull(obs.AirTemperature);
+        Assert.Equal(TemperatureUnits.DegreeFahrenheit.Symbol, obs.AirTemperature.Unit.Symbol);
+        Assert.InRange(obs.AirTemperature.Value, 50.5, 51.0);
+
+        await mux.DisposeAsync();
+        relay.Unregister<ObservationReading>(recipient);
     }
 
     [Fact]
@@ -194,7 +266,7 @@ public sealed class WeatherReadingMuxTests
             SerialNumber = "device",
             Timestamp = staleUtc,
             ReceivedUtc = staleUtc,
-            Provenance = new ReadingProvenance { UdpReceiptTime = staleUtc, TransformStartTime = staleUtc, TransformEndTime = staleUtc },
+            Provenance = new ReadingProvenance { RawPacketId = Guid.NewGuid(), UdpReceiptTime = staleUtc, TransformStartTime = staleUtc, TransformEndTime = staleUtc },
             AirTemperature = new Amount(10, TemperatureUnits.DegreeCelsius),
             StationPressure = new Amount(1000, PressureUnits.MilliBar),
             RelativeHumidity = 50,
@@ -202,6 +274,7 @@ public sealed class WeatherReadingMuxTests
             UvIndex = 0,
             SolarRadiation = new Amount(0, SolarRadiationUnits.WattPerSquareMeter),
             RainAccumulation = new Amount(0, LengthUnits.MilliMeter),
+            PrecipitationType = 0,
             LightningStrikeAverageDistance = new Amount(0, LengthUnits.KiloMeter),
             LightningStrikeCount = 0,
             BatteryLevel = new Amount(3, ElectricUnits.Volt),
@@ -242,6 +315,58 @@ public sealed class WeatherReadingMuxTests
         relay.Unregister<ObservationReading>(recipient);
         relay.Unregister<WindReading>(recipient);
         relay.Unregister<WeatherIngestStatus>(recipient);
+    }
+
+    [Fact]
+    public async Task WhenUnitPreferenceChangesThenRestReadingsAreRepublishedInNewUnits()
+    {
+        await EnsureUnitsInitializedAsync();
+
+        var settings = CreateDefaultSettings();
+        settings[LookupDictionaries.WeatherIngestGroupSettingsDefinition.BuildPath(SettingConstants.WeatherIngest_sourceMode)] = WeatherIngestSourceMode.RestOnly.ToString();
+
+        var relay = new EventRelayBasic();
+        var settingRepository = new InMemorySettingRepository(settings);
+        var logger = new TestLogger("mux");
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+        var mux = new WeatherReadingMux();
+        await mux.InitializeAsync(logger, settingRepository, relay, cts.Token);
+
+        var observations = new ConcurrentQueue<ObservationReading>();
+        object recipient = new();
+        relay.Register<ObservationReading>(recipient, observations.Enqueue);
+
+        var json = await File.ReadAllTextAsync(Path.Combine("Fixtures", "GetStationObservationResultSample.json"), cts.Token);
+        var restSnapshot = new TempestRestObservationsSnapshot(
+            StationId: 123,
+            RetrievedUtc: DateTimeOffset.UtcNow,
+            RawJson: json);
+
+        relay.Send(restSnapshot);
+        await WaitForAsync(() => observations.Count >= 1, cts.Token);
+
+        var first = observations.Last();
+
+        settingRepository.SetValue(
+            LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildPath(SettingConstants.UnitOfMeasure_airTemperature),
+            "degree fahrenheit");
+
+        await WaitForAsync(() => observations.Count >= 2, cts.Token);
+
+        var targetUnit = Unit.Parse("degree fahrenheit");
+        var latest = observations.Last();
+
+        var expected = first.AirTemperature.ConvertedTo(targetUnit);
+
+        Assert.True(
+            first.AirTemperature.Unit != targetUnit &&
+            latest.AirTemperature.Unit == targetUnit &&
+            Math.Abs(latest.AirTemperature.Value - expected.Value) < 0.25);
+
+        await mux.DisposeAsync();
+        relay.Unregister<ObservationReading>(recipient);
     }
 
     static async Task WaitForAsync(Func<bool> condition, CancellationToken cancellationToken)

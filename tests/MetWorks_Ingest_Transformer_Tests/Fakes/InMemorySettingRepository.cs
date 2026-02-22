@@ -39,5 +39,14 @@ sealed class InMemorySettingRepository : ISettingRepository
     public void RegisterForSettingChangeMessages(string path, Action<ISettingValue> handler)
         => _path.Register(path, handler);
 
+    public void SetValue(string path, string value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        _values[path] = value;
+        _path.Send(new SettingValueMessage(path, value));
+    }
+
     public IEventRelayPath IEventRelayPath => _path;
+
+    sealed record SettingValueMessage(string Path, string? Value) : ISettingValue;
 }

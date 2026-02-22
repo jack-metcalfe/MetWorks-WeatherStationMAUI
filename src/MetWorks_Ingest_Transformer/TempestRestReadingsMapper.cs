@@ -1,13 +1,4 @@
 ﻿namespace MetWorks.Ingest.Transformer;
-
-using System.IO;
-using System.Globalization;
-using System.Linq;
-using System.Text.Json;
-using MetWorks.Common;
-using MetWorks.Common.Utility;
-using MetWorks.Interfaces;
-
 /// <summary>
 /// Best-effort mapping from a Tempest REST observations snapshot to UI-compatible readings.
 /// Intended for use by the UDP/REST mux so the UI can remain bound to `IObservationReading` and `IWindReading`.
@@ -15,8 +6,6 @@ using MetWorks.Interfaces;
 internal static class TempestRestReadingsMapper
 {
     const string TransformerVersion = "rest-1.0";
-
-    readonly record struct StationUnits(Unit Temp, Unit Pressure, Unit Wind, Unit Distance, Unit Precip);
 
     // Tempest station observations "obs" array indexes (matches WeatherFlow docs and aligns with existing UDP observation mapping).
     const int ObsIdx_EpochSeconds = 0;
@@ -43,7 +32,8 @@ internal static class TempestRestReadingsMapper
         ILogger logger,
         ISettingRepository settingRepository,
         IStationMetadataProvider? stationMetadataProvider,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         ArgumentNullException.ThrowIfNull(logger);
@@ -78,12 +68,10 @@ internal static class TempestRestReadingsMapper
 
             if (obsElement.ValueKind == JsonValueKind.Object)
             {
-                var stationUnits = GetStationUnits(root);
                 return await TryMapFromObsObjectAsync(
                     snapshot,
                     root,
                     obsElement,
-                    stationUnits,
                     tzOffsetMinutes,
                     preferredUnits,
                     logger,
@@ -114,7 +102,8 @@ internal static class TempestRestReadingsMapper
         Dictionary<MeasurementTypeEnum, Unit> preferredUnits,
         ILogger logger,
         IStationMetadataProvider? stationMetadataProvider,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         if (!TryGetInt64(obsRow, ObsIdx_EpochSeconds, out var epochSeconds) || epochSeconds <= 0)
             return (null, null, tzOffsetMinutes);
@@ -334,7 +323,6 @@ internal static class TempestRestReadingsMapper
         TempestRestObservationsSnapshot snapshot,
         JsonElement root,
         JsonElement obs,
-        StationUnits stationUnits,
         int? tzOffsetMinutes,
         Dictionary<MeasurementTypeEnum, Unit> preferredUnits,
         ILogger logger,
@@ -381,17 +369,18 @@ internal static class TempestRestReadingsMapper
             return Convert(source ?? new Amount(0, defaultSourceUnit), measurementType);
         }
 
-        // Source amounts based on the station_units block.
-        var airTemperature = new Amount(airTempRaw, stationUnits.Temp);
-        var stationPressure = new Amount(stationPressureRaw, stationUnits.Pressure);
-        var windAvg = new Amount(windAvgRaw, stationUnits.Wind);
+        // Source amounts from Tempest observations are treated as metric (matches obs-array payload and field magnitudes).
+        // The response includes a `station_units` block, but observed payload values are still metric in practice.
+        var airTemperature = new Amount(airTempRaw, TemperatureUnits.DegreeCelsius);
+        var stationPressure = new Amount(stationPressureRaw, PressureUnits.MilliBar);
+        var windAvg = new Amount(windAvgRaw, SpeedUnits.MeterPerSecond);
 
         var windGust = TryGetDouble(obs, "wind_gust", out var windGustRaw)
-            ? new Amount(windGustRaw, stationUnits.Wind)
+            ? new Amount(windGustRaw, SpeedUnits.MeterPerSecond)
             : (Amount?)null;
 
         var windLull = TryGetDouble(obs, "wind_lull", out var windLullRaw)
-            ? new Amount(windLullRaw, stationUnits.Wind)
+            ? new Amount(windLullRaw, SpeedUnits.MeterPerSecond)
             : (Amount?)null;
 
         var solar = TryGetDouble(obs, "solar_radiation", out var solarRaw)
@@ -403,13 +392,13 @@ internal static class TempestRestReadingsMapper
             ? new Amount(brightnessRaw, LuminousIntensityUnits.Lux)
             : (Amount?)null;
 
-        // REST payload provides precip in station_units.units_precip (typically in or mm).
+        // Tempest "precip" is treated as mm.
         var rain = TryGetDouble(obs, "precip", out var precipRaw)
-            ? new Amount(precipRaw, stationUnits.Precip)
+            ? new Amount(precipRaw, LengthUnits.MilliMeter)
             : (Amount?)null;
 
         var lightningDistance = TryGetDouble(obs, "lightning_strike_last_distance", out var lightningDistRaw)
-            ? new Amount(lightningDistRaw, stationUnits.Distance)
+            ? new Amount(lightningDistRaw, LengthUnits.KiloMeter)
             : (Amount?)null;
 
         _ = TryGetInt(obs, "lightning_strike_count", out var lightningCount);
@@ -422,29 +411,29 @@ internal static class TempestRestReadingsMapper
         var airTemperaturePreferred = Convert(airTemperature, MeasurementTypeEnum.AirTemperature);
         var stationPressurePreferred = Convert(stationPressure, MeasurementTypeEnum.AirPressure);
         var windAvgPreferred = Convert(windAvg, MeasurementTypeEnum.WindSpeed);
-        var windGustPreferred = ConvertOrDefault(windGust, MeasurementTypeEnum.WindSpeed, stationUnits.Wind);
-        var windLullPreferred = ConvertOrDefault(windLull, MeasurementTypeEnum.WindSpeed, stationUnits.Wind);
+        var windGustPreferred = ConvertOrDefault(windGust, MeasurementTypeEnum.WindSpeed, SpeedUnits.MeterPerSecond);
+        var windLullPreferred = ConvertOrDefault(windLull, MeasurementTypeEnum.WindSpeed, SpeedUnits.MeterPerSecond);
         var solarPreferred = ConvertOrDefault(solar, MeasurementTypeEnum.SolarRadiation, SolarRadiationUnits.WattPerSquareMeter);
         var illuminancePreferred = ConvertOrDefault(illuminance, MeasurementTypeEnum.Illuminance, LuminousIntensityUnits.Lux);
-        var rainPreferred = ConvertOrDefault(rain, MeasurementTypeEnum.RainAccumulation, stationUnits.Precip);
-        var lightningDistPreferred = ConvertOrDefault(lightningDistance, MeasurementTypeEnum.LightningDistance, stationUnits.Distance);
+        var rainPreferred = ConvertOrDefault(rain, MeasurementTypeEnum.RainAccumulation, LengthUnits.MilliMeter);
+        var lightningDistPreferred = ConvertOrDefault(lightningDistance, MeasurementTypeEnum.LightningDistance, LengthUnits.KiloMeter);
         var batteryPreferred = ConvertOrDefault(null, MeasurementTypeEnum.BatteryLevel, ElectricUnits.Volt);
 
         // Optional fields in this payload.
         var dewPointProvided = TryGetDouble(obs, "dew_point", out var dewPointRaw)
-            ? Convert(new Amount(dewPointRaw, stationUnits.Temp), MeasurementTypeEnum.AirTemperature)
+            ? Convert(new Amount(dewPointRaw, TemperatureUnits.DegreeCelsius), MeasurementTypeEnum.AirTemperature)
             : (Amount?)null;
 
         var windChillProvided = TryGetDouble(obs, "wind_chill", out var windChillRaw)
-            ? Convert(new Amount(windChillRaw, stationUnits.Temp), MeasurementTypeEnum.AirTemperature)
+            ? Convert(new Amount(windChillRaw, TemperatureUnits.DegreeCelsius), MeasurementTypeEnum.AirTemperature)
             : (Amount?)null;
 
         var heatIndexProvided = TryGetDouble(obs, "heat_index", out var heatIndexRaw)
-            ? Convert(new Amount(heatIndexRaw, stationUnits.Temp), MeasurementTypeEnum.AirTemperature)
+            ? Convert(new Amount(heatIndexRaw, TemperatureUnits.DegreeCelsius), MeasurementTypeEnum.AirTemperature)
             : (Amount?)null;
 
         var feelsLikeProvided = TryGetDouble(obs, "feels_like", out var feelsLikeRaw)
-            ? Convert(new Amount(feelsLikeRaw, stationUnits.Temp), MeasurementTypeEnum.AirTemperature)
+            ? Convert(new Amount(feelsLikeRaw, TemperatureUnits.DegreeCelsius), MeasurementTypeEnum.AirTemperature)
             : (Amount?)null;
 
         var dewPoint = dewPointProvided ?? DerivedObservationCalculator.TryComputeDewPoint(airTemperaturePreferred, relativeHumidityRaw);
@@ -455,7 +444,7 @@ internal static class TempestRestReadingsMapper
         Amount? seaLevelPressurePreferred = null;
         if (TryGetDouble(obs, "sea_level_pressure", out var slpRaw))
         {
-            seaLevelPressurePreferred = Convert(new Amount(slpRaw, stationUnits.Pressure), MeasurementTypeEnum.AirPressure);
+            seaLevelPressurePreferred = Convert(new Amount(slpRaw, PressureUnits.MilliBar), MeasurementTypeEnum.AirPressure);
         }
         else
         {
@@ -494,7 +483,7 @@ internal static class TempestRestReadingsMapper
             UdpReceiptTime = receivedUtc,
             TransformStartTime = transformStartUtc,
             TransformEndTime = transformEndUtc,
-            SourceUnits = $"temp:{stationUnits.Temp.Symbol}, pressure:{stationUnits.Pressure.Symbol}, wind:{stationUnits.Wind.Symbol}, distance:{stationUnits.Distance.Symbol}, precip:{stationUnits.Precip.Symbol}",
+            SourceUnits = "c, mbar, mps, lux, w/m2, mm, km, v",
             TargetUnits = BuildTargetUnits(preferredUnits),
             TransformerVersion = TransformerVersion
         };
@@ -630,65 +619,6 @@ internal static class TempestRestReadingsMapper
 
         obsElement = first;
         return true;
-    }
-
-    static StationUnits GetStationUnits(JsonElement root)
-    {
-        // Default to the metric units used by the UDP payload.
-        var temp = TemperatureUnits.DegreeCelsius;
-        var pressure = PressureUnits.MilliBar;
-        var wind = SpeedUnits.MeterPerSecond;
-        var distance = LengthUnits.KiloMeter;
-        var precip = LengthUnits.MilliMeter;
-
-        if (root.TryGetProperty("station_units", out var su) && su.ValueKind == JsonValueKind.Object)
-        {
-            if (TryGetString(su, "units_temp", out var v))
-                temp = v.Trim().ToLowerInvariant() switch
-                {
-                    "f" => TemperatureUnits.DegreeFahrenheit,
-                    "c" => TemperatureUnits.DegreeCelsius,
-                    _ => temp
-                };
-
-            if (TryGetString(su, "units_pressure", out var p))
-                pressure = p.Trim().ToLowerInvariant() switch
-                {
-                    "inhg" => PressureUnits.InchOfMercury,
-                    "mb" or "mbar" => PressureUnits.MilliBar,
-                    "hpa" => PressureUnits.HectoPascal,
-                    _ => pressure
-                };
-
-            if (TryGetString(su, "units_wind", out var w))
-                wind = w.Trim().ToLowerInvariant() switch
-                {
-                    "mph" => SpeedUnits.MilePerHour,
-                    "kph" => SpeedUnits.KilometerPerHour,
-                    "mps" => SpeedUnits.MeterPerSecond,
-                    "kts" => SpeedUnits.Knot,
-                    _ => wind
-                };
-
-            if (TryGetString(su, "units_distance", out var d))
-                distance = d.Trim().ToLowerInvariant() switch
-                {
-                    "mi" => LengthUnits.Mile,
-                    "km" => LengthUnits.KiloMeter,
-                    _ => distance
-                };
-
-            if (TryGetString(su, "units_precip", out var r))
-                precip = r.Trim().ToLowerInvariant() switch
-                {
-                    "in" => LengthUnits.Inch,
-                    "mm" => LengthUnits.MilliMeter,
-                    "cm" => LengthUnits.CentiMeter,
-                    _ => precip
-                };
-        }
-
-        return new StationUnits(temp, pressure, wind, distance, precip);
     }
 
     static bool TryGetDouble(JsonElement array, int index, out double value)

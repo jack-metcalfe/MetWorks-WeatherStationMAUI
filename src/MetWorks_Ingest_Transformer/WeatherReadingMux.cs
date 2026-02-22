@@ -1,12 +1,4 @@
 ﻿namespace MetWorks.Ingest.Transformer;
-
-using System.Threading;
-using System.Text.Json;
-using MetWorks.Common;
-using MetWorks.Constants;
-using MetWorks.Interfaces;
-using MetWorks.Models.Observables.Weather;
-
 /// <summary>
 /// Selects a single canonical UI stream of weather readings from either UDP-derived readings or REST-derived readings.
 /// </summary>
@@ -33,12 +25,20 @@ public sealed class WeatherReadingMux : ServiceBase
     ObservationReading? _restObservation;
     WindReading? _restWind;
 
+    TempestRestObservationsSnapshot? _restLatestSnapshot;
+
     string? _udpLastError;
     string? _restLastError;
 
     WeatherIngestStatus? _lastPublishedStatus;
 
     IStationMetadataProvider? _stationMetadataProvider;
+
+    string? _settingsPrefix_weatherIngest;
+    Action<ISettingValue>? _settingsHandler_weatherIngest;
+
+    string? _settingsPrefix_unitOfMeasure;
+    Action<ISettingValue>? _settingsHandler_unitOfMeasure;
 
     public WeatherReadingMux()
     {
@@ -50,7 +50,8 @@ public sealed class WeatherReadingMux : ServiceBase
         IEventRelayBasic iEventRelayBasic,
         CancellationToken externalCancellation = default,
         ProvenanceTracker? provenanceTracker = null,
-        IStationMetadataProvider? iStationMetadataProvider = null)
+        IStationMetadataProvider? iStationMetadataProvider = null
+    )
     {
         ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
@@ -61,18 +62,20 @@ public sealed class WeatherReadingMux : ServiceBase
             iSettingRepository,
             iEventRelayBasic,
             externalCancellation,
-            provenanceTracker);
+            provenanceTracker
+        );
 
         _stationMetadataProvider = iStationMetadataProvider;
 
         LoadSettings();
 
-        var settingsPrefix = LookupDictionaries.WeatherIngestGroupSettingsDefinition.BuildGroupPath();
-        IEventRelayPath.Register(settingsPrefix, _ =>
-        {
-            LoadSettings();
-            EvaluateAndPublish(triggerSource: null, udpDelta: null, restDelta: null, isTick: false);
-        });
+        _settingsPrefix_weatherIngest = LookupDictionaries.WeatherIngestGroupSettingsDefinition.BuildGroupPath();
+        _settingsHandler_weatherIngest = OnWeatherIngestSettingsChanged;
+        IEventRelayPath.Register(_settingsPrefix_weatherIngest, _settingsHandler_weatherIngest);
+
+        _settingsPrefix_unitOfMeasure = LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildGroupPath();
+        _settingsHandler_unitOfMeasure = OnUnitOfMeasureSettingsChanged;
+        IEventRelayPath.Register(_settingsPrefix_unitOfMeasure, _settingsHandler_unitOfMeasure);
 
         IEventRelayBasic.Register<IObservationReading>(this, OnUdpObservationReceived);
         IEventRelayBasic.Register<IWindReading>(this, OnUdpWindReceived);
@@ -84,6 +87,19 @@ public sealed class WeatherReadingMux : ServiceBase
         ILogger.Information("WeatherReadingMux initialized");
 
         return Task.FromResult(true);
+    }
+
+    void OnWeatherIngestSettingsChanged(ISettingValue _)
+    {
+        LoadSettings();
+        EvaluateAndPublish(triggerSource: null, observationReading: null, windReading: null, isTick: false);
+    }
+
+    void OnUnitOfMeasureSettingsChanged(ISettingValue _)
+    {
+        // UDP units are handled upstream (transformer); REST units are produced here.
+        // Remap the latest REST snapshot so cached REST readings are refreshed in the new preferred units.
+        StartBackground(RemapRestLatestSnapshotAsync);
     }
 
     void LoadSettings()
@@ -117,7 +133,7 @@ public sealed class WeatherReadingMux : ServiceBase
         while (!token.IsCancellationRequested)
         {
             await Task.Delay(StatusTickInterval, token).ConfigureAwait(false);
-            EvaluateAndPublish(triggerSource: null, udpDelta: null, restDelta: null, isTick: true);
+            EvaluateAndPublish(triggerSource: null, observationReading: null, windReading: null, isTick: true);
         }
     }
 
@@ -129,7 +145,7 @@ public sealed class WeatherReadingMux : ServiceBase
         if (concrete is null)
         {
             lock (_gate) { _udpLastError = $"Unexpected observation type: {reading.GetType().Name}"; }
-            EvaluateAndPublish(triggerSource: WeatherIngestSource.Udp, udpDelta: null, restDelta: null, isTick: false);
+            EvaluateAndPublish(triggerSource: WeatherIngestSource.Udp, observationReading: null, windReading: null, isTick: false);
             return;
         }
 
@@ -140,7 +156,7 @@ public sealed class WeatherReadingMux : ServiceBase
             _udpLastError = null;
         }
 
-        EvaluateAndPublish(triggerSource: WeatherIngestSource.Udp, udpDelta: concrete, restDelta: null, isTick: false);
+        EvaluateAndPublish(triggerSource: WeatherIngestSource.Udp, observationReading: concrete, windReading: null, isTick: false);
     }
 
     void OnUdpWindReceived(IWindReading reading)
@@ -151,7 +167,7 @@ public sealed class WeatherReadingMux : ServiceBase
         if (concrete is null)
         {
             lock (_gate) { _udpLastError = $"Unexpected wind type: {reading.GetType().Name}"; }
-            EvaluateAndPublish(triggerSource: WeatherIngestSource.Udp, udpDelta: null, restDelta: null, isTick: false);
+            EvaluateAndPublish(triggerSource: WeatherIngestSource.Udp, observationReading: null, windReading: null, isTick: false);
             return;
         }
 
@@ -162,12 +178,17 @@ public sealed class WeatherReadingMux : ServiceBase
             _udpLastError = null;
         }
 
-        EvaluateAndPublish(triggerSource: WeatherIngestSource.Udp, udpDelta: null, restDelta: concrete, isTick: false);
+        EvaluateAndPublish(triggerSource: WeatherIngestSource.Udp, observationReading: null, windReading: concrete, isTick: false);
     }
 
     void OnRestSnapshotReceived(TempestRestObservationsSnapshot snapshot)
     {
         if (snapshot is null) return;
+
+        lock (_gate)
+        {
+            _restLatestSnapshot = snapshot;
+        }
 
         StartBackground(async token =>
         {
@@ -179,7 +200,8 @@ public sealed class WeatherReadingMux : ServiceBase
                     ILogger,
                     ISettingRepository,
                     _stationMetadataProvider,
-                    token).ConfigureAwait(false);
+                    token
+                ).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
@@ -193,7 +215,7 @@ public sealed class WeatherReadingMux : ServiceBase
                     _restLastError = ex.Message;
                 }
 
-                EvaluateAndPublish(triggerSource: WeatherIngestSource.Rest, udpDelta: null, restDelta: null, isTick: false);
+                EvaluateAndPublish(triggerSource: WeatherIngestSource.Rest, observationReading: null, windReading: null, isTick: false);
                 return;
             }
             catch (InvalidOperationException ex)
@@ -204,7 +226,7 @@ public sealed class WeatherReadingMux : ServiceBase
                     _restLastError = ex.Message;
                 }
 
-                EvaluateAndPublish(triggerSource: WeatherIngestSource.Rest, udpDelta: null, restDelta: null, isTick: false);
+                EvaluateAndPublish(triggerSource: WeatherIngestSource.Rest, observationReading: null, windReading: null, isTick: false);
                 return;
             }
 
@@ -218,14 +240,76 @@ public sealed class WeatherReadingMux : ServiceBase
 
             EvaluateAndPublish(
                 triggerSource: WeatherIngestSource.Rest,
-                udpDelta: mapped.Observation,
-                restDelta: mapped.Wind,
-                isTick: false);
+                observationReading: mapped.Observation,
+                windReading: mapped.Wind,
+                isTick: false
+            );
         });
     }
 
+    async Task RemapRestLatestSnapshotAsync(CancellationToken token)
+    {
+        TempestRestObservationsSnapshot? snapshot;
+        lock (_gate) { snapshot = _restLatestSnapshot; }
+        if (snapshot is null)
+            return;
+
+        (ObservationReading? Observation, WindReading? Wind, int? TimeZoneOffsetMinutes) mapped;
+        try
+        {
+            mapped = await TempestRestReadingsMapper.TryMapAsync(
+                snapshot,
+                ILogger,
+                ISettingRepository,
+                _stationMetadataProvider,
+                token
+            ).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            return;
+        }
+        catch (JsonException ex)
+        {
+            lock (_gate)
+            {
+                _restLastRetrievedUtc = snapshot.RetrievedUtc;
+                _restLastError = ex.Message;
+            }
+
+            EvaluateAndPublish(triggerSource: WeatherIngestSource.Rest, observationReading: null, windReading: null, isTick: false);
+            return;
+        }
+        catch (InvalidOperationException ex)
+        {
+            lock (_gate)
+            {
+                _restLastRetrievedUtc = snapshot.RetrievedUtc;
+                _restLastError = ex.Message;
+            }
+
+            EvaluateAndPublish(triggerSource: WeatherIngestSource.Rest, observationReading: null, windReading: null, isTick: false);
+            return;
+        }
+
+        lock (_gate)
+        {
+            _restLastRetrievedUtc = snapshot.RetrievedUtc;
+            _restObservation = mapped.Observation;
+            _restWind = mapped.Wind;
+            _restLastError = null;
+        }
+
+        EvaluateAndPublish(
+            triggerSource: WeatherIngestSource.Rest,
+            observationReading: mapped.Observation,
+            windReading: mapped.Wind,
+            isTick: false
+        );
+    }
+
     // udpDelta: optional observation, restDelta: optional wind (naming kept to avoid extra tuples)
-    void EvaluateAndPublish(WeatherIngestSource? triggerSource, ObservationReading? udpDelta, WindReading? restDelta, bool isTick)
+    void EvaluateAndPublish(WeatherIngestSource? triggerSource, ObservationReading? observationReading, WindReading? windReading, bool isTick)
     {
         WeatherIngestSourceMode mode;
         int udpStaleSeconds;
@@ -299,11 +383,11 @@ public sealed class WeatherReadingMux : ServiceBase
         }
         else if (triggerSource is not null && triggerSource.Value == activeSource)
         {
-            if (udpDelta is not null)
-                IEventRelayBasic.Send(udpDelta);
+            if (observationReading is not null)
+                IEventRelayBasic.Send(observationReading);
 
-            if (restDelta is not null)
-                IEventRelayBasic.Send(restDelta);
+            if (windReading is not null)
+                IEventRelayBasic.Send(windReading);
         }
 
         var status = new WeatherIngestStatus(
@@ -316,7 +400,8 @@ public sealed class WeatherReadingMux : ServiceBase
             RestIsFresh: restIsFresh,
             RestLastRetrievedUtc: restLast,
             UdpLastError: udpError,
-            RestLastError: restError);
+            RestLastError: restError
+        );
 
         var shouldPublishStatus = sourceChanged || isTick || _lastPublishedStatus != status;
         if (shouldPublishStatus)
@@ -331,15 +416,14 @@ public sealed class WeatherReadingMux : ServiceBase
         ObservationReading? udpObs,
         WindReading? udpWind,
         ObservationReading? restObs,
-        WindReading? restWind)
+        WindReading? restWind
+    )
     {
-        if (active == WeatherIngestSource.Udp)
-        {
+        if (active == WeatherIngestSource.Udp) {
             if (udpObs is not null) IEventRelayBasic.Send(udpObs);
             if (udpWind is not null) IEventRelayBasic.Send(udpWind);
         }
-        else if (active == WeatherIngestSource.Rest)
-        {
+        else if (active == WeatherIngestSource.Rest) {
             if (restObs is not null) IEventRelayBasic.Send(restObs);
             if (restWind is not null) IEventRelayBasic.Send(restWind);
         }
@@ -358,6 +442,21 @@ public sealed class WeatherReadingMux : ServiceBase
         try { IEventRelayBasic.Unregister<IObservationReading>(this); } catch { }
         try { IEventRelayBasic.Unregister<IWindReading>(this); } catch { }
         try { IEventRelayBasic.Unregister<TempestRestObservationsSnapshot>(this); } catch { }
+
+        try
+        {
+            if (_settingsPrefix_weatherIngest is not null && _settingsHandler_weatherIngest is not null)
+                IEventRelayPath.Unregister(_settingsPrefix_weatherIngest, _settingsHandler_weatherIngest);
+        }
+        catch { }
+
+        try
+        {
+            if (_settingsPrefix_unitOfMeasure is not null && _settingsHandler_unitOfMeasure is not null)
+                IEventRelayPath.Unregister(_settingsPrefix_unitOfMeasure, _settingsHandler_unitOfMeasure);
+        }
+        catch { }
+
         return Task.CompletedTask;
     }
 }

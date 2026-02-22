@@ -21,6 +21,7 @@ global using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
 global using MetWorks.Common.Metrics;
 global using MetWorks.Common.Settings;
 global using MetWorks.Common.Utility;
+global using MetWorks.Ingest.Transformer;
 global using MetWorks.Interfaces;
 global using MetWorks.ServiceRegistry;
 

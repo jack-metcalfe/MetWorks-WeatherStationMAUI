@@ -37,7 +37,8 @@ public sealed class TempestRestObservationsProvider : ServiceBase, ITempestRestO
         ITempestRestClient iTempestRestClient,
         CancellationToken externalCancellation = default,
         IPlatformPaths? iPlatformPaths = null,
-        ProvenanceTracker? provenanceTracker = null)
+        ProvenanceTracker? provenanceTracker = null
+    )
     {
         ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
@@ -49,7 +50,8 @@ public sealed class TempestRestObservationsProvider : ServiceBase, ITempestRestO
             iSettingRepository,
             iEventRelayBasic,
             externalCancellation,
-            provenanceTracker);
+            provenanceTracker
+        );
 
         _tempestRestClient = iTempestRestClient;
         _platformPaths = iPlatformPaths;
@@ -166,13 +168,13 @@ public sealed class TempestRestObservationsProvider : ServiceBase, ITempestRestO
             }
 
             snapshot ??= TryLoadPersistedSnapshot();
-            if (snapshot is null)
-                return;
+            if (snapshot is null) return;
 
             var message = new TempestRestObservationsSnapshot(
                 StationId: snapshot.StationId,
                 RetrievedUtc: snapshot.RetrievedUtc,
-                RawJson: snapshot.RawJson);
+                RawJson: snapshot.RawJson
+            );
 
             _latest = message;
 

@@ -1416,7 +1416,7 @@ instance:
   element: []
 - name: TheTempestRestObservationsProvider
   class: MetWorks.Common.TempestRestObservationsProvider
-  exposeToMauiDi: false
+  exposeToMauiDi: true
   assignment:
   - name: iLogger
     literal: null

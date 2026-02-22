@@ -1,6 +1,7 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
 
 using MetWorks.Models.Observables.Weather;
+using MetWorks.Constants;
 /// <summary>
 /// ViewModel for displaying current weather readings.
 /// Subscribes to weather reading streams via ISingletonEventRelay.
@@ -17,6 +18,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     readonly MetWorks.Interfaces.ILogger _iLogger;
     readonly ISettingRepository _iSettingRepository;
     readonly IEventRelayBasic _iEventRelayBasic;
+    readonly ITempestRestObservationsProvider _iTempestRestObservationsProvider;
     private readonly IInstanceIdentifier _iInstanceIdentifier;
     IWindReading? _currentWind;
     IObservationReading? _currentObservation;
@@ -67,6 +69,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         MetWorks.Interfaces.ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
+        ITempestRestObservationsProvider iTempestRestObservationsProvider,
         IInstanceIdentifier iInstanceIdentifier,
         CancellationToken externalCancellation
     )
@@ -74,6 +77,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
+        ArgumentNullException.ThrowIfNull(iTempestRestObservationsProvider);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
 
         _iExternalCancellationToken = externalCancellation;
@@ -81,7 +85,9 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         _iLogger = iLogger;
         _iSettingRepository = iSettingRepository;
         _iEventRelayBasic = iEventRelayBasic;
+        _iTempestRestObservationsProvider = iTempestRestObservationsProvider;
         _iInstanceIdentifier = iInstanceIdentifier;
+
         StartServiceStatusMonitoring();
         // Initialization is event-driven: subscribe to event relay and initialize when data arrives.
     }
@@ -127,6 +133,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     }
     async Task<bool> InitializeAsync()
     {
+//        await _weatherReadingMux.Ready;
         // Quick check: if already marked initialized return true
         if (
             Interlocked.CompareExchange(
@@ -175,6 +182,8 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
             _iEventRelayBasic.Register<ObservationReading>(this, OnObservationReceived);
             _iEventRelayBasic.Register<WeatherIngestStatus>(this, OnWeatherIngestStatusReceived);
 
+            await TryWarmStartReadingsAsync().ConfigureAwait(false);
+
             InitializeClockTimer();
 
             return await Task.FromResult(true);
@@ -189,6 +198,58 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
 
             _iLogger.Error("Failed to initialize", exception);
             throw;
+        }
+    }
+
+    async Task TryWarmStartReadingsAsync()
+    {
+        // The UI may register after the first REST snapshot is already published.
+        // Best-effort: re-publish the provider's latest snapshot (if any), then request an on-demand refresh.
+        // This avoids a blank UI during the REST polling interval and does not force the mux to switch sources.
+
+        try
+        {
+            var latest = await _iTempestRestObservationsProvider.GetLatestAsync(LinkedCancellationToken).ConfigureAwait(false);
+            if (latest is not null)
+                _iEventRelayBasic.Send(latest);
+        }
+        catch (OperationCanceledException) when (LinkedCancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _iLogger.Warning($"WeatherViewModel: failed to load latest REST snapshot. {ex.Message}");
+        }
+
+        WeatherIngestSourceMode mode;
+        try
+        {
+            var modeText = _iSettingRepository.GetValueOrDefault<string>(
+                LookupDictionaries.WeatherIngestGroupSettingsDefinition.BuildPath(SettingConstants.WeatherIngest_sourceMode));
+
+            if (!Enum.TryParse(modeText, ignoreCase: true, out mode))
+                mode = WeatherIngestSourceMode.Auto;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _iLogger.Warning($"WeatherViewModel: failed to read ingest settings. {ex.Message}");
+            mode = WeatherIngestSourceMode.Auto;
+        }
+
+        if (mode == WeatherIngestSourceMode.UdpOnly)
+            return;
+
+        try
+        {
+            await _iTempestRestObservationsProvider.RequestRefreshAsync(LinkedCancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (LinkedCancellationToken.IsCancellationRequested)
+        {
+        }
+        catch (InvalidOperationException ex)
+        {
+            _iLogger.Warning($"WeatherViewModel: failed to request REST refresh. {ex.Message}");
         }
     }
     // ========================================
@@ -269,10 +330,11 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     private void OnObservationReceived(ObservationReading reading)
     {
         // Update on main thread for UI safety
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            CurrentObservation = reading;
-        });
+        MainThread.BeginInvokeOnMainThread(
+            () => {
+                CurrentObservation = reading;
+            }
+        );
     }
     // ========================================
     // Properties

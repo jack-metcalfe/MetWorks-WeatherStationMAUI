@@ -99,7 +99,8 @@ public sealed class TempestRestClient : ServiceBase, ITempestRestClient
         );
     }
 
-    public async Task<TempestStationObservationsSnapshot> GetStationObservationsAsync(CancellationToken cancellationToken = default)
+    public async Task<TempestStationObservationsSnapshot> GetStationObservationsAsync(CancellationToken cancellationToken = default
+    )
     {
         await Ready.ConfigureAwait(false);
 
