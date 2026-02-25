@@ -8,5 +8,6 @@ public enum LogicalContentKey
     HomePage = 0,
     LiveWind = 1,
     MetricsOne = 2,
-    ForecastHours = 3
+    ForecastHours = 3,
+    HistoricalObservations = 4
 }

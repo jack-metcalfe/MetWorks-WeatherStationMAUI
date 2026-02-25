@@ -25,6 +25,8 @@ global using MetWorks.Ingest.Transformer;
 global using MetWorks.Interfaces;
 global using MetWorks.ServiceRegistry;
 
+global using RedStar.Amounts;
+
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Maui;

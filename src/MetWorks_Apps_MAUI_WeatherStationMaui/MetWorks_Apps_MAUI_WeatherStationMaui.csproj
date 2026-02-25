@@ -101,6 +101,7 @@
 	  <ProjectReference Include="..\MetWorks_Common_Utility\MetWorks_Common_Utility.csproj" />
 	  <ProjectReference Include="..\MetWorks_DdiRegistry\MetWorks_DdiRegistry.csproj" />
 	  <ProjectReference Include="..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
+	  <ProjectReference Include="..\RedStar_Amounts\RedStar_Amounts.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -144,6 +145,9 @@
 
 	<ItemGroup>
 		<MauiXaml Update="Pages\GuestPages\ForecastHoursAdaptive.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Pages\GuestPages\HistoricalObservationsAdaptive.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Pages\GuestPages\LiveWind2176x1812.xaml">

@@ -80,6 +80,7 @@ public sealed class WeatherReadingMux : ServiceBase
         IEventRelayBasic.Register<IObservationReading>(this, OnUdpObservationReceived);
         IEventRelayBasic.Register<IWindReading>(this, OnUdpWindReceived);
         IEventRelayBasic.Register<TempestRestObservationsSnapshot>(this, OnRestSnapshotReceived);
+        IEventRelayBasic.Register<WeatherIngestWarmStartRequest>(this, OnWarmStartRequested);
 
         StartBackground(StatusTickLoopAsync);
 
@@ -245,6 +246,35 @@ public sealed class WeatherReadingMux : ServiceBase
                 isTick: false
             );
         });
+    }
+
+    void OnWarmStartRequested(WeatherIngestWarmStartRequest _)
+    {
+        WeatherIngestSource before;
+        lock (_gate) { before = _activeSource; }
+
+        // Ensure freshness and status are evaluated right now.
+        EvaluateAndPublish(triggerSource: null, observationReading: null, windReading: null, isTick: true);
+
+        WeatherIngestSource active;
+        ObservationReading? udpObs;
+        WindReading? udpWind;
+        ObservationReading? restObs;
+        WindReading? restWind;
+
+        lock (_gate)
+        {
+            active = _activeSource;
+            udpObs = _udpObservation;
+            udpWind = _udpWind;
+            restObs = _restObservation;
+            restWind = _restWind;
+        }
+
+        // If the source didn't change, EvaluateAndPublish won't re-send cached readings.
+        // Do it here so late subscribers (UI) can immediately render.
+        if (active == before)
+            PublishCachedFor(active, udpObs, udpWind, restObs, restWind);
     }
 
     async Task RemapRestLatestSnapshotAsync(CancellationToken token)
@@ -442,6 +472,7 @@ public sealed class WeatherReadingMux : ServiceBase
         try { IEventRelayBasic.Unregister<IObservationReading>(this); } catch { }
         try { IEventRelayBasic.Unregister<IWindReading>(this); } catch { }
         try { IEventRelayBasic.Unregister<TempestRestObservationsSnapshot>(this); } catch { }
+        try { IEventRelayBasic.Unregister<WeatherIngestWarmStartRequest>(this); } catch { }
 
         try
         {

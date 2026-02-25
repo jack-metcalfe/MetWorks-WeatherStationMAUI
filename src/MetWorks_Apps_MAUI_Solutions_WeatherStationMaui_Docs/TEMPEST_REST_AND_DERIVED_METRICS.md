@@ -67,8 +67,53 @@ Responsibilities:
   - Uses `Authorization: Bearer <apiKey>`
 - Returns a `TempestStationSnapshot` containing the **entire JSON** payload.
 
+Unit behavior:
+- Tempest REST payloads that are persisted locally are requested in **metric** units.
+- User unit preferences are applied later when constructing `Amount` values for the UI/domain.
+
 Design note:
 - We intentionally avoid binding to a rigid DTO because the WeatherFlow payload is large and subject to change.
+
+### `TempestRestObservationsProvider`
+- File: `src/MetWorks_Common/TempestRestObservationsProvider.cs`
+- Implements: `ITempestRestObservationsProvider`
+
+Responsibilities:
+- Retrieves station observations using `ITempestRestClient.GetStationObservationsAsync(...)`
+- Persists the **raw observations JSON** in AppData (metric):
+  - raw: `tempest.observations.snapshot.json`
+  - meta: `tempest.observations.snapshot.meta.json`
+- If REST fails, loads the last snapshot from disk (offline mode)
+- Publishes the latest snapshot via the event relay:
+  - `IEventRelayBasic.Send(TempestRestObservationsSnapshot)`
+
+Meta file fields (best-effort):
+- `units_system`: always `metric`
+- `obs_row_count`
+- `oldest_epoch_seconds`
+- `newest_epoch_seconds`
+
+### `TempestForecastProvider`
+- File: `src/MetWorks_Common/TempestForecastProvider.cs`
+- Implements: `ITempestForecastProvider`
+
+Responsibilities:
+- Retrieves Better Forecast using `ITempestRestClient.GetBetterForecastAsync(...)`
+- Persists the **raw forecast JSON** in AppData (metric):
+  - raw: `tempest.forecast.snapshot.json`
+  - meta: `tempest.forecast.snapshot.meta.json`
+- If REST fails, loads the last snapshot from disk (offline mode)
+- Extracts a strongly-typed `TempestForecast` from the raw JSON
+  - Forecast values are converted from metric to preferred units when constructing `Amount`
+- Publishes forecast changes via the event relay:
+  - `IEventRelayBasic.Send(TempestForecast)`
+
+Meta file fields (best-effort):
+- `units_system`: always `metric`
+- `daily_row_count`
+- `hourly_row_count`
+- `oldest_hour_epoch_seconds`
+- `newest_hour_epoch_seconds`
 
 ### `StationMetadataProvider`
 - File: `src/MetWorks_Common/StationMetadataProvider.cs`

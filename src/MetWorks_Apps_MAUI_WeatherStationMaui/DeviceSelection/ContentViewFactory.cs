@@ -75,6 +75,9 @@ public sealed class ContentViewFactory : IContentViewFactory
             LogicalContentKey.ForecastHours
                 => VariantKeys.Placeholder.Default,
 
+            LogicalContentKey.HistoricalObservations
+                => VariantKeys.Placeholder.Default,
+
             LogicalContentKey.HomePage
                 => SelectDefaultWeatherVariant(
                         deviceContext

@@ -11,7 +11,7 @@ public sealed class ContentVariantCatalog : IContentVariantCatalog
 
         viewType = default!;
 
-        if (content != LogicalContentKey.HomePage && content != LogicalContentKey.MetricsOne && content != LogicalContentKey.LiveWind && content != LogicalContentKey.ForecastHours)
+        if (content != LogicalContentKey.HomePage && content != LogicalContentKey.MetricsOne && content != LogicalContentKey.LiveWind && content != LogicalContentKey.ForecastHours && content != LogicalContentKey.HistoricalObservations)
             return false;
 
         // Baseline fallback mapping for unknown devices or missing curated overrides.
@@ -24,6 +24,7 @@ public sealed class ContentVariantCatalog : IContentVariantCatalog
                 LogicalContentKey.LiveWind => typeof(LiveWindAdaptive),
                 LogicalContentKey.MetricsOne => typeof(MetricsOne1920x1200),
                 LogicalContentKey.ForecastHours => typeof(ForecastHoursAdaptive),
+                LogicalContentKey.HistoricalObservations => typeof(HistoricalObservationsAdaptive),
                 _ => null
             };
 

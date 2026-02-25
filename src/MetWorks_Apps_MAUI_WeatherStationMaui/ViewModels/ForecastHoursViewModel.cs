@@ -19,9 +19,9 @@ public sealed class ForecastHoursViewModel : INotifyPropertyChanged, IDisposable
     int _hoursToShowMin = DefaultMinHoursToShow;
     int _hoursToShowMax = DefaultMaxHoursToShow;
 
-    double? _minTemp;
-    double? _maxTemp;
-    double? _maxGust;
+    Amount? _minTemp;
+    Amount? _maxTemp;
+    Amount? _maxGust;
 
     string _statusLine = "Waiting for forecast...";
 
@@ -86,7 +86,7 @@ public sealed class ForecastHoursViewModel : INotifyPropertyChanged, IDisposable
         }
     }
 
-    public double? MinTemp
+    public Amount? MinTemp
     {
         get => _minTemp;
         private set
@@ -97,7 +97,7 @@ public sealed class ForecastHoursViewModel : INotifyPropertyChanged, IDisposable
         }
     }
 
-    public double? MaxTemp
+    public Amount? MaxTemp
     {
         get => _maxTemp;
         private set
@@ -108,7 +108,7 @@ public sealed class ForecastHoursViewModel : INotifyPropertyChanged, IDisposable
         }
     }
 
-    public double? MaxGust
+    public Amount? MaxGust
     {
         get => _maxGust;
         private set
@@ -233,16 +233,14 @@ public sealed class ForecastHoursViewModel : INotifyPropertyChanged, IDisposable
 
         var rows = candidates.Select(h => ForecastHourRow.From(h)).ToArray();
 
-        var temps = candidates
-            .Select(h => h.AirTemperature)
-            .Where(v => v.HasValue)
-            .Select(v => v!.Value)
+        var temps = rows
+            .Where(r => r.AirTemperature is not null)
+            .Select(r => r.AirTemperature!)
             .ToArray();
 
-        var gusts = candidates
-            .Select(h => h.WindGust)
-            .Where(v => v.HasValue)
-            .Select(v => v!.Value)
+        var gusts = rows
+            .Where(r => r.WindGust is not null)
+            .Select(r => r.WindGust!)
             .ToArray();
 
         MainThread.BeginInvokeOnMainThread(() =>
@@ -284,8 +282,8 @@ public sealed class ForecastHoursViewModel : INotifyPropertyChanged, IDisposable
     public sealed record ForecastHourRow(
         DateTimeOffset TimeLocal,
         string HourDisplay,
-        double? AirTemperature,
-        double? WindGust,
+        Amount? AirTemperature,
+        Amount? WindGust,
         int? PrecipProbability,
         double? Uv,
         int? RelativeHumidity)

@@ -2,8 +2,8 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels"
-             x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages.ForecastHoursAdaptive"
-             x:DataType="viewmodels:ForecastHoursViewModel">
+             x:Class="MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages.HistoricalObservationsAdaptive"
+             x:DataType="viewmodels:HistoricalObservationsViewModel">
 
     <Grid Padding="12" RowSpacing="12">
         <Grid.RowDefinitions>
@@ -20,12 +20,21 @@
 
             <VerticalStackLayout Grid.Column="0" Spacing="4">
                 <Label FontSize="28" TextColor="{StaticResource GoldVikings}"
-                       Text="Next hours (Temp / Gust / Precip / UV / Humidity)" />
+                       Text="Previous hours (Temp / Gust / Rain / UV / Humidity)" />
                 <Label FontSize="22" TextColor="{StaticResource WhiteVikings}"
                        Text="{Binding StatusLine}" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Grid.Column="1" Spacing="6" HorizontalOptions="End">
+                <HorizontalStackLayout Spacing="8" HorizontalOptions="End">
+                    <Label FontSize="22" TextColor="{StaticResource GoldVikings}" Text="Back" />
+                    <Label FontSize="22" TextColor="{StaticResource WhiteVikings}" Text="{Binding HoursBack}" />
+                    <Stepper Minimum="0"
+                             Maximum="72"
+                             Increment="1"
+                             Value="{Binding HoursBack}" />
+                </HorizontalStackLayout>
+
                 <HorizontalStackLayout Spacing="8" HorizontalOptions="End">
                     <Label FontSize="22" TextColor="{StaticResource GoldVikings}" Text="Hours" />
                     <Label FontSize="22" TextColor="{StaticResource WhiteVikings}" Text="{Binding HoursToShow}" />
@@ -80,7 +89,7 @@
             <Label Grid.Column="0" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="Hour" />
             <Label Grid.Column="1" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="Temp" />
             <Label Grid.Column="2" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="Gust" />
-            <Label Grid.Column="3" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="Precip" />
+            <Label Grid.Column="3" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="Rain" />
             <Label Grid.Column="4" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="UV" />
             <Label Grid.Column="5" FontSize="24" TextColor="{StaticResource GoldVikings}" Text="Hum" />
 
@@ -97,7 +106,7 @@
                         ItemsLayout="VerticalList"
                         SelectionMode="None">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="viewmodels:ForecastHoursViewModel+ForecastHourRow">
+                <DataTemplate x:DataType="viewmodels:HistoricalObservationsViewModel+HistoricalHourRow">
                     <Grid Padding="0" ColumnSpacing="12" RowSpacing="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -131,9 +140,16 @@
                                     </MultiBinding>
                                 </Label.Text>
                             </Label>
-                            <Label Grid.Column="3" FontSize="34" TextColor="{StaticResource WhiteVikings}" Text="{Binding PrecipProbability, StringFormat='{}{0}%'}" />
+                            <Label Grid.Column="3" FontSize="34" TextColor="{StaticResource WhiteVikings}">
+                                <Label.Text>
+                                    <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="2">
+                                        <Binding Path="Rain.Value" />
+                                        <Binding Path="Rain.Unit.Symbol" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
                             <Label Grid.Column="4" FontSize="34" TextColor="{StaticResource WhiteVikings}" Text="{Binding Uv, StringFormat='{}{0:0.#}'}" />
-                            <Label Grid.Column="5" FontSize="34" TextColor="{StaticResource WhiteVikings}" Text="{Binding RelativeHumidity, StringFormat='{}{0}%'}" />
+                            <Label Grid.Column="5" FontSize="34" TextColor="{StaticResource WhiteVikings}" Text="{Binding RelativeHumidity, StringFormat='{}{0:0}%'}" />
                         </Grid>
 
                         <BoxView Grid.Row="1"

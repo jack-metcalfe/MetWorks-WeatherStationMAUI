@@ -26,6 +26,7 @@
 - When refactoring DDI/codegen, prioritize clean code; incremental steps that take longer are acceptable if they keep the design tidy and maintainable.
 - Initialize new services (like Tempest forecast) via DDI and publish updates event-driven via EventRelay on a regular refresh interval (e.g., hourly) rather than pull-only.
 - Phase 11 manual validation should account for this dev machine having two WiFi connections: one network interface can see Tempest UDP broadcasts and the other cannot (useful for UDP-only vs REST-only test scenarios).
+- Persist raw weather/forecast JSON snapshots in metric units (API/UDP native), independent of user unit preferences; apply preference conversions only when constructing `Amount` for UI/domain models.
 
 ## Instrumentation Preferences
 - Target Android primarily; emit reports to logs first.
@@ -39,6 +40,7 @@
 
 ## Naming Conventions
 - Prefer a naming pattern where raw, unformatted properties keep their actual type and use a 'Value' suffix (e.g., AirTemperatureValue is a double).
+- Use `RedStar.Amounts` `Amount`/`Unit` types in ViewModels (including `WeatherViewModel` and forecast/history) instead of concrete numeric values, so UI can leverage unit metadata beyond conversions.
 
 ## App Startup Flow
 - App startup flow is fixed (InitializationSplashPage then MainSwipeHostPage). Host pages should contain host-specific logic but should remain data-driven where practical; device/registry matching should select guest pages by logical names from the host’s configured list, rather than selecting the host page.

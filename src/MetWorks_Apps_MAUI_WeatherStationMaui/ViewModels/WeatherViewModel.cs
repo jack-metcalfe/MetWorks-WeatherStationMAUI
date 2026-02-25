@@ -23,6 +23,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     IWindReading? _currentWind;
     IObservationReading? _currentObservation;
     WeatherIngestStatus? _weatherIngestStatus;
+    TaskCompletionSource<WeatherIngestStatus>? _firstStatusTcs;
     SystemTimer? _clockTimer;
     ThreadingTimer? _statusCheckTimer;
     string? _lastServiceStatusLine;
@@ -177,6 +178,8 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
                 _statusCheckTimer = null;
             }
 
+            _firstStatusTcs ??= new TaskCompletionSource<WeatherIngestStatus>(TaskCreationOptions.RunContinuationsAsynchronously);
+
             // Register for events (consume mux-published canonical readings)
             _iEventRelayBasic.Register<WindReading>(this, OnWindReceived);
             _iEventRelayBasic.Register<ObservationReading>(this, OnObservationReceived);
@@ -203,10 +206,45 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
 
     async Task TryWarmStartReadingsAsync()
     {
-        // The UI may register after the first REST snapshot is already published.
-        // Best-effort: re-publish the provider's latest snapshot (if any), then request an on-demand refresh.
-        // This avoids a blank UI during the REST polling interval and does not force the mux to switch sources.
+        // The UI may register after the first readings/status are already published.
+        // Ask the mux to immediately re-publish cached canonical readings/status.
+        // Then, only request an on-demand REST refresh when it is actually needed (REST is active or UDP is stale).
 
+        _firstStatusTcs ??= new TaskCompletionSource<WeatherIngestStatus>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        try
+        {
+            _iEventRelayBasic.Send(new WeatherIngestWarmStartRequest());
+        }
+        catch (InvalidOperationException ex)
+        {
+            _iLogger.Warning($"WeatherViewModel: failed to request warm-start. {ex.Message}");
+        }
+
+        WeatherIngestStatus? status = null;
+        try
+        {
+            status = await WaitForFirstStatusAsync(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (LinkedCancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+
+        var mode = status?.SourceMode ?? ReadSourceModeFromSettings();
+        if (mode == WeatherIngestSourceMode.UdpOnly)
+            return;
+
+        var shouldRequestRestRefresh = mode == WeatherIngestSourceMode.RestOnly
+            || status is null
+            || status.ActiveSource == WeatherIngestSource.Rest
+            || !status.UdpIsFresh;
+
+        if (!shouldRequestRestRefresh)
+            return;
+
+        // If the REST provider already has a latest snapshot (cached from disk or early fetch),
+        // re-send it so the mux can map/publish immediately even before the network refresh completes.
         try
         {
             var latest = await _iTempestRestObservationsProvider.GetLatestAsync(LinkedCancellationToken).ConfigureAwait(false);
@@ -222,24 +260,6 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
             _iLogger.Warning($"WeatherViewModel: failed to load latest REST snapshot. {ex.Message}");
         }
 
-        WeatherIngestSourceMode mode;
-        try
-        {
-            var modeText = _iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.WeatherIngestGroupSettingsDefinition.BuildPath(SettingConstants.WeatherIngest_sourceMode));
-
-            if (!Enum.TryParse(modeText, ignoreCase: true, out mode))
-                mode = WeatherIngestSourceMode.Auto;
-        }
-        catch (InvalidOperationException ex)
-        {
-            _iLogger.Warning($"WeatherViewModel: failed to read ingest settings. {ex.Message}");
-            mode = WeatherIngestSourceMode.Auto;
-        }
-
-        if (mode == WeatherIngestSourceMode.UdpOnly)
-            return;
-
         try
         {
             await _iTempestRestObservationsProvider.RequestRefreshAsync(LinkedCancellationToken).ConfigureAwait(false);
@@ -250,6 +270,38 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         catch (InvalidOperationException ex)
         {
             _iLogger.Warning($"WeatherViewModel: failed to request REST refresh. {ex.Message}");
+        }
+    }
+
+    async Task<WeatherIngestStatus?> WaitForFirstStatusAsync(TimeSpan timeout)
+    {
+        if (_firstStatusTcs is null)
+            return null;
+
+        var delayTask = Task.Delay(timeout, LinkedCancellationToken);
+        var completed = await Task.WhenAny(_firstStatusTcs.Task, delayTask).ConfigureAwait(false);
+        if (completed != _firstStatusTcs.Task)
+            return null;
+
+        return await _firstStatusTcs.Task.ConfigureAwait(false);
+    }
+
+    WeatherIngestSourceMode ReadSourceModeFromSettings()
+    {
+        try
+        {
+            var modeText = _iSettingRepository.GetValueOrDefault<string>(
+                LookupDictionaries.WeatherIngestGroupSettingsDefinition.BuildPath(SettingConstants.WeatherIngest_sourceMode));
+
+            if (!Enum.TryParse(modeText, ignoreCase: true, out WeatherIngestSourceMode mode))
+                mode = WeatherIngestSourceMode.Auto;
+
+            return mode;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _iLogger.Warning($"WeatherViewModel: failed to read ingest settings. {ex.Message}");
+            return WeatherIngestSourceMode.Auto;
         }
     }
     // ========================================
@@ -308,6 +360,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         MainThread.BeginInvokeOnMainThread(() =>
         {
             _weatherIngestStatus = status;
+            _firstStatusTcs?.TrySetResult(status);
             OnPropertyChanged(nameof(ActiveIngestSource));
             OnPropertyChanged(nameof(ActiveIngestSourceDisplay));
             OnPropertyChanged(nameof(RestIsFresh));

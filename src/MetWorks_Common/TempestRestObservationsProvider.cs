@@ -194,7 +194,19 @@ public sealed class TempestRestObservationsProvider : ServiceBase, ITempestRestO
         }
     }
 
-    sealed record PersistedMeta(long StationId, DateTimeOffset RetrievedUtc);
+    sealed record PersistedMeta
+    {
+        public long StationId { get; init; }
+        public DateTimeOffset RetrievedUtc { get; init; }
+
+        // Explicit contract: persisted raw JSON snapshots are always metric and independent of user preferences.
+        public string UnitsSystem { get; init; } = "metric";
+
+        // Best-effort info about what the payload contains.
+        public int? ObsRowCount { get; init; }
+        public long? OldestEpochSeconds { get; init; }
+        public long? NewestEpochSeconds { get; init; }
+    }
 
     bool TryPersistSnapshot(TempestStationObservationsSnapshot snapshot)
     {
@@ -207,7 +219,9 @@ public sealed class TempestRestObservationsProvider : ServiceBase, ITempestRestO
             var metaPath = Path.Combine(dir, ObservationsSnapshotMetaFileName);
 
             File.WriteAllText(rawPath, snapshot.RawJson);
-            File.WriteAllText(metaPath, JsonSerializer.Serialize(new PersistedMeta(snapshot.StationId, snapshot.RetrievedUtc)));
+
+            var meta = TryBuildMeta(snapshot);
+            File.WriteAllText(metaPath, JsonSerializer.Serialize(meta));
             return true;
         }
         catch (IOException ex)
@@ -244,8 +258,9 @@ public sealed class TempestRestObservationsProvider : ServiceBase, ITempestRestO
                 {
                     meta = JsonSerializer.Deserialize<PersistedMeta>(File.ReadAllText(metaPath));
                 }
-                catch
+                catch (Exception ex)
                 {
+                    try { ILogger.Warning($"TempestRestObservationsProvider: failed to parse observations snapshot meta. {ex.Message}"); } catch { }
                 }
             }
 
@@ -263,6 +278,84 @@ public sealed class TempestRestObservationsProvider : ServiceBase, ITempestRestO
         {
             try { ILogger.Warning($"TempestRestObservationsProvider: failed to load cached observations snapshot. {ex.Message}"); } catch { }
             return null;
+        }
+    }
+
+    PersistedMeta TryBuildMeta(TempestStationObservationsSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+
+        int? obsRowCount = null;
+        long? oldest = null;
+        long? newest = null;
+
+        try
+        {
+            using var doc = JsonDocument.Parse(snapshot.RawJson);
+            var root = doc.RootElement;
+            if (root.ValueKind != JsonValueKind.Object)
+                throw new JsonException("Root is not an object.");
+
+            if (root.TryGetProperty("obs", out var obsEl) && obsEl.ValueKind == JsonValueKind.Array)
+            {
+                obsRowCount = obsEl.GetArrayLength();
+                foreach (var row in obsEl.EnumerateArray())
+                {
+                    long? epoch = row.ValueKind switch
+                    {
+                        JsonValueKind.Array => TryReadEpochFromObsArray(row),
+                        JsonValueKind.Object => TryReadEpochFromObsObject(row),
+                        _ => null
+                    };
+
+                    if (epoch is null || epoch.Value <= 0)
+                        continue;
+
+                    oldest = oldest is null ? epoch : Math.Min(oldest.Value, epoch.Value);
+                    newest = newest is null ? epoch : Math.Max(newest.Value, epoch.Value);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            try { ILogger.Warning($"TempestRestObservationsProvider: failed to build observations snapshot meta. {ex.Message}"); } catch { }
+        }
+
+        return new PersistedMeta
+        {
+            StationId = snapshot.StationId,
+            RetrievedUtc = snapshot.RetrievedUtc,
+            ObsRowCount = obsRowCount,
+            OldestEpochSeconds = oldest,
+            NewestEpochSeconds = newest
+        };
+
+        static long? TryReadEpochFromObsArray(JsonElement row)
+        {
+            // Observed shape: obs is an array-of-arrays where index 0 is epoch seconds.
+            if (row.ValueKind != JsonValueKind.Array)
+                return null;
+
+            if (row.GetArrayLength() <= 0)
+                return null;
+
+            var first = row[0];
+            if (first.ValueKind != JsonValueKind.Number)
+                return null;
+
+            return first.TryGetInt64(out var seconds) ? seconds : null;
+        }
+
+        static long? TryReadEpochFromObsObject(JsonElement row)
+        {
+            // Observed shape: obs is an array-of-objects with a "timestamp" field.
+            if (row.ValueKind != JsonValueKind.Object)
+                return null;
+
+            if (!row.TryGetProperty("timestamp", out var p) || p.ValueKind != JsonValueKind.Number)
+                return null;
+
+            return p.TryGetInt64(out var seconds) ? seconds : null;
         }
     }
 

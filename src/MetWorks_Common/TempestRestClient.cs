@@ -118,7 +118,16 @@ public sealed class TempestRestClient : ServiceBase, ITempestRestClient
 
         // Swagger (expected): GET /observations/station/{station_id}
         // Auth (expected): apiKey in query param 'token' (consistent with /better_forecast).
-        var url = $"observations/station/{stationId.ToString(CultureInfo.InvariantCulture)}?token={Uri.EscapeDataString(apiKey)}";
+        var query = new List<string>
+        {
+            $"token={Uri.EscapeDataString(apiKey)}"
+        };
+
+        // Persisted observations snapshots should be stable and independent of user preferences.
+        // Always request metric units from Tempest and perform user-preference conversions later.
+        AppendMetricUnitQueryParams(query);
+
+        var url = $"observations/station/{stationId.ToString(CultureInfo.InvariantCulture)}?{string.Join("&", query)}";
 
         using var req = new HttpRequestMessage(HttpMethod.Get, url);
 
@@ -162,7 +171,7 @@ public sealed class TempestRestClient : ServiceBase, ITempestRestClient
             $"token={Uri.EscapeDataString(apiKey)}"
         };
 
-        AppendUnitQueryParams(query);
+        AppendMetricUnitQueryParams(query);
         var url = "better_forecast?" + string.Join("&", query);
 
         using var req = new HttpRequestMessage(HttpMethod.Get, url);
@@ -181,94 +190,18 @@ public sealed class TempestRestClient : ServiceBase, ITempestRestClient
             RetrievedUtc: DateTimeOffset.UtcNow,
             RawJson: rawJson
         );
+    }
 
-        void AppendUnitQueryParams(List<string> queryParts)
-        {
-            // Best-effort mapping from our existing unit settings to Tempest query enums.
-            // If a mapping is unknown, omit the query param so Tempest defaults apply.
+    static void AppendMetricUnitQueryParams(List<string> queryParts)
+    {
+        ArgumentNullException.ThrowIfNull(queryParts);
 
-            TryAdd("units_temp", MapUnitsTemp);
-            TryAdd("units_wind", MapUnitsWind);
-            TryAdd("units_pressure", MapUnitsPressure);
-            TryAdd("units_precip", MapUnitsPrecip);
-            TryAdd("units_distance", MapUnitsDistance);
-
-            void TryAdd(string key, Func<string?, string?> map)
-            {
-                var raw = ISettingRepository.GetValueOrDefault<string>(
-                    LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildPath(key switch
-                    {
-                        "units_temp" => SettingConstants.UnitOfMeasure_airTemperature,
-                        "units_wind" => SettingConstants.UnitOfMeasure_windSpeed,
-                        "units_pressure" => SettingConstants.UnitOfMeasure_airPressure,
-                        "units_precip" => SettingConstants.UnitOfMeasure_rainAccumulation,
-                        "units_distance" => SettingConstants.UnitOfMeasure_lightningDistance,
-                        _ => throw new InvalidOperationException("Unexpected unit key.")
-                    }));
-
-                var mapped = map(raw);
-                if (!string.IsNullOrWhiteSpace(mapped))
-                    queryParts.Add($"{key}={Uri.EscapeDataString(mapped)}");
-            }
-
-            static string? MapUnitsTemp(string? raw)
-            {
-                if (string.IsNullOrWhiteSpace(raw)) return null;
-                return raw.Trim().ToLowerInvariant() switch
-                {
-                    "degree fahrenheit" => "f",
-                    "degree celsius" => "c",
-                    _ => null
-                };
-            }
-
-            static string? MapUnitsWind(string? raw)
-            {
-                if (string.IsNullOrWhiteSpace(raw)) return null;
-                return raw.Trim().ToLowerInvariant() switch
-                {
-                    "mile/hour" => "mph",
-                    "kilometer/hour" => "kph",
-                    "knot" => "kts",
-                    "meter/second" => "mps",
-                    _ => null
-                };
-            }
-
-            static string? MapUnitsPressure(string? raw)
-            {
-                if (string.IsNullOrWhiteSpace(raw)) return null;
-                return raw.Trim().ToLowerInvariant() switch
-                {
-                    "inch of mercury" => "inhg",
-                    "hectopascal" => "hpa",
-                    "millibar" => "mb",
-                    _ => null
-                };
-            }
-
-            static string? MapUnitsPrecip(string? raw)
-            {
-                if (string.IsNullOrWhiteSpace(raw)) return null;
-                return raw.Trim().ToLowerInvariant() switch
-                {
-                    "inch" => "in",
-                    "centimeter" => "cm",
-                    "millimeter" => "mm",
-                    _ => null
-                };
-            }
-
-            static string? MapUnitsDistance(string? raw)
-            {
-                if (string.IsNullOrWhiteSpace(raw)) return null;
-                return raw.Trim().ToLowerInvariant() switch
-                {
-                    "mile" => "mi",
-                    "kilometer" => "km",
-                    _ => null
-                };
-            }
-        }
+        // Persisted Tempest snapshots should be stable and preference-independent.
+        // Always request metric units from the API; do conversions later when constructing `Amount`.
+        queryParts.Add("units_temp=c");
+        queryParts.Add("units_wind=mps");
+        queryParts.Add("units_pressure=mb");
+        queryParts.Add("units_precip=mm");
+        queryParts.Add("units_distance=km");
     }
 }
