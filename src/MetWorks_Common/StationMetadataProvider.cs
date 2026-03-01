@@ -176,11 +176,12 @@ public sealed class StationMetadataProvider : ServiceBase, IStationMetadataProvi
             }
             catch { }
 
-            var tempestDeviceName = TryExtractTempestDeviceName(station);
+            var (tempestDeviceId, tempestDeviceName) = TryExtractTempestDeviceInfo(station);
 
             return new StationMetadata(
                 StationId: stationId,
                 StationName: stationName,
+                TempestDeviceId: tempestDeviceId,
                 TempestDeviceName: tempestDeviceName,
                 Latitude: latitude,
                 Longitude: longitude,
@@ -216,11 +217,11 @@ public sealed class StationMetadataProvider : ServiceBase, IStationMetadataProvi
             return p.ValueKind == System.Text.Json.JsonValueKind.String ? p.GetString() : null;
         }
 
-        static string? TryExtractTempestDeviceName(System.Text.Json.JsonElement station)
+        static (long? DeviceId, string? DeviceName) TryExtractTempestDeviceInfo(System.Text.Json.JsonElement station)
         {
             // Prefer the Tempest device: device_type == "ST".
             if (!station.TryGetProperty("devices", out var devices) || devices.ValueKind != System.Text.Json.JsonValueKind.Array)
-                return null;
+                return (null, null);
 
             foreach (var d in devices.EnumerateArray())
             {
@@ -234,13 +235,21 @@ public sealed class StationMetadataProvider : ServiceBase, IStationMetadataProvi
                 if (!string.Equals(deviceType, "ST", StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                if (!d.TryGetProperty("device_meta", out var meta) || meta.ValueKind != System.Text.Json.JsonValueKind.Object)
-                    continue;
+                long? deviceId = null;
+                try
+                {
+                    if (d.TryGetProperty("device_id", out var did) && did.TryGetInt64(out var didVal))
+                        deviceId = didVal;
+                }
+                catch { }
 
-                return TryGetString(meta, "name");
+                if (!d.TryGetProperty("device_meta", out var meta) || meta.ValueKind != System.Text.Json.JsonValueKind.Object)
+                    return (deviceId, null);
+
+                return (deviceId, TryGetString(meta, "name"));
             }
 
-            return null;
+            return (null, null);
         }
     }
 }

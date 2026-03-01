@@ -291,11 +291,61 @@ definitions:
     isEditable: true
     isSecret: true
 
+  - path: /services/tempest/oauth/clientId
+    defaultValue: ""
+    description: "OAuth Client ID for Tempest developer application (required for WebSocket API)."
+    expectedValueType: "String"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/tempest/oauth/authorizeUrl
+    defaultValue: "https://smartweather.weatherflow.com/authorize.html"
+    description: "OAuth authorization endpoint URL for Tempest."
+    expectedValueType: "String"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/tempest/oauth/redirectUri
+    defaultValue: "metworks-weatherstation://oauth2redirect"
+    description: "OAuth redirect URI for Tempest developer application (must match the callback registered with Tempest)."
+    expectedValueType: "String"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/tempest/oauth/tokenUrl
+    defaultValue: "https://swd.weatherflow.com/id/oauth2/token"
+    description: "OAuth token endpoint URL for Tempest."
+    expectedValueType: "String"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
   - path: /services/tempest/stationId
     defaultValue: "160805"
     description: "Station ID for Tempest Weather Station"
     expectedValueType: "Int32"
     allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/tempest/websocket/deviceId
+    defaultValue: "0"
+    description: "Tempest device_id to subscribe to for WebSocket obs_st / rapid_wind. Use 0 to auto-discover from the station snapshot when possible."
+    expectedValueType: "Int64"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
+  - path: /services/tempest/websocket/enabled
+    defaultValue: "false"
+    description: "Enable Tempest WebSocket ingest (cloud-hosted real-time stream)."
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
     isEditable: true
     isSecret: false
 

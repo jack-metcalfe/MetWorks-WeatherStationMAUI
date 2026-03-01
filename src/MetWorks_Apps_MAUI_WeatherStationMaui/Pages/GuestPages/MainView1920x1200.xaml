@@ -115,5 +115,17 @@
                 </Label>
             </VerticalStackLayout>
         </Border>
+
+        <Frame Grid.Row="0" Grid.Column="0" Grid.RowSpan="6" Grid.ColumnSpan="3"
+               Padding="12"
+               BackgroundColor="#44000000"
+               IsVisible="{Binding TempestOAuthAuthorizationRequired}">
+            <VerticalStackLayout Spacing="8">
+                <Label FontSize="28" TextColor="{StaticResource WhiteVikings}" Text="Tempest authorization required" />
+                <Label FontSize="20" TextColor="{StaticResource WhiteVikings}" Text="{Binding TempestOAuthAuthorizationReasonDisplay}" />
+                <Label FontSize="20" TextColor="{StaticResource WhiteVikings}" Text="{Binding TempestOAuthLastErrorDisplay}" />
+                <Button Text="Authorize Tempest" Command="{Binding AuthorizeTempestCommand}" />
+            </VerticalStackLayout>
+        </Frame>
     </Grid>
 </ContentView>

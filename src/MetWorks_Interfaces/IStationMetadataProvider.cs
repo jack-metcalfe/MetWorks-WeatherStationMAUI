@@ -9,6 +9,7 @@ public interface IStationMetadataProvider
 public sealed record StationMetadata(
     long StationId,
     string? StationName,
+    long? TempestDeviceId,
     string? TempestDeviceName,
     double? Latitude,
     double? Longitude,

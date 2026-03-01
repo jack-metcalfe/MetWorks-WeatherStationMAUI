@@ -7,5 +7,6 @@ public enum WeatherIngestSource
 {
     None = 0,
     Udp = 1,
-    Rest = 2
+    Rest = 2,
+    WebSocket = 3
 }

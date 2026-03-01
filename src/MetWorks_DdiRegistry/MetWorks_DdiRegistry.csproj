@@ -10,6 +10,7 @@
 	  <ProjectReference Include="..\MetWorks_Common\MetWorks_Common.csproj" />
 	  <ProjectReference Include="..\MetWorks_Common_Logging\MetWorks_Common_Logging.csproj" />
 	  <ProjectReference Include="..\MetWorks_Common_Settings\MetWorks_Common_Settings.csproj" />
+	  <ProjectReference Include="..\MetWorks_Maui_Services\MetWorks_Maui_Services.csproj" />
 	  <ProjectReference Include="..\MetWorks_Ingest_SQLite\MetWorks_Ingest_SQLite.csproj" />
 	  <ProjectReference Include="..\MetWorks_Ingest_Transformer\MetWorks_Ingest_Transformer.csproj" />
 	  <ProjectReference Include="..\MetWorks_InstanceIdentifier\MetWorks_InstanceIdentifier.csproj" />
@@ -44,6 +45,16 @@
 	  </PropertyGroup>
 	  <WriteLinesToFile File="$(DdiReferenceAssemblyListFile)" Lines="@(ReferencePath)" Overwrite="true" />
 	  <Exec Command="dotnet &quot;$(DdiCodeGenToolExe)&quot; --yaml &quot;$(DdiInputYaml)&quot; --out &quot;$(MSBuildProjectDirectory)&quot; --refsFile &quot;$(DdiReferenceAssemblyListFile)&quot;" />
+	  <!--
+	    DDI codegen emits *.g.cs files into the project directory during the build.
+	    SDK-style projects evaluate Compile globs before targets execute, so newly generated files
+	    are not automatically picked up in the same build. Refresh the Compile item list here so
+	    the just-generated files are included in CoreCompile.
+	  -->
+	  <ItemGroup>
+	    <Compile Remove="$(MSBuildProjectDirectory)\**\*.g.cs" />
+	    <Compile Include="$(MSBuildProjectDirectory)\**\*.g.cs" />
+	  </ItemGroup>
 	  <WriteLinesToFile File="$(DdiCodeGenStampFile)" Lines="Generated: $([System.DateTime]::UtcNow.ToString('o'))" Overwrite="true" />
 	</Target>
 </Project>

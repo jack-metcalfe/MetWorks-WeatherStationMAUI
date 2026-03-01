@@ -27,6 +27,8 @@
 - Initialize new services (like Tempest forecast) via DDI and publish updates event-driven via EventRelay on a regular refresh interval (e.g., hourly) rather than pull-only.
 - Phase 11 manual validation should account for this dev machine having two WiFi connections: one network interface can see Tempest UDP broadcasts and the other cannot (useful for UDP-only vs REST-only test scenarios).
 - Persist raw weather/forecast JSON snapshots in metric units (API/UDP native), independent of user unit preferences; apply preference conversions only when constructing `Amount` for UI/domain models.
+- Run diagnostic commands/searches via tools without asking the user to copy/paste. If `rg` is unavailable on PATH in Visual Studio DevShell, invoke it via full path `$env:LOCALAPPDATA\Microsoft\WinGet\Links\rg.exe` as a fallback.
+- OAuth interactive negotiation in this codebase only occurs when `ITempestOAuthTokenProvider.GetAccessTokenAsync` is called with `allowInteractive: true`; otherwise, it returns null when no cached token is present.
 
 ## Instrumentation Preferences
 - Target Android primarily; emit reports to logs first.
@@ -71,6 +73,7 @@
 - Keep the `iSettingRepository` parameter in `InitializeAsync` signatures even if currently unused, as it may be handy later.
 - DDI requirement: types constructed by the generator’s `new()` InstanceFactory must have a public parameterless constructor (e.g., SqliteDatabaseOptions cannot be positional-only).
 - For DDI F1 (explicit factory bindings), prefer option 2: create the factory as a named instance and call an instance factory method (factory instance method). Option 1 (static factory) may be added later.
+- Prefer services managed by DDI to not live in the MAUI executable; each service should reside in its own assembly (can be deferred).
 
 ## Concurrency Management
 - Prefer using Interlocked-based, lock-free patterns (when appropriate) to harden concurrency and reduce brittleness.

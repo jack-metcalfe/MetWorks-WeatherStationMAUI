@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Registry
-// Generated On:        2026-02-24T21:44:40.0741161Z
+// Generated On:        2026-03-01T07:07:53.2766146Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -251,6 +251,15 @@ namespace MetWorks.ServiceRegistry
                 ? WhenTheStreamShippingHttpClientProviderInitializedAsync().WaitAsync(cancellationToken)
                 : WhenTheStreamShippingHttpClientProviderInitializedAsync();
 
+        private Task? _initTask_TheTempestOAuthTokenProvider;
+        public Task WhenTheTempestOAuthTokenProviderInitializedAsync()
+            => EnsureInitialized(ref _initTask_TheTempestOAuthTokenProvider, () => TheTempestOAuthTokenProvider_Initializer.Initialize_TheTempestOAuthTokenProviderAsync(this));
+
+        public Task WhenTheTempestOAuthTokenProviderInitializedAsync(CancellationToken cancellationToken)
+            => cancellationToken.CanBeCanceled
+                ? WhenTheTempestOAuthTokenProviderInitializedAsync().WaitAsync(cancellationToken)
+                : WhenTheTempestOAuthTokenProviderInitializedAsync();
+
         private Task? _initTask_TheTempestRestClient;
         public Task WhenTheTempestRestClientInitializedAsync()
             => EnsureInitialized(ref _initTask_TheTempestRestClient, () => TheTempestRestClient_Initializer.Initialize_TheTempestRestClientAsync(this));
@@ -277,6 +286,15 @@ namespace MetWorks.ServiceRegistry
             => cancellationToken.CanBeCanceled
                 ? WhenTheStationMetadataProviderInitializedAsync().WaitAsync(cancellationToken)
                 : WhenTheStationMetadataProviderInitializedAsync();
+
+        private Task? _initTask_TheTempestWebSocketObservationsProvider;
+        public Task WhenTheTempestWebSocketObservationsProviderInitializedAsync()
+            => EnsureInitialized(ref _initTask_TheTempestWebSocketObservationsProvider, () => TheTempestWebSocketObservationsProvider_Initializer.Initialize_TheTempestWebSocketObservationsProviderAsync(this));
+
+        public Task WhenTheTempestWebSocketObservationsProviderInitializedAsync(CancellationToken cancellationToken)
+            => cancellationToken.CanBeCanceled
+                ? WhenTheTempestWebSocketObservationsProviderInitializedAsync().WaitAsync(cancellationToken)
+                : WhenTheTempestWebSocketObservationsProviderInitializedAsync();
 
         private Task? _initTask_TheTempestForecastProvider;
         public Task WhenTheTempestForecastProviderInitializedAsync()
@@ -478,9 +496,11 @@ namespace MetWorks.ServiceRegistry
             TheLoggerResilient_InstanceFactory.Create(this);
             TheProvenanceTracker_InstanceFactory.Create(this);
             TheStreamShippingHttpClientProvider_InstanceFactory.Create(this);
+            TheTempestOAuthTokenProvider_InstanceFactory.Create(this);
             TheTempestRestClient_InstanceFactory.Create(this);
             TheTempestRestObservationsProvider_InstanceFactory.Create(this);
             TheStationMetadataProvider_InstanceFactory.Create(this);
+            TheTempestWebSocketObservationsProvider_InstanceFactory.Create(this);
             TheTempestForecastProvider_InstanceFactory.Create(this);
             TheUnitsOfMeasureInitializer_InstanceFactory.Create(this);
             TheRawPacketDatabaseReadiness_InstanceFactory.Create(this);
@@ -536,9 +556,11 @@ namespace MetWorks.ServiceRegistry
                 WhenTheLoggerResilientInitializedAsync(),
                 WhenTheProvenanceTrackerInitializedAsync(),
                 WhenTheStreamShippingHttpClientProviderInitializedAsync(),
+                WhenTheTempestOAuthTokenProviderInitializedAsync(),
                 WhenTheTempestRestClientInitializedAsync(),
                 WhenTheTempestRestObservationsProviderInitializedAsync(),
                 WhenTheStationMetadataProviderInitializedAsync(),
+                WhenTheTempestWebSocketObservationsProviderInitializedAsync(),
                 WhenTheTempestForecastProviderInitializedAsync(),
                 WhenTheUnitsOfMeasureInitializerInitializedAsync(),
                 WhenTheRawPacketDatabaseReadinessInitializedAsync(),

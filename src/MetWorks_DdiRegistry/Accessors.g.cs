@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-02-24T21:44:40.0741161Z
+// Generated On:        2026-03-01T07:07:53.2766146Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -1046,6 +1046,42 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheTempestOAuthTokenProvider(MetWorks.Maui.Services.TempestOAuthTokenProvider instance) =>
+            _TheTempestOAuthTokenProviderInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Interfaces.ITempestOAuthTokenProvider GetTheTempestOAuthTokenProvider()
+        {
+            var initTask = _initTask_TheTempestOAuthTokenProvider;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestOAuthTokenProvider' was accessed before initialization started. Await registry.WhenTheTempestOAuthTokenProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheTempestOAuthTokenProvider().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestOAuthTokenProvider' was accessed before initialization completed. Await registry.WhenTheTempestOAuthTokenProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheTempestOAuthTokenProvider().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestOAuthTokenProvider' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestOAuthTokenProvider' initialization failed.",
+                    initTask.Exception);
+
+            return _TheTempestOAuthTokenProviderInstance;
+        }
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Maui.Services.TempestOAuthTokenProvider GetTheTempestOAuthTokenProvider_Internal() =>
+            _TheTempestOAuthTokenProviderInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
         public void RegisterTheTempestRestClient(MetWorks.Common.TempestRestClient instance) =>
             _TheTempestRestClientInstance = instance;
 
@@ -1149,6 +1185,42 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Common.StationMetadataProvider GetTheStationMetadataProvider_Internal() =>
             _TheStationMetadataProviderInstance;
+        // Template:            Accessors.Triplet
+        // Version:             1.1
+        // Template Requested:  Accessors
+
+        // Register method: stores the concrete instance in the backing field.
+        public void RegisterTheTempestWebSocketObservationsProvider(MetWorks.Common.TempestWebSocketObservationsProvider instance) =>
+            _TheTempestWebSocketObservationsProviderInstance = instance;
+
+        // External accessor: returns the interface type when defined, otherwise the concrete class.
+        public MetWorks.Interfaces.ITempestWebSocketObservationsProvider GetTheTempestWebSocketObservationsProvider()
+        {
+            var initTask = _initTask_TheTempestWebSocketObservationsProvider;
+            if (initTask is null)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestWebSocketObservationsProvider' was accessed before initialization started. Await registry.WhenTheTempestWebSocketObservationsProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheTempestWebSocketObservationsProvider().");
+
+            if (!initTask.IsCompleted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestWebSocketObservationsProvider' was accessed before initialization completed. Await registry.WhenTheTempestWebSocketObservationsProviderInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheTempestWebSocketObservationsProvider().");
+
+            if (initTask.IsCanceled)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestWebSocketObservationsProvider' initialization was canceled.",
+                    initTask.Exception);
+
+            if (initTask.IsFaulted)
+                throw new global::System.InvalidOperationException(
+                    "DDI: instance 'TheTempestWebSocketObservationsProvider' initialization failed.",
+                    initTask.Exception);
+
+            return _TheTempestWebSocketObservationsProviderInstance;
+        }
+
+        // Internal accessor: always returns the concrete class.
+        internal MetWorks.Common.TempestWebSocketObservationsProvider GetTheTempestWebSocketObservationsProvider_Internal() =>
+            _TheTempestWebSocketObservationsProviderInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors

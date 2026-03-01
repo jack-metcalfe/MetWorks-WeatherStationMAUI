@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<LangVersion>preview</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net10.0</TargetFramework>
+		<RootNamespace>MetWorks.Maui.Services</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\MetWorks_Constants\MetWorks_Constants.csproj" />
+		<ProjectReference Include="..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Maui.Essentials" />
+	</ItemGroup>
+</Project>

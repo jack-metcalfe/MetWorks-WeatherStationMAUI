@@ -1,5 +1,7 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
 
+using System.Net.Http;
+
 using MetWorks.Models.Observables.Weather;
 using MetWorks.Constants;
 /// <summary>
@@ -18,6 +20,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     readonly MetWorks.Interfaces.ILogger _iLogger;
     readonly ISettingRepository _iSettingRepository;
     readonly IEventRelayBasic _iEventRelayBasic;
+    readonly ITempestOAuthTokenProvider _iTempestOAuthTokenProvider;
     readonly ITempestRestObservationsProvider _iTempestRestObservationsProvider;
     private readonly IInstanceIdentifier _iInstanceIdentifier;
     IWindReading? _currentWind;
@@ -29,12 +32,22 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     string? _lastServiceStatusLine;
     DateTime _currentTime = DateTime.Now;
 
+    bool _tempestOAuthAuthorizationRequired;
+    string? _tempestOAuthAuthorizationReason;
+    string? _tempestOAuthLastError;
+
+    public ICommand AuthorizeTempestCommand { get; }
+
     public WeatherIngestSource ActiveIngestSource => _weatherIngestStatus?.ActiveSource ?? WeatherIngestSource.None;
     public string ActiveIngestSourceDisplay => ActiveIngestSource.ToString();
     public bool RestIsFresh => _weatherIngestStatus?.RestIsFresh ?? false;
     public bool UdpIsFresh => _weatherIngestStatus?.UdpIsFresh ?? false;
     public DateTimeOffset? RestLastRetrievedUtc => _weatherIngestStatus?.RestLastRetrievedUtc;
     public DateTimeOffset? UdpLastReceivedUtc => _weatherIngestStatus?.UdpLastReceivedUtc;
+
+    public bool TempestOAuthAuthorizationRequired => _tempestOAuthAuthorizationRequired;
+    public string TempestOAuthAuthorizationReasonDisplay => _tempestOAuthAuthorizationReason ?? string.Empty;
+    public string TempestOAuthLastErrorDisplay => _tempestOAuthLastError ?? string.Empty;
 
     // Lightweight init guard: 0 = not started, 1 = initializing, 2 = initialized
     int _initializeState = (int)InitializeStateEnum.Uninitialized;
@@ -70,6 +83,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         MetWorks.Interfaces.ILogger iLogger,
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
+        ITempestOAuthTokenProvider iTempestOAuthTokenProvider,
         ITempestRestObservationsProvider iTempestRestObservationsProvider,
         IInstanceIdentifier iInstanceIdentifier,
         CancellationToken externalCancellation
@@ -78,6 +92,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
+        ArgumentNullException.ThrowIfNull(iTempestOAuthTokenProvider);
         ArgumentNullException.ThrowIfNull(iTempestRestObservationsProvider);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
 
@@ -86,8 +101,11 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         _iLogger = iLogger;
         _iSettingRepository = iSettingRepository;
         _iEventRelayBasic = iEventRelayBasic;
+        _iTempestOAuthTokenProvider = iTempestOAuthTokenProvider;
         _iTempestRestObservationsProvider = iTempestRestObservationsProvider;
         _iInstanceIdentifier = iInstanceIdentifier;
+
+        AuthorizeTempestCommand = new Command(async () => await AuthorizeTempestAsync());
 
         StartServiceStatusMonitoring();
         // Initialization is event-driven: subscribe to event relay and initialize when data arrives.
@@ -184,6 +202,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
             _iEventRelayBasic.Register<WindReading>(this, OnWindReceived);
             _iEventRelayBasic.Register<ObservationReading>(this, OnObservationReceived);
             _iEventRelayBasic.Register<WeatherIngestStatus>(this, OnWeatherIngestStatusReceived);
+            _iEventRelayBasic.Register<TempestOAuthInteractiveAuthRequest>(this, OnTempestOAuthInteractiveAuthRequestReceived);
 
             await TryWarmStartReadingsAsync().ConfigureAwait(false);
 
@@ -201,6 +220,66 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
 
             _iLogger.Error("Failed to initialize", exception);
             throw;
+        }
+    }
+
+    void OnTempestOAuthInteractiveAuthRequestReceived(TempestOAuthInteractiveAuthRequest request)
+    {
+        if (request is null) return;
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            _tempestOAuthAuthorizationRequired = true;
+            _tempestOAuthAuthorizationReason = request.Reason;
+            _tempestOAuthLastError = null;
+
+            OnPropertyChanged(nameof(TempestOAuthAuthorizationRequired));
+            OnPropertyChanged(nameof(TempestOAuthAuthorizationReasonDisplay));
+            OnPropertyChanged(nameof(TempestOAuthLastErrorDisplay));
+        });
+    }
+
+    async Task AuthorizeTempestAsync()
+    {
+        _tempestOAuthLastError = null;
+        OnPropertyChanged(nameof(TempestOAuthLastErrorDisplay));
+
+        try
+        {
+            var token = await _iTempestOAuthTokenProvider.GetAccessTokenAsync(
+                allowInteractive: true,
+                cancellationToken: LinkedCancellationToken
+            );
+
+            if (string.IsNullOrWhiteSpace(token))
+                return;
+
+            _tempestOAuthAuthorizationRequired = false;
+            _tempestOAuthAuthorizationReason = null;
+            OnPropertyChanged(nameof(TempestOAuthAuthorizationRequired));
+            OnPropertyChanged(nameof(TempestOAuthAuthorizationReasonDisplay));
+        }
+        catch (OperationCanceledException) when (LinkedCancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _tempestOAuthLastError = ex.Message;
+            OnPropertyChanged(nameof(TempestOAuthLastErrorDisplay));
+            _iLogger.Warning($"Tempest OAuth interactive auth failed. {ex.Message}");
+        }
+        catch (NotSupportedException ex)
+        {
+            _tempestOAuthLastError = ex.Message;
+            OnPropertyChanged(nameof(TempestOAuthLastErrorDisplay));
+            _iLogger.Warning($"Tempest OAuth secure storage is not supported. {ex.Message}");
+        }
+        catch (HttpRequestException ex)
+        {
+            _tempestOAuthLastError = ex.Message;
+            OnPropertyChanged(nameof(TempestOAuthLastErrorDisplay));
+            _iLogger.Warning($"Tempest OAuth token exchange failed. {ex.Message}");
         }
     }
 
@@ -435,6 +514,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         try { _iEventRelayBasic.Unregister<WindReading>(this); } catch { }
         try { _iEventRelayBasic.Unregister<ObservationReading>(this); } catch { }
         try { _iEventRelayBasic.Unregister<WeatherIngestStatus>(this); } catch { }
+        try { _iEventRelayBasic.Unregister<TempestOAuthInteractiveAuthRequest>(this); } catch { }
 
         // Stop and dispose clock timer
         try

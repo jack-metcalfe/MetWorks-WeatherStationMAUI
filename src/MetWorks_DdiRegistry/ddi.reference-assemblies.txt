@@ -3,24 +3,25 @@ C:\Users\JackM\.nuget\packages\humanizer.core\3.0.1\lib\net10.0\Humanizer.dll
 C:\Users\JackM\.nuget\packages\json.more.net\2.2.0\lib\net10.0\Json.More.dll
 C:\Users\JackM\.nuget\packages\jsonpointer.net\6.0.0\lib\net10.0\JsonPointer.Net.dll
 C:\Users\JackM\.nuget\packages\jsonschema.net\8.0.3\lib\net9.0\JsonSchema.Net.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Common\bin\Debug\net10.0\MetWorks_Common.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Common_Logging\bin\Debug\net10.0\MetWorks_Common_Logging.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Common_Settings\bin\Debug\net10.0\MetWorks_Common_Settings.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Common_Utility\bin\Debug\net10.0\MetWorks_Common_Utility.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Constants\bin\Debug\net10.0\MetWorks_Constants.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Data_Sqlite\bin\Debug\net10.0\MetWorks_Data_Sqlite.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_EnumDefinitions\bin\Debug\net10.0\MetWorks_EnumDefinitions.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_EventRelay\bin\Debug\net10.0\MetWorks_EventRelay.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Ingest\bin\Debug\net10.0\MetWorks_Ingest.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Ingest_SQLite\bin\Debug\net10.0\MetWorks_Ingest_SQLite.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Ingest_Transformer\bin\Debug\net10.0\MetWorks_Ingest_Transformer.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_InstanceIdentifier\bin\Debug\net10.0\MetWorks_InstanceIdentifier.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Interfaces\bin\Debug\net10.0\MetWorks_Interfaces.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_IoT_UDP_Tempest\bin\Debug\net10.0\MetWorks_IoT_UDP_Tempest.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Models_Observables\bin\Debug\net10.0\MetWorks_Models_Observables.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Networking_Udp_Transformer\bin\Debug\net10.0\MetWorks_Networking_Udp_Transformer.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Persistence\bin\Debug\net10.0\MetWorks_Persistence.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Resource_Store\bin\Debug\net10.0\MetWorks_Resource_Store.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Common\bin\Release\net10.0\MetWorks_Common.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Common_Logging\bin\Release\net10.0\MetWorks_Common_Logging.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Common_Settings\bin\Release\net10.0\MetWorks_Common_Settings.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Common_Utility\bin\Release\net10.0\MetWorks_Common_Utility.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Constants\bin\Release\net10.0\MetWorks_Constants.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Data_Sqlite\bin\Release\net10.0\MetWorks_Data_Sqlite.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_EnumDefinitions\bin\Release\net10.0\MetWorks_EnumDefinitions.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_EventRelay\bin\Release\net10.0\MetWorks_EventRelay.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Ingest\bin\Release\net10.0\MetWorks_Ingest.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Ingest_SQLite\bin\Release\net10.0\MetWorks_Ingest_SQLite.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Ingest_Transformer\bin\Release\net10.0\MetWorks_Ingest_Transformer.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_InstanceIdentifier\bin\Release\net10.0\MetWorks_InstanceIdentifier.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Interfaces\bin\Release\net10.0\MetWorks_Interfaces.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_IoT_UDP_Tempest\bin\Release\net10.0\MetWorks_IoT_UDP_Tempest.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Maui_Services\bin\Release\net10.0\MetWorks_Maui_Services.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Models_Observables\bin\Release\net10.0\MetWorks_Models_Observables.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Networking_Udp_Transformer\bin\Release\net10.0\MetWorks_Networking_Udp_Transformer.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Persistence\bin\Release\net10.0\MetWorks_Persistence.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\MetWorks_Resource_Store\bin\Release\net10.0\MetWorks_Resource_Store.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.3\ref\net10.0\Microsoft.CSharp.dll
 C:\Users\JackM\.nuget\packages\microsoft.data.sqlite.core\10.0.2\lib\net8.0\Microsoft.Data.Sqlite.dll
 C:\Users\JackM\.nuget\packages\microsoft.extensions.configuration.abstractions\10.0.0\lib\net10.0\Microsoft.Extensions.Configuration.Abstractions.dll
@@ -46,9 +47,9 @@ C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.3\ref\net10.0\Micro
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.3\ref\net10.0\mscorlib.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\10.0.3\ref\net10.0\netstandard.dll
 C:\Users\JackM\.nuget\packages\npgsql\10.0.1\lib\net10.0\Npgsql.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\RedStar_Amounts\bin\Debug\net10.0\RedStar_Amounts.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\RedStar_Amounts_StandardUnits\bin\Debug\net10.0\RedStar_Amounts_StandardUnits.dll
-C:\WinRepos\MetWorks-WeatherStationMAUI\src\RedStar_Amounts_WeatherExtensions\bin\Debug\net10.0\RedStar_Amounts_WeatherExtensions.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\RedStar_Amounts\bin\Release\net10.0\RedStar_Amounts.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\RedStar_Amounts_StandardUnits\bin\Release\net10.0\RedStar_Amounts_StandardUnits.dll
+C:\WinRepos\MetWorks-WeatherStationMAUI\src\RedStar_Amounts_WeatherExtensions\bin\Release\net10.0\RedStar_Amounts_WeatherExtensions.dll
 C:\Users\JackM\.nuget\packages\serilog\4.3.0\lib\net9.0\Serilog.dll
 C:\Users\JackM\.nuget\packages\serilog.sinks.file\7.0.0\lib\net9.0\Serilog.Sinks.File.dll
 C:\Users\JackM\.nuget\packages\sqlitepclraw.bundle_e_sqlite3\2.1.11\lib\netstandard2.0\SQLitePCLRaw.batteries_v2.dll

@@ -4,7 +4,7 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  ExposeToMauiDi
-// Generated On:        2026-02-24T21:44:40.0741161Z
+// Generated On:        2026-03-01T07:07:53.2766146Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -54,6 +54,10 @@ namespace MetWorks.ServiceRegistry
                         _TheLoggerResilient = GetTheLoggerResilient_Internal();
             services.AddSingleton<MetWorks.Interfaces.ILogger>
                 (_TheLoggerResilient);
+            MetWorks.Interfaces.ITempestOAuthTokenProvider
+                        _TheTempestOAuthTokenProvider = GetTheTempestOAuthTokenProvider_Internal();
+            services.AddSingleton<MetWorks.Interfaces.ITempestOAuthTokenProvider>
+                (_TheTempestOAuthTokenProvider);
             MetWorks.Interfaces.ITempestRestObservationsProvider
                         _TheTempestRestObservationsProvider = GetTheTempestRestObservationsProvider_Internal();
             services.AddSingleton<MetWorks.Interfaces.ITempestRestObservationsProvider>

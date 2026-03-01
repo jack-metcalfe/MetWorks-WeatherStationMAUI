@@ -101,6 +101,7 @@
 	  <ProjectReference Include="..\MetWorks_Common_Utility\MetWorks_Common_Utility.csproj" />
 	  <ProjectReference Include="..\MetWorks_DdiRegistry\MetWorks_DdiRegistry.csproj" />
 	  <ProjectReference Include="..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
+	  <ProjectReference Include="..\MetWorks_Maui_Services\MetWorks_Maui_Services.csproj" />
 	  <ProjectReference Include="..\RedStar_Amounts\RedStar_Amounts.csproj" />
 	</ItemGroup>
 
@@ -192,6 +193,10 @@
 		<MauiXaml Update="Pages\InitializationSplashPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Services\" />
 	</ItemGroup>
 </Project>
 

@@ -16,8 +16,10 @@ namespace:
   - name: ISettingRepository
   - name: IStationMetadataProvider
   - name: ITempestForecastProvider
+  - name: ITempestOAuthTokenProvider
   - name: ITempestRestObservationsProvider
   - name: ITempestRestClient
+  - name: ITempestWebSocketObservationsProvider
   class: []
 - name: System
   interface: []
@@ -169,6 +171,47 @@ namespace:
       interface: MetWorks.Interfaces.IPlatformPaths
     - name: provenanceTracker
       class: MetWorks.Common.ProvenanceTracker
+      interface: null
+    property: []
+  - name: TempestWebSocketObservationsProvider
+    interface: MetWorks.Interfaces.ITempestWebSocketObservationsProvider
+    parameter:
+    - name: iLogger
+      class: null
+      interface: MetWorks.Interfaces.ILogger
+    - name: iSettingRepository
+      class: null
+      interface: MetWorks.Interfaces.ISettingRepository
+    - name: iEventRelayBasic
+      class: null
+      interface: MetWorks.Interfaces.IEventRelayBasic
+    - name: iTempestOAuthTokenProvider
+      class: null
+      interface: MetWorks.Interfaces.ITempestOAuthTokenProvider
+    - name: iStationMetadataProvider
+      class: null
+      interface: MetWorks.Interfaces.IStationMetadataProvider
+    - name: externalCancellation
+      class: System.Threading.CancellationToken
+      interface: null
+    property: []
+- name: MetWorks.Maui.Services
+  interface: []
+  class:
+  - name: TempestOAuthTokenProvider
+    interface: MetWorks.Interfaces.ITempestOAuthTokenProvider
+    parameter:
+    - name: iLogger
+      class: null
+      interface: MetWorks.Interfaces.ILogger
+    - name: iSettingRepository
+      class: null
+      interface: MetWorks.Interfaces.ISettingRepository
+    - name: iEventRelayBasic
+      class: null
+      interface: MetWorks.Interfaces.IEventRelayBasic
+    - name: externalCancellation
+      class: System.Threading.CancellationToken
       interface: null
     property: []
 - name: MetWorks.Common.Logging
@@ -1414,6 +1457,23 @@ instance:
     literal: null
     instance: TheProvenanceTracker
   element: []
+- name: TheTempestOAuthTokenProvider
+  class: MetWorks.Maui.Services.TempestOAuthTokenProvider
+  exposeToMauiDi: true
+  assignment:
+  - name: iLogger
+    literal: null
+    instance: TheLoggerResilient
+  - name: iSettingRepository
+    literal: null
+    instance: TheSettingRepository
+  - name: iEventRelayBasic
+    literal: null
+    instance: TheEventRelayBasic
+  - name: externalCancellation
+    literal: null
+    instance: TheRootCancellationTokenSource.Token
+  element: []
 - name: TheTempestRestObservationsProvider
   class: MetWorks.Common.TempestRestObservationsProvider
   exposeToMauiDi: true
@@ -1453,6 +1513,29 @@ instance:
   - name: iEventRelayBasic
     literal: null
     instance: TheEventRelayBasic
+  - name: externalCancellation
+    literal: null
+    instance: TheRootCancellationTokenSource.Token
+  element: []
+- name: TheTempestWebSocketObservationsProvider
+  class: MetWorks.Common.TempestWebSocketObservationsProvider
+  exposeToMauiDi: false
+  assignment:
+  - name: iLogger
+    literal: null
+    instance: TheLoggerResilient
+  - name: iSettingRepository
+    literal: null
+    instance: TheSettingRepository
+  - name: iEventRelayBasic
+    literal: null
+    instance: TheEventRelayBasic
+  - name: iTempestOAuthTokenProvider
+    literal: null
+    instance: TheTempestOAuthTokenProvider
+  - name: iStationMetadataProvider
+    literal: null
+    instance: TheStationMetadataProvider
   - name: externalCancellation
     literal: null
     instance: TheRootCancellationTokenSource.Token

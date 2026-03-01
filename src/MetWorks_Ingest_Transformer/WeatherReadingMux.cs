@@ -17,17 +17,23 @@ public sealed class WeatherReadingMux : ServiceBase
     WeatherIngestSource _activeSource = WeatherIngestSource.None;
 
     DateTimeOffset? _udpLastReceivedUtc;
+    DateTimeOffset? _webSocketLastReceivedUtc;
     DateTimeOffset? _restLastRetrievedUtc;
 
     ObservationReading? _udpObservation;
     WindReading? _udpWind;
 
+    ObservationReading? _webSocketObservation;
+    WindReading? _webSocketWind;
+
     ObservationReading? _restObservation;
     WindReading? _restWind;
 
     TempestRestObservationsSnapshot? _restLatestSnapshot;
+    TempestWebSocketObservationsSnapshot? _webSocketLatestSnapshot;
 
     string? _udpLastError;
+    string? _webSocketLastError;
     string? _restLastError;
 
     WeatherIngestStatus? _lastPublishedStatus;
@@ -79,6 +85,7 @@ public sealed class WeatherReadingMux : ServiceBase
 
         IEventRelayBasic.Register<IObservationReading>(this, OnUdpObservationReceived);
         IEventRelayBasic.Register<IWindReading>(this, OnUdpWindReceived);
+        IEventRelayBasic.Register<TempestWebSocketObservationsSnapshot>(this, OnWebSocketSnapshotReceived);
         IEventRelayBasic.Register<TempestRestObservationsSnapshot>(this, OnRestSnapshotReceived);
         IEventRelayBasic.Register<WeatherIngestWarmStartRequest>(this, OnWarmStartRequested);
 
@@ -101,6 +108,73 @@ public sealed class WeatherReadingMux : ServiceBase
         // UDP units are handled upstream (transformer); REST units are produced here.
         // Remap the latest REST snapshot so cached REST readings are refreshed in the new preferred units.
         StartBackground(RemapRestLatestSnapshotAsync);
+        StartBackground(RemapWebSocketLatestSnapshotAsync);
+    }
+
+    void OnWebSocketSnapshotReceived(TempestWebSocketObservationsSnapshot snapshot)
+    {
+        if (snapshot is null) return;
+
+        lock (_gate)
+        {
+            _webSocketLatestSnapshot = snapshot;
+        }
+
+        StartBackground(async token =>
+        {
+            (ObservationReading? Observation, WindReading? Wind) mapped;
+            try
+            {
+                mapped = await TempestWebSocketReadingsMapper.TryMapAsync(
+                    snapshot,
+                    ILogger,
+                    ISettingRepository,
+                    _stationMetadataProvider,
+                    token
+                ).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (JsonException ex)
+            {
+                lock (_gate)
+                {
+                    _webSocketLastReceivedUtc = snapshot.ReceivedUtc;
+                    _webSocketLastError = ex.Message;
+                }
+
+                EvaluateAndPublish(triggerSource: WeatherIngestSource.WebSocket, observationReading: null, windReading: null, isTick: false);
+                return;
+            }
+            catch (InvalidOperationException ex)
+            {
+                lock (_gate)
+                {
+                    _webSocketLastReceivedUtc = snapshot.ReceivedUtc;
+                    _webSocketLastError = ex.Message;
+                }
+
+                EvaluateAndPublish(triggerSource: WeatherIngestSource.WebSocket, observationReading: null, windReading: null, isTick: false);
+                return;
+            }
+
+            lock (_gate)
+            {
+                _webSocketLastReceivedUtc = snapshot.ReceivedUtc;
+                _webSocketObservation = mapped.Observation;
+                _webSocketWind = mapped.Wind;
+                _webSocketLastError = null;
+            }
+
+            EvaluateAndPublish(
+                triggerSource: WeatherIngestSource.WebSocket,
+                observationReading: mapped.Observation,
+                windReading: mapped.Wind,
+                isTick: false
+            );
+        });
     }
 
     void LoadSettings()
@@ -259,6 +333,8 @@ public sealed class WeatherReadingMux : ServiceBase
         WeatherIngestSource active;
         ObservationReading? udpObs;
         WindReading? udpWind;
+        ObservationReading? webSocketObs;
+        WindReading? webSocketWind;
         ObservationReading? restObs;
         WindReading? restWind;
 
@@ -267,6 +343,8 @@ public sealed class WeatherReadingMux : ServiceBase
             active = _activeSource;
             udpObs = _udpObservation;
             udpWind = _udpWind;
+            webSocketObs = _webSocketObservation;
+            webSocketWind = _webSocketWind;
             restObs = _restObservation;
             restWind = _restWind;
         }
@@ -274,7 +352,68 @@ public sealed class WeatherReadingMux : ServiceBase
         // If the source didn't change, EvaluateAndPublish won't re-send cached readings.
         // Do it here so late subscribers (UI) can immediately render.
         if (active == before)
-            PublishCachedFor(active, udpObs, udpWind, restObs, restWind);
+            PublishCachedFor(active, udpObs, udpWind, webSocketObs, webSocketWind, restObs, restWind);
+    }
+
+    async Task RemapWebSocketLatestSnapshotAsync(CancellationToken token)
+    {
+        TempestWebSocketObservationsSnapshot? snapshot;
+        lock (_gate) { snapshot = _webSocketLatestSnapshot; }
+        if (snapshot is null)
+            return;
+
+        (ObservationReading? Observation, WindReading? Wind) mapped;
+        try
+        {
+            mapped = await TempestWebSocketReadingsMapper.TryMapAsync(
+                snapshot,
+                ILogger,
+                ISettingRepository,
+                _stationMetadataProvider,
+                token
+            ).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            return;
+        }
+        catch (JsonException ex)
+        {
+            lock (_gate)
+            {
+                _webSocketLastReceivedUtc = snapshot.ReceivedUtc;
+                _webSocketLastError = ex.Message;
+            }
+
+            EvaluateAndPublish(triggerSource: WeatherIngestSource.WebSocket, observationReading: null, windReading: null, isTick: false);
+            return;
+        }
+        catch (InvalidOperationException ex)
+        {
+            lock (_gate)
+            {
+                _webSocketLastReceivedUtc = snapshot.ReceivedUtc;
+                _webSocketLastError = ex.Message;
+            }
+
+            EvaluateAndPublish(triggerSource: WeatherIngestSource.WebSocket, observationReading: null, windReading: null, isTick: false);
+            return;
+        }
+
+        lock (_gate)
+        {
+            _webSocketLastReceivedUtc = snapshot.ReceivedUtc;
+            _webSocketObservation = mapped.Observation;
+            _webSocketWind = mapped.Wind;
+            _webSocketLastError = null;
+        }
+
+        EvaluateAndPublish(
+            triggerSource: WeatherIngestSource.WebSocket,
+            observationReading: mapped.Observation,
+            windReading: mapped.Wind,
+            isTick: false
+        );
     }
 
     async Task RemapRestLatestSnapshotAsync(CancellationToken token)
@@ -348,15 +487,20 @@ public sealed class WeatherReadingMux : ServiceBase
         WeatherIngestSource activeSource;
 
         DateTimeOffset? udpLast;
+        DateTimeOffset? webSocketLast;
         DateTimeOffset? restLast;
 
         ObservationReading? udpObs;
         WindReading? udpWind;
 
+        ObservationReading? webSocketObs;
+        WindReading? webSocketWind;
+
         ObservationReading? restObs;
         WindReading? restWind;
 
         string? udpError;
+        string? webSocketError;
         string? restError;
 
         lock (_gate)
@@ -368,25 +512,38 @@ public sealed class WeatherReadingMux : ServiceBase
             activeSource = _activeSource;
 
             udpLast = _udpLastReceivedUtc;
+            webSocketLast = _webSocketLastReceivedUtc;
             restLast = _restLastRetrievedUtc;
 
             udpObs = _udpObservation;
             udpWind = _udpWind;
 
+            webSocketObs = _webSocketObservation;
+            webSocketWind = _webSocketWind;
+
             restObs = _restObservation;
             restWind = _restWind;
 
             udpError = _udpLastError;
+            webSocketError = _webSocketLastError;
             restError = _restLastError;
         }
+
+        var webSocketEnabled = ISettingRepository.GetValueOrDefault<bool>(
+            LookupDictionaries.TempestGroupSettingsDefinition.BuildPath(SettingConstants.Tempest_websocket_enabled));
 
         var nowUtc = DateTimeOffset.UtcNow;
 
         var udpAvailable = udpLast is not null;
-        var udpIsFresh = udpAvailable && (nowUtc - udpLast.Value) <= TimeSpan.FromSeconds(udpStaleSeconds);
+        var udpIsFresh = udpLast is DateTimeOffset udpLastValue && (nowUtc - udpLastValue) <= TimeSpan.FromSeconds(udpStaleSeconds);
+
+        var webSocketAvailable = webSocketEnabled && webSocketLast is not null;
+        var webSocketIsFresh = webSocketEnabled
+            && webSocketLast is DateTimeOffset webSocketLastValue
+            && (nowUtc - webSocketLastValue) <= TimeSpan.FromSeconds(udpStaleSeconds);
 
         var restAvailable = restLast is not null;
-        var restIsFresh = restAvailable && (nowUtc - restLast.Value) <= TimeSpan.FromMinutes(restStaleMinutes);
+        var restIsFresh = restLast is DateTimeOffset restLastValue && (nowUtc - restLastValue) <= TimeSpan.FromMinutes(restStaleMinutes);
 
         WeatherIngestSource desired = mode switch
         {
@@ -394,9 +551,11 @@ public sealed class WeatherReadingMux : ServiceBase
             WeatherIngestSourceMode.RestOnly => restIsFresh ? WeatherIngestSource.Rest : WeatherIngestSource.None,
             _ => udpIsFresh
                 ? WeatherIngestSource.Udp
-                : restIsFresh
-                    ? WeatherIngestSource.Rest
-                    : WeatherIngestSource.None
+                : webSocketIsFresh
+                    ? WeatherIngestSource.WebSocket
+                    : restIsFresh
+                        ? WeatherIngestSource.Rest
+                        : WeatherIngestSource.None
         };
 
         var sourceChanged = desired != activeSource;
@@ -409,7 +568,7 @@ public sealed class WeatherReadingMux : ServiceBase
         // Publish canonical readings
         if (sourceChanged)
         {
-            PublishCachedFor(activeSource, udpObs, udpWind, restObs, restWind);
+            PublishCachedFor(activeSource, udpObs, udpWind, webSocketObs, webSocketWind, restObs, restWind);
         }
         else if (triggerSource is not null && triggerSource.Value == activeSource)
         {
@@ -426,10 +585,14 @@ public sealed class WeatherReadingMux : ServiceBase
             UdpAvailable: udpAvailable,
             UdpIsFresh: udpIsFresh,
             UdpLastReceivedUtc: udpLast,
+            WebSocketAvailable: webSocketAvailable,
+            WebSocketIsFresh: webSocketIsFresh,
+            WebSocketLastReceivedUtc: webSocketLast,
             RestAvailable: restAvailable,
             RestIsFresh: restIsFresh,
             RestLastRetrievedUtc: restLast,
             UdpLastError: udpError,
+            WebSocketLastError: webSocketError,
             RestLastError: restError
         );
 
@@ -445,6 +608,8 @@ public sealed class WeatherReadingMux : ServiceBase
         WeatherIngestSource active,
         ObservationReading? udpObs,
         WindReading? udpWind,
+        ObservationReading? webSocketObs,
+        WindReading? webSocketWind,
         ObservationReading? restObs,
         WindReading? restWind
     )
@@ -452,6 +617,10 @@ public sealed class WeatherReadingMux : ServiceBase
         if (active == WeatherIngestSource.Udp) {
             if (udpObs is not null) IEventRelayBasic.Send(udpObs);
             if (udpWind is not null) IEventRelayBasic.Send(udpWind);
+        }
+        else if (active == WeatherIngestSource.WebSocket) {
+            if (webSocketObs is not null) IEventRelayBasic.Send(webSocketObs);
+            if (webSocketWind is not null) IEventRelayBasic.Send(webSocketWind);
         }
         else if (active == WeatherIngestSource.Rest) {
             if (restObs is not null) IEventRelayBasic.Send(restObs);
@@ -471,6 +640,7 @@ public sealed class WeatherReadingMux : ServiceBase
     {
         try { IEventRelayBasic.Unregister<IObservationReading>(this); } catch { }
         try { IEventRelayBasic.Unregister<IWindReading>(this); } catch { }
+        try { IEventRelayBasic.Unregister<TempestWebSocketObservationsSnapshot>(this); } catch { }
         try { IEventRelayBasic.Unregister<TempestRestObservationsSnapshot>(this); } catch { }
         try { IEventRelayBasic.Unregister<WeatherIngestWarmStartRequest>(this); } catch { }
 

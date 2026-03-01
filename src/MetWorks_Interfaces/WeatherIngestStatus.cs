@@ -10,9 +10,13 @@ public sealed record WeatherIngestStatus(
     bool UdpAvailable,
     bool UdpIsFresh,
     DateTimeOffset? UdpLastReceivedUtc,
+    bool WebSocketAvailable,
+    bool WebSocketIsFresh,
+    DateTimeOffset? WebSocketLastReceivedUtc,
     bool RestAvailable,
     bool RestIsFresh,
     DateTimeOffset? RestLastRetrievedUtc,
     string? UdpLastError = null,
+    string? WebSocketLastError = null,
     string? RestLastError = null
 );

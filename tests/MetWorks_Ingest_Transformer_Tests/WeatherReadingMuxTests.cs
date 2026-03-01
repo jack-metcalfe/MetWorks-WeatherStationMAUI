@@ -161,6 +161,96 @@ public sealed class WeatherReadingMuxTests
     }
 
     [Fact]
+    public async Task WhenUdpIsStaleAndWebSocketIsFreshThenMuxSelectsWebSocketAndPublishesConcreteReadings()
+    {
+        await EnsureUnitsInitializedAsync();
+
+        var settings = CreateDefaultSettings();
+        settings[LookupDictionaries.WeatherIngestGroupSettingsDefinition.BuildPath(SettingConstants.WeatherIngest_udpStaleSeconds)] = "1";
+        settings[LookupDictionaries.WeatherIngestGroupSettingsDefinition.BuildPath(SettingConstants.WeatherIngest_sourceMode)] = WeatherIngestSourceMode.Auto.ToString();
+        settings[LookupDictionaries.TempestGroupSettingsDefinition.BuildPath(SettingConstants.Tempest_websocket_enabled)] = "true";
+
+        var relay = new EventRelayBasic();
+        var settingRepository = new InMemorySettingRepository(settings);
+        var logger = new TestLogger("mux");
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+        var mux = new WeatherReadingMux();
+        await mux.InitializeAsync(logger, settingRepository, relay, cts.Token);
+
+        var observations = new ConcurrentQueue<ObservationReading>();
+        var winds = new ConcurrentQueue<WindReading>();
+        var statuses = new ConcurrentQueue<WeatherIngestStatus>();
+
+        object recipient = new();
+        relay.Register<ObservationReading>(recipient, observations.Enqueue);
+        relay.Register<WindReading>(recipient, winds.Enqueue);
+        relay.Register<WeatherIngestStatus>(recipient, statuses.Enqueue);
+
+        // Send a UDP reading with a stale ReceivedUtc.
+        var staleUtc = DateTime.UtcNow.AddMinutes(-10);
+        relay.Send<IObservationReading>(new ObservationReading
+        {
+            Id = Guid.NewGuid(),
+            SourcePacketId = Guid.NewGuid(),
+            Type = "udp-observation",
+            HubSerialNumber = "hub",
+            SerialNumber = "device",
+            Timestamp = staleUtc,
+            ReceivedUtc = staleUtc,
+            Provenance = new ReadingProvenance { RawPacketId = Guid.NewGuid(), UdpReceiptTime = staleUtc, TransformStartTime = staleUtc, TransformEndTime = staleUtc },
+            AirTemperature = new Amount(10, TemperatureUnits.DegreeCelsius),
+            StationPressure = new Amount(1000, PressureUnits.MilliBar),
+            RelativeHumidity = 50,
+            Illuminance = new Amount(1, LuminousIntensityUnits.Lux),
+            UvIndex = 0,
+            SolarRadiation = new Amount(0, SolarRadiationUnits.WattPerSquareMeter),
+            RainAccumulation = new Amount(0, LengthUnits.MilliMeter),
+            PrecipitationType = 0,
+            LightningStrikeAverageDistance = new Amount(0, LengthUnits.KiloMeter),
+            LightningStrikeCount = 0,
+            BatteryLevel = new Amount(3, ElectricUnits.Volt),
+            EpochTimeOfMeasurement = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            WindAverage = new Amount(0, SpeedUnits.MeterPerSecond),
+            WindGust = new Amount(0, SpeedUnits.MeterPerSecond),
+            WindLull = new Amount(0, SpeedUnits.MeterPerSecond),
+            WindDirection = 0,
+            WindSampleInterval = 60,
+            ReportingInterval = 1,
+        });
+
+        var wsJson = """
+        {
+          "type": "obs_st",
+          "device_id": 999,
+          "hub_sn": "hub",
+          "serial_number": "device",
+          "obs": [
+            [1771642103, 0.0, 1.0, 2.0, 90, 3, 1000.0, 10.0, 50.0, 100.0, 0.0, 0.0, 0.0, 0, 0.0, 0, 3.0, 1]
+          ]
+        }
+        """;
+
+        relay.Send(new TempestWebSocketObservationsSnapshot(
+            DeviceId: 999,
+            ReceivedUtc: DateTimeOffset.UtcNow,
+            MessageType: "obs_st",
+            RawJson: wsJson));
+
+        await WaitForAsync(() => statuses.Any(s => s.ActiveSource == WeatherIngestSource.WebSocket), cts.Token);
+
+        Assert.Contains(statuses, s => s.ActiveSource == WeatherIngestSource.WebSocket);
+        Assert.True(observations.Count >= 1);
+        Assert.True(winds.Count >= 1);
+
+        await mux.DisposeAsync();
+        relay.Unregister<ObservationReading>(recipient);
+        relay.Unregister<WindReading>(recipient);
+        relay.Unregister<WeatherIngestStatus>(recipient);
+    }
+
+    [Fact]
     public async Task WhenRestSnapshotArrivesThenMuxPublishesRestObservationInPreferredUnits()
     {
         await EnsureUnitsInitializedAsync();

@@ -64,7 +64,13 @@ public static class LookupDictionaries
 
         [
             SettingConstants.Tempest_apiKey,
-            SettingConstants.Tempest_stationId
+            SettingConstants.Tempest_oauth_authorizeUrl,
+            SettingConstants.Tempest_oauth_clientId,
+            SettingConstants.Tempest_oauth_redirectUri,
+            SettingConstants.Tempest_oauth_tokenUrl,
+            SettingConstants.Tempest_stationId,
+            SettingConstants.Tempest_websocket_deviceId,
+            SettingConstants.Tempest_websocket_enabled
         ]
     );
 

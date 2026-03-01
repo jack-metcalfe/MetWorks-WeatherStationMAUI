@@ -44,6 +44,15 @@ public static class SettingConstants
     public const string Tempest_apiKey = "apiKey";
     public const string Tempest_stationId = "stationId";
 
+    public const string Tempest_oauth_clientId = "oauth/clientId";
+    public const string Tempest_oauth_redirectUri = "oauth/redirectUri";
+
+    public const string Tempest_oauth_authorizeUrl = "oauth/authorizeUrl";
+    public const string Tempest_oauth_tokenUrl = "oauth/tokenUrl";
+
+    public const string Tempest_websocket_deviceId = "websocket/deviceId";
+    public const string Tempest_websocket_enabled = "websocket/enabled";
+
     public const string TempestForecast_groupName = "tempestForecast";
     public const string TempestForecast_refreshIntervalMinutes = "refreshIntervalMinutes";
 

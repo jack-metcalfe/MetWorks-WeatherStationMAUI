@@ -76,15 +76,23 @@ RECEIVED BY:
   - Location: `src/MetWorks_Ingest_Postgres/RawPacketIngestor.cs`
   - Registration: `IEventRelayBasic.Register<IRawPacketRecordTyped>(this, ReceiveHandler);`
 
+- Component: `RawPacketIngestor` (SQLite sink)
+  - Location: `src/MetWorks_Ingest_SQLite/RawPacketIngestor.cs`
+  - Registration: `IEventRelayBasic.Register<IRawPacketRecordTyped>(this, ReceiveHandler);`
+
 - Component: `SensorReadingTransformer` (transforms into typed readings)
   - Location: `src/MetWorks_Ingest_Transformer/SensorReadingTransformer.cs`
   - Registration: `IEventRelayBasic.Register<IRawPacketRecordTyped>(this, OnRawPacketReceived);`
 
 WHAT RECEIVER DOES:
 
-`RawPacketIngestor`:
+`RawPacketIngestor` (PostgreSQL):
 1. Buffers messages if DB is unavailable and buffering is enabled
-2. Writes raw JSON into Postgres tables (`observation`, `wind`, `lightning`, `precipitation`)
+2. Writes raw JSON into PostgreSQL tables (`observation`, `wind`, `lightning`, `precipitation`)
+
+`RawPacketIngestor` (SQLite):
+1. Skips writes when DB is unavailable
+2. Writes raw JSON into SQLite tables based on `PacketEnum` (e.g., `observation`, `wind`, `lightning`, `precipitation`)
 
 `SensorReadingTransformer`:
 1. Caches the last packet per `PacketEnum` in `_lastPacketCache` for retransformation
@@ -130,18 +138,12 @@ RECEIVED BY:
 - Location: `src/MetWorks_Ingest_Transformer/WeatherReadingMux.cs`
 - Registration: `IEventRelayBasic.Register<IObservationReading>(this, ...)`
 
-FORWARDED TO UI AS:
-- Component: `WeatherViewModel`
-- Location: `src/MetWorks_Apps_MAUI_WeatherStationMaui/ViewModels/WeatherViewModel.cs`
-- Registration: `_iEventRelayBasic.Register<ObservationReading>(this, OnObservationReceived);`
-
 WHAT RECEIVER DOES:
-1. Marshals to main thread (MainThread.BeginInvokeOnMainThread)
-2. Updates CurrentObservation property
-3. Triggers PropertyChanged for: CurrentObservation, TemperatureDisplay, PressureDisplay, HumidityDisplay
-4. UI automatically updates via data binding
+1. Caches latest UDP-derived observation
+2. Selects the canonical active ingest source (UDP vs REST) based on freshness + settings
+3. Publishes canonical UI readings as concrete `ObservationReading` / `WindReading`
 
-FREQUENCY: ~Every 60 seconds (from weather station), Immediately on unit preference change (retransformation)
+FREQUENCY: ~Every 60 seconds (UDP observation packets), immediately on unit preference change (retransformation)
 
 ---
 
@@ -171,18 +173,12 @@ RECEIVED BY:
 - Location: `src/MetWorks_Ingest_Transformer/WeatherReadingMux.cs`
 - Registration: `IEventRelayBasic.Register<IWindReading>(this, ...)`
 
-FORWARDED TO UI AS:
-- Component: `WeatherViewModel`
-- Location: `src/MetWorks_Apps_MAUI_WeatherStationMaui/ViewModels/WeatherViewModel.cs`
-- Registration: `_iEventRelayBasic.Register<WindReading>(this, OnWindReceived);`
-
 WHAT RECEIVER DOES:
-1. Marshals to main thread
-2. Updates CurrentWind property
-3. Triggers PropertyChanged for: CurrentWind, WindSpeedDisplay, WindDirectionDisplay, WindGustDisplay
-4. UI automatically updates via data binding
+1. Caches latest UDP-derived wind
+2. Selects the canonical active ingest source (UDP vs REST) based on freshness + settings
+3. Publishes canonical UI readings as concrete `ObservationReading` / `WindReading`
 
-FREQUENCY: ~Every 3 seconds (rapid_wind packets from weather station), Immediately on unit preference change (retransformation)
+FREQUENCY: ~Every 3 seconds (UDP rapid_wind packets), immediately on unit preference change (retransformation)
 
 ---
 
@@ -229,14 +225,35 @@ SENT BY:
 
 RECEIVED BY:
 - Component: `StationMetadataIngestor` (PostgreSQL sink)
-- Location: `src/MetWorks_Ingest_Postgres/StationMetadataIngestor.cs`
-- Registration: `IEventRelayBasic.Register<StationMetadata>(this, md => StartBackground(ct => PersistAsync(md, ct)));`
+  - Location: `src/MetWorks_Ingest_Postgres/StationMetadataIngestor.cs`
+  - Registration: `IEventRelayBasic.Register<StationMetadata>(this, md => StartBackground(ct => PersistAsync(md, ct)));`
+
+- Component: `StationMetadataIngestor` (SQLite sink)
+  - Location: `src/MetWorks_Ingest_SQLite/StationMetadataIngestor.cs`
+  - Registration: `IEventRelayBasic.Register<StationMetadata>(this, md => StartBackground(ct => PersistAsync(md, ct)));`
 
 ---
 
-## REST OBSERVATIONS + UDP/REST MUX (PLANNED / IN-PROGRESS)
+### 7. `TempestForecast`
 
-This section describes the planned message flow to support fetching observations from Tempest's REST API in addition to UDP.
+SENT BY:
+- Component: `TempestForecastProvider`
+- Location: `src/MetWorks_Common/TempestForecastProvider.cs`
+- Code: `IEventRelayBasic.Send(_forecast);`
+
+RECEIVED BY (CURRENT):
+- Component: `ForecastHoursViewModel`
+- Location: `src/MetWorks_Apps_MAUI_WeatherStationMaui/ViewModels/ForecastHoursViewModel.cs`
+- Registration: `_iEventRelayBasic.Register<TempestForecast>(this, OnForecastReceived);`
+
+Notes:
+- `ForecastHoursViewModel` also performs an initial pull from `ITempestForecastProvider` to populate UI immediately.
+
+---
+
+## REST OBSERVATIONS + UDP/REST MUX (IMPLEMENTED)
+
+This section describes the implemented message flow to support fetching observations from Tempest's REST API in addition to UDP.
 
 Reference docs:
 - `src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/tempest-rest-observations/mini-spec.md`
@@ -259,11 +276,11 @@ RETURNS:
 
 Notes:
 - The snapshot preserves the full JSON payload to avoid binding to a rigid external schema.
-- This is a pull-based REST call; a later provider will poll on an interval and publish a superset message via `IEventRelayBasic`.
+- This is a pull-based REST call; `TempestRestObservationsProvider` polls on an interval and publishes a message via `IEventRelayBasic`.
 
-### Planned: `TempestRestObservationsSnapshot` (event relay)
+### `TempestRestObservationsSnapshot` (event relay)
 
-PLANNED MESSAGE:
+MESSAGE:
 - `TempestRestObservationsSnapshot`
   - File: `src/MetWorks_Interfaces/TempestRestObservationsSnapshot.cs`
   - Fields: `StationId`, `RetrievedUtc`, `RawJson`
@@ -271,13 +288,18 @@ PLANNED MESSAGE:
 Notes:
 - This is the superset message published via `IEventRelayBasic` by `TempestRestObservationsProvider`.
 
-SENT BY (IMPLEMENTED):
+SENT BY:
 - Component: `TempestRestObservationsProvider`
 - File: `src/MetWorks_Common/TempestRestObservationsProvider.cs`
 
-### Planned: `WeatherIngestStatus`
+RECEIVED BY:
+- Component: `WeatherReadingMux`
+- File: `src/MetWorks_Ingest_Transformer/WeatherReadingMux.cs`
+- Registration: `IEventRelayBasic.Register<TempestRestObservationsSnapshot>(this, OnRestSnapshotReceived)`
 
-Planned status message to surface ingest health in the UI:
+### `WeatherIngestStatus`
+
+Status message used to surface ingest health in the UI:
 - Which source is currently active for UI display (UDP vs REST)
 - Whether UDP and/or REST are available/fresh
 - What happens when neither is available
@@ -286,13 +308,37 @@ Type:
 - `WeatherIngestStatus`
   - File: `src/MetWorks_Interfaces/WeatherIngestStatus.cs`
 
-### Planned: canonical UI stream via mux
+SENT BY:
+- Component: `WeatherReadingMux`
+- File: `src/MetWorks_Ingest_Transformer/WeatherReadingMux.cs`
 
-Goal: continue publishing exactly one canonical stream of:
-- `IObservationReading`
-- `IWindReading`
+RECEIVED BY:
+- Component: `WeatherViewModel`
+- File: `src/MetWorks_Apps_MAUI_WeatherStationMaui/ViewModels/WeatherViewModel.cs`
+- Registration: `_iEventRelayBasic.Register<WeatherIngestStatus>(this, OnWeatherIngestStatusReceived);`
+
+### Canonical UI stream via mux
+
+Goal: publish exactly one canonical UI stream of concrete readings:
+- `ObservationReading`
+- `WindReading`
 
 ...selected by a mux so UDP and REST do not race each other and cause UI thrash.
+
+SENT BY:
+- Component: `WeatherReadingMux`
+- File: `src/MetWorks_Ingest_Transformer/WeatherReadingMux.cs`
+
+RECEIVED BY (CURRENT):
+- Component: `WeatherViewModel`
+  - File: `src/MetWorks_Apps_MAUI_WeatherStationMaui/ViewModels/WeatherViewModel.cs`
+  - Registrations:
+    - `_iEventRelayBasic.Register<ObservationReading>(this, OnObservationReceived);`
+    - `_iEventRelayBasic.Register<WindReading>(this, OnWindReceived);`
+
+- Component: `HistoricalObservationsViewModel`
+  - File: `src/MetWorks_Apps_MAUI_WeatherStationMaui/ViewModels/HistoricalObservationsViewModel.cs`
+  - Registration: `_iEventRelayBasic.Register<ObservationReading>(this, ...)`
 
 ### REST snapshot -> UI readings mapping (IMPLEMENTED)
 
@@ -300,12 +346,153 @@ IMPLEMENTED MAPPER:
 - `TempestRestReadingsMapper`
   - File: `src/MetWorks_Ingest_Transformer/TempestRestReadingsMapper.cs`
   - Input: `TempestRestObservationsSnapshot`
-  - Output: `IObservationReading` + `IWindReading` (best-effort)
+  - Output: `ObservationReading` + `WindReading` (best-effort)
 
 Provenance strategy (REST-derived):
 - `ReadingProvenance.RawPacketId = Guid.Empty`
 - `IWeatherReading.SourcePacketId = Guid.Empty`
 - `ReadingProvenance.TransformerVersion = "rest-1.0"`
+
+---
+
+## WEBSOCKET OBSERVATIONS + UDP/REST/WS MUX (IMPLEMENTED)
+
+This section describes the end-to-end runtime chain required to get Tempest WebSockets delivering observation/wind readings into the canonical UI stream.
+
+Reference docs:
+- `src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/tempest-websocket-observations/implementation-plan.md`
+
+### Prerequisites (configuration)
+
+1. Tempest developer application exists and provides a `client_id`.
+2. Tempest application has an OAuth redirect callback URL registered (custom scheme).
+   - Example: `metworks-weatherstation://oauth2redirect`
+3. App settings are configured (via `settings.yaml` + overrides) with:
+   - `/services/tempest/oauth/clientId`
+   - `/services/tempest/oauth/redirectUri`
+   - `/services/tempest/websocket/enabled` (must be `true`)
+   - `/services/tempest/websocket/deviceId` (optional; falls back to station metadata `TempestDeviceId`)
+
+### 1) DDI startup wires and starts the long-running services
+
+SENT BY:
+- Host: MAUI app startup calls DDI `Registry.InitializeAllAsync()`.
+
+EFFECT:
+- DDI constructs and initializes:
+  - `TempestOAuthTokenProvider` (implements `ITempestOAuthTokenProvider`)
+  - `TempestWebSocketObservationsProvider` (implements `ITempestWebSocketObservationsProvider`)
+  - `WeatherReadingMux`
+
+Notes:
+- `TempestWebSocketObservationsProvider.InitializeAsync(...)` calls `StartBackground(RunAsync)`.
+- The WS provider does not block startup; it runs a background loop that waits for prerequisites.
+
+### 2) OAuth token is acquired (interactive once, then cached)
+
+AVAILABLE VIA:
+- Interface: `ITempestOAuthTokenProvider`
+- File: `src/MetWorks_Interfaces/ITempestOAuthTokenProvider.cs`
+
+IMPLEMENTATION:
+- `TempestOAuthTokenProvider`
+  - File: `src/MetWorks_Maui_Services/TempestOAuthTokenProvider.cs`
+
+CHAIN:
+1. Some UI/action path calls `GetAccessTokenAsync(allowInteractive: true, ct)` at least once.
+2. `TempestOAuthTokenProvider` uses MAUI `WebAuthenticator`.
+3. Browser redirects back to the app via the registered callback URL.
+4. The provider exchanges the auth code for an `access_token`.
+5. Token material is persisted in MAUI `SecureStorage`.
+
+Notes:
+- The WS provider itself calls `GetAccessTokenAsync(allowInteractive: false, ct)` (it will wait/retry if the token is not present yet).
+
+### 3) `TempestWebSocketObservationsProvider` connects and subscribes
+
+SENT BY:
+- Component: `TempestWebSocketObservationsProvider`
+- File: `src/MetWorks_Common/TempestWebSocketObservationsProvider.cs`
+
+CHAIN (background loop):
+1. Load `/services/tempest/websocket/enabled`.
+2. Retrieve OAuth `access_token` from `ITempestOAuthTokenProvider` (non-interactive).
+3. Resolve `device_id`:
+   - Use `/services/tempest/websocket/deviceId` if set.
+   - Else use `StationMetadata.TempestDeviceId` from `IStationMetadataProvider`.
+4. Connect `ClientWebSocket` to `wss://ws.weatherflow.com/swd/data?token=<access_token>`.
+5. Send subscription messages:
+   - `listen_start` (observation stream, e.g. `obs_st`)
+   - `listen_rapid_start` (rapid wind stream, e.g. `rapid_wind`)
+
+### 4) WebSocket messages are published as raw snapshots
+
+MESSAGE:
+- `TempestWebSocketObservationsSnapshot`
+  - File: `src/MetWorks_Interfaces/TempestWebSocketObservationsSnapshot.cs`
+  - Fields: `DeviceId`, `ReceivedUtc`, `MessageType`, `RawJson`
+
+SENT BY:
+- Component: `TempestWebSocketObservationsProvider`
+- Code: `IEventRelayBasic.Send(snapshot);`
+
+FREQUENCY (typical):
+- `rapid_wind`: ~every 3 seconds
+- `obs_st`: ~every 60 seconds
+
+### 5) `WeatherReadingMux` maps snapshots into UI-compatible readings
+
+RECEIVED BY:
+- Component: `WeatherReadingMux`
+- File: `src/MetWorks_Ingest_Transformer/WeatherReadingMux.cs`
+- Registration: `IEventRelayBasic.Register<TempestWebSocketObservationsSnapshot>(this, OnWebSocketSnapshotReceived)`
+
+MAPPING:
+- Mapper: `TempestWebSocketReadingsMapper`
+  - File: `src/MetWorks_Ingest_Transformer/TempestWebSocketReadingsMapper.cs`
+  - Input: `TempestWebSocketObservationsSnapshot`
+  - Output (best-effort): `ObservationReading` and/or `WindReading`
+
+Provenance strategy (WS-derived):
+- `ReadingProvenance.RawPacketId = Guid.Empty`
+- `IWeatherReading.SourcePacketId = Guid.Empty`
+- `ReadingProvenance.TransformerVersion = "ws-1.0"`
+
+### 6) The mux selects the active source and publishes a single canonical UI stream
+
+EFFECT:
+- `WeatherReadingMux` evaluates freshness and chooses `WeatherIngestSource`:
+  - Prefer UDP when fresh.
+  - Else prefer WebSocket when fresh.
+  - Else fall back to REST when fresh.
+
+SENT BY:
+- Component: `WeatherReadingMux`
+- Messages:
+  - `ObservationReading` (concrete)
+  - `WindReading` (concrete)
+  - `WeatherIngestStatus` (includes WS freshness fields)
+
+RECEIVED BY (CURRENT):
+- `WeatherViewModel`
+- `HistoricalObservationsViewModel` (observation)
+
+Notes:
+- Status is ticked on a timer (`StatusTickInterval`) and also emitted when new UDP/WS/REST data arrives.
+
+### `WeatherIngestWarmStartRequest`
+
+Purpose: allow late subscribers (UI) to request that the mux re-publish cached canonical readings/status.
+
+SENT BY:
+- Component: `WeatherViewModel`
+- File: `src/MetWorks_Apps_MAUI_WeatherStationMaui/ViewModels/WeatherViewModel.cs`
+- Code: `_iEventRelayBasic.Send(new WeatherIngestWarmStartRequest());`
+
+RECEIVED BY:
+- Component: `WeatherReadingMux`
+- File: `src/MetWorks_Ingest_Transformer/WeatherReadingMux.cs`
+- Registration: `IEventRelayBasic.Register<WeatherIngestWarmStartRequest>(this, OnWarmStartRequested)`
 
 ## SETTINGS CHANGE NOTIFICATIONS (`IEventRelayPath`)
 
@@ -325,23 +512,22 @@ SUBSCRIBED BY (CURRENT):
   - `var unitGroupPrefix = LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildGroupPath();`
   - `IEventRelayPath.Register(unitGroupPrefix, OnUnitSettingChanged);`
 
+- Component: `WeatherReadingMux`
+  - Location: `src/MetWorks_Ingest_Transformer/WeatherReadingMux.cs`
+  - Registrations:
+    - `IEventRelayPath.Register(LookupDictionaries.WeatherIngestGroupSettingsDefinition.BuildGroupPath(), OnWeatherIngestSettingsChanged)`
+    - `IEventRelayPath.Register(LookupDictionaries.UnitOfMeasureGroupSettingsDefinition.BuildGroupPath(), OnUnitOfMeasureSettingsChanged)`
+
 INTENDED EFFECT:
 - When unit-of-measure settings change under that prefix, the transformer reloads preferences and retransforms cached packets so the UI updates in the new units.
 
+- When weather ingest settings change, the mux re-evaluates which source is active.
+- When unit-of-measure settings change, the mux remaps the latest REST snapshot so cached REST readings are refreshed in the new preferred units.
+
 MESSAGE CONTAINS:
-- Id - New COMB GUID for this reading
-- SourcePacketId - Links to original IRawPacketRecordTyped.Id
-- Timestamp - Weather station timestamp
-- ReceivedUtc - System receipt time
-- StrikeDistance - Amount (value + unit) in user preferred units
-- StrikeCount - int (1 per event)
-- Provenance - Complete lineage
-
-RECEIVED BY:
-- Status: No listeners currently registered
-- Future: Will be added to WeatherViewModel when lightning UI is implemented
-
-FREQUENCY: Only during lightning strikes
+- `ISettingValue`
+  - `Path`
+  - `Value`
 
 ---
 
@@ -354,8 +540,8 @@ Weather Station (UDP Broadcast)
     - Assigns COMB GUID
     - Calls ProvenanceTracker.TrackNewPacket()
     - SENDS: IRawPacketRecordTyped
-    ↓ ISingletonEventRelay.Send(IRawPacketRecordTyped)
-2. WeatherDataTransformer
+    ↓ IEventRelayBasic.Send(IRawPacketRecordTyped)
+2. SensorReadingTransformer
     RECEIVES: IRawPacketRecordTyped
     - Caches packet
     - Parses JSON via TempestPacketParser
@@ -363,18 +549,15 @@ Weather Station (UDP Broadcast)
     - Creates typed reading with provenance
     - Calls ProvenanceTracker.LinkTransformedReading()
     - SENDS: IObservationReading OR IWindReading OR IPrecipitationReading OR ILightningReading
-    ↓ ISingletonEventRelay.Send(specific type)
-3a. WeatherViewModel
-    RECEIVES: IObservationReading
-    - Updates CurrentObservation property
-    - Triggers PropertyChanged
-    - UI updates: Temperature, Pressure, Humidity
-
-3b. WeatherViewModel
-    RECEIVES: IWindReading
-    - Updates CurrentWind property
-    - Triggers PropertyChanged
-    - UI updates: Wind Speed, Direction, Gusts
+    ↓ IEventRelayBasic.Send(specific type)
+3. WeatherReadingMux
+    RECEIVES: IObservationReading, IWindReading, TempestRestObservationsSnapshot, TempestWebSocketObservationsSnapshot
+    - Chooses canonical source (UDP vs WebSocket vs REST)
+    - SENDS: ObservationReading, WindReading, WeatherIngestStatus
+    ↓ IEventRelayBasic.Send(concrete reading / status)
+4. WeatherViewModel
+    RECEIVES: ObservationReading, WindReading, WeatherIngestStatus
+    - Updates bound properties
 
 3c. (Future) WeatherViewModel
     RECEIVES: IPrecipitationReading
@@ -389,11 +572,18 @@ Weather Station (UDP Broadcast)
 ## MESSAGE STATISTICS
 
 MESSAGE TYPE | SENDER | RECEIVER(S) | FREQUENCY | ACTIVE LISTENERS
-IRawPacketRecordTyped | UDP Transformer | WeatherDataTransformer | Every UDP packet | 1
-IObservationReading | WeatherDataTransformer | WeatherViewModel | ~60 seconds | 1
-IWindReading | WeatherDataTransformer | WeatherViewModel | ~3 seconds | 1
-IPrecipitationReading | WeatherDataTransformer | (none) | Rain events | 0
-ILightningReading | WeatherDataTransformer | (none) | Lightning strikes | 0
+IRawPacketRecordTyped | UDP Transformer | RawPacketIngestor (Postgres + SQLite), SensorReadingTransformer | Every UDP packet | 3
+IObservationReading | SensorReadingTransformer | WeatherReadingMux | ~60 seconds | 1
+IWindReading | SensorReadingTransformer | WeatherReadingMux | ~3 seconds | 1
+TempestRestObservationsSnapshot | TempestRestObservationsProvider | WeatherReadingMux | On REST refresh | 1
+TempestWebSocketObservationsSnapshot | TempestWebSocketObservationsProvider | WeatherReadingMux | rapid_wind (~3s) + obs_st (~60s) | 1
+TempestForecast | TempestForecastProvider | ForecastHoursViewModel | On forecast refresh | 1
+ObservationReading | WeatherReadingMux | WeatherViewModel, HistoricalObservationsViewModel | Depends on active source | 2
+WindReading | WeatherReadingMux | WeatherViewModel | Depends on active source | 1
+WeatherIngestStatus | WeatherReadingMux | WeatherViewModel | Tick + change-driven | 1
+WeatherIngestWarmStartRequest | WeatherViewModel | WeatherReadingMux | On viewmodel init | 1
+IPrecipitationReading | SensorReadingTransformer | (none) | Rain events | 0
+ILightningReading | SensorReadingTransformer | (none) | Lightning strikes | 0
 
 ---
 
@@ -405,7 +595,7 @@ When user changes unit preferences:
 
 1. User changes setting → SettingsRepository.ApplyOverrides()
 2. SettingsRepository fires event → OnUnitSettingChanged()
-3. WeatherDataTransformer receives event
+3. SensorReadingTransformer receives event
 4. LoadUnitPreferences() → updates _preferredXXXUnit fields
 5. RetransformCachedPackets() → processes _lastPacketCache
 6. For each cached packet:
@@ -413,7 +603,7 @@ When user changes unit preferences:
    - NEW COMB GUID assigned (different from original)
    - SAME SourcePacketId (links back to original)
    - Provenance.TransformerVersion = "1.0-retransform"
-   - ISingletonEventRelay.Send(reading) → UI updates immediately
+   - IEventRelayBasic.Send(reading) → mux receives and re-publishes canonical UI readings
 
 MOCK SERVICE FLOW (Development Only):
 
@@ -421,10 +611,10 @@ When MockWeatherReadingService is running (#if DEBUG):
 
 1. Timer fires every 2 seconds
 2. MockWeatherReadingService.CreateMockObservationReading()
-3. ISingletonEventRelay.Send(mockObservation)
+3. IEventRelayBasic.Send(mockObservation)
 4. WeatherViewModel.OnObservationReceived() → UI updates
 5. MockWeatherReadingService.CreateMockWindReading()
-6. ISingletonEventRelay.Send(mockWind)
+6. IEventRelayBasic.Send(mockWind)
 7. WeatherViewModel.OnWindReceived() → UI updates
 
 Note: Mock and real services can coexist—both publish to same relay.
@@ -436,7 +626,8 @@ Note: Mock and real services can coexist—both publish to same relay.
 1. Exact Type Matching: Event relay requires exact type match (not base/derived)
 2. Single Responsibility: Each component does one thing:
    - UDP Transformer: Receive + COMB GUID
-   - WeatherDataTransformer: Parse + Convert + Publish
+   - SensorReadingTransformer: Parse + Convert + Publish
+   - WeatherReadingMux: Select canonical source + re-publish concrete readings
    - WeatherViewModel: Update UI
 3. Provenance Throughout: Every reading carries complete lineage
 4. Thread Safety: UI updates marshaled to main thread
@@ -448,20 +639,36 @@ Note: Mock and real services can coexist—both publish to same relay.
 
 ACTIVE REGISTRATIONS:
 
-In WeatherDataTransformer.InitializeAsync():
-ISingletonEventRelay.Register<IRawPacketRecordTyped>(this, OnRawPacketReceived);
+In `SensorReadingTransformer.InitializeAsync()`:
+- `IEventRelayBasic.Register<IRawPacketRecordTyped>(this, OnRawPacketReceived);`
+- `IEventRelayPath.Register(UnitOfMeasure group prefix, OnUnitSettingChanged);`
 
-In WeatherViewModel constructor:
-ISingletonEventRelay.Register<IObservationReading>(this, OnObservationReceived);
-ISingletonEventRelay.Register<IWindReading>(this, OnWindReceived);
+In `WeatherReadingMux.InitializeAsync()`:
+- `IEventRelayBasic.Register<IObservationReading>(this, OnUdpObservationReceived);`
+- `IEventRelayBasic.Register<IWindReading>(this, OnUdpWindReceived);`
+- `IEventRelayBasic.Register<TempestWebSocketObservationsSnapshot>(this, OnWebSocketSnapshotReceived);`
+- `IEventRelayBasic.Register<TempestRestObservationsSnapshot>(this, OnRestSnapshotReceived);`
+- `IEventRelayBasic.Register<WeatherIngestWarmStartRequest>(this, OnWarmStartRequested);`
+- `IEventRelayBasic.Register<TempestRestObservationsSnapshot>(this, OnRestSnapshotReceived);`
+- `IEventRelayBasic.Register<WeatherIngestWarmStartRequest>(this, OnWarmStartRequested);`
+- `IEventRelayPath.Register(WeatherIngest group prefix, OnWeatherIngestSettingsChanged);`
+- `IEventRelayPath.Register(UnitOfMeasure group prefix, OnUnitOfMeasureSettingsChanged);`
 
-FUTURE REGISTRATIONS (Planned):
+In `RawPacketIngestor.InitializeAsync()`:
+- `IEventRelayBasic.Register<IRawPacketRecordTyped>(this, ReceiveHandler);` (Postgres sink)
+- `IEventRelayBasic.Register<IRawPacketRecordTyped>(this, ReceiveHandler);` (SQLite sink)
 
-In WeatherViewModel (when precipitation UI is added):
-ISingletonEventRelay.Register<IPrecipitationReading>(this, OnPrecipitationReceived);
+In `WeatherViewModel.InitializeAsync()`:
+- `_iEventRelayBasic.Register<ObservationReading>(this, OnObservationReceived);`
+- `_iEventRelayBasic.Register<WindReading>(this, OnWindReceived);`
+- `_iEventRelayBasic.Register<WeatherIngestStatus>(this, OnWeatherIngestStatusReceived);`
+- `_iEventRelayBasic.Send(new WeatherIngestWarmStartRequest());`
 
-In WeatherViewModel (when lightning UI is added):
-ISingletonEventRelay.Register<ILightningReading>(this, OnLightningReceived);
+In `ForecastHoursViewModel`:
+- `_iEventRelayBasic.Register<TempestForecast>(this, OnForecastReceived);`
+
+In `HistoricalObservationsViewModel`:
+- `_iEventRelayBasic.Register<ObservationReading>(this, ...);`
 
 ---
 
