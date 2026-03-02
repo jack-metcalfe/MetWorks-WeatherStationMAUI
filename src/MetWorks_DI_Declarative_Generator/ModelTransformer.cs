@@ -200,7 +200,6 @@ public sealed class ModelTransformer
 public sealed class TransformationResult
 {
     private readonly CodeGen _codeGen;
-    private readonly string _generationTimeUtc = DateTime.UtcNow.ToString("o");
     private readonly List<string> _instanceOrder = new();
     private readonly HashSet<string> _instanceNameSet = new();
     private bool _finalized;
@@ -297,7 +296,6 @@ public sealed class TransformationResult
     {
         _accessorsModel = new Models.Accessors.Model
         {
-            GenerationTimeRoundTripUtc = _generationTimeUtc,
             TemplateRequested = TemplateDictionary.EnumToInfo[TemplateEnum.Accessors].Name,
             Namespace = _codeGen.Namespace!,
             ContainerClass = _codeGen.RegistryClass!,
@@ -306,7 +304,6 @@ public sealed class TransformationResult
 
         _registryModel = new Models.Registry.Model
         {
-            GenerationTimeRoundTripUtc = _generationTimeUtc,
             TemplateRequested = TemplateDictionary.EnumToInfo[TemplateEnum.Registry].Name,
             Namespace = _codeGen.Namespace!,
             ContainerClass = _codeGen.RegistryClass!,
@@ -315,7 +312,6 @@ public sealed class TransformationResult
 
         _exposeToMauiDiModel = new Models.ExposeToMauiDi.Model
         {
-            GenerationTimeRoundTripUtc = _generationTimeUtc,
             TemplateRequested = TemplateDictionary.EnumToInfo[TemplateEnum.ExposeToMauiDi].Name,
             Namespace = _codeGen.Namespace!,
             ContainerClass = _codeGen.RegistryClass!,
@@ -326,7 +322,6 @@ public sealed class TransformationResult
             kvp => kvp.Key,
             kvp => new Models.Instance.Factory.Model
             {
-                GenerationTimeRoundTripUtc = _generationTimeUtc,
                 TemplateRequested = TemplateDictionary.EnumToInfo[TemplateEnum.InstanceFactory].Name,
                 Namespace = _codeGen.Namespace!,
                 ContainerClass = _codeGen.RegistryClass!,
@@ -337,7 +332,6 @@ public sealed class TransformationResult
             kvp => kvp.Key,
             kvp => new Models.Instance.Field.Model
             {
-                GenerationTimeRoundTripUtc = _generationTimeUtc,
                 TemplateRequested = TemplateDictionary.EnumToInfo[TemplateEnum.InstanceField].Name,
                 Namespace = _codeGen.Namespace!,
                 ContainerClass = _codeGen.RegistryClass!,
@@ -348,7 +342,6 @@ public sealed class TransformationResult
             kvp => kvp.Key,
             kvp => new Models.Elements.Initializer.Model
             {
-                GenerationTimeRoundTripUtc = _generationTimeUtc,
                 TemplateRequested = TemplateDictionary.EnumToInfo[TemplateEnum.ElementsInitializer].Name,
                 Namespace = _codeGen.Namespace!,
                 ContainerClass = _codeGen.RegistryClass!,
@@ -359,7 +352,6 @@ public sealed class TransformationResult
             kvp => kvp.Key,
             kvp => new Models.Assignments.Initializer.Model
             {
-                GenerationTimeRoundTripUtc = _generationTimeUtc,
                 TemplateRequested = TemplateDictionary.EnumToInfo[TemplateEnum.AssignmentsInitializer].Name,
                 Namespace = _codeGen.Namespace!,
                 ContainerClass = _codeGen.RegistryClass!,
