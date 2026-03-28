@@ -147,6 +147,12 @@ namespace:
           - name: "iInstanceIdentifier"
             class: null
             interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
+          - name: "platformPaths"
+            class: null
+            interface: "MetWorks.Interfaces.IPlatformPaths"
+          - name: "cancellationToken"
+            class: System.Threading.CancellationToken
+            interface: null
         property: []
       - name: "LoggerResilient"
         interface: MetWorks.Interfaces.ILogger
@@ -203,6 +209,8 @@ namespace:
         property: []
 
   - name: "MetWorks.Common.Metrics"
+    interface:
+      - name: IMetricsLatestSnapshot
     class:
       - name: "MetricsLatestSnapshotStore"
         interface: "MetWorks.Common.Metrics.IMetricsLatestSnapshot"
@@ -819,7 +827,7 @@ namespace:
     interface: []
     class:
       - name: "MetricsSummaryIngestor"
-        interface: IMetricsSummaryPersister
+        interface: MetWorks.Interfaces.IMetricsSummaryPersister
         parameter:
           - name: "iLogger"
             class: null
@@ -835,7 +843,7 @@ namespace:
             interface: "MetWorks.InstanceIdentifier.IInstanceIdentifier"
           - name: iMetricsLatestSnapshot
             class: null
-            interface: IMetricsLatestSnapshot
+            interface: MetWorks.Common.Metrics.IMetricsLatestSnapshot
           - name: "metricsDatabaseReadiness"
             class: null
             interface: "MetWorks.Persistence.Metrics.IMetricsDatabaseReadiness"
