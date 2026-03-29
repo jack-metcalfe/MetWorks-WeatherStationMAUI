@@ -1,7 +1,4 @@
 ﻿namespace MetWorks.Ingest.SQLite;
-
-using MetWorks.Common.Metrics;
-
 public sealed class MetricsSummaryIngestor : ServiceBase, IMetricsSummaryPersister
 {
     const int DefaultSchemaVersion = 1;

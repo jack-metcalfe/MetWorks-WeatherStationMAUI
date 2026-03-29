@@ -1,5 +1,4 @@
-﻿namespace MetWorks.Common;
-using System.Runtime.CompilerServices;
+﻿namespace MetWorks.ServiceFoundation;
 /// <summary>
 /// Lightweight base for long-running services:
 /// - standard linked CancellationTokenSource pattern

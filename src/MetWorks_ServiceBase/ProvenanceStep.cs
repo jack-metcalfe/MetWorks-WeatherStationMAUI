@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Common;
+﻿namespace MetWorks.ServiceFoundation;
 /// <summary>
 /// Represents a single step in the data processing pipeline.
 /// Used by ProvenanceTracker to build complete packet lineage.

@@ -15,6 +15,7 @@ global using MetWorks.EnumDefinitions;
 global using MetWorks.Interfaces;
 global using MetWorks.IoT.UDP.Tempest;
 global using MetWorks.Models.Observables.Weather;
+global using MetWorks.ServiceFoundation;
 
 global using RedStar.Amounts;
 global using RedStar.Amounts.StandardUnits;

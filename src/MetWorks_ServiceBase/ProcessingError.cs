@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Common;
+﻿namespace MetWorks.ServiceFoundation;
 /// <summary>
 /// Tracks errors that occurred during packet processing.
 /// Used by ProvenanceTracker for diagnostics and error analysis.

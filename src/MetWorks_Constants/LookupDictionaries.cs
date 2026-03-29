@@ -107,13 +107,19 @@ public static class LookupDictionaries
         basePath: SettingConstants.Metrics_groupName,
         settingNames:
         [
-            SettingConstants.Metrics_enabled,
-            SettingConstants.Metrics_captureIntervalSeconds,
             SettingConstants.Metrics_applicationId,
+            SettingConstants.Metrics_autoCreateTable,
+            SettingConstants.Metrics_captureIntervalSeconds,
+            SettingConstants.Metrics_enabled,
+            SettingConstants.Metrics_pipelineEnabled,
+            SettingConstants.Metrics_pipelineTopN,
             SettingConstants.Metrics_relayEnabled,
             SettingConstants.Metrics_relayTopN,
-            SettingConstants.Metrics_pipelineEnabled,
-            SettingConstants.Metrics_pipelineTopN
+            SettingConstants.Metrics_shippingEnabled,
+            SettingConstants.Metrics_shippingTopN,
+            SettingConstants.Metrics_storageEnabled,
+            SettingConstants.Metrics_storageTopN,
+            SettingConstants.Metrics_tableName
         ]
     );
 

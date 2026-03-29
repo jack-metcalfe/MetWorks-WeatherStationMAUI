@@ -68,16 +68,9 @@ namespace:
     interface: MetWorks.Interfaces.IEventRelayPath
     parameter: []
     property: []
-- name: MetWorks.Common
+- name: MetWorks.ServiceFoundation
   interface: []
   class:
-  - name: DefaultPlatformPaths
-    interface: IPlatformPaths
-    parameter: []
-    property:
-    - name: AppDataDirectory
-      class: System.String
-      interface: null
   - name: ProvenanceTracker
     interface: null
     parameter:
@@ -85,6 +78,9 @@ namespace:
       class: null
       interface: MetWorks.Interfaces.ILogger
     property: []
+- name: MetWorks.Common
+  interface: []
+  class:
   - name: TempestRestClient
     interface: ITempestRestClient
     parameter:
@@ -145,7 +141,7 @@ namespace:
       class: null
       interface: MetWorks.Interfaces.IPlatformPaths
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
   - name: TempestRestObservationsProvider
@@ -170,7 +166,7 @@ namespace:
       class: null
       interface: MetWorks.Interfaces.IPlatformPaths
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
   - name: TempestWebSocketObservationsProvider
@@ -315,7 +311,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
 - name: MetWorks.Common.Networking
@@ -337,7 +333,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property:
     - name: Client
@@ -374,7 +370,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
   - name: LoggerSQLiteStreamShipper
@@ -408,7 +404,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
   - name: ObservationStreamShipper
@@ -439,7 +435,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
   - name: PrecipitationStreamShipper
@@ -470,7 +466,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
   - name: StationMetadataStreamShipper
@@ -504,7 +500,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
   - name: WindStreamShipper
@@ -535,7 +531,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
 - name: MetWorks.Common.Settings
@@ -547,6 +543,9 @@ namespace:
     - name: iLogger
       class: null
       interface: MetWorks.Interfaces.ILogger
+    - name: iPlatformPaths
+      class: null
+      interface: MetWorks.Interfaces.IPlatformPaths
     property: []
   - name: SettingRepository
     interface: MetWorks.Interfaces.ISettingRepository
@@ -558,37 +557,16 @@ namespace:
       class: null
       interface: MetWorks.Interfaces.ISettingProvider
     property: []
-  - name: SqliteDatabaseOptionsFactory
-    interface: null
-    parameter:
-    - name: iLogger
-      class: null
-      interface: MetWorks.Interfaces.ILogger
-    - name: iSettingRepository
-      class: null
-      interface: MetWorks.Interfaces.ISettingRepository
-    - name: iPlatformPaths
-      class: null
-      interface: MetWorks.Interfaces.IPlatformPaths
-    - name: cancellationToken
-      class: System.Threading.CancellationToken
-      interface: null
-    property:
-    - name: Options
-      class: MetWorks.Data.Sqlite.SqliteDatabaseOptions
-      interface: null
-    - name: Options_ConnectionString
-      class: System.String
-      interface: null
-    - name: Options_JournalMode
-      class: System.String
-      interface: null
-    - name: Options_BusyTimeoutMs
-      class: System.Int32
-      interface: null
 - name: MetWorks.Common.Utility
   interface: []
   class:
+  - name: DefaultPlatformPaths
+    interface: IPlatformPaths
+    parameter: []
+    property:
+    - name: AppDataDirectory
+      class: System.String
+      interface: null
   - name: SqliteWriteCoordinator
     interface: null
     parameter: []
@@ -635,6 +613,34 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     property: []
+  - name: SqliteDatabaseOptionsFactory
+    interface: null
+    parameter:
+    - name: iLogger
+      class: null
+      interface: MetWorks.Interfaces.ILogger
+    - name: iSettingRepository
+      class: null
+      interface: MetWorks.Interfaces.ISettingRepository
+    - name: iPlatformPaths
+      class: null
+      interface: MetWorks.Interfaces.IPlatformPaths
+    - name: cancellationToken
+      class: System.Threading.CancellationToken
+      interface: null
+    property:
+    - name: Options
+      class: MetWorks.Data.Sqlite.SqliteDatabaseOptions
+      interface: null
+    - name: Options_ConnectionString
+      class: System.String
+      interface: null
+    - name: Options_JournalMode
+      class: System.String
+      interface: null
+    - name: Options_BusyTimeoutMs
+      class: System.Int32
+      interface: null
 - name: MetWorks.Persistence.Rollups
   interface:
   - name: IRollupsDatabaseReadiness
@@ -907,7 +913,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
   - name: RawPacketIngestor
@@ -938,7 +944,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
   - name: StationMetadataIngestor
@@ -1000,7 +1006,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
 - name: MetWorks.Ingest.Transformer
   interface: []
@@ -1021,7 +1027,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     - name: iStationMetadataProvider
       class: null
@@ -1043,7 +1049,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     - name: iStationMetadataProvider
       class: null
@@ -1068,7 +1074,7 @@ namespace:
       class: System.Threading.CancellationToken
       interface: null
     - name: provenanceTracker
-      class: MetWorks.Common.ProvenanceTracker
+      class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
 instance:
@@ -1078,7 +1084,7 @@ instance:
   assignment: []
   element: []
 - name: TheDefaultPlatformPaths
-  class: MetWorks.Common.DefaultPlatformPaths
+  class: MetWorks.Common.Utility.DefaultPlatformPaths
   exposeToMauiDi: true
   assignment: []
   element: []
@@ -1114,6 +1120,9 @@ instance:
   - name: iLogger
     literal: null
     instance: TheLoggerStub
+  - name: iPlatformPaths
+    literal: null
+    instance: TheDefaultPlatformPaths
   element: []
 - name: TheSettingRepository
   class: MetWorks.Common.Settings.SettingRepository
@@ -1152,7 +1161,7 @@ instance:
     instance: TheInstanceIdentifier
   element: []
 - name: TheSqliteDatabaseOptionsFactory
-  class: MetWorks.Common.Settings.SqliteDatabaseOptionsFactory
+  class: MetWorks.Data.Sqlite.SqliteDatabaseOptionsFactory
   exposeToMauiDi: false
   assignment:
   - name: iLogger
@@ -1430,7 +1439,7 @@ instance:
     instance: TheRootCancellationTokenSource.Token
   element: []
 - name: TheProvenanceTracker
-  class: MetWorks.Common.ProvenanceTracker
+  class: MetWorks.ServiceFoundation.ProvenanceTracker
   exposeToMauiDi: false
   assignment:
   - name: iLogger

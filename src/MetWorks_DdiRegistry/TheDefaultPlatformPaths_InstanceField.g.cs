@@ -10,6 +10,6 @@ namespace MetWorks.ServiceRegistry
 {
     public partial class Registry
     {
-        private MetWorks.Common.DefaultPlatformPaths _TheDefaultPlatformPathsInstance;
+        private MetWorks.Common.Utility.DefaultPlatformPaths _TheDefaultPlatformPathsInstance;
     }
 }

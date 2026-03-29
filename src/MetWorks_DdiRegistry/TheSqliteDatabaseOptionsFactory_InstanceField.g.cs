@@ -10,6 +10,6 @@ namespace MetWorks.ServiceRegistry
 {
     public partial class Registry
     {
-        private MetWorks.Common.Settings.SqliteDatabaseOptionsFactory _TheSqliteDatabaseOptionsFactoryInstance;
+        private MetWorks.Data.Sqlite.SqliteDatabaseOptionsFactory _TheSqliteDatabaseOptionsFactoryInstance;
     }
 }

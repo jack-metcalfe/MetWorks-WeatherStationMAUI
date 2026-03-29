@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MetWorks_Common_Settings\MetWorks_Common_Settings.csproj" />
     <ProjectReference Include="..\MetWorks_Interfaces\MetWorks_Interfaces.csproj" />
     <ProjectReference Include="..\MetWorks_Constants\MetWorks_Constants.csproj" />
   </ItemGroup>

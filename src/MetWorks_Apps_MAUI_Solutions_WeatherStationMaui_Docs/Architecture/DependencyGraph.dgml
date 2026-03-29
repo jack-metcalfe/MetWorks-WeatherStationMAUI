@@ -1,0 +1,251 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph ZoomLevel="-1" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+    <Node Id="Common" Category="RuntimeLib" Bounds="923.641666666667,265.30770637498,103.546666666666,28.7333333333333" Description="F2: depends on Npgsql" Label="Common ⚠️" />
+    <Node Id="Common_Logging" Category="RuntimeLib" Bounds="584.363333333333,223.214873041646,173.92,28.7333333333333" Description="F3: heavyweight deps" Label="Common_Logging ⚠️" />
+    <Node Id="Common_Metrics" Category="RuntimeLib" Bounds="815.615,206.574273041646,143.153333333333,28.7333333333333" Label="Common_Metrics" />
+    <Node Id="Common_Settings" Category="RuntimeLib" Bounds="835.831666666667,382.774573041646,182.716666666667,28.7333333333333" Description="F1: depends on MAUI" Label="Common_Settings ⚠️" />
+    <Node Id="Common_Utility" Category="RuntimeLib" Bounds="331.246834064633,449.82830637498,143.153333333333,28.7333333333333" Label="Common_Utility" />
+    <Node Id="Constants" Category="CoreContract" Bounds="1121.7885007313,447.054873041646,99.1700000000001,28.7333333333333" Label="Constants" />
+    <Node Id="DDI_Diagnostics" Category="DDIToolchain" Bounds="711.087501369999,795.175373041646,151.95,28.7333333333333" Label="DDI Diagnostics" />
+    <Node Id="DDI_EnumDefs" Category="DDIToolchain" Bounds="777.024166666667,853.90880637498,187.136666666667,28.7333333333333" Label="DDI EnumDefinitions" />
+    <Node Id="DDI_Generator" Category="DDIToolchain" Bounds="793.9225,736.441939708313,134.356666666667,28.7333333333333" Label="DDI Generator" />
+    <Node Id="DDI_Interfaces" Category="DDIToolchain" Bounds="518.8475,851.135373041646,143.153333333333,28.7333333333333" Label="DDI Interfaces" />
+    <Node Id="DDI_Loader" Category="DDIToolchain" Bounds="573.120834703332,792.401939708313,107.966666666667,28.7333333333333" Label="DDI Loader" />
+    <Node Id="DDI_Resources" Category="DDIToolchain" Bounds="893.037501369999,795.175373041646,134.356666666667,28.7333333333333" Label="DDI Resources" />
+    <Node Id="Data_Sqlite" Category="Persistence" Bounds="543.030167397967,449.82830637498,116.763333333333,28.7333333333333" Label="Data_Sqlite" />
+    <Node Id="DdiRegistry" Category="DDIToolchain" Bounds="1100.81666666667,89.1074063749797,147.53,28.7333333333333" Description="F4: god aggregator — 9 direct refs" Label="DdiRegistry ⚠️" />
+    <Node Id="EnumDefinitions" Category="CoreContract" Bounds="987.538333333334,558.974873041646,151.95,28.7333333333333" Label="EnumDefinitions" />
+    <Node Id="EventRelay" Category="RuntimeLib" Bounds="689.7935007313,449.82830637498,107.966666666667,28.7333333333333" Label="EventRelay" />
+    <Node Id="Group_DDI" Category="IslandGroup" Bounds="498.8475,696.441839708313,548.546668036666,206.2004" Group="Expanded" Label="DDI Toolchain Island" />
+    <Node Id="Group_Leaves" Category="IslandGroup" Bounds="233.646666666667,932.642339708313,321.493333333333,44" Group="Expanded" Label="Leaf Libraries (no project refs)" />
+    <Node Id="Group_MAUI" Category="IslandGroup" Bounds="-5.57816593536666,-2.70522695835371,1594.12166666667,669.146966666667" Group="Expanded" Label="MAUI Island (~25 projects)" />
+    <Node Id="Group_ServerSide" Category="IslandGroup" Bounds="-33.435,1006.64243970831,312.696666666667,147.466966666667" Group="Expanded" Label="Server-Side Island (standalone)" />
+    <Node Id="Ingest" Category="CoreContract" Bounds="14.4218340646333,505.72,72.78,28.7333333333333" Label="Ingest" />
+    <Node Id="Ingest_SQLite" Category="DomainPipeline" Bounds="375.106666666667,108.521439708313,134.356666666667,28.7333333333333" Label="Ingest_SQLite" />
+    <Node Id="Ingest_Transformer" Category="DomainPipeline" Bounds="930.69,147.840839708313,178.34,28.7333333333333" Label="Ingest_Transformer" />
+    <Node Id="InstanceIdentifier" Category="RuntimeLib" Bounds="868.363333333333,324.041139708313,178.34,28.7333333333333" Label="InstanceIdentifier" />
+    <Node Id="Interfaces" Category="CoreContract" Bounds="893.361666666667,500.241439708313,107.966666666667,28.7333333333333" Label="Interfaces" />
+    <Node Id="IoT_UDP_Tempest" Category="DomainPipeline" Bounds="206.631834064633,391.094873041646,151.95,28.7333333333333" Label="IoT_UDP_Tempest" />
+    <Node Id="MAUI_App" Category="Executable" Bounds="46.655,37.2948730416463,198.34,44" Group="Expanded" Label="WeatherStationMaui" />
+    <Node Id="Maui_Services" Category="RuntimeLib" Bounds="1298.04683406463,388.321439708313,134.356666666667,28.7333333333333" Label="Maui_Services" />
+    <Node Id="Models_Observables" Category="RuntimeLib" Bounds="1169.52166666667,329.58800637498,178.34,28.7333333333333" Label="Models_Observables" />
+    <Node Id="Networking_Udp_Transformer" Category="DomainPipeline" Bounds="156.3,167.254873041646,248.713333333333,28.7333333333333" Label="Networking_Udp_Transformer" />
+    <Node Id="Persistence" Category="Persistence" Bounds="611.613333333333,281.88,116.763333333333,28.7333333333333" Label="Persistence" />
+    <Node Id="QueueWorker" Category="ServerSide" Bounds="51.3366666666666,1046.64253970831,116.763333333333,28.7333333333331" Label="QueueWorker" />
+    <Node Id="RedStar_Amounts" Category="ThirdParty" Bounds="1068.335,617.64,151.95,28.7333333333333" Label="RedStar_Amounts" />
+    <Node Id="RedStar_Amounts_StandardUnits" Category="ThirdParty" Bounds="1185.63516739797,505.78830637498,275.103333333333,28.7333333333333" Label="RedStar_Amounts_StandardUnits" />
+    <Node Id="RedStar_Amounts_WeatherExt" Category="ThirdParty" Bounds="1319.83016739797,447.054873041646,248.713333333333,28.7333333333333" Label="RedStar_Amounts_WeatherExt" />
+    <Node Id="Resource_Store" Category="Persistence" Bounds="827.760167397967,441.50800637498,143.153333333333,28.7333333333333" Label="Resource_Store" />
+    <Node Id="StreamReceiver" Category="ServerSide" Bounds="51.3366666666667,1105.37597304165,143.153333333333,28.7333333333333" Label="StreamReceiver" />
+  </Nodes>
+  <Links>
+    <Link Source="Common" Target="Common_Utility" Bounds="455.971333730496,294.041039708313,474.86202494512,153.02676667746" />
+    <Link Source="Common" Target="Constants" Bounds="1009.58630371094,294.041046142578,145.11279296875,145.905029296875" />
+    <Link Source="Common" Target="EventRelay" Bounds="760.170593261719,294.021636962891,166.130432128906,148.646575927734" />
+    <Link Source="Common" Target="Interfaces" Bounds="962.981750488281,294.041046142578,93.8557739257813,198.902709960938" />
+    <Link Source="Common_Logging" Target="Common" Bounds="758.20976832583,249.608492854239,156.51690108829,21.6653086997645" />
+    <Link Source="Common_Logging" Target="Common_Utility" Bounds="425.541473388672,251.948211669922,216.469757080078,191.870880126953" />
+    <Link Source="Common_Logging" Target="Constants" Bounds="690.125854492188,251.948211669922,450.515625,190.352111816406" />
+    <Link Source="Common_Logging" Target="InstanceIdentifier" Bounds="712.105203004861,251.94820637498,196.157589589275,69.1025381245199" />
+    <Link Source="Common_Logging" Target="Interfaces" Bounds="699.5205078125,251.948211669922,186.508361816406,246.478698730469" />
+    <Link Source="Common_Logging" Target="Persistence" Bounds="670.523415659668,251.94820637498,0.474996736149023,21.0024008553266" />
+    <Link Source="Common_Settings" Target="Common_Utility" Bounds="483.327472853105,408.821646930602,352.520644440121,45.0788242951235" />
+    <Link Source="Common_Settings" Target="Constants" Bounds="981.765086931865,411.50790637498,131.763335926147,34.6861550308171" />
+    <Link Source="Common_Settings" Target="Data_Sqlite" Bounds="668.540565520908,411.50790637498,188.849498150345,38.8702043697407" />
+    <Link Source="Common_Settings" Target="EventRelay" Bounds="791.527039556751,411.50790637498,96.3655837532395,35.2301434989556" />
+    <Link Source="Common_Settings" Target="Interfaces" Bounds="949.792907714844,411.507904052734,27.6687622070313,81.3194885253906" />
+    <Link Source="Common_Settings" Target="Resource_Store" Bounds="910.00634360013,411.50790637498,10.3705496582003,21.8681778722512" />
+    <Link Source="Common_Utility" Target="Interfaces" Bounds="474.400177001953,471.706146240234,409.992218017578,37.6876525878906" />
+    <Link Source="Constants" Target="EnumDefinitions" Bounds="1083.60419652111,475.78820637498,73.9237799820096,76.7062545439971" />
+    <Link Source="Constants" Target="RedStar_Amounts" Bounds="1147.99804463242,475.78820637498,21.0970824016999,133.031183988791" />
+    <Link Source="Constants" Target="RedStar_Amounts_StandardUnits" Bounds="1208.50825400168,475.78820637498,69.1500994759829,26.7527408060293" />
+    <Link Source="DDI_Diagnostics" Target="DDI_EnumDefs" Bounds="807.494605861042,823.90870637498,35.3035854074445,24.8234264810708" />
+    <Link Source="DDI_Diagnostics" Target="DDI_Interfaces" Bounds="649.56361935753,823.90870637498,87.0157260337124,24.7632285749013" />
+    <Link Source="DDI_Generator" Target="DDI_EnumDefs" Bounds="862.261702053004,765.175273041646,6.44506539217332,79.7627712463927" />
+    <Link Source="DDI_Generator" Target="DDI_Interfaces" Bounds="641.237548828125,764.827026367188,154.282043457031,83.3816528320313" />
+    <Link Source="DDI_Generator" Target="DDI_Loader" Bounds="689.465025919694,765.175273041646,111.561609925633,26.6798147893408" />
+    <Link Source="DDI_Generator" Target="DDI_Resources" Bounds="885.345153910807,765.175273041646,42.8836890541251,25.4119584052211" />
+    <Link Source="DDI_Loader" Target="DDI_EnumDefs" Bounds="680.266130838379,820.197692407224,124.726885554293,31.5068892939465" />
+    <Link Source="DDI_Loader" Target="DDI_Interfaces" Bounds="604.163724181011,821.135273041646,13.9682227013947,22.3664570931161" />
+    <Link Source="DdiRegistry" Target="Common" Bounds="1005.18682861328,117.84073638916,159.829528808594,142.579490661621" />
+    <Link Source="DdiRegistry" Target="Common_Logging" Bounds="715.528747558594,113.414649963379,385.287902832031,106.452445983887" />
+    <Link Source="DdiRegistry" Target="Common_Settings" Bounds="990.302062988281,117.84073638916,177.759338378906,262.636192321777" />
+    <Link Source="DdiRegistry" Target="DDI_Generator" Category="BuildTimeLink" Label="build-time codegen" />
+    <Link Source="DdiRegistry" Target="Ingest_SQLite" Bounds="518.46017221259,105.429668682074,582.356494454077,15.4389455938365" />
+    <Link Source="DdiRegistry" Target="Ingest_Transformer" Bounds="1066.12030446458,117.840739708313,70.615207380934,26.806029590949" />
+    <Link Source="DdiRegistry" Target="InstanceIdentifier" Bounds="999.2900390625,117.84073638916,165.46630859375,202.651878356934" />
+    <Link Source="DdiRegistry" Target="Maui_Services" Bounds="1186.78210449219,117.84073638916,176.41650390625,261.514457702637" />
+    <Link Source="DdiRegistry" Target="Networking_Udp_Transformer" Bounds="413.979138573685,109.922654162732,686.837528092982,60.043754042075" />
+    <Link Source="DdiRegistry" Target="RedStar_Amounts_WeatherExt" Bounds="1188.59497070313,117.84073638916,255.12890625,320.21590423584" />
+    <Link Source="EnumDefinitions" Target="RedStar_Amounts" Bounds="1083.27684300575,587.70820637498,33.9898321875844,24.7081918742607" />
+    <Link Source="EventRelay" Target="Interfaces" Bounds="797.125712771315,477.406685801674,88.1343116189908,21.8262358580193" />
+    <Link Source="Group_DDI" Target="DDI_Diagnostics" Category="Contains" />
+    <Link Source="Group_DDI" Target="DDI_EnumDefs" Category="Contains" />
+    <Link Source="Group_DDI" Target="DDI_Generator" Category="Contains" />
+    <Link Source="Group_DDI" Target="DDI_Interfaces" Category="Contains" />
+    <Link Source="Group_DDI" Target="DDI_Loader" Category="Contains" />
+    <Link Source="Group_DDI" Target="DDI_Resources" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Common" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Common_Logging" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Common_Metrics" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Common_Settings" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Common_Utility" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Constants" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Data_Sqlite" Category="Contains" />
+    <Link Source="Group_MAUI" Target="DdiRegistry" Category="Contains" />
+    <Link Source="Group_MAUI" Target="EnumDefinitions" Category="Contains" />
+    <Link Source="Group_MAUI" Target="EventRelay" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Ingest" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Ingest_SQLite" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Ingest_Transformer" Category="Contains" />
+    <Link Source="Group_MAUI" Target="InstanceIdentifier" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Interfaces" Category="Contains" />
+    <Link Source="Group_MAUI" Target="IoT_UDP_Tempest" Category="Contains" />
+    <Link Source="Group_MAUI" Target="MAUI_App" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Maui_Services" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Models_Observables" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Networking_Udp_Transformer" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Persistence" Category="Contains" />
+    <Link Source="Group_MAUI" Target="RedStar_Amounts" Category="Contains" />
+    <Link Source="Group_MAUI" Target="RedStar_Amounts_StandardUnits" Category="Contains" />
+    <Link Source="Group_MAUI" Target="RedStar_Amounts_WeatherExt" Category="Contains" />
+    <Link Source="Group_MAUI" Target="Resource_Store" Category="Contains" />
+    <Link Source="Group_ServerSide" Target="QueueWorker" Category="Contains" />
+    <Link Source="Group_ServerSide" Target="StreamReceiver" Category="Contains" />
+    <Link Source="Ingest" Target="EnumDefinitions" Bounds="87.2018340646333,522.000305415484,891.348917756383,46.8733121114201" />
+    <Link Source="Ingest_SQLite" Target="Common" Bounds="488.835052490234,137.254776000977,426.165618896484,128.151138305664" />
+    <Link Source="Ingest_SQLite" Target="Common_Logging" Bounds="470.974675539886,137.254773041646,163.611588208871,81.9302800177331" />
+    <Link Source="Ingest_SQLite" Target="Common_Utility" Bounds="405.518241246452,137.254773041646,35.1057016183747,303.633091584183" />
+    <Link Source="Ingest_SQLite" Target="Constants" Bounds="494.234283447266,137.254776000977,660.464813232422,302.691299438477" />
+    <Link Source="Ingest_SQLite" Target="Data_Sqlite" Bounds="448.983142949938,137.254773041646,141.927517218143,304.416514538511" />
+    <Link Source="Ingest_SQLite" Target="EventRelay" Bounds="454.97572821485,137.254773041646,270.152020066732,305.828314649743" />
+    <Link Source="Ingest_SQLite" Target="Ingest" Bounds="74.3012313842773,137.254776000977,363.29972076416,362.590042114258" />
+    <Link Source="Ingest_SQLite" Target="Interfaces" Bounds="453.840179443359,137.254776000977,432.190399169922,361.165573120117" />
+    <Link Source="Ingest_Transformer" Target="Common" Bounds="984.035709267087,176.574173041646,30.3884898290552,80.3159114175049" />
+    <Link Source="Ingest_Transformer" Target="Common_Logging" Bounds="746.552810823005,176.574173041646,206.874362251482,44.7383491248801" />
+    <Link Source="Ingest_Transformer" Target="Common_Metrics" Bounds="927.872996661199,176.574173041646,59.5352699043708,26.3567855120693" />
+    <Link Source="Ingest_Transformer" Target="Common_Utility" Bounds="448.395874023438,176.574172973633,562.668640136719,270.010025024414" />
+    <Link Source="Ingest_Transformer" Target="Constants" Bounds="1027.13487255947,176.574173041646,132.897957547071,262.451423189952" />
+    <Link Source="Ingest_Transformer" Target="EventRelay" Bounds="761.116271972656,176.574172973633,249.9482421875,266.267471313477" />
+    <Link Source="Ingest_Transformer" Target="Interfaces" Bounds="962.981750488281,176.574172973633,85.6815795898438,316.369583129883" />
+    <Link Source="Ingest_Transformer" Target="IoT_UDP_Tempest" Bounds="311.897216796875,172.387145996094,618.792785644531,213.751770019531" />
+    <Link Source="Ingest_Transformer" Target="Models_Observables" Bounds="1038.73905603908,176.574173041646,193.911492608825,147.563616071675" />
+    <Link Source="InstanceIdentifier" Target="Common_Settings" Bounds="938.743157690073,352.774473041646,11.3679540768576,22.0041405990174" />
+    <Link Source="InstanceIdentifier" Target="Constants" Bounds="982.507540047522,352.774473041646,156.090474499125,89.79263456231" />
+    <Link Source="InstanceIdentifier" Target="Interfaces" Bounds="962.416381835938,352.774475097656,66.26611328125,140.067657470703" />
+    <Link Source="Interfaces" Target="EnumDefinitions" Bounds="975.760701713713,528.974773041646,51.3051212549838,25.9393057679646" />
+    <Link Source="Interfaces" Target="RedStar_Amounts" Bounds="952.533386230469,528.974792480469,112.913269042969,86.9252319335938" />
+    <Link Source="IoT_UDP_Tempest" Target="Common_Utility" Bounds="312.012790429823,419.82820637498,53.31825561033,26.0493349064656" />
+    <Link Source="IoT_UDP_Tempest" Target="Interfaces" Bounds="358.208160400391,418.278137207031,526.171051025391,92.3932189941406" />
+    <Link Source="MAUI_App" Target="Common_Utility" Bounds="145.876068115234,81.2948760986328,247.647735595703,360.205520629883" />
+    <Link Source="MAUI_App" Target="DdiRegistry" Bounds="244.995,63.5536559063989,846.829954150473,36.3664908550496" />
+    <Link Source="MAUI_App" Target="Interfaces" Bounds="209.603713989258,81.2948760986328,676.426864624023,417.125473022461" />
+    <Link Source="MAUI_App" Target="Maui_Services" Bounds="200.553329467773,81.2948760986328,1088.61695861816,308.735275268555" />
+    <Link Source="MAUI_App" Target="RedStar_Amounts" Bounds="209.603713989258,81.2948760986328,855.845993041992,534.590621948242" />
+    <Link Source="Maui_Services" Target="Constants" Bounds="1227.19119130887,417.054773041646,90.6163108902688,27.455049245142" />
+    <Link Source="Maui_Services" Target="Interfaces" Bounds="985.866943359375,411.75732421875,312.179931640625,84.6371459960938" />
+    <Link Source="Models_Observables" Target="Interfaces" Bounds="981.448318041587,358.321339708313,251.032251136986,137.594264273229" />
+    <Link Source="Networking_Udp_Transformer" Target="Common_Logging" Bounds="380.95291001509,195.98820637498,194.695571957042,27.8886455803313" />
+    <Link Source="Networking_Udp_Transformer" Target="Common_Utility" Bounds="286.867902316191,195.98820637498,106.172829456763,245.579098255418" />
+    <Link Source="Networking_Udp_Transformer" Target="EventRelay" Bounds="304.202733942456,195.98820637498,408.345217632484,249.152419295323" />
+    <Link Source="Networking_Udp_Transformer" Target="Interfaces" Bounds="310.007507324219,195.988204956055,576.023071289063,302.432144165039" />
+    <Link Source="Networking_Udp_Transformer" Target="IoT_UDP_Tempest" Bounds="280.781833772415,195.98820637498,1.62142521426102,186.107008218154" />
+    <Link Source="Persistence" Target="Data_Sqlite" Bounds="610.684631387989,310.681639708313,53.4412270588891,130.815092541824" />
+    <Link Source="Persistence" Target="InstanceIdentifier" Bounds="728.376666666667,304.861484862292,131.555074699764,19.2583916352883" />
+    <Link Source="Persistence" Target="Interfaces" Bounds="682.522888183594,310.681640625,213.534423828125,186.688354492188" />
+    <Link Source="Persistence" Target="Resource_Store" Bounds="690.644811216295,310.681639708313,180.654329922828,125.686405202742" />
+    <Link Source="RedStar_Amounts_StandardUnits" Target="RedStar_Amounts" Bounds="1174.90125959117,534.521639708313,125.323960379509,78.412935464894" />
+    <Link Source="RedStar_Amounts_WeatherExt" Target="RedStar_Amounts" Bounds="1149.60070800781,475.788208007813,181.824462890625,133.146484375" />
+    <Link Source="RedStar_Amounts_WeatherExt" Target="RedStar_Amounts_StandardUnits" Bounds="1360.88097234481,475.78820637498,53.7082957678922,26.0700215614086" />
+  </Links>
+  <Categories>
+    <Category Id="BuildTimeLink" Label="Build-Time" />
+    <Category Id="Contains" Label="Contains" Description="Whether the source of the link contains the target object" CanBeDataDriven="False" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Contained By" IsContainment="True" OutgoingActionLabel="Contains" />
+    <Category Id="CoreContract" Label="Core Contract" />
+    <Category Id="DDIToolchain" Label="DDI Toolchain" />
+    <Category Id="DomainPipeline" Label="Domain / Pipeline" />
+    <Category Id="Executable" Label="Executable" />
+    <Category Id="IslandGroup" Label="Dependency Island" />
+    <Category Id="Persistence" Label="Persistence / Data" />
+    <Category Id="RuntimeLib" Label="Runtime Library" />
+    <Category Id="ServerSide" Label="Server-Side" />
+    <Category Id="ThirdParty" Label="Third-Party Fork" />
+  </Categories>
+  <Properties>
+    <Property Id="Bounds" DataType="System.Windows.Rect" />
+    <Property Id="CanBeDataDriven" Label="CanBeDataDriven" Description="CanBeDataDriven" DataType="System.Boolean" />
+    <Property Id="CanLinkedNodesBeDataDriven" Label="CanLinkedNodesBeDataDriven" Description="CanLinkedNodesBeDataDriven" DataType="System.Boolean" />
+    <Property Id="Description" Label="Description" Description="Description" DataType="System.String" />
+    <Property Id="Expression" DataType="System.String" />
+    <Property Id="Group" Label="Group" Description="Display the node as a group" DataType="Microsoft.VisualStudio.GraphModel.GraphGroupStyle" />
+    <Property Id="GroupLabel" DataType="System.String" />
+    <Property Id="IncomingActionLabel" Label="IncomingActionLabel" Description="IncomingActionLabel" DataType="System.String" />
+    <Property Id="IsContainment" DataType="System.Boolean" />
+    <Property Id="IsEnabled" DataType="System.Boolean" />
+    <Property Id="Label" Label="Label" Description="Displayable label of an Annotatable object" DataType="System.String" />
+    <Property Id="OutgoingActionLabel" Label="OutgoingActionLabel" Description="OutgoingActionLabel" DataType="System.String" />
+    <Property Id="TargetType" DataType="System.Type" />
+    <Property Id="Value" DataType="System.String" />
+    <Property Id="ValueLabel" DataType="System.String" />
+    <Property Id="ZoomLevel" DataType="System.String" />
+  </Properties>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="Executable" ValueLabel="True">
+      <Condition Expression="HasCategory('Executable')" />
+      <Setter Property="Background" Value="#FF2D7DD2" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="StrokeThickness" Value="2" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Core Contract" ValueLabel="True">
+      <Condition Expression="HasCategory('CoreContract')" />
+      <Setter Property="Background" Value="#FF27AE60" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Runtime Library" ValueLabel="True">
+      <Condition Expression="HasCategory('RuntimeLib')" />
+      <Setter Property="Background" Value="#FF1ABC9C" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Domain / Pipeline" ValueLabel="True">
+      <Condition Expression="HasCategory('DomainPipeline')" />
+      <Setter Property="Background" Value="#FFE67E22" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Persistence" ValueLabel="True">
+      <Condition Expression="HasCategory('Persistence')" />
+      <Setter Property="Background" Value="#FF8E44AD" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Third-Party Fork" ValueLabel="True">
+      <Condition Expression="HasCategory('ThirdParty')" />
+      <Setter Property="Background" Value="#FF7F8C8D" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="DDI Toolchain" ValueLabel="True">
+      <Condition Expression="HasCategory('DDIToolchain')" />
+      <Setter Property="Background" Value="#FF8D6E63" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Server-Side" ValueLabel="True">
+      <Condition Expression="HasCategory('ServerSide')" />
+      <Setter Property="Background" Value="#FFE74C3C" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Dependency Island" ValueLabel="True">
+      <Condition Expression="HasCategory('IslandGroup')" />
+      <Setter Property="Background" Value="#20000000" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Build-Time" ValueLabel="True">
+      <Condition Expression="HasCategory('BuildTimeLink')" />
+      <Setter Property="StrokeDashArray" Value="4 2" />
+      <Setter Property="Stroke" Value="#FF8D6E63" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Flagged" ValueLabel="True">
+      <Condition Expression="Description != ''" />
+      <Setter Property="Stroke" Value="#FFE74C3C" />
+      <Setter Property="StrokeThickness" Value="3" />
+    </Style>
+  </Styles>
+</DirectedGraph>

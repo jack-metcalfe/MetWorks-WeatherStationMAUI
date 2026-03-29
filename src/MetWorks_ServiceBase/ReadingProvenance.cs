@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Common;
+﻿namespace MetWorks.ServiceFoundation;
 /// <summary>
 /// Tracks the complete transformation pipeline for a weather reading.
 /// Embedded in every IWeatherReading to provide self-describing lineage metadata.

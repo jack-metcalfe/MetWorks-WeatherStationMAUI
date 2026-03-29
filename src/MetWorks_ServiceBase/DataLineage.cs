@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Common;
+﻿namespace MetWorks.ServiceFoundation;
 /// <summary>
 /// Complete lineage record for a weather data packet.
 /// Tracks the entire journey from UDP receipt through transformation to persistence and display.

@@ -33,11 +33,11 @@
 	  <DdiResourcesSources Include="$(MSBuildThisFileDirectory)..\MetWorks_DI_Declarative_Resources\**\*.hbs" />
 	</ItemGroup>
 
-	<Target Name="GenerateDdiRegistryCode"
-	        BeforeTargets="CoreCompile"
-	        Condition="'$(DesignTimeBuild)' != 'true'"
-	        Inputs="$(DdiInputYaml);@(DdiCodeGenToolSources);@(DdiGeneratorSources);@(DdiLoaderSources);@(DdiResourcesSources)"
-	        Outputs="$(DdiCodeGenStampFile)">
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+	</ItemGroup>
+
+	<Target Name="GenerateDdiRegistryCode" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'" Inputs="$(DdiInputYaml);@(DdiCodeGenToolSources);@(DdiGeneratorSources);@(DdiLoaderSources);@(DdiResourcesSources)" Outputs="$(DdiCodeGenStampFile)">
 	  <Message Importance="High" Text="DDI: generating registry code from $(DdiInputYaml)" />
 	  <MSBuild Projects="$(DdiCodeGenToolProject)" Targets="Restore;Build" Properties="Configuration=$(Configuration)" />
 	  <PropertyGroup>

@@ -242,6 +242,11 @@ public sealed class ObservationStreamShipper : ServiceBase
 
         payloadStream.Position = 0;
 
+        var gzipBytes = payloadStream.Length;
+        var rowCount = rows.Count;
+        var startTicks = Stopwatch.GetTimestamp();
+        var success = false;
+
         using var request = new HttpRequestMessage(HttpMethod.Post, endpointUrl)
         {
             Content = new StreamContent(payloadStream)
@@ -253,18 +258,38 @@ public sealed class ObservationStreamShipper : ServiceBase
         request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-ndjson");
         request.Content.Headers.ContentEncoding.Add("gzip");
 
-        using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
+        try
+        {
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
 
-        await using var responseStream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
-        using var doc = await JsonDocument.ParseAsync(responseStream, cancellationToken: token).ConfigureAwait(false);
+            await using var responseStream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
+            using var doc = await JsonDocument.ParseAsync(responseStream, cancellationToken: token).ConfigureAwait(false);
 
-        if (doc.RootElement.TryGetProperty("ackedUpToRowId", out var ackedEl) && ackedEl.ValueKind == JsonValueKind.Number)
-            return ackedEl.GetInt64();
+            if (doc.RootElement.TryGetProperty("ackedUpToRowId", out var ackedEl) && ackedEl.ValueKind == JsonValueKind.Number)
+            {
+                success = true;
+                return ackedEl.GetInt64();
+            }
 
-        if (doc.RootElement.TryGetProperty("acked_up_to_rowid", out var ackedSnake) && ackedSnake.ValueKind == JsonValueKind.Number)
-            return ackedSnake.GetInt64();
+            if (doc.RootElement.TryGetProperty("acked_up_to_rowid", out var ackedSnake) && ackedSnake.ValueKind == JsonValueKind.Number)
+            {
+                success = true;
+                return ackedSnake.GetInt64();
+            }
 
-        return null;
+            return null;
+        }
+        finally
+        {
+            var elapsedTicks = Stopwatch.GetTimestamp() - startTicks;
+            StreamShippingUploadMetrics.Record(
+                source: table,
+                table: table,
+                rows: rowCount,
+                gzipBytes: gzipBytes,
+                elapsedTicks: elapsedTicks,
+                success: success);
+        }
     }
 }

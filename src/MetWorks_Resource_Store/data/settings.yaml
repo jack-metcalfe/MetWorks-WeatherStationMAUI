@@ -169,6 +169,24 @@ definitions:
     isEditable: true
     isSecret: false
 
+  - path: /services/metrics/shippingEnabled
+    defaultValue: "true"
+    description: "Include local-first stream shipping upload/state summaries in the periodic METRICS payload"
+    expectedValueType: "Boolean"
+    allowableValues:
+      - true
+      - false
+    isEditable: true
+    isSecret: false
+
+  - path: /services/metrics/shippingTopN
+    defaultValue: "10"
+    description: "Number of top (source, table) upload hotspots to include in periodic stream shipping metrics summary"
+    expectedValueType: "Int32"
+    allowableValues: []
+    isEditable: true
+    isSecret: false
+
   - path: /services/metrics/storageEnabled
     defaultValue: "true"
     description: "Capture local storage consumption metrics (settings overrides, log file, logging sqlite, readings sqlite)"

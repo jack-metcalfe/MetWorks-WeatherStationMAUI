@@ -1,8 +1,4 @@
 ﻿namespace MetWorks.Common.Metrics;
-
-using System.Globalization;
-using System.Text.Json;
-
 public static class MetricsStructuredSnapshotParser
 {
     public static bool TryParse(string json, out MetricsStructuredSnapshot snapshot)
@@ -24,6 +20,8 @@ public static class MetricsStructuredSnapshotParser
             var process = TryParseProcess(root);
             var relay = TryParseRelay(root);
             var pipeline = TryParsePipeline(root);
+            var storage = TryParseStorage(root);
+            var shipping = TryParseShipping(root);
 
             snapshot = new MetricsStructuredSnapshot(
                 SchemaVersion: schemaVersion,
@@ -31,7 +29,9 @@ public static class MetricsStructuredSnapshotParser
                 IntervalSeconds: intervalSeconds,
                 Process: process,
                 Relay: relay,
-                Pipeline: pipeline);
+                Pipeline: pipeline,
+                Storage: storage,
+                Shipping: shipping);
 
             return true;
         }
@@ -146,6 +146,97 @@ public static class MetricsStructuredSnapshotParser
         }
 
         return new MetricsPipelineSnapshot(TopReadings: topReadings);
+    }
+
+    static MetricsStorageSnapshot? TryParseStorage(JsonElement root)
+    {
+        if (!root.TryGetProperty("storage", out var s) || s.ValueKind != JsonValueKind.Object)
+            return null;
+
+        var logFile = default(MetricsStorageLogFileSnapshot?);
+        if (s.TryGetProperty("log_file", out var lf) && lf.ValueKind == JsonValueKind.Object)
+        {
+            var path = TryGetString(lf, "path") ?? string.Empty;
+            var bytes = TryGetInt64(lf, "bytes") ?? 0;
+
+            if (!string.IsNullOrWhiteSpace(path) && bytes > 0)
+                logFile = new MetricsStorageLogFileSnapshot(Path: path, Bytes: bytes);
+        }
+
+        var topLogFiles = new List<MetricsStorageLogFileSnapshot>();
+        if (s.TryGetProperty("top_log_files", out var top) && top.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var e in top.EnumerateArray())
+            {
+                if (e.ValueKind != JsonValueKind.Object)
+                    continue;
+
+                var path = TryGetString(e, "path") ?? string.Empty;
+                var bytes = TryGetInt64(e, "bytes") ?? 0;
+                if (string.IsNullOrWhiteSpace(path) || bytes <= 0)
+                    continue;
+
+                topLogFiles.Add(new MetricsStorageLogFileSnapshot(Path: path, Bytes: bytes));
+            }
+        }
+
+        return new MetricsStorageSnapshot(
+            SettingsOverrideBytes: TryGetInt64(s, "settings_override_bytes") ?? 0,
+            LogFile: logFile,
+            LoggerSqliteBytes: TryGetInt64(s, "logger_sqlite_bytes") ?? 0,
+            ReadingsSqliteBytes: TryGetInt64(s, "readings_sqlite_bytes") ?? 0,
+            TopLogFiles: topLogFiles);
+    }
+
+    static MetricsShippingSnapshot? TryParseShipping(JsonElement root)
+    {
+        if (!root.TryGetProperty("shipping", out var s) || s.ValueKind != JsonValueKind.Object)
+            return null;
+
+        var topUploads = new List<MetricsShippingUploadHotspot>();
+        if (s.TryGetProperty("top_uploads", out var top) && top.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var e in top.EnumerateArray())
+            {
+                if (e.ValueKind != JsonValueKind.Object)
+                    continue;
+
+                topUploads.Add(new MetricsShippingUploadHotspot(
+                    Source: TryGetString(e, "source") ?? string.Empty,
+                    Table: TryGetString(e, "table") ?? string.Empty,
+                    Attempts: TryGetInt64(e, "attempts") ?? 0,
+                    Successes: TryGetInt64(e, "successes") ?? 0,
+                    Failures: TryGetInt64(e, "failures") ?? 0,
+                    Rows: TryGetInt64(e, "rows") ?? 0,
+                    GzipBytes: TryGetInt64(e, "gz_bytes") ?? 0,
+                    TotalMs: TryGetDouble(e, "total_ms") ?? 0,
+                    AvgMs: TryGetDouble(e, "avg_ms") ?? 0,
+                    MaxMs: TryGetDouble(e, "max_ms") ?? 0));
+            }
+        }
+
+        var sources = new List<MetricsShippingSourceStateSnapshot>();
+        if (s.TryGetProperty("sources", out var states) && states.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var e in states.EnumerateArray())
+            {
+                if (e.ValueKind != JsonValueKind.Object)
+                    continue;
+
+                sources.Add(new MetricsShippingSourceStateSnapshot(
+                    Source: TryGetString(e, "source") ?? string.Empty,
+                    LastShippedRowId: TryGetInt64(e, "last_shipped_rowid") ?? 0,
+                    LastAckedRowId: TryGetInt64(e, "last_acked_rowid") ?? 0,
+                    LastLossyDeletedRowId: TryGetInt64(e, "last_lossy_deleted_rowid") ?? 0,
+                    LossyDeletedRowCount: TryGetInt64(e, "lossy_deleted_row_count") ?? 0,
+                    LastLossyDeleteUtc: TryGetDateTimeUtc(e, "last_lossy_delete_utc")));
+            }
+        }
+
+        return new MetricsShippingSnapshot(
+            TopUploads: topUploads,
+            Sources: sources,
+            StateError: TryGetString(s, "state_error"));
     }
 
     static int? TryGetInt32(JsonElement obj, string name)

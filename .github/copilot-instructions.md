@@ -16,7 +16,7 @@
 - Conduct wider repo-level searches (e.g., search for `JsonToSQLite_connectionString` across all files) before proposing/removing settings/constants; avoid narrow file-only reasoning.
 - Keep a per-session date-stamped running log of touched functional areas (e.g., under `src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/session-restore-YYYY-MM-DD.md`).
 - Focus on Category B (consumers should not read DB connection details) and Category C only when UI/settings-page related; treat operational UI connection string use as leakage to remove.
-- Address project dependency hygiene to avoid cycles when centralizing persistence config (e.g., `MetWorks_Common -> MetWorks_Common_Settings -> MetWorks_Resource_Store -> MetWorks_Common`); consider refactoring/interfaces as needed.
+- Address project dependency hygiene to avoid cycles when centralizing persistence config (e.g., `MetWorks_Common -> MetWorks_Common_Settings -> MetWorks_Resource_Store -> MetWorks_Common`); consider refactoring/interfaces as needed. **Avoid breaking reference cycles by pulling persistence upward or adding interfaces; instead, move shared contracts downward and enforce layering.**
 - Avoid editing auto-generated `*.g.cs` files; after changing DDI YAML or renaming DDI-wired services, regenerate the DDI output so the registry builds. Use backward-compat shims only briefly, prefer regen.
 - Prefer using EventRelay-based maintenance messaging (begin/end) with optional acknowledgements so services can pause DB writes (buffering if needed) during DB maintenance/retention, leveraging existing resilience paths.
 - Report runtime exceptions with exact caller-info JSON; keep using caller-info to pinpoint failures to specific line numbers/blocks.

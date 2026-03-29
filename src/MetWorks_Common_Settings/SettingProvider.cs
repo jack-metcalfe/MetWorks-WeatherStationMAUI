@@ -10,6 +10,8 @@ public class SettingProvider : ISettingProvider
     bool _isInitialized = false;
     ILogger? _iLogger = null;
     ILogger ILogger => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
+    IPlatformPaths? _iPlatformPaths = null;
+    IPlatformPaths IPlatformPaths => NullPropertyGuard.Get(_isInitialized, _iPlatformPaths, nameof(IPlatformPaths));
     ISettingDefinitionDictionary? _iSettingDefinitionDictionary;
     public ISettingDefinitionDictionary ISettingDefinitionDictionary
     {
@@ -36,12 +38,14 @@ public class SettingProvider : ISettingProvider
         _overridesBaseDirectory = overridesBaseDirectory;
     }
     public async Task<bool> InitializeAsync(
-        ILogger iLogger
+        ILogger iLogger,
+        IPlatformPaths iPlatformPaths
     )
     {
         try
         {
             _iLogger = iLogger;
+            _iPlatformPaths = iPlatformPaths;
             _isInitialized = true;
             var settingModel = Load();
             if (settingModel is not null)
@@ -79,7 +83,7 @@ public class SettingProvider : ISettingProvider
                 .Build();
             // Prefer an embedded template resource as the canonical source of definitions,
             // then overlay any local overrides found in AppData so overrides only replace values.
-            var localDir = _overridesBaseDirectory ?? GetAppDataDirectory();
+            var localDir = _overridesBaseDirectory ?? IPlatformPaths.AppDataDirectory;
             var overridePath = Path.Combine(localDir ?? string.Empty, SettingConstants.ProviderFilename);
             SettingsOverrideFilePath = overridePath;
             SettingsOverrideFileExistsAtLoad = !string.IsNullOrWhiteSpace(localDir) && File.Exists(overridePath);
@@ -142,37 +146,6 @@ public class SettingProvider : ISettingProvider
         }
     }
 
-    static string? GetAppDataDirectory()
-    {
-        // Prefer platform-specific AppData where available.
-#if MAUI
-        try
-        {
-            return FileSystem.AppDataDirectory;
-        }
-        catch
-        {
-            // fall through to other options
-        }
-#endif
-        try
-        {
-            var p = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            if (!string.IsNullOrWhiteSpace(p)) return Path.Combine(p, "MetWorks-WeatherStationMAUI");
-        }
-        catch { /* ignore */ }
-
-        try
-        {
-            var p = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            if (!string.IsNullOrWhiteSpace(p)) return Path.Combine(p, "MetWorks-WeatherStationMAUI");
-        }
-        catch { /* ignore */ }
-
-        // Last resort: temp directory
-        try { return Path.Combine(Path.GetTempPath(), "MetWorks-WeatherStationMAUI"); } catch { return null; }
-    }
-
     /// <summary>
     /// Persist a single value override to the LocalApplicationData overrides file.
     /// Creates the overrides file if it does not exist. This method is idempotent for the same path/value.
@@ -181,7 +154,7 @@ public class SettingProvider : ISettingProvider
     {
         try
         {
-            var localDir = _overridesBaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MetWorks-WeatherStationMAUI");
+            var localDir = _overridesBaseDirectory ?? IPlatformPaths.AppDataDirectory;
             Directory.CreateDirectory(localDir);
             var overridePath = Path.Combine(localDir, SettingConstants.ProviderFilename);
 

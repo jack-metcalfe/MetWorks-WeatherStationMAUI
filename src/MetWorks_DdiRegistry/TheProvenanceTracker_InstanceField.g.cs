@@ -10,6 +10,6 @@ namespace MetWorks.ServiceRegistry
 {
     public partial class Registry
     {
-        private MetWorks.Common.ProvenanceTracker _TheProvenanceTrackerInstance;
+        private MetWorks.ServiceFoundation.ProvenanceTracker _TheProvenanceTrackerInstance;
     }
 }

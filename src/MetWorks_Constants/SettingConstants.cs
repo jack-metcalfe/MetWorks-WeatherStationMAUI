@@ -80,6 +80,9 @@ public static class SettingConstants
     public const string Metrics_storageEnabled = "storageEnabled";
     public const string Metrics_storageTopN = "storageTopN";
 
+    public const string Metrics_shippingEnabled = "shippingEnabled";
+    public const string Metrics_shippingTopN = "shippingTopN";
+
     public const string StreamShipping_groupName = "streamShipping";
     public const string StreamShipping_enabled = "enabled";
     public const string StreamShipping_endpointUrl = "endpointUrl";

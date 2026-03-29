@@ -8,6 +8,10 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
     MetricsLatestSnapshot _current;
     MetricsStructuredSnapshot? _structured;
 
+    string _lastShippingUpload1 = "--";
+    string _lastShippingUpload2 = "--";
+    DateTime _lastShippingNonEmptyCapturedUtc = DateTime.MinValue;
+
     public string InstallationId => _iInstanceIdentifier.InstallationId;
 
     public MetricsLatestSnapshot Current
@@ -34,14 +38,26 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
             if (!Equals(_structured, value))
             {
                 _structured = value;
+
+                var uploads = value?.Shipping?.TopUploads;
+                if (uploads is not null && uploads.Count > 0)
+                {
+                    _lastShippingUpload1 = FormatShippingUpload(uploads, 0);
+                    _lastShippingUpload2 = FormatShippingUpload(uploads, 1);
+                    _lastShippingNonEmptyCapturedUtc = value!.CapturedUtc;
+                }
+
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(ProcessSummaryLine));
                 OnPropertyChanged(nameof(GcSummaryLine));
+                OnPropertyChanged(nameof(StorageSummaryLine));
                 OnPropertyChanged(nameof(TopRelayHandler1));
                 OnPropertyChanged(nameof(TopRelayHandler2));
                 OnPropertyChanged(nameof(TopRelayFanout1));
                 OnPropertyChanged(nameof(TopPipelineReading1));
                 OnPropertyChanged(nameof(TopPipelineReading2));
+                OnPropertyChanged(nameof(TopShippingUpload1));
+                OnPropertyChanged(nameof(TopShippingUpload2));
             }
         }
     }
@@ -71,6 +87,9 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
     public string TopPipelineReading1 => FormatPipelineReading(Structured?.Pipeline?.TopReadings, 0);
     public string TopPipelineReading2 => FormatPipelineReading(Structured?.Pipeline?.TopReadings, 1);
 
+    public string TopShippingUpload1 => FormatShippingUploadWithLastKnown(Structured?.Shipping?.TopUploads, 0, _lastShippingUpload1);
+    public string TopShippingUpload2 => FormatShippingUploadWithLastKnown(Structured?.Shipping?.TopUploads, 1, _lastShippingUpload2);
+
     static string FormatRelayHandler(IReadOnlyList<MetricsRelayHandlerHotspot>? list, int idx)
     {
         if (list is null || idx < 0 || idx >= list.Count) return "--";
@@ -95,6 +114,45 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
         var t = string.IsNullOrWhiteSpace(r.ReadingType) ? "?" : r.ReadingType;
         return $"{t} | n={r.Count} retrans={r.Retransforms} udp→end avg={r.UdpToTransformEndAvgMs:F1}ms max={r.UdpToTransformEndMaxMs:F1}ms";
     }
+
+    static string FormatShippingUpload(IReadOnlyList<MetricsShippingUploadHotspot>? list, int idx)
+    {
+        if (list is null || idx < 0 || idx >= list.Count) return "--";
+        var u = list[idx];
+        var source = string.IsNullOrWhiteSpace(u.Source) ? "?" : u.Source;
+        var table = string.IsNullOrWhiteSpace(u.Table) ? "?" : u.Table;
+        return $"{source}/{table} | ok={u.Successes}/{u.Attempts} rows={u.Rows} avg={u.AvgMs:F0}ms max={u.MaxMs:F0}ms";
+    }
+
+    string FormatShippingUploadWithLastKnown(IReadOnlyList<MetricsShippingUploadHotspot>? list, int idx, string lastKnown)
+    {
+        var current = FormatShippingUpload(list, idx);
+        if (!string.Equals(current, "--", StringComparison.Ordinal))
+            return current;
+
+        if (string.Equals(lastKnown, "--", StringComparison.Ordinal) || _lastShippingNonEmptyCapturedUtc == DateTime.MinValue)
+            return "--";
+
+        var age = DateTime.UtcNow - _lastShippingNonEmptyCapturedUtc;
+        if (age < TimeSpan.Zero)
+            age = TimeSpan.Zero;
+
+        return $"(last {age.TotalSeconds:F0}s ago) {lastKnown}";
+    }
+
+    public string StorageSummaryLine
+    {
+        get
+        {
+            var s = Structured?.Storage;
+            if (s is null) return "--";
+
+            var logBytes = s.LogFile?.Bytes ?? 0;
+            return $"settings {ToMiB(s.SettingsOverrideBytes):F1} MiB | log {ToMiB(logBytes):F1} MiB | logger_db {ToMiB(s.LoggerSqliteBytes):F1} MiB | readings_db {ToMiB(s.ReadingsSqliteBytes):F1} MiB";
+        }
+    }
+
+    static double ToMiB(long bytes) => bytes <= 0 ? 0 : bytes / (1024.0 * 1024.0);
 
     public string CapturedUtcLocalizedDisplay =>
         Current.CapturedUtc.ToLocalTime() == DateTime.MinValue ? "--" : Current.CapturedUtc.ToLocalTime().ToString("G");

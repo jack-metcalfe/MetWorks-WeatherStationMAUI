@@ -37,7 +37,7 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheDefaultPlatformPaths(MetWorks.Common.DefaultPlatformPaths instance) =>
+        public void RegisterTheDefaultPlatformPaths(MetWorks.Common.Utility.DefaultPlatformPaths instance) =>
             _TheDefaultPlatformPathsInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
@@ -48,7 +48,7 @@ namespace MetWorks.ServiceRegistry
         }
 
         // Internal accessor: always returns the concrete class.
-        internal MetWorks.Common.DefaultPlatformPaths GetTheDefaultPlatformPaths_Internal() =>
+        internal MetWorks.Common.Utility.DefaultPlatformPaths GetTheDefaultPlatformPaths_Internal() =>
             _TheDefaultPlatformPathsInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
@@ -289,11 +289,11 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheSqliteDatabaseOptionsFactory(MetWorks.Common.Settings.SqliteDatabaseOptionsFactory instance) =>
+        public void RegisterTheSqliteDatabaseOptionsFactory(MetWorks.Data.Sqlite.SqliteDatabaseOptionsFactory instance) =>
             _TheSqliteDatabaseOptionsFactoryInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Common.Settings.SqliteDatabaseOptionsFactory GetTheSqliteDatabaseOptionsFactory()
+        public MetWorks.Data.Sqlite.SqliteDatabaseOptionsFactory GetTheSqliteDatabaseOptionsFactory()
         {
             var initTask = _initTask_TheSqliteDatabaseOptionsFactory;
             if (initTask is null)
@@ -318,7 +318,7 @@ namespace MetWorks.ServiceRegistry
         }
 
         // Internal accessor: always returns the concrete class.
-        internal MetWorks.Common.Settings.SqliteDatabaseOptionsFactory GetTheSqliteDatabaseOptionsFactory_Internal() =>
+        internal MetWorks.Data.Sqlite.SqliteDatabaseOptionsFactory GetTheSqliteDatabaseOptionsFactory_Internal() =>
             _TheSqliteDatabaseOptionsFactoryInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
@@ -973,11 +973,11 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheProvenanceTracker(MetWorks.Common.ProvenanceTracker instance) =>
+        public void RegisterTheProvenanceTracker(MetWorks.ServiceFoundation.ProvenanceTracker instance) =>
             _TheProvenanceTrackerInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Common.ProvenanceTracker GetTheProvenanceTracker()
+        public MetWorks.ServiceFoundation.ProvenanceTracker GetTheProvenanceTracker()
         {
             var initTask = _initTask_TheProvenanceTracker;
             if (initTask is null)
@@ -1002,7 +1002,7 @@ namespace MetWorks.ServiceRegistry
         }
 
         // Internal accessor: always returns the concrete class.
-        internal MetWorks.Common.ProvenanceTracker GetTheProvenanceTracker_Internal() =>
+        internal MetWorks.ServiceFoundation.ProvenanceTracker GetTheProvenanceTracker_Internal() =>
             _TheProvenanceTrackerInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1

@@ -6,7 +6,9 @@ public sealed record MetricsStructuredSnapshot(
     int IntervalSeconds,
     MetricsProcessSnapshot? Process,
     MetricsRelaySnapshot? Relay,
-    MetricsPipelineSnapshot? Pipeline
+    MetricsPipelineSnapshot? Pipeline,
+    MetricsStorageSnapshot? Storage,
+    MetricsShippingSnapshot? Shipping
 );
 
 public sealed record MetricsProcessSnapshot(
@@ -57,4 +59,45 @@ public sealed record MetricsPipelineReadingHotspot(
     double TransformMaxMs,
     double UdpToTransformEndAvgMs,
     double UdpToTransformEndMaxMs
+);
+
+public sealed record MetricsStorageSnapshot(
+    long SettingsOverrideBytes,
+    MetricsStorageLogFileSnapshot? LogFile,
+    long LoggerSqliteBytes,
+    long ReadingsSqliteBytes,
+    IReadOnlyList<MetricsStorageLogFileSnapshot> TopLogFiles
+);
+
+public sealed record MetricsStorageLogFileSnapshot(
+    string Path,
+    long Bytes
+);
+
+public sealed record MetricsShippingSnapshot(
+    IReadOnlyList<MetricsShippingUploadHotspot> TopUploads,
+    IReadOnlyList<MetricsShippingSourceStateSnapshot> Sources,
+    string? StateError
+);
+
+public sealed record MetricsShippingUploadHotspot(
+    string Source,
+    string Table,
+    long Attempts,
+    long Successes,
+    long Failures,
+    long Rows,
+    long GzipBytes,
+    double TotalMs,
+    double AvgMs,
+    double MaxMs
+);
+
+public sealed record MetricsShippingSourceStateSnapshot(
+    string Source,
+    long LastShippedRowId,
+    long LastAckedRowId,
+    long LastLossyDeletedRowId,
+    long LossyDeletedRowCount,
+    DateTime? LastLossyDeleteUtc
 );

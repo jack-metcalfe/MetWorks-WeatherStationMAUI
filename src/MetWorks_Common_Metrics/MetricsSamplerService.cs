@@ -1,5 +1,4 @@
 ﻿namespace MetWorks.Common.Metrics;
-using MetWorks.Common.Metrics.Storage;
 public sealed class MetricsSamplerService : ServiceBase
 {
     const int DefaultCaptureIntervalSeconds = 10;
@@ -80,10 +79,31 @@ public sealed class MetricsSamplerService : ServiceBase
         if (storageTopN <= 0)
             storageTopN = 10;
 
-        StartBackground(ct => SamplerLoopAsync(TimeSpan.FromSeconds(intervalSeconds), relayEnabled, relayTopN, pipelineEnabled, pipelineTopN, storageEnabled, storageTopN, iMetricsSummaryPersister, iMetricsLatestSnapshot, ct));
+        var shippingEnabled = ISettingRepository.GetValueOrDefault<bool>(
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_shippingEnabled));
+
+        var shippingTopN = ISettingRepository.GetValueOrDefault<int>(
+            LookupDictionaries.MetricsGroupSettingsDefinition.BuildPath(SettingConstants.Metrics_shippingTopN));
+
+        if (shippingTopN <= 0)
+            shippingTopN = 10;
+
+        StartBackground(ct => SamplerLoopAsync(
+            interval: TimeSpan.FromSeconds(intervalSeconds),
+            relayEnabled: relayEnabled,
+            relayTopN: relayTopN,
+            pipelineEnabled: pipelineEnabled,
+            pipelineTopN: pipelineTopN,
+            storageEnabled: storageEnabled,
+            storageTopN: storageTopN,
+            shippingEnabled: shippingEnabled,
+            shippingTopN: shippingTopN,
+            metricsSummaryIngestor: iMetricsSummaryPersister,
+            metricsLatestSnapshotStore: iMetricsLatestSnapshot,
+            token: ct));
 
         try { MarkReady(); } catch { }
-        ILogger.Information($"MetricsSamplerService started (interval={intervalSeconds}s, relayEnabled={relayEnabled}, relayTopN={relayTopN}, pipelineEnabled={pipelineEnabled}, pipelineTopN={pipelineTopN}, storageEnabled={storageEnabled}, storageTopN={storageTopN})");
+        ILogger.Information($"MetricsSamplerService started (interval={intervalSeconds}s, relayEnabled={relayEnabled}, relayTopN={relayTopN}, pipelineEnabled={pipelineEnabled}, pipelineTopN={pipelineTopN}, storageEnabled={storageEnabled}, storageTopN={storageTopN}, shippingEnabled={shippingEnabled}, shippingTopN={shippingTopN})");
         return true;
     }
 
@@ -95,6 +115,8 @@ public sealed class MetricsSamplerService : ServiceBase
         int pipelineTopN, 
         bool storageEnabled, 
         int storageTopN, 
+        bool shippingEnabled,
+        int shippingTopN,
         IMetricsSummaryPersister? metricsSummaryIngestor, 
         IMetricsLatestSnapshot? metricsLatestSnapshotStore, 
         CancellationToken token
@@ -134,7 +156,9 @@ public sealed class MetricsSamplerService : ServiceBase
                     cpuUtil = cpuDelta.TotalSeconds / (wallDelta.TotalSeconds * Math.Max(1, Environment.ProcessorCount));
                 }
 
-                object? relay = null;
+                 const int schemaVersion = 2;
+
+                 object? relay = null;
                 if (relayEnabled)
                 {
                     var top = EventRelayBasic.GetTopRelayHotspotsSnapshot(relayTopN)
@@ -212,13 +236,33 @@ public sealed class MetricsSamplerService : ServiceBase
                     };
                 }
 
-                 // Reserved for local-first shipping state (acked + potential lossy deletions).
-                 // Populated once shipping state is wired to a concrete local SQLite connection.
-                 object? shipping = null;
+                  object? shipping = null;
+                  if (shippingEnabled)
+                  {
+                      var uploadsTop = StreamShippingUploadMetrics.SnapshotTopNAndReset(shippingTopN)
+                          .Select(h => new
+                          {
+                              source = h.Source,
+                              table = h.Table,
+                              attempts = h.Attempts,
+                              successes = h.Successes,
+                              failures = h.Failures,
+                              rows = h.Rows,
+                              gz_bytes = h.GzipBytes,
+                              total_ms = h.TotalMilliseconds,
+                              avg_ms = h.AverageMilliseconds,
+                              max_ms = h.MaxMilliseconds
+                          })
+                          .ToArray();
+                      shipping = new
+                      {
+                          top_uploads = uploadsTop
+                      };
+                  }
 
                 var payload = new
                 {
-                    schema_version = 2,
+                     schema_version = schemaVersion,
                     captured_utc = nowWall,
                     interval_seconds = (int)Math.Round(wallDelta.TotalSeconds),
                     process = new
@@ -263,7 +307,7 @@ public sealed class MetricsSamplerService : ServiceBase
                         await metricsSummaryIngestor.PersistAsync(
                             capturedUtc: nowWall,
                             captureIntervalSeconds: (int)Math.Round(wallDelta.TotalSeconds),
-                            schemaVersion: 1,
+                             schemaVersion: schemaVersion,
                             jsonMetricsSummary: payloadJson,
                             cancellationToken: token).ConfigureAwait(false);
 

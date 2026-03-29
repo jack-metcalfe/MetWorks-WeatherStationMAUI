@@ -14,11 +14,11 @@ namespace MetWorks.ServiceRegistry
     // and immediately registers the created instance with the Registry.
     internal static partial class TheDefaultPlatformPaths_InstanceFactory
     {
-        public static MetWorks.Common.DefaultPlatformPaths Create(Registry registry)
+        public static MetWorks.Common.Utility.DefaultPlatformPaths Create(Registry registry)
         {
             // Assignment-driven instance: construct with new().
             // This is always valid because ContainerClass is a concrete class.
-            var instance = new MetWorks.Common.DefaultPlatformPaths();
+            var instance = new MetWorks.Common.Utility.DefaultPlatformPaths();
             
 
             // Register immediately so other instances can reference it.

@@ -1,7 +1,4 @@
 ﻿namespace MetWorks.Common.Metrics;
-
-using System.Threading;
-
 public sealed class MetricsLatestSnapshotStore : IMetricsLatestSnapshot
 {
     MetricsLatestSnapshot _snapshot = new(

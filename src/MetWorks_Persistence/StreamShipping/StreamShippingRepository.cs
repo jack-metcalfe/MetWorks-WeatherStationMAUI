@@ -110,7 +110,7 @@ WHERE installation_id = $installation_id AND source = $source;
         {
             var message = $"Error reading shipper state for source '{source}' and installation '{installationId}' exception[{exception}].";
             ILogger.Error($"{message} Exception: {exception}");
-            throw new Exception(message, exception);
+            throw new InvalidOperationException(message, exception);
         }
     }
 
@@ -158,7 +158,7 @@ DO UPDATE SET
         {
             var message = $"Error upserting shipping progress for source '{source}' and installation '{installationId}' exception[{exception}].";
             ILogger.Error($"{message} Exception: {exception}");
-            throw new Exception(message, exception);
+            throw new InvalidOperationException(message, exception);
         }
     }
 
@@ -241,7 +241,7 @@ LIMIT $limit;
         {
             var message = $"Error reading standard readings batch from table '{table}' for installation '{installationId}' exception[{exception}].";
             ILogger.Error($"{message} Exception: {exception}");
-            throw new Exception(message, exception);
+            throw new InvalidOperationException(message, exception);
         }
     }
 }

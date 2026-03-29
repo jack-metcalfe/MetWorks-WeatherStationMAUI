@@ -124,6 +124,18 @@
                 LineBreakMode="TailTruncation"
                 Text="{Binding PersistErrorMessageDisplay}" 
         />
+
+        <Label
+                Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4"
+                FontSize="22" TextColor="{StaticResource GoldVikings}"
+                Text="Shipping:"
+        />
+        <Label
+                Grid.Row="2" Grid.Column="5" Grid.ColumnSpan="45"
+                FontSize="20" TextColor="{StaticResource WhiteVikings}"
+                LineBreakMode="TailTruncation"
+                Text="{Binding TopShippingUpload1}"
+        />
         <Label 
                 Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4"
                 FontSize="22" TextColor="{StaticResource GoldVikings}" 
@@ -190,6 +202,18 @@
                 FontSize="20" TextColor="{StaticResource WhiteVikings}"
                 LineBreakMode="TailTruncation"
                 Text="{Binding TopRelayFanout1}"
+        />
+
+        <Label
+                Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="4"
+                FontSize="22" TextColor="{StaticResource GoldVikings}"
+                Text="Storage:"
+        />
+        <Label
+                Grid.Row="11" Grid.Column="5" Grid.ColumnSpan="45"
+                FontSize="20" TextColor="{StaticResource WhiteVikings}"
+                LineBreakMode="TailTruncation"
+                Text="{Binding StorageSummaryLine}"
         />
         <Grid Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="50" RowSpacing="0">
             <Grid.RowDefinitions>

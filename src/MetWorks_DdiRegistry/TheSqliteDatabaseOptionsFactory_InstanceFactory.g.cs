@@ -14,11 +14,11 @@ namespace MetWorks.ServiceRegistry
     // and immediately registers the created instance with the Registry.
     internal static partial class TheSqliteDatabaseOptionsFactory_InstanceFactory
     {
-        public static MetWorks.Common.Settings.SqliteDatabaseOptionsFactory Create(Registry registry)
+        public static MetWorks.Data.Sqlite.SqliteDatabaseOptionsFactory Create(Registry registry)
         {
             // Assignment-driven instance: construct with new().
             // This is always valid because ContainerClass is a concrete class.
-            var instance = new MetWorks.Common.Settings.SqliteDatabaseOptionsFactory();
+            var instance = new MetWorks.Data.Sqlite.SqliteDatabaseOptionsFactory();
             
 
             // Register immediately so other instances can reference it.

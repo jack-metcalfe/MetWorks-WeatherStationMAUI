@@ -14,11 +14,11 @@ namespace MetWorks.ServiceRegistry
     // and immediately registers the created instance with the Registry.
     internal static partial class TheProvenanceTracker_InstanceFactory
     {
-        public static MetWorks.Common.ProvenanceTracker Create(Registry registry)
+        public static MetWorks.ServiceFoundation.ProvenanceTracker Create(Registry registry)
         {
             // Assignment-driven instance: construct with new().
             // This is always valid because ContainerClass is a concrete class.
-            var instance = new MetWorks.Common.ProvenanceTracker();
+            var instance = new MetWorks.ServiceFoundation.ProvenanceTracker();
             
 
             // Register immediately so other instances can reference it.

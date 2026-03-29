@@ -2,6 +2,7 @@
 global using System.Collections.Generic;
 global using System.Collections.ObjectModel;
 global using System.ComponentModel;
+global using System.Data.Common;
 global using System.Diagnostics;
 global using System.Globalization;
 global using System.Linq;
@@ -21,11 +22,11 @@ global using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
 global using MetWorks.Common.Metrics;
 global using MetWorks.Common.Settings;
 global using MetWorks.Common.Utility;
-global using MetWorks.Ingest.Transformer;
+global using MetWorks.Constants;
+global using MetWorks.Data.Sqlite;
 global using MetWorks.Interfaces;
+global using MetWorks.Models.Observables.Weather;
 global using MetWorks.ServiceRegistry;
-
-global using RedStar.Amounts;
 
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
@@ -36,6 +37,8 @@ global using Microsoft.Maui.Controls.Hosting;
 global using Microsoft.Maui.Devices;
 global using Microsoft.Maui.Hosting;
 global using Microsoft.Maui.Storage;
+
+global using RedStar.Amounts;
 
 global using YamlDotNet.RepresentationModel;
 

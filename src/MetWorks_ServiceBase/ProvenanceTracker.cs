@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Common;
+﻿namespace MetWorks.ServiceFoundation;
 /// <summary>
 /// Centralized in-memory provenance tracking service.
 /// Maintains lineage for the last 1000 weather data packets with LRU eviction.

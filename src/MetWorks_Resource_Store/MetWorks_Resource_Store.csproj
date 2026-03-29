@@ -36,7 +36,4 @@
 			<LogicalName>Ingest.SQLite.wind.sql</LogicalName>
 		</EmbeddedResource>
 	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\MetWorks_Common\MetWorks_Common.csproj" />
-	</ItemGroup>
 </Project>

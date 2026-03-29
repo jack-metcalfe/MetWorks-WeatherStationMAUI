@@ -12,6 +12,7 @@ global using MetWorks.Common.Utility;
 global using MetWorks.Constants;
 global using MetWorks.Interfaces;
 global using MetWorks.Persistence.Logging;
+global using MetWorks.ServiceFoundation;
 
 global using Serilog;
 global using Serilog.Core;

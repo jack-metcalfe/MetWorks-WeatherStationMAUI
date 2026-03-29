@@ -1,10 +1,5 @@
 ﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
 
-using MetWorks.Constants;
-using MetWorks.Data.Sqlite;
-using MetWorks.Models.Observables.Weather;
-using System.Data.Common;
-
 public sealed class HistoricalObservationsViewModel : INotifyPropertyChanged, IDisposable
 {
     const int DefaultHoursBack = 0;
@@ -316,6 +311,10 @@ LIMIT $limit;
                 MaxGust = null;
                 StatusLine = $"Historical: {ex.Message}";
             });
+        }
+        finally
+        {
+            try { _refreshGate.Release(); } catch { }
         }
     }
 

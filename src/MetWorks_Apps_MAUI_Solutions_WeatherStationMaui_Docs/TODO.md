@@ -46,3 +46,15 @@ Consolidated from `ToDo_Candidates.txt`.
 
 - [ ] Per-service readiness gates (instead of/alongside a single global “all initialized” gate)
   - Candidate: `Task Ready` + `bool IsReady` per long-running service.
+
+## Project dependency hygiene / reference cycles (medium)
+
+- [ ] Identify and eliminate project reference cycle “ugliness” (e.g., `MetWorks_Resource_Store -> MetWorks_Common -> MetWorks_Persistence -> MetWorks_Resource_Store`).
+  - Goal: enforce a clean layering where foundational projects never depend on higher-level projects.
+  - Deliverables:
+    - Document current cycles + why they exist (what types are causing each edge).
+    - Decide target layering rules (e.g., `Interfaces/Constants` -> `Common` -> `Data` -> `Persistence` -> `App`).
+    - Refactor until `dotnet restore` can’t form cycles.
+  - Notes:
+    - Prefer moving shared DTOs/contracts “down” rather than pulling persistence “up” into common services.
+    - Avoid introducing new interfaces purely to break cycles unless they represent a real contract boundary.
