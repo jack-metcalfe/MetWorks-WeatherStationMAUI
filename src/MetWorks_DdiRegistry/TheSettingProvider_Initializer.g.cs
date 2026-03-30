@@ -24,7 +24,8 @@ namespace MetWorks.ServiceRegistry
             // Step 2: call its async initializer with assignment values.
             // All argument expressions are fully computed by the pipeline.
             await instance.InitializeAsync(
-                iLogger: registry.GetTheLoggerStub()
+                iLogger: registry.GetTheLoggerStub(),
+                iPlatformPaths: registry.GetTheDefaultPlatformPaths()
             ).ConfigureAwait(false);
         }
     }

@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MetWorks_Ingest_QueueWorker/MetWorks_Ingest_QueueWorker.csproj" />
+    <Project Path="src/MetWorks_Ingest_StreamReceiver/MetWorks_Ingest_StreamReceiver.csproj" />
+  </Folder>
+</Solution>

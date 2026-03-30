@@ -65,6 +65,10 @@ public sealed class LoggerResilient : ServiceBase, ILoggerResilient
             if (iLoggerSQLite is not null)
                 AddLogger(iLoggerSQLite);
 
+            // Replay any bootstrap log entries that were captured before persistent sinks existed
+            if (iLoggerStub is ILoggerStub stub)
+                stub.DrainTo(this);
+
             InitializeBase(
                 this,
                 iSettingRepository,

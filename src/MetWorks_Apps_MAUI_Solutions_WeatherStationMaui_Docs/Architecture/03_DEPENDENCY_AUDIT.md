@@ -52,9 +52,9 @@ Likely a metrics persistence or logging sink that targets PostgreSQL was added d
 
 ---
 
-## F3: Common_Logging is heavyweight — PARTIALLY RESOLVED
+## F3: ✅ RESOLVED — Common_Logging dependency footprint rationalized
 
-> **Status**: Npgsql removed (D2). ServiceBase dependency now goes through lightweight `MetWorks_ServiceBase` instead of all of Common (M1). InstanceIdentifier no longer pulls in Common_Settings (D4). Remaining: Common_Logging still references Common and Persistence.
+> **Status**: All unnecessary dependencies removed. Npgsql removed (D2). `MetWorks_Common` reference removed (was dead — zero types used) and replaced with direct `MetWorks_ServiceBase` reference. Bootstrap blind spot eliminated (LoggerStub A+B: Debug.WriteLine + buffer with drain into LoggerResilient). Dead `ILoggerBase.cs` removed. Remaining reference to `MetWorks_Persistence` is **intentional by design** (SQLite sink + stream-shipping pipeline).
 
 ### Original Problem
 `MetWorks_Common_Logging` depends on:
@@ -75,43 +75,100 @@ Multi-sink logging (file, SQLite, PostgreSQL, resilient) was implemented directl
 - Creates circular-like dependency pressure (logging needs persistence; persistence may need logging).
 - Makes it difficult to use logging in lightweight contexts (tests, tools).
 
-### Recommended Remediation
-1. Extract a core `ILogger` / logging abstraction that has zero infrastructure dependencies.
-2. Move database sinks (PostgreSQL, SQLite) into separate sink projects (e.g., `MetWorks_Logging_Sink_Postgres`, `MetWorks_Logging_Sink_Sqlite`).
-3. Keep `Common_Logging` as a thin orchestrator that references only the core abstraction + Serilog.
-4. Register sinks via DDI so consumers only pull in the sinks they need.
+### Current Dependencies (Post-Remediation)
+| Ref | Purpose | Weight |
+|-----|---------|--------|
+| Interfaces | `ILogger`, `ILoggerStub`, `ILoggerResilient`, `ILoggerSQLite`, `ISettingRepository` | Leaf ✅ |
+| Constants | Setting keys (`SettingConstants`, `LookupDictionaries`, `DatabaseConstants`) | Leaf ✅ |
+| Common_Utility | `NullPropertyGuard`, `SqliteWriteCoordinator`, `DefaultPlatformPaths` | Leaf ✅ |
+| ServiceBase | `ServiceBase` for `LoggerResilient` | Lightweight ✅ |
+| InstanceIdentifier | Installation ID for log context enrichment | Lightweight ✅ |
+| Persistence | `ILoggingDatabaseReadiness`, `ILoggerSqliteRepository` (SQLite sink) | **Intentional** — by design |
+| Serilog + Serilog.Sinks.File | File sink implementation | NuGet packages ✅ |
+
+### Future Consideration
+Rename `ILogger` → `IMetLogger` to eliminate disambiguation with `Serilog.ILogger` and `Microsoft.Extensions.Logging.ILogger`. Currently mitigated via `global using ILogger = MetWorks.Interfaces.ILogger;` in Common_Logging and fully-qualified names in ~12 other files.
+
+### Design Intent
+The Common_Logging → Persistence dependency is **intentional**, not accidental:
+- **SQLite is the default local sink** — logging rows persist locally in SQLite, consistent with the rest of the app's local data storage.
+- **Remote batching** reuses the same stream-shipping pipeline as weather data — log rows are batched and shipped alongside observation/wind/lightning data, not via a separate remote logging mechanism. This was a deliberate choice for coordinated, consistent batching.
+- **File sink is supplementary and independent** — useful for `adb` access on Android release builds where other debug output may not be available. It should work whether SQLite logging is active or not.
+- **LoggerResilient** orchestrates which sinks are active based on settings.
+
+**F3 remediation should preserve the SQLite + stream-shipping pipeline.** The goal is to make the file-only path lighter (no Persistence dependency needed for just file logging) while keeping the SQLite sink wired through Persistence as it is today. A possible approach: split Common_Logging into a lightweight core (file sink + LoggerStub) and a SQLite sink module that references Persistence.
 
 ---
 
-## F4: DdiRegistry is a "god aggregator"
+## F4: DdiRegistry is a "god aggregator" — ACCEPTED CONSTRAINT
+
+> **Status**: All 9 direct references verified as required (each provides at least one `new()`'d type). No stale references. Accepted as an inherent property of single-registry DDI design. Transitive fragility identified as the one actionable improvement (DDI tooling enhancement).
 
 ### Problem
-`MetWorks_DdiRegistry` has **9 direct project references**:
-1. Common
-2. Common_Logging
-3. Common_Settings
-4. Maui_Services
-5. Ingest_SQLite
-6. Ingest_Transformer
-7. InstanceIdentifier
-8. Networking_Udp_Transformer
-9. RedStar_Amounts_WeatherExtensions
+`MetWorks_DdiRegistry` has **9 direct project references** and `new()`s **55 concrete types** — 28 from the 9 direct references and 27 from **transitive** dependencies.
 
-The MAUI app references `DdiRegistry`, which means it transitively inherits the union of all 9 trees — approximately **25 projects**. This is the single biggest contributor to the solution's dependency complexity.
+#### Direct References (all required — each provides ≥1 `new()`'d type)
+| # | Reference | Types `new()`'d |
+|---|-----------|----------------|
+| 1 | Common | 6 (`StationMetadataProvider`, `TempestRestClient`, `TempestForecastProvider`, `TempestRestObservationsProvider`, `TempestWebSocketObservationsProvider`, `StreamShippingHttpClientProvider`) |
+| 2 | Common_Logging | 4 (`LoggerFile`, `LoggerResilient`, `LoggerSQLite`, `LoggerStub`) |
+| 3 | Common_Settings | 2 (`SettingProvider`, `SettingRepository`) |
+| 4 | Ingest_SQLite | 10 (all ingestors + shippers + `RollupsWorker`) |
+| 5 | Ingest_Transformer | 2 (`SensorReadingTransformer`, `WeatherReadingMux`) |
+| 6 | InstanceIdentifier | 1 |
+| 7 | Maui_Services | 1 (`TempestOAuthTokenProvider`) |
+| 8 | Networking_Udp_Transformer | 1 (`TempestPacketTransformer`) |
+| 9 | RedStar_WeatherExtensions | 1 (`UnitsOfMeasureInitializer`) |
+
+#### Transitive Dependencies (27 types `new()`'d with no direct reference)
+| Project | Types | Arrives via |
+|---------|-------|-------------|
+| **Persistence** | **17** (repositories, database readiness, stream shipping) | Common_Logging, Ingest_SQLite |
+| **Data_Sqlite** | 3 (`SqliteDatabase`, `SqliteDatabaseOptions`, `SqliteDatabaseOptionsFactory`) | Ingest_SQLite → Persistence |
+| **EventRelay** | 2 (`EventRelayBasic`, `EventRelayPath`) | Common |
+| **Common_Utility** | 2 (`DefaultPlatformPaths`, `SqliteWriteCoordinator`) | Common |
+| **Common_Metrics** | 2 (`MetricsLatestSnapshotStore`, `MetricsSamplerService`) | Ingest_SQLite |
+| **ServiceBase** | 1 (`ProvenanceTracker`) | Common |
 
 ### Root Cause
 DdiRegistry is generated code. The MSBuild target `GenerateDdiRegistryCode` generates C# classes that `new()` concrete types from across the entire solution. To compile, the registry project must reference every project whose types it instantiates.
 
 ### Impact
-- **High**: The MAUI app cannot pick and choose which subsystems it needs — it gets everything.
-- Build times increase because a change in any referenced project triggers recompilation of DdiRegistry.
-- The generated registry is a compile-time bottleneck and a conceptual single point of failure.
+- **Accepted**: The MAUI app genuinely needs all ~25 projects at runtime. DdiRegistry isn't inflating the dependency graph — it's honestly reflecting the app's true footprint.
+- Build times: a change in any referenced project triggers recompilation of DdiRegistry, but the generated code is trivial (no complex logic), so incremental builds are fast.
+- **Transitive fragility**: The real risk is that 27 types are `new()`'d from projects the registry doesn't directly reference. If any upstream project restructures its references, the registry silently breaks.
 
-### Structural Note
-This is an inherent property of the DDI design: a single registry that wires all instances needs visibility into all types. Possible mitigations:
-1. **Split the registry** into sub-registries per domain (e.g., `Registry_Ingest`, `Registry_Networking`, `Registry_Persistence`) so each sub-registry references only its domain.
-2. **Lazy loading**: Generate factories that load assemblies on demand rather than referencing them at compile time.
-3. **Accept the cost**: If build times are acceptable and the MAUI app truly needs everything, this may be an acceptable tradeoff — but document it as a known architectural constraint.
+### Recommended Remediation: DDI `assembly-map` (Tooling Enhancement)
+
+**Add an optional `assembly-map:` section to the DDI YAML** that maps namespaces to project paths:
+
+```yaml
+assembly-map:
+  MetWorks.Persistence:        ../MetWorks_Persistence/MetWorks_Persistence.csproj
+  MetWorks.Data.Sqlite:        ../MetWorks_Data_Sqlite/MetWorks_Data_Sqlite.csproj
+  MetWorks.EventRelay:         ../MetWorks_EventRelay/MetWorks_EventRelay.csproj
+  MetWorks.ServiceFoundation:  ../MetWorks_ServiceBase/MetWorks_ServiceFoundation.csproj
+  MetWorks.Common.Utility:     ../MetWorks_Common_Utility/MetWorks_Common_Utility.csproj
+  MetWorks.Common.Metrics:     ../MetWorks_Common_Metrics/MetWorks_Common_Metrics.csproj
+```
+
+The codegen tool would then:
+1. **Validate** that every `new()`'d type's namespace has a reachable assembly mapping.
+2. **Warn or fail** when a type relies on transitive visibility without an explicit mapping.
+3. **Optionally emit** the complete set of `<ProjectReference>` items in the DdiRegistry csproj, replacing manual maintenance.
+
+#### Why not dynamic assembly loading?
+- Loses compile-time safety — DDI's biggest advantage over runtime reflection DI.
+- `Assembly.LoadFrom` on MAUI/Android is constrained by AOT/trimming (types only referenced via reflection can be stripped).
+- No meaningful startup gain — `InitializeAllAsync` touches everything during splash anyway.
+- Contradicts the project's deliberate choice: *"avoid runtime reflection for DI."*
+
+#### Why not split registries?
+- The MAUI app needs everything — splitting into sub-registries means the app references all of them, with added cross-registry initialization ordering complexity.
+- Net result: more files, more wiring, same total references, harder to reason about startup order.
+
+### Decision
+**Accept the 9 direct references as irreducible.** Address transitive fragility via DDI tooling (`assembly-map`) when the DDI codegen tool is next enhanced.
 
 ---
 
@@ -141,13 +198,13 @@ Both `MetWorks_Ingest_StreamReceiver` and `MetWorks_Ingest_QueueWorker` have **z
 |---------|----------|--------|------|--------|
 | F1: Common_Settings → MAUI | High | Medium | Low | ✅ Resolved (D3, S3) |
 | F2: Common → Npgsql | Medium | Low | Low | ✅ Resolved (D1, D2) |
-| F3: Common_Logging heavyweight | Medium-High | Medium | Medium | ⚠️ Partially resolved |
-| F4: DdiRegistry god aggregator | High | High | High | Open (accepted constraint) |
+| F3: Common_Logging heavyweight | Medium-High | Medium | Medium | ✅ Resolved (D2, M1, D4, D6, LoggerStub A+B) |
+| F4: DdiRegistry god aggregator | High | High | High | ✅ Accepted constraint (assembly-map recommended for DDI tooling) |
 | F5: Server-side isolation | Low (opportunity) | Low | Very Low | Open (recommended) |
 
 ### Recommended Priority Order
 1. ~~**F5** — Move server-side projects out (zero risk, immediate noise reduction)~~ — Still recommended
 2. ~~**F2** — Remove Npgsql from Common (small, surgical)~~ — ✅ Done
 3. ~~**F1** — Decouple Common_Settings from MAUI (enables cross-platform settings)~~ — ✅ Done
-4. **F3** — Lighten Common_Logging further (remaining: still references Common and Persistence)
-5. **F4** — Address DdiRegistry aggregation (largest effort, needs DDI design discussion)
+4. ~~**F3** — Lighten Common_Logging (removed dead Common ref, LoggerStub A+B, Persistence kept by design)~~ — ✅ Done
+5. ~~**F4** — DdiRegistry aggregation (all 9 refs verified required; transitive fragility → DDI `assembly-map` tooling enhancement)~~ — ✅ Accepted

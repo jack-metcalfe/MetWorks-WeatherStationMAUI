@@ -1,5 +1,4 @@
 <Solution>
-	<Folder Name="/Solution Items/" />
 	<Folder Name="/src/">
 		<Project Path="src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs.csproj" />
 		<Project Path="src/MetWorks_Common/MetWorks_Common.csproj" />
@@ -20,9 +19,7 @@
 		<Project Path="src/MetWorks_EnumDefinitions/MetWorks_EnumDefinitions.csproj" />
 		<Project Path="src/MetWorks_EventRelay/MetWorks_EventRelay.csproj" />
 		<Project Path="src/MetWorks_Ingest/MetWorks_Ingest.csproj" />
-		<Project Path="src/MetWorks_Ingest_QueueWorker/MetWorks_Ingest_QueueWorker.csproj" />
 		<Project Path="src/MetWorks_Ingest_SQLite/MetWorks_Ingest_SQLite.csproj" />
-		<Project Path="src/MetWorks_Ingest_StreamReceiver/MetWorks_Ingest_StreamReceiver.csproj" />
 		<Project Path="src/MetWorks_Ingest_Transformer/MetWorks_Ingest_Transformer.csproj" />
 		<Project Path="src/MetWorks_InstanceIdentifier/MetWorks_InstanceIdentifier.csproj" />
 		<Project Path="src/MetWorks_Interfaces/MetWorks_Interfaces.csproj" />
