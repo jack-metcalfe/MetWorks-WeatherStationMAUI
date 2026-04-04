@@ -28,6 +28,9 @@
 - Phase 11 manual validation should account for this dev machine having two WiFi connections: one network interface can see Tempest UDP broadcasts and the other cannot (useful for UDP-only vs REST-only test scenarios).
 - Persist raw weather/forecast JSON snapshots in metric units (API/UDP native), independent of user unit preferences; apply preference conversions only when constructing `Amount` for UI/domain models.
 - Run diagnostic commands/searches via tools without asking the user to copy/paste. If `rg` is unavailable on PATH in Visual Studio DevShell, invoke it via full path `$env:LOCALAPPDATA\Microsoft\WinGet\Links\rg.exe` as a fallback.
+
+## PowerShell Command Guidelines
+- Avoid using `2>&1` stderr redirect in PowerShell terminal commands. The terminal integration echoes the command character-by-character and may repeat when stderr is redirected this way. If a command fails silently, diagnose with a separate follow-up command (e.g., `git status`) rather than redirecting stderr.
 - OAuth interactive negotiation in this codebase only occurs when `ITempestOAuthTokenProvider.GetAccessTokenAsync` is called with `allowInteractive: true`; otherwise, it returns null when no cached token is present.
 
 ## Instrumentation Preferences
@@ -112,3 +115,16 @@
 - Prefer deterministic manual paging (host ContentView + swipe gestures + arrow:key navigation) over CarouselView when CarouselView exhibits virtualization/recycling issues like oscillation/self-swiping.
 - StationMetadataProvider persists station metadata to local device disk; MetricsSummaryIngestor should be migrated to SQLite for local-first. User prefers the workflow: create a plan, then execute the plan.
 - For forecast/hourly table layouts, keep header Grid column definitions identical to the data row Grid to preserve alignment; place extra controls (e.g., auto-scroll button) using overlay/column-span rather than adding columns.
+
+## Stream Shipping & Receiver
+- Wire format: each NDJSON line is a JSON object; batches are POST'd to `/ingest/v1/stream` with `Content-Type: application/x-ndjson` and optional `Content-Encoding: gzip`.
+- All source tables (observation, wind, lightning, station_metadata, log_entries) use a COMB GUID (`IdGenerator.CreateCombGuid()`) as `TEXT PRIMARY KEY` for record identity and dedup.
+- SQLite's hidden `rowid` (integer, monotonically increasing) is used for shipping progress watermarks — a separate concern from record identity.
+- Receiver dedup: transition from SHA256 content hash (`RecordHash CHAR(64)` unique index) to `(InstallationId, RecordId)` composite unique key. SHA256 may be retained as a secondary integrity check.
+- ACK response shape: `{ "ackedUpToRowId": <long> }` (camelCase) or `{ "acked_up_to_rowid": <long> }` (snake_case); shippers accept either.
+- Shipper progress state: `shipper_state` table tracks `(source, last_shipped_rowid, last_acked_rowid)` per source/table. Progress uses `rowid`, not the GUID `id`.
+- `rowid` can be reused after SQLite DB deletion/recreation; this is safe because dedup relies on the GUID `id`, and `shipper_state` resets on a fresh DB.
+- Receiver target: Azure Container Apps (Consumption plan, scale-to-zero). Phase 1 storage: Azure SQL (connection string swap from LAN SQL Server). Phase 2+: Blob Storage.
+- Download API (new, receiver-side): `GET /ingest/v1/download` (query by installationId, afterRowId, table, limit) returns NDJSON; `POST /ingest/v1/ack` marks records consumed.
+- Both the MAUI solution and the server-side solution share this `.github/copilot-instructions.md`; keep conventions applicable to both sides here.
+- Full migration plan: `src/MetWorks_Apps_MAUI_Solutions_WeatherStationMaui_Docs/Architecture/07_RECEIVER_MIGRATION_PLAN.md`.
