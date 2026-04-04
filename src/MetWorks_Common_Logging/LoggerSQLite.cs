@@ -373,6 +373,7 @@ public sealed class LoggerSQLite : ILoggerSQLite
                     await _loggerSqliteRepository.InsertAsync(
                         _tableName,
                         new MetWorks.Persistence.Logging.LoggerSqliteLogEvent(
+                            Id: IdGenerator.CreateCombGuid().ToString(),
                             TimestampUtc: logEvent.Timestamp.UtcDateTime,
                             Level: logEvent.Level.ToString(),
                             Message: rendered ?? string.Empty,

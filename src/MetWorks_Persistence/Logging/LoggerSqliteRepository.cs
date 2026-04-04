@@ -35,8 +35,8 @@ public sealed class LoggerSqliteRepository : ILoggerSqliteRepository
         ArgumentNullException.ThrowIfNull(logEvent);
 
         var sql = $"""
- INSERT INTO "{table}" (timestamp_utc, level, message, exception, properties, installation_id)
- VALUES ($ts, $level, $message, $exception, json($properties), $installation_id);
+ INSERT INTO "{table}" (id, timestamp_utc, level, message, exception, properties, installation_id)
+ VALUES ($id, $ts, $level, $message, $exception, json($properties), $installation_id);
  """;
 
         if (_isInitialized != 1)
@@ -49,6 +49,7 @@ public sealed class LoggerSqliteRepository : ILoggerSqliteRepository
         _ = await session.ExecuteAsync(
             sql,
             [
+                new DbParam("$id", logEvent.Id),
                 new DbParam("$ts", logEvent.TimestampUtc.ToString("O")),
                 new DbParam("$level", logEvent.Level),
                 new DbParam("$message", logEvent.Message),

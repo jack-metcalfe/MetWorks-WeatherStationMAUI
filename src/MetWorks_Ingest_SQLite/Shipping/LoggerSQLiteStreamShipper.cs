@@ -143,13 +143,17 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
             {
                 break;
             }
+            catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
+            {
+                ILogger.Error("LoggerSQLiteStreamShipper: request timed out", ex);
+            }
             catch (HttpRequestException ex)
             {
-                ILogger.Warning("LoggerSQLiteStreamShipper: HTTP failure", ex);
+                ILogger.Error("LoggerSQLiteStreamShipper: HTTP failure", ex);
             }
             catch (InvalidOperationException ex)
             {
-                ILogger.Warning("LoggerSQLiteStreamShipper: failure", ex);
+                ILogger.Error("LoggerSQLiteStreamShipper: failure", ex);
             }
             catch (Exception ex)
             {
@@ -196,7 +200,7 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
             if (rows.Count == 0)
                 return;
 
-            var maxId = rows[^1].Id;
+            var maxRowId = rows[^1].RowId;
 
             var ackedUpTo = await UploadNdjsonAsync(
                 httpClient: _httpClient,
@@ -204,6 +208,7 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
                 table: _tableName,
                 installationId: _installationId,
                 rows: rows,
+                iLogger: ILogger,
                 token: token).ConfigureAwait(false);
 
             if (ackedUpTo is null)
@@ -211,7 +216,7 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
 
             await stateRepo.UpsertShippingProgressAsync(
                 source: Source,
-                lastShippedRowId: maxId,
+                lastShippedRowId: maxRowId,
                 lastAckedRowId: ackedUpTo.Value,
                 cancellationToken: token).ConfigureAwait(false);
         }
@@ -219,13 +224,17 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         {
             throw;
         }
+        catch (OperationCanceledException exception) when (!token.IsCancellationRequested)
+        {
+            ILogger.Error("LoggerSQLiteStreamShipper: request timed out during shipping", exception);
+        }
         catch (HttpRequestException exception)
         {
-            ILogger.Warning("LoggerSQLiteStreamShipper: HTTP failure during shipping", exception);
+            ILogger.Error("LoggerSQLiteStreamShipper: HTTP failure during shipping", exception);
         }
         catch (InvalidOperationException exception)
         {
-            ILogger.Warning("LoggerSQLiteStreamShipper: failure during shipping", exception);
+            ILogger.Error("LoggerSQLiteStreamShipper: failure during shipping", exception);
         }
         catch (Exception exception)
         {
@@ -239,6 +248,7 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         string table,
         string installationId,
         IReadOnlyList<LoggerLogRow> rows,
+        ILogger iLogger,
         CancellationToken token)
     {
         await using var payloadStream = new MemoryStream();
@@ -252,7 +262,8 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
                     source = Source,
                     table,
                     installationId,
-                    rowid = row.Id,
+                    rowid = row.RowId,
+                    id = row.Id,
                     timestamp_utc = row.TimestampUtc,
                     level = row.Level,
                     message = row.Message,
@@ -289,7 +300,13 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         try
         {
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync(token).ConfigureAwait(false);
+                iLogger.Error($"UploadNdjsonAsync: server returned {(int)response.StatusCode} {response.ReasonPhrase} (endpoint={endpointUrl}, table={table}, rows={rowCount}, gzipBytes={gzipBytes}): {errorBody}");
+                return null;
+            }
 
             await using var responseStream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
             using var doc = await JsonDocument.ParseAsync(responseStream, cancellationToken: token).ConfigureAwait(false);
@@ -306,7 +323,18 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
                 return ackedSnake.GetInt64();
             }
 
+            iLogger.Error($"UploadNdjsonAsync: server returned unrecognized ACK response (endpoint={endpointUrl}, table={table}, rows={rowCount}, status={(int)response.StatusCode}): {doc.RootElement.GetRawText()}");
             return null;
+        }
+        catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
+        {
+            iLogger.Error($"LoggerSQLiteStreamShipper: request timed out (endpoint={endpointUrl}, rows={rowCount}, gzipBytes={gzipBytes})", ex);
+            throw;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            iLogger.Error($"LoggerSQLiteStreamShipper: upload failed (endpoint={endpointUrl}, rows={rowCount}, gzipBytes={gzipBytes})", ex);
+            throw;
         }
         finally
         {

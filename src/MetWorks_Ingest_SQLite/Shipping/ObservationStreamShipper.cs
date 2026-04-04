@@ -123,13 +123,17 @@ public sealed class ObservationStreamShipper : ServiceBase
             {
                 break;
             }
+            catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
+            {
+                ILogger.Error("ObservationStreamShipper: request timed out", ex);
+            }
             catch (HttpRequestException ex)
             {
-                ILogger.Warning("ObservationStreamShipper: HTTP failure", ex);
+                ILogger.Error("ObservationStreamShipper: HTTP failure", ex);
             }
             catch (InvalidOperationException ex)
             {
-                ILogger.Warning("ObservationStreamShipper: failure", ex);
+                ILogger.Error("ObservationStreamShipper: failure", ex);
             }
             catch (Exception ex)
             {
@@ -179,6 +183,7 @@ public sealed class ObservationStreamShipper : ServiceBase
                 table: Table,
                 installationId: _installationId,
                 rows: rows,
+                iLogger: ILogger,
                 token: token).ConfigureAwait(false);
 
             if (ackedUpTo is null)
@@ -194,17 +199,21 @@ public sealed class ObservationStreamShipper : ServiceBase
         {
             throw;
         }
+        catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
+        {
+            ILogger.Error("ObservationStreamShipper: request timed out during shipping", ex);
+        }
         catch (HttpRequestException ex)
         {
-            ILogger.Warning("ObservationStreamShipper: HTTP failure", ex);
+            ILogger.Error("ObservationStreamShipper: HTTP failure during shipping", ex);
         }
         catch (InvalidOperationException ex)
         {
-            ILogger.Warning("ObservationStreamShipper: failure", ex);
+            ILogger.Error("ObservationStreamShipper: failure during shipping", ex);
         }
         catch (Exception ex)
         {
-            ILogger.Error("ObservationStreamShipper: error during shipping", ex);
+            ILogger.Error("ObservationStreamShipper: unexpected error during shipping", ex);
         }
     }
 
@@ -214,6 +223,7 @@ public sealed class ObservationStreamShipper : ServiceBase
         string table,
         string installationId,
         IReadOnlyList<MetWorks.Persistence.StreamShipping.StandardReadingRow> rows,
+        ILogger iLogger,
         CancellationToken token)
     {
         await using var payloadStream = new MemoryStream();
@@ -261,7 +271,13 @@ public sealed class ObservationStreamShipper : ServiceBase
         try
         {
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync(token).ConfigureAwait(false);
+                iLogger.Error($"UploadNdjsonAsync: server returned {(int)response.StatusCode} {response.ReasonPhrase} (endpoint={endpointUrl}, table={table}, rows={rowCount}, gzipBytes={gzipBytes}): {errorBody}");
+                return null;
+            }
 
             await using var responseStream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
             using var doc = await JsonDocument.ParseAsync(responseStream, cancellationToken: token).ConfigureAwait(false);
@@ -278,7 +294,18 @@ public sealed class ObservationStreamShipper : ServiceBase
                 return ackedSnake.GetInt64();
             }
 
+            iLogger.Error($"UploadNdjsonAsync: server returned unrecognized ACK response (endpoint={endpointUrl}, table={table}, rows={rowCount}, status={(int)response.StatusCode}): {doc.RootElement.GetRawText()}");
             return null;
+        }
+        catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
+        {
+            iLogger.Error($"ObservationStreamShipper: request timed out (endpoint={endpointUrl}, rows={rowCount}, gzipBytes={gzipBytes})", ex);
+            throw;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            iLogger.Error($"ObservationStreamShipper: upload failed (endpoint={endpointUrl}, rows={rowCount}, gzipBytes={gzipBytes})", ex);
+            throw;
         }
         finally
         {

@@ -133,13 +133,17 @@ public sealed class StationMetadataStreamShipper : ServiceBase
             {
                 break;
             }
+            catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
+            {
+                ILogger.Error("StationMetadataStreamShipper: request timed out", ex);
+            }
             catch (HttpRequestException ex)
             {
-                ILogger.Warning("StationMetadataStreamShipper: HTTP failure", ex);
+                ILogger.Error("StationMetadataStreamShipper: HTTP failure", ex);
             }
             catch (InvalidOperationException ex)
             {
-                ILogger.Warning("StationMetadataStreamShipper: failure", ex);
+                ILogger.Error("StationMetadataStreamShipper: failure", ex);
             }
             catch (Exception ex)
             {
@@ -195,6 +199,7 @@ public sealed class StationMetadataStreamShipper : ServiceBase
                 table: Table,
                 installationId: _installationId,
                 rows: rows,
+                iLogger: ILogger,
                 token: token).ConfigureAwait(false);
 
             if (ackedUpTo is null)
@@ -211,13 +216,17 @@ public sealed class StationMetadataStreamShipper : ServiceBase
         {
             throw;
         }
+        catch (OperationCanceledException exception) when (!token.IsCancellationRequested)
+        {
+            ILogger.Error("StationMetadataStreamShipper: request timed out during shipping", exception);
+        }
         catch (HttpRequestException exception)
         {
-            ILogger.Warning("StationMetadataStreamShipper: HTTP failure during shipping", exception);
+            ILogger.Error("StationMetadataStreamShipper: HTTP failure during shipping", exception);
         }
         catch (InvalidOperationException exception)
         {
-            ILogger.Warning("StationMetadataStreamShipper: failure during shipping", exception);
+            ILogger.Error("StationMetadataStreamShipper: failure during shipping", exception);
         }
         catch (Exception exception)
         {

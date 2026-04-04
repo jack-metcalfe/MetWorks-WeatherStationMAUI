@@ -127,13 +127,17 @@ public sealed class LightningStreamShipper : ServiceBase
             {
                 break;
             }
+            catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
+            {
+                ILogger.Error("LightningStreamShipper: request timed out", ex);
+            }
             catch (HttpRequestException ex)
             {
-                ILogger.Warning("LightningStreamShipper: HTTP failure", ex);
+                ILogger.Error("LightningStreamShipper: HTTP failure", ex);
             }
             catch (InvalidOperationException ex)
             {
-                ILogger.Warning("LightningStreamShipper: failure", ex);
+                ILogger.Error("LightningStreamShipper: failure", ex);
             }
             catch (Exception ex)
             {
@@ -183,6 +187,7 @@ public sealed class LightningStreamShipper : ServiceBase
                 table: Table,
                 installationId: _installationId,
                 rows: rows,
+                iLogger: ILogger,
                 token: token).ConfigureAwait(false);
 
             if (ackedUpTo is null)
@@ -198,13 +203,17 @@ public sealed class LightningStreamShipper : ServiceBase
         {
             throw;
         }
+        catch (OperationCanceledException exception) when (!token.IsCancellationRequested)
+        {
+            ILogger.Error("LightningStreamShipper: request timed out during shipping", exception);
+        }
         catch (HttpRequestException exception)
         {
-            ILogger.Warning("LightningStreamShipper: HTTP failure during shipping", exception);
+            ILogger.Error("LightningStreamShipper: HTTP failure during shipping", exception);
         }
         catch (InvalidOperationException exception)
         {
-            ILogger.Warning("LightningStreamShipper: failure during shipping", exception);
+            ILogger.Error("LightningStreamShipper: failure during shipping", exception);
         }
         catch (Exception exception)
         {

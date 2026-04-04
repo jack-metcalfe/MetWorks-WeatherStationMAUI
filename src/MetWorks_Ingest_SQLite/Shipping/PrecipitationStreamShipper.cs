@@ -119,13 +119,17 @@ public sealed class PrecipitationStreamShipper : ServiceBase
             {
                 break;
             }
+            catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
+            {
+                ILogger.Error("PrecipitationStreamShipper: request timed out", ex);
+            }
             catch (HttpRequestException ex)
             {
-                ILogger.Warning("PrecipitationStreamShipper: HTTP failure", ex);
+                ILogger.Error("PrecipitationStreamShipper: HTTP failure", ex);
             }
             catch (InvalidOperationException ex)
             {
-                ILogger.Warning("PrecipitationStreamShipper: failure", ex);
+                ILogger.Error("PrecipitationStreamShipper: failure", ex);
             }
             catch (Exception ex)
             {
@@ -176,6 +180,7 @@ public sealed class PrecipitationStreamShipper : ServiceBase
                 table: Table,
                 installationId: _installationId,
                 rows: rows,
+                iLogger: ILogger,
                 token: token).ConfigureAwait(false);
 
             if (ackedUpTo is null)
@@ -191,13 +196,17 @@ public sealed class PrecipitationStreamShipper : ServiceBase
         {
             throw;
         }
+        catch (OperationCanceledException exception) when (!token.IsCancellationRequested)
+        {
+            ILogger.Error("PrecipitationStreamShipper: request timed out during shipping", exception);
+        }
         catch (HttpRequestException exception)
         {
-            ILogger.Warning("PrecipitationStreamShipper: HTTP failure during shipping", exception);
+            ILogger.Error("PrecipitationStreamShipper: HTTP failure during shipping", exception);
         }
         catch (InvalidOperationException exception)
         {
-            ILogger.Warning("PrecipitationStreamShipper: failure during shipping", exception);
+            ILogger.Error("PrecipitationStreamShipper: failure during shipping", exception);
         }
         catch (Exception exception)
         {

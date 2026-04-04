@@ -1,7 +1,8 @@
 ﻿namespace MetWorks.Persistence.StreamShipping;
 
 public sealed record LoggerLogRow(
-    long Id,
+    long RowId,
+    string Id,
     string TimestampUtc,
     string Level,
     string Message,

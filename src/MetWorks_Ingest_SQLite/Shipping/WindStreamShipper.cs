@@ -120,13 +120,17 @@ public sealed class WindStreamShipper : ServiceBase
             {
                 break;
             }
+            catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
+            {
+                ILogger.Error("WindStreamShipper: request timed out", ex);
+            }
             catch (HttpRequestException ex)
             {
-                ILogger.Warning("WindStreamShipper: HTTP failure", ex);
+                ILogger.Error("WindStreamShipper: HTTP failure", ex);
             }
             catch (InvalidOperationException ex)
             {
-                ILogger.Warning("WindStreamShipper: failure", ex);
+                ILogger.Error("WindStreamShipper: failure", ex);
             }
             catch (Exception ex)
             {
@@ -176,6 +180,7 @@ public sealed class WindStreamShipper : ServiceBase
                 table: Table,
                 installationId: _installationId,
                 rows: rows,
+                iLogger: ILogger,
                 token: token).ConfigureAwait(false);
 
             if (ackedUpTo is null)
@@ -191,13 +196,17 @@ public sealed class WindStreamShipper : ServiceBase
         {
             throw;
         }
+        catch (OperationCanceledException exception) when (!token.IsCancellationRequested)
+        {
+            ILogger.Error("WindStreamShipper: request timed out during shipping", exception);
+        }
         catch (HttpRequestException exception)
         {
-            ILogger.Warning("WindStreamShipper: HTTP failure during shipping", exception);
+            ILogger.Error("WindStreamShipper: HTTP failure during shipping", exception);
         }
         catch (InvalidOperationException exception)
         {
-            ILogger.Warning("WindStreamShipper: failure during shipping", exception);
+            ILogger.Error("WindStreamShipper: failure during shipping", exception);
         }
         catch (Exception exception)
         {

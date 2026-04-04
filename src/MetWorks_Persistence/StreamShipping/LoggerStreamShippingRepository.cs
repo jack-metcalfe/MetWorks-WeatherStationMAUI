@@ -47,10 +47,10 @@ public sealed class LoggerStreamShippingRepository : ILoggerStreamShippingReposi
             throw new ArgumentOutOfRangeException(nameof(maxRows));
 
         var sql = $"""
-SELECT id, timestamp_utc, level, message, exception, properties, installation_id
+SELECT rowid, id, timestamp_utc, level, message, exception, properties, installation_id
 FROM "{table}"
-WHERE id > $last_acked_id
-ORDER BY id
+WHERE rowid > $last_acked_rowid
+ORDER BY rowid
 LIMIT $limit;
 """;
 
@@ -59,12 +59,13 @@ LIMIT $limit;
         var rows = await session.QueryAsync(
             sql,
             [
-                new DbParam("$last_acked_id", lastAckedRowId),
+                new DbParam("$last_acked_rowid", lastAckedRowId),
                 new DbParam("$limit", maxRows),
             ],
             row =>
             {
-                _ = row.TryGetInt64("id", out var id);
+                _ = row.TryGetInt64("rowid", out var rowId);
+                _ = row.TryGetString("id", out var id);
                 _ = row.TryGetString("timestamp_utc", out var ts);
                 _ = row.TryGetString("level", out var level);
                 _ = row.TryGetString("message", out var message);
@@ -73,7 +74,8 @@ LIMIT $limit;
                 _ = row.TryGetString("installation_id", out var installationId);
 
                 return new LoggerLogRow(
-                    Id: id,
+                    RowId: rowId,
+                    Id: id ?? string.Empty,
                     TimestampUtc: ts ?? string.Empty,
                     Level: level ?? string.Empty,
                     Message: message ?? string.Empty,
@@ -102,7 +104,7 @@ LIMIT $limit;
 
         var sql = $"""
 DELETE FROM "{table}"
-WHERE id <= $acked_id AND timestamp_utc < $cutoff_ts;
+WHERE rowid <= $acked_rowid AND timestamp_utc < $cutoff_ts;
 """;
 
         await using var session = await GetInitializedSqliteDatabase().OpenSessionAsync(cancellationToken).ConfigureAwait(false);
@@ -110,7 +112,7 @@ WHERE id <= $acked_id AND timestamp_utc < $cutoff_ts;
         return await session.ExecuteAsync(
             sql,
             [
-                new DbParam("$acked_id", ackedUpToRowId),
+                new DbParam("$acked_rowid", ackedUpToRowId),
                 new DbParam("$cutoff_ts", cutoffRaw),
             ],
             cancellationToken).ConfigureAwait(false);
