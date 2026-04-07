@@ -37,14 +37,7 @@ public sealed class LoggerSQLite : ILoggerSQLite
 
         try
         {
-            var tableName = iSettingRepository.GetValueOrDefault<string>(
-                LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildPath(
-                    SettingConstants.LoggerSQLite_tableName
-                )
-            );
-
-            if (string.IsNullOrWhiteSpace(tableName))
-                tableName = DatabaseConstants.DefaultLoggerSqliteTableName;
+            var tableName = DatabaseConstants.DefaultLoggerSqliteTableName;
 
             var minimumLevel = iSettingRepository.GetValueOrDefault<string>(
                 LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildPath(
@@ -52,11 +45,7 @@ public sealed class LoggerSQLite : ILoggerSQLite
                 )
             );
 
-            var autoCreateTable = iSettingRepository.GetValueOrDefault<bool>(
-                LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildPath(
-                    SettingConstants.LoggerSQLite_autoCreateTable
-                )
-            );
+            const bool autoCreateTable = true;
 
             _tableName = tableName;
 

@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -8,7 +8,6 @@ namespace MetWorks.Ingest.SQLite.Shipping;
 
 public sealed class LoggerSQLiteStreamShipper : ServiceBase
 {
-    const string Source = "logger_sqlite";
     const string DefaultLoggerTableName = DatabaseConstants.DefaultLoggerSqliteTableName;
 
     const int DefaultShipIntervalSeconds = 30;
@@ -101,12 +100,6 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         if (_maxBatchRows <= 0)
             _maxBatchRows = DefaultMaxBatchRows;
 
-        _tableName = iSettingRepository.GetValueOrDefault<string>(
-            LookupDictionaries.LoggerSQLiteGroupSettingsDefinition.BuildPath(SettingConstants.LoggerSQLite_tableName));
-
-        if (string.IsNullOrWhiteSpace(_tableName))
-            _tableName = DefaultLoggerTableName;
-
         _installationId = iInstanceIdentifier.GetOrCreateInstallationId();
 
         if (string.IsNullOrWhiteSpace(_endpointUrl))
@@ -186,7 +179,7 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
 
             await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
 
-            var state = await stateRepo.TryGetStateAsync(Source, token).ConfigureAwait(false);
+            var state = await stateRepo.TryGetStateAsync(_tableName, token).ConfigureAwait(false);
 
             await TryPurgeOldRowsAsync(
                 loggerRepo,
@@ -215,7 +208,7 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
                 return;
 
             await stateRepo.UpsertShippingProgressAsync(
-                source: Source,
+                table: _tableName,
                 lastShippedRowId: maxRowId,
                 lastAckedRowId: ackedUpTo.Value,
                 cancellationToken: token).ConfigureAwait(false);
@@ -259,7 +252,6 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
             {
                 var obj = new
                 {
-                    source = Source,
                     table,
                     installationId,
                     rowid = row.RowId,
@@ -340,7 +332,6 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         {
             var elapsedTicks = Stopwatch.GetTimestamp() - startTicks;
             StreamShippingUploadMetrics.Record(
-                source: Source,
                 table: table,
                 rows: rowCount,
                 gzipBytes: gzipBytes,
@@ -390,14 +381,14 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
             return;
 
         await loggerRepo.RecordLossyDeletionAsync(
-            source: Source,
+            table: tableName,
             deletedThroughRowId: acked,
             deletedRowCount: deleted,
             deletionUtc: now,
             cancellationToken: token).ConfigureAwait(false);
 
         await stateRepo.UpsertShippingProgressAsync(
-            Source,
+            tableName,
             lastShippedRowId: acked,
             lastAckedRowId: acked,
             cancellationToken: token).ConfigureAwait(false);

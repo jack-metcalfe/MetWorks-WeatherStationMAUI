@@ -24,10 +24,10 @@ MAUI App                          LAN Server
 │ Observation   │──POST /ingest/──│ StreamReceiver          │
 │ Wind          │   v1/stream     │  → SQL Server           │
 │ Lightning     │                 │    Weather.IngestQueue   │
-│ StationMeta   │                 └───────────┬──────────────┘
-│ Logs          │                             │
-└──────────────┘                  ┌───────────▼──────────────┐
-                                  │ QueueWorker               │
+│ Precipitation │                 └───────────┬──────────────┘
+│ StationMeta   │                             │
+│ Logs          │                  ┌───────────▼──────────────┐
+└──────────────┘                  │ QueueWorker               │
                                   │  → SQL Server              │
                                   │    Weather.RawIngest       │
                                   └────────────────────────────┘
@@ -44,7 +44,7 @@ MAUI App                          LAN Server
 
 Each line is a JSON object. Two shapes exist depending on source table:
 
-**Observation / Wind / Lightning / StationMetadata:**
+**Observation / Wind / Lightning / Precipitation / StationMetadata:**
 ```json
 {
   "table": "observation",
@@ -59,7 +59,6 @@ Each line is a JSON object. Two shapes exist depending on source table:
 **Log entries:**
 ```json
 {
-  "source": "logger_sqlite",
   "table": "log_entries",
   "installationId": "guid",
   "rowid": 1042,
@@ -80,7 +79,7 @@ Each line is a JSON object. Two shapes exist depending on source table:
 | `rowid` | long | SQLite hidden rowid — monotonically increasing per table. Used for **progress tracking** (ACK watermark). |
 | `id` | string (GUID) | COMB GUID — globally unique per record. Used for **dedup/identity**. Present on all table types (as of 2026-01-19 log table change). |
 | `installationId` | string (GUID) | Identifies the sending device/installation. |
-| `table` | string | Source table name (`observation`, `wind`, `lightning`, `station_metadata`, `log_entries`). |
+| `table` | string | Source table name (`observation`, `wind`, `lightning`, `precipitation`, `station_metadata`, `log_entries`). |
 
 ---
 

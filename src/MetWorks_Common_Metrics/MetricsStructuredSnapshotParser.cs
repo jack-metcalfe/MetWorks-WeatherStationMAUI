@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Common.Metrics;
+namespace MetWorks.Common.Metrics;
 public static class MetricsStructuredSnapshotParser
 {
     public static bool TryParse(string json, out MetricsStructuredSnapshot snapshot)
@@ -202,7 +202,6 @@ public static class MetricsStructuredSnapshotParser
                     continue;
 
                 topUploads.Add(new MetricsShippingUploadHotspot(
-                    Source: TryGetString(e, "source") ?? string.Empty,
                     Table: TryGetString(e, "table") ?? string.Empty,
                     Attempts: TryGetInt64(e, "attempts") ?? 0,
                     Successes: TryGetInt64(e, "successes") ?? 0,
@@ -224,7 +223,7 @@ public static class MetricsStructuredSnapshotParser
                     continue;
 
                 sources.Add(new MetricsShippingSourceStateSnapshot(
-                    Source: TryGetString(e, "source") ?? string.Empty,
+                    Table: TryGetString(e, "table") ?? string.Empty,
                     LastShippedRowId: TryGetInt64(e, "last_shipped_rowid") ?? 0,
                     LastAckedRowId: TryGetInt64(e, "last_acked_rowid") ?? 0,
                     LastLossyDeletedRowId: TryGetInt64(e, "last_lossy_deleted_rowid") ?? 0,

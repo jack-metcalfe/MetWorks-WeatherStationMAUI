@@ -35,5 +35,17 @@
 		<EmbeddedResource Include="Ingest/SQLite/wind.sql">
 			<LogicalName>Ingest.SQLite.wind.sql</LogicalName>
 		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/lightning_rollup_1d.sql">
+			<LogicalName>Ingest.SQLite.lightning_rollup_1d.sql</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/station_metadata.sql">
+			<LogicalName>Ingest.SQLite.station_metadata.sql</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/wind_rollup_1d.sql">
+			<LogicalName>Ingest.SQLite.wind_rollup_1d.sql</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Ingest/SQLite/wind_rollup_1h.sql">
+			<LogicalName>Ingest.SQLite.wind_rollup_1h.sql</LogicalName>
+		</EmbeddedResource>
 	</ItemGroup>
 </Project>

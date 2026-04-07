@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using MetWorks.Data.Sqlite;
 
 namespace MetWorks.Persistence.StreamShipping;
@@ -119,17 +119,17 @@ WHERE rowid <= $acked_rowid AND timestamp_utc < $cutoff_ts;
     }
 
     public Task RecordLossyDeletionAsync(
-        string source,
+        string table,
         long deletedThroughRowId,
         int deletedRowCount,
         DateTime deletionUtc,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(source))
-            throw new ArgumentException("Source is required.", nameof(source));
+        if (string.IsNullOrWhiteSpace(table))
+            throw new ArgumentException("Table is required.", nameof(table));
 
         return GetInitializedStreamShippingRepository().UpsertShippingProgressAsync(
-            source,
+            table,
             lastShippedRowId: deletedThroughRowId,
             lastAckedRowId: deletedThroughRowId,
             cancellationToken: cancellationToken);

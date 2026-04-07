@@ -14,9 +14,7 @@ public static class SettingConstants
     public const string LoggerFile_rollOnFileSizeLimit = @"rollOnFileSizeLimit";
 
     public const string LoggerSQLite_groupName = "loggerSQLite";
-    public const string LoggerSQLite_tableName = "tableName";
     public const string LoggerSQLite_minimumLevel = "minimumLevel";
-    public const string LoggerSQLite_autoCreateTable = "autoCreateTable";
 
     public const string ProviderFilename = @"data.settings.yaml";
 

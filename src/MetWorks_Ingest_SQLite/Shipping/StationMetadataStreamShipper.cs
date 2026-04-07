@@ -1,11 +1,10 @@
-﻿using MetWorks.Persistence.StreamShipping;
+using MetWorks.Persistence.StreamShipping;
 using MetWorks.Persistence.StationMetadata;
 
 namespace MetWorks.Ingest.SQLite.Shipping;
 
 public sealed class StationMetadataStreamShipper : ServiceBase
 {
-    const string Source = "station_metadata";
     const string Table = "station_metadata";
 
     const int DefaultShipIntervalSeconds = 30;
@@ -177,7 +176,7 @@ public sealed class StationMetadataStreamShipper : ServiceBase
             await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
             await stationMetadataReadiness.EnsureReadyAsync(token).ConfigureAwait(false);
 
-            var state = await repo.TryGetStateAsync(Source, token).ConfigureAwait(false);
+            var state = await repo.TryGetStateAsync(Table, token).ConfigureAwait(false);
             var lastAcked = state?.LastAckedRowId ?? 0;
 
             var rows = await repo.ReadStandardReadingsBatchAsync(
@@ -206,7 +205,7 @@ public sealed class StationMetadataStreamShipper : ServiceBase
                 return;
 
             await repo.UpsertShippingProgressAsync(
-                source: Source,
+                table: Table,
                 lastShippedRowId: maxRowId,
                 lastAckedRowId: ackedUpTo.Value,
                 cancellationToken: token

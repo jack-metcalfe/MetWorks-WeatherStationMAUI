@@ -72,13 +72,6 @@ definitions:
       - "Minute"
     isSecret: false
 
-  - path: /services/loggerSQLite/autoCreateTable
-    defaultValue: true
-    description: "Auto create table for SQLite logging"
-    expectedValueType: "Boolean"
-    allowableValues: []
-    isSecret: false
-
   - path: /services/loggerSQLite/minimumLevel
     defaultValue: "Error"
     description: "Minimum log level for SQLite logging"
@@ -90,13 +83,6 @@ definitions:
       - "Warning"
       - "Error"
       - "Fatal"
-    isSecret: false
-
-  - path: /services/loggerSQLite/tableName
-    defaultValue: "logger_sqlite_log"
-    description: "Table name for SQLite logging"
-    expectedValueType: "String"
-    allowableValues: []
     isSecret: false
 
   - path: /services/metrics/applicationId

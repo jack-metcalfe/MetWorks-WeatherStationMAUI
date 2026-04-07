@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -7,7 +7,6 @@ using MetWorks.Persistence.StreamShipping;
 namespace MetWorks.Ingest.SQLite.Shipping;
 public sealed class ObservationStreamShipper : ServiceBase
 {
-    const string Source = "observation";
     const string Table = "observation";
 
     const int DefaultShipIntervalSeconds = 30;
@@ -162,7 +161,7 @@ public sealed class ObservationStreamShipper : ServiceBase
 
             await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
 
-            var state = await repo.TryGetStateAsync(Source, token).ConfigureAwait(false);
+            var state = await repo.TryGetStateAsync(Table, token).ConfigureAwait(false);
             var lastAcked = state?.LastAckedRowId ?? 0;
 
             var rows = await repo.ReadStandardReadingsBatchAsync(
@@ -190,7 +189,7 @@ public sealed class ObservationStreamShipper : ServiceBase
                 return;
 
             await repo.UpsertShippingProgressAsync(
-                source: Source,
+                table: Table,
                 lastShippedRowId: maxRowId,
                 lastAckedRowId: ackedUpTo.Value,
                 cancellationToken: token).ConfigureAwait(false);
@@ -222,7 +221,7 @@ public sealed class ObservationStreamShipper : ServiceBase
         string endpointUrl,
         string table,
         string installationId,
-        IReadOnlyList<MetWorks.Persistence.StreamShipping.StandardReadingRow> rows,
+        IReadOnlyList<StandardReadingRow> rows,
         ILogger iLogger,
         CancellationToken token)
     {
@@ -311,7 +310,6 @@ public sealed class ObservationStreamShipper : ServiceBase
         {
             var elapsedTicks = Stopwatch.GetTimestamp() - startTicks;
             StreamShippingUploadMetrics.Record(
-                source: table,
                 table: table,
                 rows: rowCount,
                 gzipBytes: gzipBytes,

@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Common.Metrics;
+namespace MetWorks.Common.Metrics;
 
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -8,20 +8,18 @@ public static class StreamShippingUploadMetrics
     static StreamShippingMetricsAggregator _aggregator = new();
 
     public static void Record(
-        string source,
         string table,
         int rows,
         long gzipBytes,
         long elapsedTicks,
         bool success)
     {
-        if (string.IsNullOrWhiteSpace(source)) return;
         if (string.IsNullOrWhiteSpace(table)) return;
         if (rows < 0) rows = 0;
         if (gzipBytes < 0) gzipBytes = 0;
         if (elapsedTicks < 0) elapsedTicks = 0;
 
-        _aggregator.Record(source.Trim(), table.Trim(), rows, gzipBytes, elapsedTicks, success);
+        _aggregator.Record(table.Trim(), rows, gzipBytes, elapsedTicks, success);
     }
 
     public static IReadOnlyList<StreamShippingUploadHotspot> SnapshotTopNAndReset(int topN)
@@ -29,11 +27,11 @@ public static class StreamShippingUploadMetrics
 
     internal sealed class StreamShippingMetricsAggregator
     {
-        ConcurrentDictionary<(string Source, string Table), UploadStats> _stats = new();
+        ConcurrentDictionary<string, UploadStats> _stats = new();
 
-        public void Record(string source, string table, int rows, long gzipBytes, long elapsedTicks, bool success)
+        public void Record(string table, int rows, long gzipBytes, long elapsedTicks, bool success)
         {
-            var key = (source, table);
+            var key = table;
             var entry = _stats.GetOrAdd(key, static _ => new UploadStats());
             entry.Add(rows, gzipBytes, elapsedTicks, success);
         }
@@ -44,7 +42,7 @@ public static class StreamShippingUploadMetrics
 
             var snapshotDict = Interlocked.Exchange(
                 ref _stats,
-                new ConcurrentDictionary<(string Source, string Table), UploadStats>());
+                new ConcurrentDictionary<string, UploadStats>());
 
             if (snapshotDict.IsEmpty) return Array.Empty<StreamShippingUploadHotspot>();
 
@@ -55,8 +53,7 @@ public static class StreamShippingUploadMetrics
                 if (s.Attempts <= 0) continue;
 
                 snapshot.Add(new StreamShippingUploadHotspot(
-                    Source: kv.Key.Source,
-                    Table: kv.Key.Table,
+                    Table: kv.Key,
                     Attempts: s.Attempts,
                     Successes: s.Successes,
                     Failures: s.Failures,
@@ -114,7 +111,6 @@ public static class StreamShippingUploadMetrics
 }
 
 public readonly record struct StreamShippingUploadHotspot(
-    string Source,
     string Table,
     long Attempts,
     long Successes,

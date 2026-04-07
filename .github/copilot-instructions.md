@@ -21,6 +21,7 @@
 - Prefer using EventRelay-based maintenance messaging (begin/end) with optional acknowledgements so services can pause DB writes (buffering if needed) during DB maintenance/retention, leveraging existing resilience paths.
 - Report runtime exceptions with exact caller-info JSON; keep using caller-info to pinpoint failures to specific line numbers/blocks.
 - Prefer using SQLite-compatible square bracket quoting ([identifier]) for SQL identifiers to avoid reserved-word/quoting issues.
+- Never hardcode SQL DDL in C# files; all SQLite DDL must live as `.sql` files under `MetWorks_Resource_Store/Ingest/SQLite/`, registered as `EmbeddedResource` entries with a `LogicalName` in `MetWorks_Resource_Store.csproj`, and loaded at runtime via `ResourceProvider.GetString("Ingest/SQLite/{name}.sql")`. Dynamic-table DDL (e.g., per-table logging/metrics) may use string interpolation over a loaded template but must not embed raw DDL literals in C#.
 - Prefer per-project `GlobalUsings.cs` files to centralize common using directives and reduce repetition.
 - Generated DDI output should not be emitted under a project folder where it will be picked up by default `Compile` globs; generation output should go to a non-compiled directory (e.g., outside the project, `obj/`, or excluded via csproj).
 - When refactoring DDI/codegen, prioritize clean code; incremental steps that take longer are acceptable if they keep the design tidy and maintainable.

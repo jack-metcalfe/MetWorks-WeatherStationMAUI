@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
+namespace MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
 public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
 {
     readonly IMetricsLatestSnapshot _latest;
@@ -119,9 +119,8 @@ public sealed class MetricsOneViewModel : INotifyPropertyChanged, IDisposable
     {
         if (list is null || idx < 0 || idx >= list.Count) return "--";
         var u = list[idx];
-        var source = string.IsNullOrWhiteSpace(u.Source) ? "?" : u.Source;
         var table = string.IsNullOrWhiteSpace(u.Table) ? "?" : u.Table;
-        return $"{source}/{table} | ok={u.Successes}/{u.Attempts} rows={u.Rows} avg={u.AvgMs:F0}ms max={u.MaxMs:F0}ms";
+        return $"{table} | ok={u.Successes}/{u.Attempts} rows={u.Rows} avg={u.AvgMs:F0}ms max={u.MaxMs:F0}ms";
     }
 
     string FormatShippingUploadWithLastKnown(IReadOnlyList<MetricsShippingUploadHotspot>? list, int idx, string lastKnown)

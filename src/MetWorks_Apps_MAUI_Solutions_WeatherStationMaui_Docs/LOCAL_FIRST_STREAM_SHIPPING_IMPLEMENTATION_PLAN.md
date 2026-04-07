@@ -18,12 +18,12 @@ It is intended to be readable both by developers and by automated agents working
 
 - `shipper_state` schema embedded resource: `Ingest/SQLite/shipper_state.sql`
 - Shipper services (NDJSON-over-HTTP + gzip, watermarking via `shipper_state`):
-  - `MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper` (`source=observation`)
-  - `MetWorks.Ingest.SQLite.Shipping.WindStreamShipper` (`source=wind`)
-  - `MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper` (`source=precipitation`)
-  - `MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper` (`source=lightning`)
-  - `MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper` (`source=station_metadata`)
-  - `MetWorks.Ingest.SQLite.Shipping.LoggerSQLiteStreamShipper` (`source=logger_sqlite`)
+  - `MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper` (`table=observation`)
+  - `MetWorks.Ingest.SQLite.Shipping.WindStreamShipper` (`table=wind`)
+  - `MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper` (`table=precipitation`)
+  - `MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper` (`table=lightning`)
+  - `MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper` (`table=station_metadata`)
+  - `MetWorks.Ingest.SQLite.Shipping.LoggerSQLiteStreamShipper` (`table=log_entries`)
   - All ship batches use `(installation_id, rowid)` (or log `id`) as the monotonic cursor
   - All shippers call `IStreamShippingDatabaseReadiness.EnsureReadyAsync(...)` before reading
 - Settings wiring:
@@ -33,12 +33,15 @@ It is intended to be readable both by developers and by automated agents working
   - `StreamShippingHttpClientProvider` reads `/services/streamShippingHttp/timeoutSeconds`
 - Persistence-side helpers:
   - `MetWorks.Persistence.StreamShipping.StreamShippingRepository` (ships state + standard reading batches)
+- Upload metrics:
+  - `MetWorks.Common.Metrics.StreamShippingUploadMetrics` — static lock-free aggregator keyed by `table`
+  - Populated: `finally` block of each `UploadNdjsonAsync` calls `Record(string table, int rows, long gzipBytes, long elapsedTicks, bool success)`
+  - Consumed: `MetricsSamplerService.SnapshotTopNAndReset(shippingTopN)` → `shipping.top_uploads` in the sampled metrics JSON
 
 Note: SQLite DB settings are now unified under `/services/sqlite/*` (see `sqlite-migration-plan.md`).
 
 ### Not implemented yet
 
-- Confirm/complete `instance:` wiring for all shippers in `WeatherStationMaui.yaml` (required to actually construct/run them)
 - Additional shippers for other tables (e.g. `metrics_summary`, and any future rollup/aux tables)
 - Best-effort retention cleanup that can delete unacked rows + record `last_lossy_deleted_rowid`
 
@@ -106,7 +109,7 @@ This repo uses a DDI/codegen approach:
 
 ## Data model: `shipper_state`
 
-Per `(installation_id, source)`:
+Per `(installation_id, [table])`:
 
 - `last_shipped_rowid` – last rowid attempted/shipped
 - `last_acked_rowid` – last rowid acknowledged by the server
@@ -168,7 +171,7 @@ Then add (authoritative instance names in this repo as of this writing):
   - `TheWindStreamShipper`
   - `ThePrecipitationStreamShipper`
   - `TheLightningStreamShipper`
-  - `TheStationMetadataStreamShipper`
+  - `TheStationMetadataStreamShipper` (also assigns `stationMetadataDatabaseReadiness` -> `TheStationMetadataDatabaseReadiness`)
   - `TheLoggerSQLiteStreamShipper` (also assigns `loggerStreamShippingRepository` -> `TheLoggerStreamShippingRepository`)
   - Common assignments:
     - `iLogger` -> `TheLoggerResilient`
@@ -199,9 +202,8 @@ Implementation checklist:
 - Create `<TableName>StreamShipper` class in `MetWorks.Ingest.SQLite.Shipping`
 - Reuse: `shipper_state` table
 - Table-specific changes:
-  - `source` string
   - `SELECT rowid, id (if present), application_received_utc_timestampz, json_document_original FROM <table>`
-  - NDJSON record `table` name
+  - NDJSON record `table` name (also the shipper identity in `shipper_state.[table]`)
 
 ### Step 3: Expand to all SQLite-persisted sources
 

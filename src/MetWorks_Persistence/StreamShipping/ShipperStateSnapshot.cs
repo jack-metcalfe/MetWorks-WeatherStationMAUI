@@ -1,8 +1,8 @@
-﻿namespace MetWorks.Persistence.StreamShipping;
+namespace MetWorks.Persistence.StreamShipping;
 
 public sealed record ShipperStateSnapshot(
     string InstallationId,
-    string Source,
+    string Table,
     long? LastShippedRowId,
     long? LastAckedRowId,
     long? LastLossyDeletedRowId,

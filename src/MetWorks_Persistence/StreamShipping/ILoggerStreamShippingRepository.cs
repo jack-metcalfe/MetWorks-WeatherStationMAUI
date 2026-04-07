@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Persistence.StreamShipping;
+namespace MetWorks.Persistence.StreamShipping;
 
 public interface ILoggerStreamShippingRepository
 {
@@ -15,7 +15,7 @@ public interface ILoggerStreamShippingRepository
         CancellationToken cancellationToken);
 
     Task RecordLossyDeletionAsync(
-        string source,
+        string table,
         long deletedThroughRowId,
         int deletedRowCount,
         DateTime deletionUtc,

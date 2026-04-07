@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Common.Metrics;
+namespace MetWorks.Common.Metrics;
 
 public sealed record MetricsStructuredSnapshot(
     int SchemaVersion,
@@ -81,7 +81,6 @@ public sealed record MetricsShippingSnapshot(
 );
 
 public sealed record MetricsShippingUploadHotspot(
-    string Source,
     string Table,
     long Attempts,
     long Successes,
@@ -94,7 +93,7 @@ public sealed record MetricsShippingUploadHotspot(
 );
 
 public sealed record MetricsShippingSourceStateSnapshot(
-    string Source,
+    string Table,
     long LastShippedRowId,
     long LastAckedRowId,
     long LastLossyDeletedRowId,

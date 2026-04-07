@@ -1,4 +1,4 @@
-﻿namespace MetWorks.Common.Metrics;
+namespace MetWorks.Common.Metrics;
 public sealed class MetricsSamplerService : ServiceBase
 {
     const int DefaultCaptureIntervalSeconds = 10;
@@ -242,7 +242,6 @@ public sealed class MetricsSamplerService : ServiceBase
                       var uploadsTop = StreamShippingUploadMetrics.SnapshotTopNAndReset(shippingTopN)
                           .Select(h => new
                           {
-                              source = h.Source,
                               table = h.Table,
                               attempts = h.Attempts,
                               successes = h.Successes,

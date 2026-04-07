@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using MetWorks.Interfaces;
 using MetWorks.Common.Utility;
 namespace MetWorks.Persistence.StreamShipping;
@@ -43,10 +43,10 @@ public sealed class StreamShippingRepository : IStreamShippingRepository
         return (sqliteDatabase, instanceIdentifier);
     }
 
-    public async Task<ShipperStateSnapshot?> TryGetStateAsync(string source, CancellationToken cancellationToken)
+    public async Task<ShipperStateSnapshot?> TryGetStateAsync(string table, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(source))
-            throw new ArgumentException("Source is required.", nameof(source));
+        if (string.IsNullOrWhiteSpace(table))
+            throw new ArgumentException("Table is required.", nameof(table));
 
         var (sqliteDatabase, instanceIdentifier) = GetInitialized();
 
@@ -62,7 +62,7 @@ SELECT
     lossy_deleted_row_count,
     last_lossy_delete_utc
 FROM shipper_state
-WHERE installation_id = $installation_id AND source = $source;
+WHERE installation_id = $installation_id AND [table] = $table;
 """;
         try
         {
@@ -72,7 +72,7 @@ WHERE installation_id = $installation_id AND source = $source;
                 sql,
                 [
                     new DbParam("$installation_id", installationId),
-                    new DbParam("$source", source),
+                    new DbParam("$table", table),
                 ],
                 row =>
                 {
@@ -95,7 +95,7 @@ WHERE installation_id = $installation_id AND source = $source;
 
                     return new ShipperStateSnapshot(
                         InstallationId: installationId,
-                        Source: source,
+                        Table: table,
                         LastShippedRowId: lastShipped,
                         LastAckedRowId: lastAcked,
                         LastLossyDeletedRowId: lastLossyDeleted,
@@ -108,21 +108,21 @@ WHERE installation_id = $installation_id AND source = $source;
         }
         catch (Exception exception)
         {
-            var message = $"Error reading shipper state for source '{source}' and installation '{installationId}' exception[{exception}].";
+            var message = $"Error reading shipper state for table '{table}' and installation '{installationId}' exception[{exception}].";
             ILogger.Error($"{message} Exception: {exception}");
             throw new InvalidOperationException(message, exception);
         }
     }
 
     public async Task UpsertShippingProgressAsync(
-        string source,
+        string table,
         long? lastShippedRowId,
         long? lastAckedRowId,
         CancellationToken cancellationToken
     )
     {
-        if (string.IsNullOrWhiteSpace(source))
-            throw new ArgumentException("Source is required.", nameof(source));
+        if (string.IsNullOrWhiteSpace(table))
+            throw new ArgumentException("Table is required.", nameof(table));
 
         var (sqliteDatabase, instanceIdentifier) = GetInitialized();
 
@@ -131,9 +131,9 @@ WHERE installation_id = $installation_id AND source = $source;
             throw new InvalidOperationException("Installation id is required.");
 
         const string sql = """
-INSERT INTO shipper_state(installation_id, source, last_shipped_rowid, last_acked_rowid)
-VALUES ($installation_id, $source, $last_shipped_rowid, $last_acked_rowid)
-ON CONFLICT(installation_id, source)
+INSERT INTO shipper_state(installation_id, [table], last_shipped_rowid, last_acked_rowid)
+VALUES ($installation_id, $table, $last_shipped_rowid, $last_acked_rowid)
+ON CONFLICT(installation_id, [table])
 DO UPDATE SET
     last_shipped_rowid = excluded.last_shipped_rowid,
     last_acked_rowid = excluded.last_acked_rowid,
@@ -148,7 +148,7 @@ DO UPDATE SET
                 sql,
                 [
                     new DbParam("$installation_id", installationId),
-                new DbParam("$source", source),
+                new DbParam("$table", table),
                 new DbParam("$last_shipped_rowid", lastShippedRowId is null ? DBNull.Value : lastShippedRowId.Value),
                 new DbParam("$last_acked_rowid", lastAckedRowId is null ? DBNull.Value : lastAckedRowId.Value),
                 ],
@@ -156,7 +156,7 @@ DO UPDATE SET
         }
         catch (Exception exception)
         {
-            var message = $"Error upserting shipping progress for source '{source}' and installation '{installationId}' exception[{exception}].";
+            var message = $"Error upserting shipping progress for table '{table}' and installation '{installationId}' exception[{exception}].";
             ILogger.Error($"{message} Exception: {exception}");
             throw new InvalidOperationException(message, exception);
         }

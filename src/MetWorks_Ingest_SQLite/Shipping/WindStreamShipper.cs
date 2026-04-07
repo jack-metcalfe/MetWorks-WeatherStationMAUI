@@ -1,10 +1,9 @@
-﻿using MetWorks.Persistence.StreamShipping;
+using MetWorks.Persistence.StreamShipping;
 
 namespace MetWorks.Ingest.SQLite.Shipping;
 
 public sealed class WindStreamShipper : ServiceBase
 {
-    const string Source = "wind";
     const string Table = "wind";
     const string DdlScript = "Ingest/SQLite/wind.sql";
 
@@ -159,7 +158,7 @@ public sealed class WindStreamShipper : ServiceBase
 
             await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
 
-            var state = await repo.TryGetStateAsync(Source, token).ConfigureAwait(false);
+            var state = await repo.TryGetStateAsync(Table, token).ConfigureAwait(false);
             var lastAcked = state?.LastAckedRowId ?? 0;
 
             var rows = await repo.ReadStandardReadingsBatchAsync(
@@ -187,7 +186,7 @@ public sealed class WindStreamShipper : ServiceBase
                 return;
 
             await repo.UpsertShippingProgressAsync(
-                source: Source,
+                table: Table,
                 lastShippedRowId: maxRowId,
                 lastAckedRowId: ackedUpTo.Value,
                 cancellationToken: token).ConfigureAwait(false);

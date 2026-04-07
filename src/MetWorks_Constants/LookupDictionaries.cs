@@ -23,9 +23,7 @@ public static class LookupDictionaries
     public static readonly GroupSettingDefinition LoggerSQLiteGroupSettingsDefinition = new GroupSettingDefinition(
         basePath: SettingConstants.LoggerSQLite_groupName,
         settingNames: [
-            SettingConstants.LoggerSQLite_tableName,
-            SettingConstants.LoggerSQLite_minimumLevel,
-            SettingConstants.LoggerSQLite_autoCreateTable
+            SettingConstants.LoggerSQLite_minimumLevel
         ]
     );
     public static readonly GroupSettingDefinition UdpListenerGroupSettingsDefinition = new GroupSettingDefinition(
