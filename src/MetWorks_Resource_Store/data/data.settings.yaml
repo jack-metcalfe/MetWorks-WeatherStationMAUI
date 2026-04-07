@@ -15,12 +15,8 @@
   value: true
 - path: /services/loggerFile/rollingInterval
   value: Day
-- path: /services/loggerSQLite/autoCreateTable
-  value: true
 - path: /services/loggerSQLite/minimumLevel
   value: Information
-- path: /services/loggerSQLite/tableName
-  value: logger_sqlite_log
 - path: /services/metrics/applicationId
   value: 00000000-0000-0000-0000-000000000000
 - path: /services/metrics/autoCreateTable
@@ -54,7 +50,7 @@
 - path: /services/streamShipping/enabled
   value: true
 - path: /services/streamShipping/endpointUrl
-  value: https://metworks-ingest-receiver.redcliff-daf2846f.centralus.azurecontainerapps.io/ingest/v1/stream
+  value: https://metworks-ingest-receiver.ambitioushill-9c416e8e.centralus.azurecontainerapps.io/ingest/v1/stream
 - path: /services/streamShipping/maxBatchRows
   value: 500
 - path: /services/streamShipping/shipIntervalSeconds

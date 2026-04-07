@@ -1,4 +1,4 @@
-using MetWorks.Persistence.StreamShipping;
+﻿using MetWorks.Persistence.StreamShipping;
 
 namespace MetWorks.Ingest.SQLite.Shipping;
 public sealed class LightningStreamShipper : ServiceBase
@@ -94,14 +94,14 @@ public sealed class LightningStreamShipper : ServiceBase
 
         if (string.IsNullOrWhiteSpace(_endpointUrl))
         {
-            ILogger.Warning("LightningStreamShipper endpointUrl is not configured; shipper will not run.");
+            ILogger.Error("LightningStreamShipper endpointUrl is not configured; shipper will not run.");
             try { MarkReady(); } catch { }
             return true;
         }
 
         if (string.IsNullOrWhiteSpace(_installationId))
         {
-            ILogger.Warning("LightningStreamShipper has no installation id; shipper will not run.");
+            ILogger.Error("LightningStreamShipper has no installation id; shipper will not run.");
             try { MarkReady(); } catch { }
             return true;
         }
