@@ -4,7 +4,6 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Accessors
-// Generated On:        2026-03-01T03:31:43.3092815Z
 #nullable enable
 
 namespace MetWorks.ServiceRegistry
@@ -1482,7 +1481,7 @@ namespace MetWorks.ServiceRegistry
             _TheMetricsSummaryIngestorInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public IMetricsSummaryPersister GetTheMetricsSummaryIngestor()
+        public MetWorks.Interfaces.IMetricsSummaryPersister GetTheMetricsSummaryIngestor()
         {
             var initTask = _initTask_TheMetricsSummaryIngestor;
             if (initTask is null)
