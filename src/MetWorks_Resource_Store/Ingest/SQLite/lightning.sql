@@ -14,7 +14,7 @@
     , lightning_strike_distance_at_timestamp INTEGER GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.evt[1]') AS INTEGER)) STORED
     , relative_energy_content_at_timestamp INTEGER GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.evt[2]') AS INTEGER)) STORED
     -- Per-installation identifier to distinguish records from different app installs
-    , installation_id TEXT NULL
+    ,installation_id TEXT NOT NULL COLLATE NOCASE
 );
 
 CREATE INDEX IF NOT EXISTS idx_lightning_device_received_utc_timestamp_epoch ON lightning

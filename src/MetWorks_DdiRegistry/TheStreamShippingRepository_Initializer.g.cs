@@ -23,6 +23,7 @@ namespace MetWorks.ServiceRegistry
             await registry.WhenTheLoggerFileInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheSqliteDatabaseInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheInstanceIdentifierInitializedAsync().ConfigureAwait(false);
+            await registry.WhenTheStreamShippingDatabaseReadinessInitializedAsync().ConfigureAwait(false);
 
             // Step 2: call its async initializer with assignment values.
             // All argument expressions are fully computed by the pipeline.
@@ -30,6 +31,7 @@ namespace MetWorks.ServiceRegistry
                 iLogger: registry.GetTheLoggerFile(),
                 sqliteDatabase: registry.GetTheSqliteDatabase(),
                 instanceIdentifier: registry.GetTheInstanceIdentifier(),
+                streamShippingDatabaseReadiness: registry.GetTheStreamShippingDatabaseReadiness(),
                 cancellationToken: registry.GetTheRootCancellationTokenSource().Token
             ).ConfigureAwait(false);
         }

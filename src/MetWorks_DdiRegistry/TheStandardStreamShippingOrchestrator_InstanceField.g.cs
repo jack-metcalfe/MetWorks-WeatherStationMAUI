@@ -10,6 +10,6 @@ namespace MetWorks.ServiceRegistry
 {
     public partial class Registry
     {
-        private MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper _TheStationMetadataStreamShipperInstance;
+        private MetWorks.Ingest.SQLite.Shipping.StandardStreamShippingOrchestrator _TheStandardStreamShippingOrchestratorInstance;
     }
 }

@@ -11,7 +11,7 @@
     elevation_meters REAL NULL,
     json_document_original TEXT NOT NULL,
     json_document_original_json AS (json(json_document_original)) STORED,
-    installation_id TEXT NULL
+    installation_id TEXT NOT NULL COLLATE NOCASE,
 );
 
 CREATE INDEX IF NOT EXISTS idx_station_metadata_station_id ON station_metadata(station_id);

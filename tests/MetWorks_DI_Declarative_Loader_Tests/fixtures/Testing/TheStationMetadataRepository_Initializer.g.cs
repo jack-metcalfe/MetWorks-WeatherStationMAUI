@@ -4,7 +4,6 @@
 // Template:            File.Header
 // Version:             1.1
 // Template Requested:  Assignments.Initializer
-// Generated On:        2026-03-01T03:31:43.3092815Z
 #nullable enable
 using System.Threading.Tasks;
 

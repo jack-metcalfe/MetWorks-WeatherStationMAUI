@@ -2,7 +2,6 @@
 public sealed class StationMetadataIngestor : ServiceBase, IStationMetadataPersister
 {
     Guid _installationIdGuid;
-    MetWorks.Persistence.StationMetadata.IStationMetadataDatabaseReadiness? _databaseReadiness;
     MetWorks.Persistence.StationMetadata.IStationMetadataRepository? _repository;
 
     public Task<bool> InitializeAsync(
@@ -10,7 +9,6 @@ public sealed class StationMetadataIngestor : ServiceBase, IStationMetadataPersi
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         IInstanceIdentifier iInstanceIdentifier,
-        MetWorks.Persistence.StationMetadata.IStationMetadataDatabaseReadiness stationMetadataDatabaseReadiness,
         MetWorks.Persistence.StationMetadata.IStationMetadataRepository stationMetadataRepository,
         CancellationToken externalCancellation = default
     )
@@ -19,7 +17,6 @@ public sealed class StationMetadataIngestor : ServiceBase, IStationMetadataPersi
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
-        ArgumentNullException.ThrowIfNull(stationMetadataDatabaseReadiness);
         ArgumentNullException.ThrowIfNull(stationMetadataRepository);
 
         InitializeBase(
@@ -29,7 +26,6 @@ public sealed class StationMetadataIngestor : ServiceBase, IStationMetadataPersi
             externalCancellation
         );
 
-        _databaseReadiness = stationMetadataDatabaseReadiness;
         _repository = stationMetadataRepository;
 
         var iid = iInstanceIdentifier.GetOrCreateInstallationId();
@@ -53,18 +49,12 @@ public sealed class StationMetadataIngestor : ServiceBase, IStationMetadataPersi
         cancellationToken.ThrowIfCancellationRequested();
 
 
-        var readiness = _databaseReadiness;
-        if (readiness is null)
-            throw new InvalidOperationException($"{nameof(MetWorks.Persistence.StationMetadata.IStationMetadataDatabaseReadiness)} is not initialized.");
-
         var repository = _repository;
         if (repository is null)
             throw new InvalidOperationException($"{nameof(MetWorks.Persistence.StationMetadata.IStationMetadataRepository)} is not initialized.");
 
         try
         {
-            await readiness.EnsureReadyAsync(cancellationToken).ConfigureAwait(false);
-
             var json = JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = false });
 
             await repository.InsertAsync(

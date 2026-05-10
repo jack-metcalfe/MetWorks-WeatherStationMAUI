@@ -1,6 +1,6 @@
 ﻿CREATE TABLE IF NOT EXISTS observation_rollup_1h
 (
-    installation_id TEXT NOT NULL,
+    installation_id TEXT NOT NULL COLLATE NOCASE,
     bucket_start_epoch INTEGER NOT NULL,
 
     -- Note: aggregates are over raw observation rows whose device_received_utc_timestamp_epoch falls within

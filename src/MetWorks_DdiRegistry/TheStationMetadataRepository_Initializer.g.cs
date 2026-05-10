@@ -21,11 +21,13 @@ namespace MetWorks.ServiceRegistry
             var instance = registry.GetTheStationMetadataRepository_Internal();
 
             await registry.WhenTheSqliteDatabaseInitializedAsync().ConfigureAwait(false);
+            await registry.WhenTheStationMetadataDatabaseReadinessInitializedAsync().ConfigureAwait(false);
 
             // Step 2: call its async initializer with assignment values.
             // All argument expressions are fully computed by the pipeline.
             await instance.InitializeAsync(
                 sqliteDatabase: registry.GetTheSqliteDatabase(),
+                stationMetadataDatabaseReadiness: registry.GetTheStationMetadataDatabaseReadiness(),
                 cancellationToken: registry.GetTheRootCancellationTokenSource().Token
             ).ConfigureAwait(false);
         }

@@ -194,17 +194,14 @@ public class RollupsWorker : ServiceBase
 
         try
         {
-            if (_rollupsDatabaseReadiness is null
-                || _observationRollupRepository is null
+            if (_observationRollupRepository is null
                 || _precipitationRollupRepository is null
                 || _windRollupRepository is null
                 || _lightningRollupRepository is null)
                 return;
 
-            await _rollupsDatabaseReadiness.EnsureReadyAsync(cancellationToken).ConfigureAwait(false);
-
             await _observationRollupRepository.RollupHourAsync(maxBucketsPerRun: 24, cancellationToken).ConfigureAwait(false);
-            await _observationRollupRepository.RollupDayAsync(maxBucketsPerRun: 7, cancellationToken).ConfigureAwait(false);
+            await _observationRollupRepository.RollupDayAsync (maxBucketsPerRun: 7, cancellationToken).ConfigureAwait(false);
 
             await _precipitationRollupRepository.AdvanceWatermarkAsync(
                 bucketWidthSeconds: 86400,

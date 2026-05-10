@@ -12,6 +12,7 @@ global using System.Threading.Tasks;
 global using System.Timers;
 global using System.Windows.Input;
 
+global using MetWorks.Apps.Maui.WeatherStationMaui.UITools;
 global using MetWorks.Apps.Maui.WeatherStationMaui.DeviceSelection;
 global using MetWorks.Apps.Maui.WeatherStationMaui.DeviceSelection.Overrides;
 global using MetWorks.Apps.MAUI.WeatherStationMaui.DeviceSelection;

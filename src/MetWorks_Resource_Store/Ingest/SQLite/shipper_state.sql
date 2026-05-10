@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS shipper_state
+﻿CREATE TABLE IF NOT EXISTS shipper_state
 (
-    installation_id TEXT NOT NULL,
+    installation_id TEXT NOT NULL COLLATE NOCASE,
     [table] TEXT NOT NULL,
     last_shipped_rowid INTEGER NULL,
     last_acked_rowid INTEGER NULL,

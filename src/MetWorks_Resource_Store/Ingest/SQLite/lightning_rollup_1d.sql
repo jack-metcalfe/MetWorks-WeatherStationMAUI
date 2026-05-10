@@ -1,6 +1,6 @@
 ﻿CREATE TABLE IF NOT EXISTS lightning_rollup_1d
 (
-    installation_id TEXT NOT NULL,
+    installation_id TEXT NOT NULL COLLATE NOCASE,
     bucket_start_epoch INTEGER NOT NULL,
 
     -- Note: aggregates are over raw lightning rows whose device_received_utc_timestamp_epoch falls within

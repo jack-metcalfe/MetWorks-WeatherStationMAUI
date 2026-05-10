@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using MetWorks.Interfaces;
 using MetWorks.Common.Utility;
 namespace MetWorks.Persistence.StreamShipping;
@@ -6,6 +6,9 @@ public sealed class StreamShippingRepository : IStreamShippingRepository
 {
     ISqliteDatabase? _sqliteDatabase;
     IInstanceIdentifier? _instanceIdentifier;
+    IStreamShippingDatabaseReadiness? _databaseReadiness;
+    readonly SemaphoreSlim _readinessGate = new(1, 1);
+    bool _schemaEnsured = false;
     bool _isInitialized = false;
     ILogger? _iLogger = null;
     ILogger ILogger => NullPropertyGuard.Get(_isInitialized, _iLogger, nameof(ILogger));
@@ -17,18 +20,44 @@ public sealed class StreamShippingRepository : IStreamShippingRepository
         ILogger iLogger,
         ISqliteDatabase sqliteDatabase,
         IInstanceIdentifier instanceIdentifier,
+        IStreamShippingDatabaseReadiness streamShippingDatabaseReadiness,
         CancellationToken cancellationToken
     )
     {
         ArgumentNullException.ThrowIfNull(iLogger);
         ArgumentNullException.ThrowIfNull(sqliteDatabase);
         ArgumentNullException.ThrowIfNull(instanceIdentifier);
+        ArgumentNullException.ThrowIfNull(streamShippingDatabaseReadiness);
 
         _sqliteDatabase = sqliteDatabase;
         _instanceIdentifier = instanceIdentifier;
+        _databaseReadiness = streamShippingDatabaseReadiness;
         _iLogger = iLogger;
-        _isInitialized = true;    
+        _isInitialized = true;
         return Task.FromResult(true);
+    }
+
+    async Task EnsureSchemaAsync(CancellationToken cancellationToken)
+    {
+        if (_schemaEnsured)
+            return;
+
+        await _readinessGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            if (_schemaEnsured)
+                return;
+
+            var readiness = _databaseReadiness
+                ?? throw new InvalidOperationException("StreamShippingRepository is not initialized (databaseReadiness).");
+
+            await readiness.EnsureReadyAsync(cancellationToken).ConfigureAwait(false);
+            _schemaEnsured = true;
+        }
+        finally
+        {
+            _readinessGate.Release();
+        }
     }
     (ISqliteDatabase SqliteDatabase, IInstanceIdentifier InstanceIdentifier) GetInitialized()
     {
@@ -47,6 +76,8 @@ public sealed class StreamShippingRepository : IStreamShippingRepository
     {
         if (string.IsNullOrWhiteSpace(table))
             throw new ArgumentException("Table is required.", nameof(table));
+
+        await EnsureSchemaAsync(cancellationToken).ConfigureAwait(false);
 
         var (sqliteDatabase, instanceIdentifier) = GetInitialized();
 
@@ -124,6 +155,8 @@ WHERE installation_id = $installation_id AND [table] = $table;
         if (string.IsNullOrWhiteSpace(table))
             throw new ArgumentException("Table is required.", nameof(table));
 
+        await EnsureSchemaAsync(cancellationToken).ConfigureAwait(false);
+
         var (sqliteDatabase, instanceIdentifier) = GetInitialized();
 
         var installationId = instanceIdentifier.GetOrCreateInstallationId();
@@ -180,6 +213,8 @@ DO UPDATE SET
 
         if (maxRows <= 0)
             throw new ArgumentOutOfRangeException(nameof(maxRows));
+
+        await EnsureSchemaAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {

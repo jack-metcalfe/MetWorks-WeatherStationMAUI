@@ -307,6 +307,9 @@ namespace:
     - name: iMetricsLatestSnapshot
       class: null
       interface: MetWorks.Common.Metrics.IMetricsLatestSnapshot
+    - name: iStreamShippingRepository
+      class: null
+      interface: MetWorks.Persistence.StreamShipping.IStreamShippingRepository
     - name: externalCancellation
       class: System.Threading.CancellationToken
       interface: null
@@ -342,37 +345,6 @@ namespace:
 - name: MetWorks.Ingest.SQLite.Shipping
   interface: []
   class:
-  - name: LightningStreamShipper
-    interface: null
-    parameter:
-    - name: iLogger
-      class: null
-      interface: MetWorks.Interfaces.ILogger
-    - name: iSettingRepository
-      class: null
-      interface: MetWorks.Interfaces.ISettingRepository
-    - name: iEventRelayBasic
-      class: null
-      interface: MetWorks.Interfaces.IEventRelayBasic
-    - name: iInstanceIdentifier
-      class: null
-      interface: MetWorks.Interfaces.IInstanceIdentifier
-    - name: streamShippingDatabaseReadiness
-      class: null
-      interface: MetWorks.Persistence.StreamShipping.IStreamShippingDatabaseReadiness
-    - name: streamShippingRepository
-      class: null
-      interface: MetWorks.Persistence.StreamShipping.IStreamShippingRepository
-    - name: httpClient
-      class: System.Net.Http.HttpClient
-      interface: null
-    - name: externalCancellation
-      class: System.Threading.CancellationToken
-      interface: null
-    - name: provenanceTracker
-      class: MetWorks.ServiceFoundation.ProvenanceTracker
-      interface: null
-    property: []
   - name: LoggerSQLiteStreamShipper
     interface: null
     parameter:
@@ -388,9 +360,6 @@ namespace:
     - name: iInstanceIdentifier
       class: null
       interface: MetWorks.Interfaces.IInstanceIdentifier
-    - name: streamShippingDatabaseReadiness
-      class: null
-      interface: MetWorks.Persistence.StreamShipping.IStreamShippingDatabaseReadiness
     - name: streamShippingRepository
       class: null
       interface: MetWorks.Persistence.StreamShipping.IStreamShippingRepository
@@ -407,7 +376,7 @@ namespace:
       class: MetWorks.ServiceFoundation.ProvenanceTracker
       interface: null
     property: []
-  - name: ObservationStreamShipper
+  - name: StandardStreamShippingOrchestrator
     interface: null
     parameter:
     - name: iLogger
@@ -422,105 +391,6 @@ namespace:
     - name: iInstanceIdentifier
       class: null
       interface: MetWorks.Interfaces.IInstanceIdentifier
-    - name: streamShippingDatabaseReadiness
-      class: null
-      interface: MetWorks.Persistence.StreamShipping.IStreamShippingDatabaseReadiness
-    - name: streamShippingRepository
-      class: null
-      interface: MetWorks.Persistence.StreamShipping.IStreamShippingRepository
-    - name: httpClient
-      class: System.Net.Http.HttpClient
-      interface: null
-    - name: externalCancellation
-      class: System.Threading.CancellationToken
-      interface: null
-    - name: provenanceTracker
-      class: MetWorks.ServiceFoundation.ProvenanceTracker
-      interface: null
-    property: []
-  - name: PrecipitationStreamShipper
-    interface: null
-    parameter:
-    - name: iLogger
-      class: null
-      interface: MetWorks.Interfaces.ILogger
-    - name: iSettingRepository
-      class: null
-      interface: MetWorks.Interfaces.ISettingRepository
-    - name: iEventRelayBasic
-      class: null
-      interface: MetWorks.Interfaces.IEventRelayBasic
-    - name: iInstanceIdentifier
-      class: null
-      interface: MetWorks.Interfaces.IInstanceIdentifier
-    - name: streamShippingDatabaseReadiness
-      class: null
-      interface: MetWorks.Persistence.StreamShipping.IStreamShippingDatabaseReadiness
-    - name: streamShippingRepository
-      class: null
-      interface: MetWorks.Persistence.StreamShipping.IStreamShippingRepository
-    - name: httpClient
-      class: System.Net.Http.HttpClient
-      interface: null
-    - name: externalCancellation
-      class: System.Threading.CancellationToken
-      interface: null
-    - name: provenanceTracker
-      class: MetWorks.ServiceFoundation.ProvenanceTracker
-      interface: null
-    property: []
-  - name: StationMetadataStreamShipper
-    interface: null
-    parameter:
-    - name: iLogger
-      class: null
-      interface: MetWorks.Interfaces.ILogger
-    - name: iSettingRepository
-      class: null
-      interface: MetWorks.Interfaces.ISettingRepository
-    - name: iEventRelayBasic
-      class: null
-      interface: MetWorks.Interfaces.IEventRelayBasic
-    - name: iInstanceIdentifier
-      class: null
-      interface: MetWorks.Interfaces.IInstanceIdentifier
-    - name: stationMetadataDatabaseReadiness
-      class: null
-      interface: MetWorks.Persistence.StationMetadata.IStationMetadataDatabaseReadiness
-    - name: streamShippingDatabaseReadiness
-      class: null
-      interface: MetWorks.Persistence.StreamShipping.IStreamShippingDatabaseReadiness
-    - name: streamShippingRepository
-      class: null
-      interface: MetWorks.Persistence.StreamShipping.IStreamShippingRepository
-    - name: httpClient
-      class: System.Net.Http.HttpClient
-      interface: null
-    - name: externalCancellation
-      class: System.Threading.CancellationToken
-      interface: null
-    - name: provenanceTracker
-      class: MetWorks.ServiceFoundation.ProvenanceTracker
-      interface: null
-    property: []
-  - name: WindStreamShipper
-    interface: null
-    parameter:
-    - name: iLogger
-      class: null
-      interface: MetWorks.Interfaces.ILogger
-    - name: iSettingRepository
-      class: null
-      interface: MetWorks.Interfaces.ISettingRepository
-    - name: iEventRelayBasic
-      class: null
-      interface: MetWorks.Interfaces.IEventRelayBasic
-    - name: iInstanceIdentifier
-      class: null
-      interface: MetWorks.Interfaces.IInstanceIdentifier
-    - name: streamShippingDatabaseReadiness
-      class: null
-      interface: MetWorks.Persistence.StreamShipping.IStreamShippingDatabaseReadiness
     - name: streamShippingRepository
       class: null
       interface: MetWorks.Persistence.StreamShipping.IStreamShippingRepository
@@ -739,6 +609,9 @@ namespace:
     - name: instanceIdentifier
       class: null
       interface: MetWorks.Interfaces.IInstanceIdentifier
+    - name: streamShippingDatabaseReadiness
+      class: null
+      interface: MetWorks.Persistence.StreamShipping.IStreamShippingDatabaseReadiness
     - name: cancellationToken
       class: System.Threading.CancellationToken
       interface: null
@@ -852,6 +725,9 @@ namespace:
     - name: sqliteDatabase
       class: null
       interface: MetWorks.Data.Sqlite.ISqliteDatabase
+    - name: stationMetadataDatabaseReadiness
+      class: null
+      interface: MetWorks.Persistence.StationMetadata.IStationMetadataDatabaseReadiness
     - name: cancellationToken
       class: System.Threading.CancellationToken
       interface: null
@@ -962,9 +838,6 @@ namespace:
     - name: iInstanceIdentifier
       class: null
       interface: MetWorks.Interfaces.IInstanceIdentifier
-    - name: stationMetadataDatabaseReadiness
-      class: null
-      interface: MetWorks.Persistence.StationMetadata.IStationMetadataDatabaseReadiness
     - name: stationMetadataRepository
       class: null
       interface: MetWorks.Persistence.StationMetadata.IStationMetadataRepository
@@ -1321,6 +1194,9 @@ instance:
   - name: instanceIdentifier
     literal: null
     instance: TheInstanceIdentifier
+  - name: streamShippingDatabaseReadiness
+    literal: null
+    instance: TheStreamShippingDatabaseReadiness
   - name: cancellationToken
     literal: null
     instance: TheRootCancellationTokenSource.Token
@@ -1357,6 +1233,9 @@ instance:
   - name: sqliteDatabase
     literal: null
     instance: TheSqliteDatabase
+  - name: stationMetadataDatabaseReadiness
+    literal: null
+    instance: TheStationMetadataDatabaseReadiness
   - name: cancellationToken
     literal: null
     instance: TheRootCancellationTokenSource.Token
@@ -1657,8 +1536,8 @@ instance:
     literal: null
     instance: TheProvenanceTracker
   element: []
-- name: TheStationMetadataStreamShipper
-  class: MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper
+- name: TheStandardStreamShippingOrchestrator
+  class: MetWorks.Ingest.SQLite.Shipping.StandardStreamShippingOrchestrator
   exposeToMauiDi: false
   assignment:
   - name: iLogger
@@ -1673,44 +1552,6 @@ instance:
   - name: iInstanceIdentifier
     literal: null
     instance: TheInstanceIdentifier
-  - name: stationMetadataDatabaseReadiness
-    literal: null
-    instance: TheStationMetadataDatabaseReadiness
-  - name: streamShippingDatabaseReadiness
-    literal: null
-    instance: TheStreamShippingDatabaseReadiness
-  - name: streamShippingRepository
-    literal: null
-    instance: TheStreamShippingRepository
-  - name: httpClient
-    literal: null
-    instance: TheStreamShippingHttpClientProvider.Client
-  - name: externalCancellation
-    literal: null
-    instance: TheRootCancellationTokenSource.Token
-  - name: provenanceTracker
-    literal: null
-    instance: TheProvenanceTracker
-  element: []
-- name: TheLightningStreamShipper
-  class: MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper
-  exposeToMauiDi: false
-  assignment:
-  - name: iLogger
-    literal: null
-    instance: TheLoggerResilient
-  - name: iSettingRepository
-    literal: null
-    instance: TheSettingRepository
-  - name: iEventRelayBasic
-    literal: null
-    instance: TheEventRelayBasic
-  - name: iInstanceIdentifier
-    literal: null
-    instance: TheInstanceIdentifier
-  - name: streamShippingDatabaseReadiness
-    literal: null
-    instance: TheStreamShippingDatabaseReadiness
   - name: streamShippingRepository
     literal: null
     instance: TheStreamShippingRepository
@@ -1740,111 +1581,12 @@ instance:
   - name: iInstanceIdentifier
     literal: null
     instance: TheInstanceIdentifier
-  - name: streamShippingDatabaseReadiness
-    literal: null
-    instance: TheStreamShippingDatabaseReadiness
   - name: streamShippingRepository
     literal: null
     instance: TheStreamShippingRepository
   - name: loggerStreamShippingRepository
     literal: null
     instance: TheLoggerStreamShippingRepository
-  - name: httpClient
-    literal: null
-    instance: TheStreamShippingHttpClientProvider.Client
-  - name: externalCancellation
-    literal: null
-    instance: TheRootCancellationTokenSource.Token
-  - name: provenanceTracker
-    literal: null
-    instance: TheProvenanceTracker
-  element: []
-- name: TheObservationStreamShipper
-  class: MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper
-  exposeToMauiDi: false
-  assignment:
-  - name: iLogger
-    literal: null
-    instance: TheLoggerResilient
-  - name: iSettingRepository
-    literal: null
-    instance: TheSettingRepository
-  - name: iEventRelayBasic
-    literal: null
-    instance: TheEventRelayBasic
-  - name: iInstanceIdentifier
-    literal: null
-    instance: TheInstanceIdentifier
-  - name: streamShippingDatabaseReadiness
-    literal: null
-    instance: TheStreamShippingDatabaseReadiness
-  - name: streamShippingRepository
-    literal: null
-    instance: TheStreamShippingRepository
-  - name: httpClient
-    literal: null
-    instance: TheStreamShippingHttpClientProvider.Client
-  - name: externalCancellation
-    literal: null
-    instance: TheRootCancellationTokenSource.Token
-  - name: provenanceTracker
-    literal: null
-    instance: TheProvenanceTracker
-  element: []
-- name: ThePrecipitationStreamShipper
-  class: MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper
-  exposeToMauiDi: false
-  assignment:
-  - name: iLogger
-    literal: null
-    instance: TheLoggerResilient
-  - name: iSettingRepository
-    literal: null
-    instance: TheSettingRepository
-  - name: iEventRelayBasic
-    literal: null
-    instance: TheEventRelayBasic
-  - name: iInstanceIdentifier
-    literal: null
-    instance: TheInstanceIdentifier
-  - name: streamShippingDatabaseReadiness
-    literal: null
-    instance: TheStreamShippingDatabaseReadiness
-  - name: streamShippingRepository
-    literal: null
-    instance: TheStreamShippingRepository
-  - name: httpClient
-    literal: null
-    instance: TheStreamShippingHttpClientProvider.Client
-  - name: externalCancellation
-    literal: null
-    instance: TheRootCancellationTokenSource.Token
-  - name: provenanceTracker
-    literal: null
-    instance: TheProvenanceTracker
-  element: []
-- name: TheWindStreamShipper
-  class: MetWorks.Ingest.SQLite.Shipping.WindStreamShipper
-  exposeToMauiDi: false
-  assignment:
-  - name: iLogger
-    literal: null
-    instance: TheLoggerResilient
-  - name: iSettingRepository
-    literal: null
-    instance: TheSettingRepository
-  - name: iEventRelayBasic
-    literal: null
-    instance: TheEventRelayBasic
-  - name: iInstanceIdentifier
-    literal: null
-    instance: TheInstanceIdentifier
-  - name: streamShippingDatabaseReadiness
-    literal: null
-    instance: TheStreamShippingDatabaseReadiness
-  - name: streamShippingRepository
-    literal: null
-    instance: TheStreamShippingRepository
   - name: httpClient
     literal: null
     instance: TheStreamShippingHttpClientProvider.Client
@@ -1906,6 +1648,9 @@ instance:
   - name: iMetricsLatestSnapshot
     literal: null
     instance: TheMetricsLatestSnapshotStore
+  - name: iStreamShippingRepository
+    literal: null
+    instance: TheStreamShippingRepository
   - name: externalCancellation
     literal: null
     instance: TheRootCancellationTokenSource.Token
@@ -1964,9 +1709,6 @@ instance:
   - name: iInstanceIdentifier
     literal: null
     instance: TheInstanceIdentifier
-  - name: stationMetadataDatabaseReadiness
-    literal: null
-    instance: TheStationMetadataDatabaseReadiness
   - name: stationMetadataRepository
     literal: null
     instance: TheStationMetadataRepository

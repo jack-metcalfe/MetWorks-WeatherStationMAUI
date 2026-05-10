@@ -1,17 +1,19 @@
-﻿using MetWorks.Apps.MAUI.WeatherStationMaui.ViewModels;
-
-namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages;
+﻿namespace MetWorks.Apps.MAUI.WeatherStationMaui.Pages.GuestPages;
 
 public partial class MainView2176x1812 : ContentView
 {
-    private readonly WeatherViewModel _viewModel;
-
     public MainView2176x1812(
         WeatherViewModel viewModel
     )
     {
         InitializeComponent();
-        _viewModel = viewModel;
-        BindingContext = _viewModel;
+        BindingContext = viewModel;
+        Loaded += OnLoaded;
+    }
+
+    private void OnLoaded(object? sender, EventArgs e)
+    {
+        Loaded -= OnLoaded;
+        TextMeasure.ApplyDateTimeWidths(null, null, null);
     }
 }

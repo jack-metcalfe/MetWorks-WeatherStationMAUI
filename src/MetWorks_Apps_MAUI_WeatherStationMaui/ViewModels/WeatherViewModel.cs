@@ -77,7 +77,7 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     // Time Display Properties
     // ========================================
     public string TimeDayOfWeekDisplay => _currentTime.ToString("ddd");
-    public string TimeDateDisplay => _currentTime.ToString("MMM dd");
+    public string TimeDateDisplay => _currentTime.ToString("MMM d");
     public string TimeDisplay => _currentTime.ToString("HH:mm");
     public WeatherViewModel(
         MetWorks.Interfaces.ILogger iLogger,
@@ -400,28 +400,21 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
 
         // Start timer that fires at the top of the next minute
         _clockTimer = new SystemTimer(delayUntilNextMinute);
-        _clockTimer.Elapsed += OnClockTimerFirstTick;
-        _clockTimer.AutoReset = false; // Fire once, then reconfigure
+        _clockTimer.Elapsed += OnClockTimerTick;
+        _clockTimer.AutoReset = false;
         _clockTimer.Start();
-    }
-    private void OnClockTimerFirstTick(object? sender, ElapsedEventArgs e)
-    {
-        // First tick - now synchronized to top of minute
-        UpdateTimeDisplay();
-
-        // Reconfigure timer for every minute from now on
-        if (_clockTimer is not null)
-        {
-            _clockTimer.Elapsed -= OnClockTimerFirstTick;
-            _clockTimer.Elapsed += OnClockTimerTick;
-            _clockTimer.Interval = 60000; // 60 seconds
-            _clockTimer.AutoReset = true;
-            _clockTimer.Start();
-        }
     }
     private void OnClockTimerTick(object? sender, ElapsedEventArgs e)
     {
         UpdateTimeDisplay();
+
+        // Reschedule to the next minute boundary so the display always
+        // changes exactly when the minute changes, not on a fixed interval.
+        if (_clockTimer is null) return;
+        var now = DateTime.Now;
+        var nextMinute = now.Date.AddHours(now.Hour).AddMinutes(now.Minute + 1);
+        _clockTimer.Interval = Math.Max(1.0, (nextMinute - now).TotalMilliseconds);
+        _clockTimer.Start();
     }
     private void UpdateTimeDisplay()
     {
@@ -521,7 +514,6 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
         {
             if (_clockTimer is not null)
             {
-                _clockTimer.Elapsed -= OnClockTimerFirstTick;
                 _clockTimer.Elapsed -= OnClockTimerTick;
                 _clockTimer.Dispose();
                 _clockTimer = null;

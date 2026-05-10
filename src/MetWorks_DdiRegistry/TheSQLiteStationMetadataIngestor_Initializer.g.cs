@@ -23,7 +23,6 @@ namespace MetWorks.ServiceRegistry
             await registry.WhenTheLoggerResilientInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheSettingRepositoryInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheInstanceIdentifierInitializedAsync().ConfigureAwait(false);
-            await registry.WhenTheStationMetadataDatabaseReadinessInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheStationMetadataRepositoryInitializedAsync().ConfigureAwait(false);
 
             // Step 2: call its async initializer with assignment values.
@@ -33,7 +32,6 @@ namespace MetWorks.ServiceRegistry
                 iSettingRepository: registry.GetTheSettingRepository(),
                 iEventRelayBasic: registry.GetTheEventRelayBasic(),
                 iInstanceIdentifier: registry.GetTheInstanceIdentifier(),
-                stationMetadataDatabaseReadiness: registry.GetTheStationMetadataDatabaseReadiness(),
                 stationMetadataRepository: registry.GetTheStationMetadataRepository(),
                 externalCancellation: registry.GetTheRootCancellationTokenSource().Token
             ).ConfigureAwait(false);

@@ -11,6 +11,7 @@ global using System.Threading.Tasks;
 global using MetWorks.Common.Metrics.Storage;
 global using MetWorks.Common.Utility;
 global using MetWorks.Constants;
+global using MetWorks.Persistence.StreamShipping;
 global using MetWorks.EventRelay;
 global using MetWorks.Interfaces;
 global using MetWorks.ServiceFoundation;

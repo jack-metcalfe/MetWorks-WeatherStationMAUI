@@ -1,6 +1,6 @@
 ﻿CREATE TABLE IF NOT EXISTS rollup_state
 (
-    installation_id TEXT NOT NULL,
+    installation_id TEXT NOT NULL COLLATE NOCASE,
     source_table TEXT NOT NULL,
     bucket_width_seconds INTEGER NOT NULL,
     watermark_device_epoch INTEGER NOT NULL,

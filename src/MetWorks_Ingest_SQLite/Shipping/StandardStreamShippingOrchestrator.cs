@@ -1,29 +1,38 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using MetWorks.Persistence.StreamShipping;
 
 namespace MetWorks.Ingest.SQLite.Shipping;
-public sealed class ObservationStreamShipper : ServiceBase
+
+/// <summary>
+/// Ships all standard-row tables (observation, wind, lightning, precipitation, station_metadata)
+/// sequentially on a single timer, replacing five near-identical per-table shippers.
+/// </summary>
+public sealed class StandardStreamShippingOrchestrator : ServiceBase
 {
-    const string Table = "observation";
+    static readonly string[] Tables =
+    [
+        "observation",
+        "wind",
+        "lightning",
+        "precipitation",
+        "station_metadata"
+    ];
 
     const int DefaultShipIntervalSeconds = 30;
     const int DefaultMaxBatchRows = 500;
 
     string _installationId = string.Empty;
-
     string _endpointUrl = string.Empty;
     int _shipIntervalSeconds = DefaultShipIntervalSeconds;
     int _maxBatchRows = DefaultMaxBatchRows;
 
     HttpClient? _httpClient;
-
-    IStreamShippingDatabaseReadiness? _streamShippingDatabaseReadiness;
     IStreamShippingRepository? _streamShippingRepository;
 
-    public ObservationStreamShipper()
+    public StandardStreamShippingOrchestrator()
     {
     }
 
@@ -32,7 +41,6 @@ public sealed class ObservationStreamShipper : ServiceBase
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         IInstanceIdentifier iInstanceIdentifier,
-        IStreamShippingDatabaseReadiness streamShippingDatabaseReadiness,
         IStreamShippingRepository streamShippingRepository,
         HttpClient httpClient,
         CancellationToken externalCancellation,
@@ -43,9 +51,8 @@ public sealed class ObservationStreamShipper : ServiceBase
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
-        ArgumentNullException.ThrowIfNull(streamShippingDatabaseReadiness);
         ArgumentNullException.ThrowIfNull(streamShippingRepository);
-        ArgumentNullException.ThrowIfNull(httpClient);    
+        ArgumentNullException.ThrowIfNull(httpClient);
         ArgumentNullException.ThrowIfNull(provenanceTracker);
 
         InitializeBase(
@@ -57,8 +64,6 @@ public sealed class ObservationStreamShipper : ServiceBase
         );
 
         _httpClient = httpClient;
-
-        _streamShippingDatabaseReadiness = streamShippingDatabaseReadiness;
         _streamShippingRepository = streamShippingRepository;
 
         var enabled = iSettingRepository.GetValueOrDefault<bool>(
@@ -66,7 +71,7 @@ public sealed class ObservationStreamShipper : ServiceBase
 
         if (!enabled)
         {
-            ILogger.Information("ObservationStreamShipper is disabled via settings");
+            ILogger.Information("StandardStreamShippingOrchestrator is disabled via settings");
             try { MarkReady(); } catch { }
             return true;
         }
@@ -90,14 +95,14 @@ public sealed class ObservationStreamShipper : ServiceBase
 
         if (string.IsNullOrWhiteSpace(_endpointUrl))
         {
-            ILogger.Warning("ObservationStreamShipper endpointUrl is not configured; shipper will not run.");
+            ILogger.Warning("StandardStreamShippingOrchestrator endpointUrl is not configured; shipper will not run.");
             try { MarkReady(); } catch { }
             return true;
         }
 
         if (string.IsNullOrWhiteSpace(_installationId))
         {
-            ILogger.Warning("ObservationStreamShipper has no installation id; shipper will not run.");
+            ILogger.Warning("StandardStreamShippingOrchestrator has no installation id; shipper will not run.");
             try { MarkReady(); } catch { }
             return true;
         }
@@ -105,7 +110,7 @@ public sealed class ObservationStreamShipper : ServiceBase
         StartBackground(ct => ShipLoopAsync(TimeSpan.FromSeconds(_shipIntervalSeconds), ct));
 
         try { MarkReady(); } catch { }
-        ILogger.Information($"ObservationStreamShipper started (interval={_shipIntervalSeconds}s, maxBatchRows={_maxBatchRows})");
+        ILogger.Information($"StandardStreamShippingOrchestrator started (interval={_shipIntervalSeconds}s, maxBatchRows={_maxBatchRows}, tables={Tables.Length})");
         return true;
     }
 
@@ -116,7 +121,14 @@ public sealed class ObservationStreamShipper : ServiceBase
             try
             {
                 await Task.Delay(interval, token).ConfigureAwait(false);
-                await ShipOnceAsync(token).ConfigureAwait(false);
+
+                foreach (var table in Tables)
+                {
+                    if (token.IsCancellationRequested)
+                        break;
+
+                    await ShipTableOnceAsync(table, token).ConfigureAwait(false);
+                }
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
@@ -124,33 +136,29 @@ public sealed class ObservationStreamShipper : ServiceBase
             }
             catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
             {
-                ILogger.Error("ObservationStreamShipper: request timed out", ex);
+                ILogger.Error("StandardStreamShippingOrchestrator: request timed out", ex);
             }
             catch (HttpRequestException ex)
             {
-                ILogger.Error("ObservationStreamShipper: HTTP failure", ex);
+                ILogger.Error("StandardStreamShippingOrchestrator: HTTP failure", ex);
             }
             catch (InvalidOperationException ex)
             {
-                ILogger.Error("ObservationStreamShipper: failure", ex);
+                ILogger.Error("StandardStreamShippingOrchestrator: failure", ex);
             }
             catch (Exception ex)
             {
-                ILogger.Error("ObservationStreamShipper: unexpected failure", ex);
+                ILogger.Error("StandardStreamShippingOrchestrator: unexpected failure", ex);
             }
         }
     }
 
-    async Task ShipOnceAsync(CancellationToken token)
+    async Task ShipTableOnceAsync(string table, CancellationToken token)
     {
         try
         {
             if (_httpClient is null)
                 throw new InvalidOperationException("HttpClient is not initialized.");
-
-            var readiness = _streamShippingDatabaseReadiness;
-            if (readiness is null)
-                throw new InvalidOperationException("Stream shipping database readiness is not initialized.");
 
             var repo = _streamShippingRepository;
             if (repo is null)
@@ -159,13 +167,11 @@ public sealed class ObservationStreamShipper : ServiceBase
             if (string.IsNullOrWhiteSpace(_installationId))
                 throw new InvalidOperationException("Installation id is not initialized.");
 
-            await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
-
-            var state = await repo.TryGetStateAsync(Table, token).ConfigureAwait(false);
+            var state = await repo.TryGetStateAsync(table, token).ConfigureAwait(false);
             var lastAcked = state?.LastAckedRowId ?? 0;
 
             var rows = await repo.ReadStandardReadingsBatchAsync(
-                table: Table,
+                table: table,
                 installationId: _installationId,
                 lastAckedRowId: lastAcked,
                 maxRows: _maxBatchRows,
@@ -179,7 +185,7 @@ public sealed class ObservationStreamShipper : ServiceBase
             var ackedUpTo = await UploadNdjsonAsync(
                 httpClient: _httpClient,
                 endpointUrl: _endpointUrl,
-                table: Table,
+                table: table,
                 installationId: _installationId,
                 rows: rows,
                 iLogger: ILogger,
@@ -189,7 +195,7 @@ public sealed class ObservationStreamShipper : ServiceBase
                 return;
 
             await repo.UpsertShippingProgressAsync(
-                table: Table,
+                table: table,
                 lastShippedRowId: maxRowId,
                 lastAckedRowId: ackedUpTo.Value,
                 cancellationToken: token).ConfigureAwait(false);
@@ -200,19 +206,19 @@ public sealed class ObservationStreamShipper : ServiceBase
         }
         catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
         {
-            ILogger.Error("ObservationStreamShipper: request timed out during shipping", ex);
+            ILogger.Error($"StandardStreamShippingOrchestrator: request timed out during shipping (table={table})", ex);
         }
         catch (HttpRequestException ex)
         {
-            ILogger.Error("ObservationStreamShipper: HTTP failure during shipping", ex);
+            ILogger.Error($"StandardStreamShippingOrchestrator: HTTP failure during shipping (table={table})", ex);
         }
         catch (InvalidOperationException ex)
         {
-            ILogger.Error("ObservationStreamShipper: failure during shipping", ex);
+            ILogger.Error($"StandardStreamShippingOrchestrator: failure during shipping (table={table})", ex);
         }
         catch (Exception ex)
         {
-            ILogger.Error("ObservationStreamShipper: unexpected error during shipping", ex);
+            ILogger.Error($"StandardStreamShippingOrchestrator: unexpected error during shipping (table={table})", ex);
         }
     }
 
@@ -298,12 +304,12 @@ public sealed class ObservationStreamShipper : ServiceBase
         }
         catch (OperationCanceledException ex) when (!token.IsCancellationRequested)
         {
-            iLogger.Error($"ObservationStreamShipper: request timed out (endpoint={endpointUrl}, rows={rowCount}, gzipBytes={gzipBytes})", ex);
+            iLogger.Error($"StandardStreamShippingOrchestrator: request timed out (endpoint={endpointUrl}, rows={rowCount}, gzipBytes={gzipBytes})", ex);
             throw;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            iLogger.Error($"ObservationStreamShipper: upload failed (endpoint={endpointUrl}, rows={rowCount}, gzipBytes={gzipBytes})", ex);
+            iLogger.Error($"StandardStreamShippingOrchestrator: upload failed (endpoint={endpointUrl}, rows={rowCount}, gzipBytes={gzipBytes})", ex);
             throw;
         }
         finally

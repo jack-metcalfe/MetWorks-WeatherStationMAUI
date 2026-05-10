@@ -23,7 +23,6 @@ namespace MetWorks.ServiceRegistry
             await registry.WhenTheLoggerResilientInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheSettingRepositoryInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheInstanceIdentifierInitializedAsync().ConfigureAwait(false);
-            await registry.WhenTheStreamShippingDatabaseReadinessInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheStreamShippingRepositoryInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheLoggerStreamShippingRepositoryInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheStreamShippingHttpClientProviderInitializedAsync().ConfigureAwait(false);
@@ -36,7 +35,6 @@ namespace MetWorks.ServiceRegistry
                 iSettingRepository: registry.GetTheSettingRepository(),
                 iEventRelayBasic: registry.GetTheEventRelayBasic(),
                 iInstanceIdentifier: registry.GetTheInstanceIdentifier(),
-                streamShippingDatabaseReadiness: registry.GetTheStreamShippingDatabaseReadiness(),
                 streamShippingRepository: registry.GetTheStreamShippingRepository(),
                 loggerStreamShippingRepository: registry.GetTheLoggerStreamShippingRepository(),
                 httpClient: registry.GetTheStreamShippingHttpClientProvider().Client,

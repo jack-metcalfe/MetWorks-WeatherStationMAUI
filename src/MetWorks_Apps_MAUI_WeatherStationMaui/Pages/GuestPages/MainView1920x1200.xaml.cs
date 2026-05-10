@@ -8,5 +8,12 @@ public partial class MainView1920x1200 : ContentView
     {
         InitializeComponent();
         BindingContext = viewModel;
+        Loaded += OnLoaded;
+    }
+
+    private void OnLoaded(object? sender, EventArgs e)
+    {
+        Loaded -= OnLoaded;
+        TextMeasure.ApplyDateTimeWidths(LabelDayOfWeek, LabelDate, LabelTime);
     }
 }

@@ -11,7 +11,7 @@
     , device_received_utc_timestamp_epoch INTEGER GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.evt[0]') AS INTEGER)) STORED
     , device_received_utc_timestampz TEXT GENERATED ALWAYS AS (datetime(CAST(json_extract(json_document_original, '$.evt[0]') AS INTEGER), 'unixepoch')) STORED
     -- Per-installation identifier to distinguish records from different app installs
-    , installation_id TEXT NULL
+    ,installation_id TEXT NOT NULL COLLATE NOCASE
 );
 
 CREATE INDEX IF NOT EXISTS idx_precipitation_device_received_utc_timestamp_epoch ON precipitation

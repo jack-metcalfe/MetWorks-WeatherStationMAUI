@@ -23,6 +23,7 @@ namespace MetWorks.ServiceRegistry
             await registry.WhenTheLoggerResilientInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheSettingRepositoryInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheMetricsSummaryIngestorInitializedAsync().ConfigureAwait(false);
+            await registry.WhenTheStreamShippingRepositoryInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheProvenanceTrackerInitializedAsync().ConfigureAwait(false);
 
             // Step 2: call its async initializer with assignment values.
@@ -33,6 +34,7 @@ namespace MetWorks.ServiceRegistry
                 iEventRelayBasic: registry.GetTheEventRelayBasic(),
                 iMetricsSummaryPersister: registry.GetTheMetricsSummaryIngestor(),
                 iMetricsLatestSnapshot: registry.GetTheMetricsLatestSnapshotStore(),
+                iStreamShippingRepository: registry.GetTheStreamShippingRepository(),
                 externalCancellation: registry.GetTheRootCancellationTokenSource().Token,
                 provenanceTracker: registry.GetTheProvenanceTracker()
             ).ConfigureAwait(false);

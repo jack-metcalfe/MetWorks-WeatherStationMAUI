@@ -74,58 +74,59 @@
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
         <Label
-                Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="7" 
-                FontSize="Body" TextColor="{StaticResource GoldVikings}"
-                Text="Installation Id:" 
-        />
-        <Label
-                Grid.Row="0" Grid.Column="7" Grid.ColumnSpan="18" 
-                FontSize="Body" TextColor="{StaticResource GoldVikings}"
-                Text="{Binding InstallationId}" 
-        />
-        <Label
                 Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" 
-                FontSize="Body" TextColor="{StaticResource GoldVikings}"
+                FontSize="22" TextColor="{StaticResource GoldVikings}"
                 Text="Captured:" 
         />
         <Label
                 Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="10"
-                FontSize="Body" TextColor="{StaticResource WhiteVikings}" 
+                FontSize="22" TextColor="{StaticResource WhiteVikings}" 
                 Text="{Binding Current.CapturedUtc, Converter={StaticResource TimeConverter}, StringFormat='{}{0:G}'}" 
         />
         <Label
                 Grid.Row="1" Grid.Column="15" Grid.ColumnSpan="6"
-                FontSize="Body" TextColor="{StaticResource GoldVikings}" 
-                Text="Interval(sec):"
+                FontSize="22" TextColor="{StaticResource GoldVikings}" 
+                Text="Interval (seconds):"
         />
         <Label
                 Grid.Row="1" Grid.Column="21" Grid.ColumnSpan="2"
-                FontSize="Body" TextColor="{StaticResource WhiteVikings}"
+                FontSize="22" TextColor="{StaticResource WhiteVikings}"
                 Text="{Binding Current.IntervalSeconds}"
         />
         <Label
                 Grid.Row="1" Grid.Column="23" Grid.ColumnSpan="4"
-                FontSize="Body" TextColor="{StaticResource GoldVikings}"
+                FontSize="22" TextColor="{StaticResource GoldVikings}"
                 Text="Persist:"
         />
         <Label 
                 Grid.Row="1" Grid.Column="27" Grid.ColumnSpan="4"
-                FontSize="Body" TextColor="{StaticResource WhiteVikings}"
+                FontSize="22" TextColor="{StaticResource WhiteVikings}"
                 Text="{Binding PersistStatusDisplay}"
         />
         <Label
                 Grid.Row="1" Grid.Column="31" Grid.ColumnSpan="8"
-                FontSize="Body" TextColor="{StaticResource GoldVikings}" 
+                FontSize="22" TextColor="{StaticResource GoldVikings}" 
                 Text="Persist Attempt:" 
         />
         <Label
                 Grid.Row="1" Grid.Column="39" Grid.ColumnSpan="10"
-                FontSize="Body" TextColor="{StaticResource WhiteVikings}" 
+                FontSize="22" TextColor="{StaticResource WhiteVikings}" 
                 Text="{Binding Current.PersistAttemptUtc, Converter={StaticResource TimeConverter}, StringFormat='{}{0:G}'}"
         />
         <Label
+                Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4"
+                FontSize="22" TextColor="{StaticResource GoldVikings}"
+                Text="Shipping:"
+        />
+        <Label
+                Grid.Row="2" Grid.Column="5" Grid.ColumnSpan="45"
+                FontSize="20" TextColor="{StaticResource WhiteVikings}"
+                LineBreakMode="TailTruncation"
+                Text="{Binding TopShippingUpload1}"
+        />
+        <Label
                 Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="6"
-                FontSize="Body" TextColor="{StaticResource GoldVikings}" 
+                FontSize="22" TextColor="{StaticResource GoldVikings}" 
                 Text="Persist Error:" LineBreakMode="TailTruncation" 
         />
         <Label
@@ -136,70 +137,81 @@
         />
         <Label 
                 Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4"
-                FontSize="Body" TextColor="{StaticResource GoldVikings}" 
+                FontSize="22" TextColor="{StaticResource GoldVikings}" 
                 Text="Process:"
         />
         <Label
                 Grid.Row="4" Grid.Column="5" Grid.ColumnSpan="45"
-                FontSize="Body" TextColor="{StaticResource WhiteVikings}" 
+                FontSize="20" TextColor="{StaticResource WhiteVikings}" 
                 LineBreakMode="TailTruncation"
                 Text="{Binding ProcessSummaryLine}"
         />
         <Label 
                 Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4"
-                FontSize="Body" TextColor="{StaticResource GoldVikings}" 
+                FontSize="22" TextColor="{StaticResource GoldVikings}" 
                 LineBreakMode="TailTruncation"
                 Text="G.C.:"
         />
         <Label
                 Grid.Row="5" Grid.Column="5" Grid.ColumnSpan="45"
-                FontSize="Body" TextColor="{StaticResource WhiteVikings}"
+                FontSize="20" TextColor="{StaticResource WhiteVikings}"
                 LineBreakMode="TailTruncation"
                 Text="{Binding GcSummaryLine}"
         />
         <Label
                 Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="4"
-                FontSize="Body" TextColor="{StaticResource GoldVikings}"
+                FontSize="22" TextColor="{StaticResource GoldVikings}"
                 Text="Relay:"
         />
         <Label
                 Grid.Row="6" Grid.Column="5" Grid.ColumnSpan="45"
-                FontSize="Body" TextColor="{StaticResource WhiteVikings}"
+                FontSize="20" TextColor="{StaticResource WhiteVikings}"
                 LineBreakMode="TailTruncation"
                 Text="{Binding TopRelayHandler1}"
         />
         <Label
                 Grid.Row="7"  Grid.Column="5" Grid.ColumnSpan="45"
-                FontSize="Body" TextColor="{StaticResource WhiteVikings}"
+                FontSize="20" TextColor="{StaticResource WhiteVikings}"
                 LineBreakMode="TailTruncation"
                 Text="{Binding TopRelayHandler2}"
         />
         <Label
                 Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="4"
-                FontSize="Body" TextColor="{StaticResource GoldVikings}" 
+                FontSize="22" TextColor="{StaticResource GoldVikings}" 
                 Text="Pipeline:"
         />
         <Label 
                 Grid.Row="8" Grid.Column="5" Grid.ColumnSpan="45"
-                FontSize="Body" TextColor="{StaticResource WhiteVikings}" 
+                FontSize="20" TextColor="{StaticResource WhiteVikings}" 
                 LineBreakMode="TailTruncation"
                 Text="{Binding TopPipelineReading1}"
         />
         <Label 
                 Grid.Row="9" Grid.Column="5" Grid.ColumnSpan="45"
-                FontSize="Body" TextColor="{StaticResource WhiteVikings}" 
+                FontSize="20" TextColor="{StaticResource WhiteVikings}" 
                 LineBreakMode="TailTruncation"
                 Text="{Binding TopPipelineReading2}"
         />
         <Label
                 Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="4"
-                FontSize="Body" TextColor="{StaticResource GoldVikings}"
+                FontSize="22" TextColor="{StaticResource GoldVikings}"
                 Text="Fan-out:" />
         <Label
                 Grid.Row="10" Grid.Column="5" Grid.ColumnSpan="45"
-                FontSize="Body" TextColor="{StaticResource WhiteVikings}"
+                FontSize="20" TextColor="{StaticResource WhiteVikings}"
                 LineBreakMode="TailTruncation"
                 Text="{Binding TopRelayFanout1}"
+        />
+        <Label
+                Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="4"
+                FontSize="22" TextColor="{StaticResource GoldVikings}"
+                Text="Storage:"
+        />
+        <Label
+                Grid.Row="11" Grid.Column="5" Grid.ColumnSpan="45"
+                FontSize="20" TextColor="{StaticResource WhiteVikings}"
+                LineBreakMode="TailTruncation"
+                Text="{Binding StorageSummaryLine}"
         />
         <Grid Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="50" RowSpacing="0">
             <Grid.RowDefinitions>
@@ -211,7 +223,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <StackLayout IsVisible="False" Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+            <StackLayout IsVisible="False" Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="0">
                 <Button x:Name="btnJsonUp" Text="▲" FontSize="18" Padding="8,2" />
                 <Button x:Name="btnJsonDown" Text="▼" FontSize="18" Padding="8,2" />
             </StackLayout>

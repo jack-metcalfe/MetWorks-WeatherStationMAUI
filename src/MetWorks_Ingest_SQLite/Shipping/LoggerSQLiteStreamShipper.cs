@@ -1,4 +1,4 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -25,7 +25,6 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
 
     HttpClient? _httpClient;
 
-    IStreamShippingDatabaseReadiness? _streamShippingDatabaseReadiness;
     IStreamShippingRepository? _streamShippingRepository;
     ILoggerStreamShippingRepository? _loggerStreamShippingRepository;
 
@@ -38,7 +37,6 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         ISettingRepository iSettingRepository,
         IEventRelayBasic iEventRelayBasic,
         IInstanceIdentifier iInstanceIdentifier,
-        IStreamShippingDatabaseReadiness streamShippingDatabaseReadiness,
         IStreamShippingRepository streamShippingRepository,
         ILoggerStreamShippingRepository loggerStreamShippingRepository,
         HttpClient httpClient,
@@ -50,7 +48,6 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
         ArgumentNullException.ThrowIfNull(iSettingRepository);
         ArgumentNullException.ThrowIfNull(iEventRelayBasic);
         ArgumentNullException.ThrowIfNull(iInstanceIdentifier);
-        ArgumentNullException.ThrowIfNull(streamShippingDatabaseReadiness);
         ArgumentNullException.ThrowIfNull(streamShippingRepository);
         ArgumentNullException.ThrowIfNull(loggerStreamShippingRepository);
         ArgumentNullException.ThrowIfNull(httpClient);
@@ -66,7 +63,6 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
 
         _httpClient = httpClient;
 
-        _streamShippingDatabaseReadiness = streamShippingDatabaseReadiness;
         _streamShippingRepository = streamShippingRepository;
         _loggerStreamShippingRepository = loggerStreamShippingRepository;
 
@@ -162,10 +158,6 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
             if (_httpClient is null)
                 throw new InvalidOperationException("HttpClient is not initialized.");
 
-            var readiness = _streamShippingDatabaseReadiness;
-            if (readiness is null)
-                throw new InvalidOperationException("Stream shipping database readiness is not initialized.");
-
             var stateRepo = _streamShippingRepository;
             if (stateRepo is null)
                 throw new InvalidOperationException("Stream shipping repository is not initialized.");
@@ -176,8 +168,6 @@ public sealed class LoggerSQLiteStreamShipper : ServiceBase
 
             if (string.IsNullOrWhiteSpace(_installationId))
                 throw new InvalidOperationException("Installation id is not initialized.");
-
-            await readiness.EnsureReadyAsync(token).ConfigureAwait(false);
 
             var state = await stateRepo.TryGetStateAsync(_tableName, token).ConfigureAwait(false);
 

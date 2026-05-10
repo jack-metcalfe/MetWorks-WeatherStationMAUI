@@ -1,6 +1,6 @@
 ﻿values:
 - path: /services/instance/installationId
-  value: 4382a1d1-a2bd-4885-8416-2a452e39e51e
+  value: AD356138-270D-4134-85F4-53ED9EF7E817
 - path: /services/loggerFile/fileSizeLimitBytes
   value: 10485760
 - path: /services/loggerFile/minimumLevel
@@ -16,7 +16,7 @@
 - path: /services/loggerFile/rollingInterval
   value: Day
 - path: /services/loggerSQLite/minimumLevel
-  value: Information
+  value: Warning
 - path: /services/metrics/applicationId
   value: 00000000-0000-0000-0000-000000000000
 - path: /services/metrics/autoCreateTable
@@ -52,13 +52,13 @@
 - path: /services/streamShipping/endpointUrl
   value: https://metworks-ingest-receiver.ambitioushill-9c416e8e.centralus.azurecontainerapps.io/ingest/v1/stream
 - path: /services/streamShipping/maxBatchRows
-  value: 500
+  value: 10000
 - path: /services/streamShipping/shipIntervalSeconds
-  value: 30
+  value: 1800
 - path: /services/streamShippingHttp/allowInvalidTlsForEndpointHost
   value: ''
 - path: /services/streamShippingHttp/timeoutSeconds
-  value: 45
+  value: 90
 - path: /services/tempest/apiKey
   value: c83c3cb2-a6d2-4c6f-b2f4-56aa9ab7306e
 - path: /services/tempest/oauth/clientId

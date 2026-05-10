@@ -12,18 +12,17 @@ namespace MetWorks.ServiceRegistry
     // Per-instance async initializer.
     // Declared as partial to allow modularization if needed.
     // Only emitted for instances that have assignment-driven initialization.
-    internal static partial class ThePrecipitationStreamShipper_Initializer
+    internal static partial class TheStandardStreamShippingOrchestrator_Initializer
     {
-        public static async Task Initialize_ThePrecipitationStreamShipperAsync(Registry registry)
+        public static async Task Initialize_TheStandardStreamShippingOrchestratorAsync(Registry registry)
         {
             // Step 1: retrieve the created instance from the registry.
             // Internal accessor ensures we always get the concrete class.
-            var instance = registry.GetThePrecipitationStreamShipper_Internal();
+            var instance = registry.GetTheStandardStreamShippingOrchestrator_Internal();
 
             await registry.WhenTheLoggerResilientInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheSettingRepositoryInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheInstanceIdentifierInitializedAsync().ConfigureAwait(false);
-            await registry.WhenTheStreamShippingDatabaseReadinessInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheStreamShippingRepositoryInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheStreamShippingHttpClientProviderInitializedAsync().ConfigureAwait(false);
             await registry.WhenTheProvenanceTrackerInitializedAsync().ConfigureAwait(false);
@@ -35,7 +34,6 @@ namespace MetWorks.ServiceRegistry
                 iSettingRepository: registry.GetTheSettingRepository(),
                 iEventRelayBasic: registry.GetTheEventRelayBasic(),
                 iInstanceIdentifier: registry.GetTheInstanceIdentifier(),
-                streamShippingDatabaseReadiness: registry.GetTheStreamShippingDatabaseReadiness(),
                 streamShippingRepository: registry.GetTheStreamShippingRepository(),
                 httpClient: registry.GetTheStreamShippingHttpClientProvider().Client,
                 externalCancellation: registry.GetTheRootCancellationTokenSource().Token,

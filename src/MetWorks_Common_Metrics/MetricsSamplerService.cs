@@ -1,4 +1,4 @@
-namespace MetWorks.Common.Metrics;
+﻿namespace MetWorks.Common.Metrics;
 public sealed class MetricsSamplerService : ServiceBase
 {
     const int DefaultCaptureIntervalSeconds = 10;
@@ -13,6 +13,7 @@ public sealed class MetricsSamplerService : ServiceBase
         IEventRelayBasic iEventRelayBasic,
         IMetricsSummaryPersister iMetricsSummaryPersister,
         IMetricsLatestSnapshot iMetricsLatestSnapshot,
+        IStreamShippingRepository? iStreamShippingRepository,
         CancellationToken externalCancellation,
         ProvenanceTracker provenanceTracker
     )
@@ -100,6 +101,7 @@ public sealed class MetricsSamplerService : ServiceBase
             shippingTopN: shippingTopN,
             metricsSummaryIngestor: iMetricsSummaryPersister,
             metricsLatestSnapshotStore: iMetricsLatestSnapshot,
+            streamShippingRepository: iStreamShippingRepository,
             token: ct));
 
         try { MarkReady(); } catch { }
@@ -119,6 +121,7 @@ public sealed class MetricsSamplerService : ServiceBase
         int shippingTopN,
         IMetricsSummaryPersister? metricsSummaryIngestor, 
         IMetricsLatestSnapshot? metricsLatestSnapshotStore, 
+        IStreamShippingRepository? streamShippingRepository,
         CancellationToken token
     )
     {
@@ -253,9 +256,48 @@ public sealed class MetricsSamplerService : ServiceBase
                               max_ms = h.MaxMilliseconds
                           })
                           .ToArray();
+
+                      object[]? sourcesSnapshot = null;
+                      string? stateError = null;
+                      if (streamShippingRepository is not null)
+                      {
+                          try
+                          {
+                              var tables = new[] { "observation", "wind", "lightning", "precipitation", "station_metadata" };
+                              var states = new List<object>(tables.Length);
+                              foreach (var tbl in tables)
+                              {
+                                  var s = await streamShippingRepository.TryGetStateAsync(tbl, token).ConfigureAwait(false);
+                                  if (s is not null)
+                                  {
+                                      states.Add(new
+                                      {
+                                          table = s.Table,
+                                          last_shipped_rowid = s.LastShippedRowId,
+                                          last_acked_rowid = s.LastAckedRowId,
+                                          last_lossy_deleted_rowid = s.LastLossyDeletedRowId,
+                                          lossy_deleted_row_count = s.LossyDeletedRowCount,
+                                          last_lossy_delete_utc = s.LastLossyDeleteUtc
+                                      });
+                                  }
+                              }
+                              sourcesSnapshot = states.ToArray();
+                          }
+                          catch (OperationCanceledException) when (token.IsCancellationRequested)
+                          {
+                              throw;
+                          }
+                          catch (Exception ex)
+                          {
+                              stateError = ex.Message;
+                          }
+                      }
+
                       shipping = new
                       {
-                          top_uploads = uploadsTop
+                          top_uploads = uploadsTop,
+                          sources = sourcesSnapshot,
+                          state_error = stateError
                       };
                   }
 
@@ -285,7 +327,7 @@ public sealed class MetricsSamplerService : ServiceBase
                 };
 
                 // Phase 1: log-only for now. DB persistence wiring happens next.
-                var payloadJson = System.Text.Json.JsonSerializer.Serialize(payload);
+                var payloadJson = JsonSerializer.Serialize(payload);
                 ILogger.Information($"METRICS {payloadJson}");
 
                 if (metricsLatestSnapshotStore is MetricsLatestSnapshotStore concrete)

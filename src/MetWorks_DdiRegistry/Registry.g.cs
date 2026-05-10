@@ -340,23 +340,14 @@ namespace MetWorks.ServiceRegistry
                 ? WhenTheSQLiteRawPacketIngestorInitializedAsync().WaitAsync(cancellationToken)
                 : WhenTheSQLiteRawPacketIngestorInitializedAsync();
 
-        private Task? _initTask_TheStationMetadataStreamShipper;
-        public Task WhenTheStationMetadataStreamShipperInitializedAsync()
-            => EnsureInitialized(ref _initTask_TheStationMetadataStreamShipper, () => TheStationMetadataStreamShipper_Initializer.Initialize_TheStationMetadataStreamShipperAsync(this));
+        private Task? _initTask_TheStandardStreamShippingOrchestrator;
+        public Task WhenTheStandardStreamShippingOrchestratorInitializedAsync()
+            => EnsureInitialized(ref _initTask_TheStandardStreamShippingOrchestrator, () => TheStandardStreamShippingOrchestrator_Initializer.Initialize_TheStandardStreamShippingOrchestratorAsync(this));
 
-        public Task WhenTheStationMetadataStreamShipperInitializedAsync(CancellationToken cancellationToken)
+        public Task WhenTheStandardStreamShippingOrchestratorInitializedAsync(CancellationToken cancellationToken)
             => cancellationToken.CanBeCanceled
-                ? WhenTheStationMetadataStreamShipperInitializedAsync().WaitAsync(cancellationToken)
-                : WhenTheStationMetadataStreamShipperInitializedAsync();
-
-        private Task? _initTask_TheLightningStreamShipper;
-        public Task WhenTheLightningStreamShipperInitializedAsync()
-            => EnsureInitialized(ref _initTask_TheLightningStreamShipper, () => TheLightningStreamShipper_Initializer.Initialize_TheLightningStreamShipperAsync(this));
-
-        public Task WhenTheLightningStreamShipperInitializedAsync(CancellationToken cancellationToken)
-            => cancellationToken.CanBeCanceled
-                ? WhenTheLightningStreamShipperInitializedAsync().WaitAsync(cancellationToken)
-                : WhenTheLightningStreamShipperInitializedAsync();
+                ? WhenTheStandardStreamShippingOrchestratorInitializedAsync().WaitAsync(cancellationToken)
+                : WhenTheStandardStreamShippingOrchestratorInitializedAsync();
 
         private Task? _initTask_TheLoggerSQLiteStreamShipper;
         public Task WhenTheLoggerSQLiteStreamShipperInitializedAsync()
@@ -366,33 +357,6 @@ namespace MetWorks.ServiceRegistry
             => cancellationToken.CanBeCanceled
                 ? WhenTheLoggerSQLiteStreamShipperInitializedAsync().WaitAsync(cancellationToken)
                 : WhenTheLoggerSQLiteStreamShipperInitializedAsync();
-
-        private Task? _initTask_TheObservationStreamShipper;
-        public Task WhenTheObservationStreamShipperInitializedAsync()
-            => EnsureInitialized(ref _initTask_TheObservationStreamShipper, () => TheObservationStreamShipper_Initializer.Initialize_TheObservationStreamShipperAsync(this));
-
-        public Task WhenTheObservationStreamShipperInitializedAsync(CancellationToken cancellationToken)
-            => cancellationToken.CanBeCanceled
-                ? WhenTheObservationStreamShipperInitializedAsync().WaitAsync(cancellationToken)
-                : WhenTheObservationStreamShipperInitializedAsync();
-
-        private Task? _initTask_ThePrecipitationStreamShipper;
-        public Task WhenThePrecipitationStreamShipperInitializedAsync()
-            => EnsureInitialized(ref _initTask_ThePrecipitationStreamShipper, () => ThePrecipitationStreamShipper_Initializer.Initialize_ThePrecipitationStreamShipperAsync(this));
-
-        public Task WhenThePrecipitationStreamShipperInitializedAsync(CancellationToken cancellationToken)
-            => cancellationToken.CanBeCanceled
-                ? WhenThePrecipitationStreamShipperInitializedAsync().WaitAsync(cancellationToken)
-                : WhenThePrecipitationStreamShipperInitializedAsync();
-
-        private Task? _initTask_TheWindStreamShipper;
-        public Task WhenTheWindStreamShipperInitializedAsync()
-            => EnsureInitialized(ref _initTask_TheWindStreamShipper, () => TheWindStreamShipper_Initializer.Initialize_TheWindStreamShipperAsync(this));
-
-        public Task WhenTheWindStreamShipperInitializedAsync(CancellationToken cancellationToken)
-            => cancellationToken.CanBeCanceled
-                ? WhenTheWindStreamShipperInitializedAsync().WaitAsync(cancellationToken)
-                : WhenTheWindStreamShipperInitializedAsync();
 
         private Task? _initTask_TheMetricsSummaryIngestor;
         public Task WhenTheMetricsSummaryIngestorInitializedAsync()
@@ -505,12 +469,8 @@ namespace MetWorks.ServiceRegistry
             TheRawPacketDatabaseReadiness_InstanceFactory.Create(this);
             TheRawPacketIngestRepository_InstanceFactory.Create(this);
             TheSQLiteRawPacketIngestor_InstanceFactory.Create(this);
-            TheStationMetadataStreamShipper_InstanceFactory.Create(this);
-            TheLightningStreamShipper_InstanceFactory.Create(this);
+            TheStandardStreamShippingOrchestrator_InstanceFactory.Create(this);
             TheLoggerSQLiteStreamShipper_InstanceFactory.Create(this);
-            TheObservationStreamShipper_InstanceFactory.Create(this);
-            ThePrecipitationStreamShipper_InstanceFactory.Create(this);
-            TheWindStreamShipper_InstanceFactory.Create(this);
             TheMetricsSummaryIngestor_InstanceFactory.Create(this);
             TheMetricsSamplerService_InstanceFactory.Create(this);
             TheRollupsWorker_InstanceFactory.Create(this);
@@ -565,12 +525,8 @@ namespace MetWorks.ServiceRegistry
                 WhenTheRawPacketDatabaseReadinessInitializedAsync(),
                 WhenTheRawPacketIngestRepositoryInitializedAsync(),
                 WhenTheSQLiteRawPacketIngestorInitializedAsync(),
-                WhenTheStationMetadataStreamShipperInitializedAsync(),
-                WhenTheLightningStreamShipperInitializedAsync(),
+                WhenTheStandardStreamShippingOrchestratorInitializedAsync(),
                 WhenTheLoggerSQLiteStreamShipperInitializedAsync(),
-                WhenTheObservationStreamShipperInitializedAsync(),
-                WhenThePrecipitationStreamShipperInitializedAsync(),
-                WhenTheWindStreamShipperInitializedAsync(),
                 WhenTheMetricsSummaryIngestorInitializedAsync(),
                 WhenTheMetricsSamplerServiceInitializedAsync(),
                 WhenTheRollupsWorkerInitializedAsync(),

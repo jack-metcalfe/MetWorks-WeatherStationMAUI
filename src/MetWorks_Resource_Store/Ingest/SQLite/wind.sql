@@ -14,7 +14,7 @@
     , wind_speed REAL GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.ob[1]') AS REAL)) STORED
     , wind_direction INTEGER GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.ob[2]') AS INTEGER)) STORED
     -- Per-installation identifier to distinguish records from different app installs
-    , installation_id TEXT NULL
+    ,installation_id TEXT NOT NULL COLLATE NOCASE
 );
 
 CREATE INDEX IF NOT EXISTS idx_wind_device_received_utc_timestamp_epoch ON wind

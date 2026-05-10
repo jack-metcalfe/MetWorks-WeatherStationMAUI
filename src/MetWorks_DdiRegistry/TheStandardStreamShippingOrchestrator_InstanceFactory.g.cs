@@ -12,17 +12,17 @@ namespace MetWorks.ServiceRegistry
     // Declared as partial to allow modularization if needed.
     // It handles both element-driven and assignment-driven construction,
     // and immediately registers the created instance with the Registry.
-    internal static partial class ThePrecipitationStreamShipper_InstanceFactory
+    internal static partial class TheStandardStreamShippingOrchestrator_InstanceFactory
     {
-        public static MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper Create(Registry registry)
+        public static MetWorks.Ingest.SQLite.Shipping.StandardStreamShippingOrchestrator Create(Registry registry)
         {
             // Assignment-driven instance: construct with new().
             // This is always valid because ContainerClass is a concrete class.
-            var instance = new MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper();
+            var instance = new MetWorks.Ingest.SQLite.Shipping.StandardStreamShippingOrchestrator();
             
 
             // Register immediately so other instances can reference it.
-            registry.RegisterThePrecipitationStreamShipper(instance);
+            registry.RegisterTheStandardStreamShippingOrchestrator(instance);
 
             return instance;
         }

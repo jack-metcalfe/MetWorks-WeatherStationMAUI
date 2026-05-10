@@ -1405,73 +1405,37 @@ namespace MetWorks.ServiceRegistry
         // Template Requested:  Accessors
 
         // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheStationMetadataStreamShipper(MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper instance) =>
-            _TheStationMetadataStreamShipperInstance = instance;
+        public void RegisterTheStandardStreamShippingOrchestrator(MetWorks.Ingest.SQLite.Shipping.StandardStreamShippingOrchestrator instance) =>
+            _TheStandardStreamShippingOrchestratorInstance = instance;
 
         // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper GetTheStationMetadataStreamShipper()
+        public MetWorks.Ingest.SQLite.Shipping.StandardStreamShippingOrchestrator GetTheStandardStreamShippingOrchestrator()
         {
-            var initTask = _initTask_TheStationMetadataStreamShipper;
+            var initTask = _initTask_TheStandardStreamShippingOrchestrator;
             if (initTask is null)
                 throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheStationMetadataStreamShipper' was accessed before initialization started. Await registry.WhenTheStationMetadataStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStationMetadataStreamShipper().");
+                    "DDI: instance 'TheStandardStreamShippingOrchestrator' was accessed before initialization started. Await registry.WhenTheStandardStreamShippingOrchestratorInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStandardStreamShippingOrchestrator().");
 
             if (!initTask.IsCompleted)
                 throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheStationMetadataStreamShipper' was accessed before initialization completed. Await registry.WhenTheStationMetadataStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStationMetadataStreamShipper().");
+                    "DDI: instance 'TheStandardStreamShippingOrchestrator' was accessed before initialization completed. Await registry.WhenTheStandardStreamShippingOrchestratorInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheStandardStreamShippingOrchestrator().");
 
             if (initTask.IsCanceled)
                 throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheStationMetadataStreamShipper' initialization was canceled.",
+                    "DDI: instance 'TheStandardStreamShippingOrchestrator' initialization was canceled.",
                     initTask.Exception);
 
             if (initTask.IsFaulted)
                 throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheStationMetadataStreamShipper' initialization failed.",
+                    "DDI: instance 'TheStandardStreamShippingOrchestrator' initialization failed.",
                     initTask.Exception);
 
-            return _TheStationMetadataStreamShipperInstance;
+            return _TheStandardStreamShippingOrchestratorInstance;
         }
 
         // Internal accessor: always returns the concrete class.
-        internal MetWorks.Ingest.SQLite.Shipping.StationMetadataStreamShipper GetTheStationMetadataStreamShipper_Internal() =>
-            _TheStationMetadataStreamShipperInstance;
-        // Template:            Accessors.Triplet
-        // Version:             1.1
-        // Template Requested:  Accessors
-
-        // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheLightningStreamShipper(MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper instance) =>
-            _TheLightningStreamShipperInstance = instance;
-
-        // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper GetTheLightningStreamShipper()
-        {
-            var initTask = _initTask_TheLightningStreamShipper;
-            if (initTask is null)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheLightningStreamShipper' was accessed before initialization started. Await registry.WhenTheLightningStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLightningStreamShipper().");
-
-            if (!initTask.IsCompleted)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheLightningStreamShipper' was accessed before initialization completed. Await registry.WhenTheLightningStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheLightningStreamShipper().");
-
-            if (initTask.IsCanceled)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheLightningStreamShipper' initialization was canceled.",
-                    initTask.Exception);
-
-            if (initTask.IsFaulted)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheLightningStreamShipper' initialization failed.",
-                    initTask.Exception);
-
-            return _TheLightningStreamShipperInstance;
-        }
-
-        // Internal accessor: always returns the concrete class.
-        internal MetWorks.Ingest.SQLite.Shipping.LightningStreamShipper GetTheLightningStreamShipper_Internal() =>
-            _TheLightningStreamShipperInstance;
+        internal MetWorks.Ingest.SQLite.Shipping.StandardStreamShippingOrchestrator GetTheStandardStreamShippingOrchestrator_Internal() =>
+            _TheStandardStreamShippingOrchestratorInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors
@@ -1508,114 +1472,6 @@ namespace MetWorks.ServiceRegistry
         // Internal accessor: always returns the concrete class.
         internal MetWorks.Ingest.SQLite.Shipping.LoggerSQLiteStreamShipper GetTheLoggerSQLiteStreamShipper_Internal() =>
             _TheLoggerSQLiteStreamShipperInstance;
-        // Template:            Accessors.Triplet
-        // Version:             1.1
-        // Template Requested:  Accessors
-
-        // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheObservationStreamShipper(MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper instance) =>
-            _TheObservationStreamShipperInstance = instance;
-
-        // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper GetTheObservationStreamShipper()
-        {
-            var initTask = _initTask_TheObservationStreamShipper;
-            if (initTask is null)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheObservationStreamShipper' was accessed before initialization started. Await registry.WhenTheObservationStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheObservationStreamShipper().");
-
-            if (!initTask.IsCompleted)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheObservationStreamShipper' was accessed before initialization completed. Await registry.WhenTheObservationStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheObservationStreamShipper().");
-
-            if (initTask.IsCanceled)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheObservationStreamShipper' initialization was canceled.",
-                    initTask.Exception);
-
-            if (initTask.IsFaulted)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheObservationStreamShipper' initialization failed.",
-                    initTask.Exception);
-
-            return _TheObservationStreamShipperInstance;
-        }
-
-        // Internal accessor: always returns the concrete class.
-        internal MetWorks.Ingest.SQLite.Shipping.ObservationStreamShipper GetTheObservationStreamShipper_Internal() =>
-            _TheObservationStreamShipperInstance;
-        // Template:            Accessors.Triplet
-        // Version:             1.1
-        // Template Requested:  Accessors
-
-        // Register method: stores the concrete instance in the backing field.
-        public void RegisterThePrecipitationStreamShipper(MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper instance) =>
-            _ThePrecipitationStreamShipperInstance = instance;
-
-        // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper GetThePrecipitationStreamShipper()
-        {
-            var initTask = _initTask_ThePrecipitationStreamShipper;
-            if (initTask is null)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'ThePrecipitationStreamShipper' was accessed before initialization started. Await registry.WhenThePrecipitationStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetThePrecipitationStreamShipper().");
-
-            if (!initTask.IsCompleted)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'ThePrecipitationStreamShipper' was accessed before initialization completed. Await registry.WhenThePrecipitationStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetThePrecipitationStreamShipper().");
-
-            if (initTask.IsCanceled)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'ThePrecipitationStreamShipper' initialization was canceled.",
-                    initTask.Exception);
-
-            if (initTask.IsFaulted)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'ThePrecipitationStreamShipper' initialization failed.",
-                    initTask.Exception);
-
-            return _ThePrecipitationStreamShipperInstance;
-        }
-
-        // Internal accessor: always returns the concrete class.
-        internal MetWorks.Ingest.SQLite.Shipping.PrecipitationStreamShipper GetThePrecipitationStreamShipper_Internal() =>
-            _ThePrecipitationStreamShipperInstance;
-        // Template:            Accessors.Triplet
-        // Version:             1.1
-        // Template Requested:  Accessors
-
-        // Register method: stores the concrete instance in the backing field.
-        public void RegisterTheWindStreamShipper(MetWorks.Ingest.SQLite.Shipping.WindStreamShipper instance) =>
-            _TheWindStreamShipperInstance = instance;
-
-        // External accessor: returns the interface type when defined, otherwise the concrete class.
-        public MetWorks.Ingest.SQLite.Shipping.WindStreamShipper GetTheWindStreamShipper()
-        {
-            var initTask = _initTask_TheWindStreamShipper;
-            if (initTask is null)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheWindStreamShipper' was accessed before initialization started. Await registry.WhenTheWindStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheWindStreamShipper().");
-
-            if (!initTask.IsCompleted)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheWindStreamShipper' was accessed before initialization completed. Await registry.WhenTheWindStreamShipperInitializedAsync() (or registry.InitializeAllAsync()) before calling GetTheWindStreamShipper().");
-
-            if (initTask.IsCanceled)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheWindStreamShipper' initialization was canceled.",
-                    initTask.Exception);
-
-            if (initTask.IsFaulted)
-                throw new global::System.InvalidOperationException(
-                    "DDI: instance 'TheWindStreamShipper' initialization failed.",
-                    initTask.Exception);
-
-            return _TheWindStreamShipperInstance;
-        }
-
-        // Internal accessor: always returns the concrete class.
-        internal MetWorks.Ingest.SQLite.Shipping.WindStreamShipper GetTheWindStreamShipper_Internal() =>
-            _TheWindStreamShipperInstance;
         // Template:            Accessors.Triplet
         // Version:             1.1
         // Template Requested:  Accessors

@@ -29,7 +29,7 @@
     , wind_speed_gust_in_wind_sample_interval REAL GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.obs[0][3]') AS REAL)) STORED
     , wind_speed_lull_in_wind_sample_interval REAL GENERATED ALWAYS AS (CAST(json_extract(json_document_original, '$.obs[0][1]') AS REAL)) STORED
     -- Per-installation identifier to distinguish records from different app installs
-    , installation_id TEXT NULL
+    ,installation_id TEXT NOT NULL COLLATE NOCASE
 );
 
 CREATE INDEX IF NOT EXISTS idx_observation_device_received_utc_timestampz ON observation

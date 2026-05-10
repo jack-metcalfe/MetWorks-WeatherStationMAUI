@@ -5,17 +5,48 @@ namespace MetWorks.Persistence.StationMetadata;
 public sealed class StationMetadataRepository : IStationMetadataRepository
 {
     ISqliteDatabase? _sqliteDatabase;
+    IStationMetadataDatabaseReadiness? _databaseReadiness;
+    readonly SemaphoreSlim _readinessGate = new(1, 1);
+    bool _schemaEnsured = false;
 
     public StationMetadataRepository()
     {
     }
 
-    public Task<bool> InitializeAsync(ISqliteDatabase sqliteDatabase, CancellationToken cancellationToken)
+    public Task<bool> InitializeAsync(
+        ISqliteDatabase sqliteDatabase,
+        IStationMetadataDatabaseReadiness stationMetadataDatabaseReadiness,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(sqliteDatabase);
+        ArgumentNullException.ThrowIfNull(stationMetadataDatabaseReadiness);
 
         _sqliteDatabase = sqliteDatabase;
+        _databaseReadiness = stationMetadataDatabaseReadiness;
         return Task.FromResult(true);
+    }
+
+    async Task EnsureSchemaAsync(CancellationToken cancellationToken)
+    {
+        if (_schemaEnsured)
+            return;
+
+        await _readinessGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            if (_schemaEnsured)
+                return;
+
+            var readiness = _databaseReadiness
+                ?? throw new InvalidOperationException("StationMetadataRepository is not initialized (databaseReadiness).");
+
+            await readiness.EnsureReadyAsync(cancellationToken).ConfigureAwait(false);
+            _schemaEnsured = true;
+        }
+        finally
+        {
+            _readinessGate.Release();
+        }
     }
 
     ISqliteDatabase GetInitializedSqliteDatabase() =>
@@ -62,6 +93,7 @@ VALUES (
 """;
 
         var sqliteDatabase = GetInitializedSqliteDatabase();
+        await EnsureSchemaAsync(cancellationToken).ConfigureAwait(false);
         await using var session = await sqliteDatabase.OpenSessionAsync(cancellationToken).ConfigureAwait(false);
 
         _ = await session.ExecuteAsync(
