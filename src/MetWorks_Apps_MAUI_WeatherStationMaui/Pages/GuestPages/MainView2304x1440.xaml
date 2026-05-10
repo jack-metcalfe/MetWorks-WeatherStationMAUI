@@ -44,11 +44,11 @@
 
         <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="6" StrokeThickness="0">
             <VerticalStackLayout HorizontalOptions="Center" Spacing="0">
-                <Label FontSize="200" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+                <Label x:Name="LabelDayOfWeek" FontSize="200" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
                     Text="{Binding TimeDayOfWeekDisplay}" />
-                <Label FontSize="134" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+                <Label x:Name="LabelDate" FontSize="134" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
                     Text="{Binding TimeDateDisplay}" />
-                <Label FontSize="160" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+                <Label x:Name="LabelTime" FontSize="160" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
                     Text="{Binding TimeDisplay}" />
             </VerticalStackLayout>
         </Border>

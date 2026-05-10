@@ -50,13 +50,10 @@ internal static class TextMeasure
     /// not contain; those slots are silently skipped.
     /// Must be called after the labels are loaded (have a live renderer).
     /// </summary>
-    internal static void ApplyDateTimeWidths(Label? dayOfWeek, Label? date, Label? time)
+    internal static void ApplyDateTimeWidths(Label dayOfWeek, Label date, Label time)
     {
-        if (dayOfWeek is not null)
-            dayOfWeek.WidthRequest = MeasureMaxWidth(dayOfWeek, AllDaysOfWeek());
-        if (date is not null)
-            date.WidthRequest = MeasureMaxWidth(date, AllMonthDayCombos());
-        if (time is not null)
-            time.WidthRequest = MeasureMaxWidth(time, TimeRepresentatives());
+        dayOfWeek.WidthRequest = MeasureMaxWidth(dayOfWeek, AllDaysOfWeek());
+        date.WidthRequest = MeasureMaxWidth(date, AllMonthDayCombos());
+        time.WidthRequest = MeasureMaxWidth(time, TimeRepresentatives());
     }
 }

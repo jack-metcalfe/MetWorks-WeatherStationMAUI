@@ -14,6 +14,6 @@ public partial class MainView1440x2304 : ContentView
     private void OnLoaded(object? sender, EventArgs e)
     {
         Loaded -= OnLoaded;
-        TextMeasure.ApplyDateTimeWidths(null, null, null);
+        TextMeasure.ApplyDateTimeWidths(LabelDayOfWeek, LabelDate, LabelTime);
     }
 }
