@@ -10,6 +10,8 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                fonts.AddFont("OpenSans-CondensedRegular.ttf", "OpenSansCondensedRegular");
+                fonts.AddFont("OpenSans-CondensedSemiBold.ttf", "OpenSansCondensedSemiBold");
             });
 
         // NOTE: MockWeatherReadingService is now started in StartupInitializer.cs

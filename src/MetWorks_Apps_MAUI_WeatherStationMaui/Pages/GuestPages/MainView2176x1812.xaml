@@ -42,13 +42,13 @@
             </VerticalStackLayout>
         </Border>
 
-        <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="6" StrokeThickness="0">
-            <VerticalStackLayout HorizontalOptions="Center" Spacing="0">
-                <Label x:Name="LabelDayOfWeek" FontSize="130" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+        <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" StrokeThickness="0">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Start" Spacing="0">
+                <Label x:Name="LabelDayOfWeek" FontSize="100" Margin="0,-25,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
                     Text="{Binding TimeDayOfWeekDisplay}" />
-                <Label x:Name="LabelDate" FontSize="89" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+                <Label x:Name="LabelDate" FontSize="70" Margin="0,-35,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
                     Text="{Binding TimeDateDisplay}" />
-                <Label x:Name="LabelTime" FontSize="100" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+                <Label x:Name="LabelTime" FontSize="80" Margin="0,-15,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
                     Text="{Binding TimeDisplay}" />
             </VerticalStackLayout>
         </Border>
@@ -108,7 +108,7 @@
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Label FontSize="32" TextColor="{StaticResource GoldVikings}" Text="UV Index" />
                 </HorizontalStackLayout>
-                <Label FontSize="200" Margin="0,-20,0,0" TextColor="{StaticResource WhiteVikings}">
+                <Label FontSize="200" Margin="30,-20,0,0" TextColor="{StaticResource WhiteVikings}">
                     <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
                         <Binding Path="CurrentObservation.UvIndex" />
                     </MultiBinding>
@@ -116,7 +116,24 @@
             </VerticalStackLayout>
         </Border>
 
-        <Frame Grid.Row="0" Grid.Column="0" Grid.RowSpan="6" Grid.ColumnSpan="3"
+        <VerticalStackLayout Grid.Row="3" Grid.Column="1" Grid.RowSpan="3" HorizontalOptions="Fill" Margin="-50,0,-100,0" Spacing="0">
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Label FontSize="32" TextColor="{StaticResource GoldVikings}" Text="Feels Like" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" Text=" (" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource WhiteVikings}"
+                           Text="{Binding CurrentObservation.FeelsLike.Unit}" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" Text=")" />
+                </HorizontalStackLayout>
+                <Label FontSize="200" Margin="0,-20,0,0" FontFamily="OpenSansCondensedRegular" HorizontalTextAlignment="Center" LineBreakMode="NoWrap" TextColor="{StaticResource WhiteVikings}">
+                    <Label.Text>
+                        <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
+                            <Binding Path="CurrentObservation.FeelsLike" />
+                        </MultiBinding>
+                    </Label.Text>
+                </Label>
+        </VerticalStackLayout>
+
+        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="6" Grid.ColumnSpan="3"
                Padding="12"
                BackgroundColor="#44000000"
                IsVisible="{Binding TempestOAuthAuthorizationRequired}">
@@ -126,6 +143,6 @@
                 <Label FontSize="20" TextColor="{StaticResource WhiteVikings}" Text="{Binding TempestOAuthLastErrorDisplay}" />
                 <Button Text="Authorize Tempest" Command="{Binding AuthorizeTempestCommand}" />
             </VerticalStackLayout>
-        </Frame>
+        </Border>
     </Grid>
 </ContentView>

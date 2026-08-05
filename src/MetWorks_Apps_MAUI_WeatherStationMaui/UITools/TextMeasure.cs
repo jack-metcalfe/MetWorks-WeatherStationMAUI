@@ -12,9 +12,11 @@ internal static class TextMeasure
     /// measures each, and returns the maximum width. The label's original text is restored.
     /// Must be called after the label is loaded (has a live renderer).
     /// </summary>
-    internal static double MeasureMaxWidth(Label label, IEnumerable<string> candidates)
+    private static double MeasureMaxWidth(Label label, IEnumerable<string> candidates)
     {
-        var original = label.Text;
+        // NOTE: setting label.Text directly inside this loop unapplies any live OneWay
+        // binding on Label.TextProperty.  Callers that need to preserve bindings must
+        // re-call SetBinding after all measurements are complete (see ApplyDateTimeWidths).
         double max = 0;
         foreach (var s in candidates)
         {
@@ -22,7 +24,6 @@ internal static class TextMeasure
             var size = label.Measure(double.PositiveInfinity, double.PositiveInfinity);
             if (size.Width > max) max = size.Width;
         }
-        label.Text = original;
         return max;
     }
 
@@ -55,5 +56,11 @@ internal static class TextMeasure
         dayOfWeek.WidthRequest = MeasureMaxWidth(dayOfWeek, AllDaysOfWeek());
         date.WidthRequest = MeasureMaxWidth(date, AllMonthDayCombos());
         time.WidthRequest = MeasureMaxWidth(time, TimeRepresentatives());
+
+        // MeasureMaxWidth sets label.Text directly, which unapplies any live OneWay
+        // binding in MAUI.  Re-establish the bindings so the clock keeps updating.
+        dayOfWeek.SetBinding(Label.TextProperty, new Binding(nameof(WeatherViewModel.TimeDayOfWeekDisplay)));
+        date.SetBinding(Label.TextProperty, new Binding(nameof(WeatherViewModel.TimeDateDisplay)));
+        time.SetBinding(Label.TextProperty, new Binding(nameof(WeatherViewModel.TimeDisplay)));
     }
 }

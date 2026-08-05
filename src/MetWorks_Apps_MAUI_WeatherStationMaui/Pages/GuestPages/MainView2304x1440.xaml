@@ -32,7 +32,7 @@
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}"
                         Text=")" />
                 </HorizontalStackLayout>
-                <Label FontSize="270" Margin="0,-60,0,0" TextColor="{StaticResource WhiteVikings}" >
+                <Label FontSize="270" FontFamily="OpenSansCondensedRegular" Margin="0,-60,0,0" TextColor="{StaticResource WhiteVikings}" >
                     <Label.Text>
                         <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
                             <Binding Path="CurrentObservation.AirTemperature" />
@@ -42,13 +42,13 @@
             </VerticalStackLayout>
         </Border>
 
-        <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="6" StrokeThickness="0">
-            <VerticalStackLayout HorizontalOptions="Center" Spacing="0">
-                <Label x:Name="LabelDayOfWeek" FontSize="200" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+        <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" StrokeThickness="0">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Start" Spacing="0">
+                <Label x:Name="LabelDayOfWeek" FontSize="155" Margin="0,-43,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
                     Text="{Binding TimeDayOfWeekDisplay}" />
-                <Label x:Name="LabelDate" FontSize="134" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+                <Label x:Name="LabelDate" FontSize="95" Margin="0,-65,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
                     Text="{Binding TimeDateDisplay}" />
-                <Label x:Name="LabelTime" FontSize="160" Margin="0,0,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
+                <Label x:Name="LabelTime" FontSize="125" Margin="0,-45,0,0" TextColor="{StaticResource GoldVikings}" HorizontalTextAlignment="Center" 
                     Text="{Binding TimeDisplay}" />
             </VerticalStackLayout>
         </Border>
@@ -75,7 +75,7 @@
                     <Label FontSize="20" Margin="0,-10,0,0" TextColor="{StaticResource GoldVikings}" 
                            Text=")" />
                 </HorizontalStackLayout>
-                <Label FontSize="270" Margin="0,-70,0,0" TextColor="{StaticResource WhiteVikings}">
+                <Label FontSize="270" FontFamily="OpenSansCondensedRegular" Margin="0,-70,0,0" TextColor="{StaticResource WhiteVikings}">
                     <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
                         <Binding Path="CurrentWind.Speed" />
                     </MultiBinding>
@@ -95,7 +95,7 @@
                     <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" 
                            Text=")" />
                 </HorizontalStackLayout>
-                <Label FontSize="270" Margin="0,-40,0,0" TextColor="{StaticResource WhiteVikings}">
+                <Label FontSize="270" FontFamily="OpenSansCondensedRegular" Margin="0,-40,0,0" TextColor="{StaticResource WhiteVikings}">
                     <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
                         <Binding Path="CurrentObservation.RelativeHumidity" />
                     </MultiBinding>
@@ -108,13 +108,30 @@
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Label FontSize="32" TextColor="{StaticResource GoldVikings}" Text="UV Index" />
                 </HorizontalStackLayout>
-                <Label FontSize="270" Margin="0,-40,0,0" TextColor="{StaticResource WhiteVikings}">
+                <Label FontSize="270" FontFamily="OpenSansCondensedRegular" Margin="0,-40,0,0" TextColor="{StaticResource WhiteVikings}">
                     <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
                         <Binding Path="CurrentObservation.UvIndex" />
                     </MultiBinding>
                 </Label>
             </VerticalStackLayout>
         </Border>
+
+        <VerticalStackLayout Grid.Row="3" Grid.Column="1" Grid.RowSpan="3" HorizontalOptions="Fill" Margin="-100,0,-100,0" Spacing="0">
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Label FontSize="32" TextColor="{StaticResource GoldVikings}" Text="Feels Like" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" Text=" (" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource WhiteVikings}"
+                           Text="{Binding CurrentObservation.AirTemperature.Unit}" />
+                    <Label FontSize="20" Margin="0,10,0,0" TextColor="{StaticResource GoldVikings}" Text=")" />
+                </HorizontalStackLayout>
+                <Label FontSize="270" Margin="0,-40,0,0" FontFamily="OpenSansCondensedRegular" HorizontalTextAlignment="Center" LineBreakMode="NoWrap" TextColor="{StaticResource WhiteVikings}">
+                    <Label.Text>
+                        <MultiBinding Converter="{StaticResource QuantityFormatter}" ConverterParameter="0">
+                            <Binding Path="CurrentObservation.FeelsLike" />
+                        </MultiBinding>
+                    </Label.Text>
+                </Label>
+        </VerticalStackLayout>
 
         <Frame Grid.Row="0" Grid.Column="0" Grid.RowSpan="6" Grid.ColumnSpan="3"
                Padding="12"

@@ -152,7 +152,6 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     }
     async Task<bool> InitializeAsync()
     {
-//        await _weatherReadingMux.Ready;
         // Quick check: if already marked initialized return true
         if (
             Interlocked.CompareExchange(
@@ -406,19 +405,35 @@ public class WeatherViewModel : INotifyPropertyChanged, IDisposable
     }
     private void OnClockTimerTick(object? sender, ElapsedEventArgs e)
     {
-        UpdateTimeDisplay();
+        try
+        {
+            UpdateTimeDisplay();
 
-        // Reschedule to the next minute boundary so the display always
-        // changes exactly when the minute changes, not on a fixed interval.
-        if (_clockTimer is null) return;
-        var now = DateTime.Now;
-        var nextMinute = now.Date.AddHours(now.Hour).AddMinutes(now.Minute + 1);
-        _clockTimer.Interval = Math.Max(1.0, (nextMinute - now).TotalMilliseconds);
-        _clockTimer.Start();
+            // Snapshot to local to eliminate TOCTOU race with dispose nulling _clockTimer.
+            // System.Timers.Timer silently swallows Elapsed exceptions, so any unguarded
+            // NullReferenceException here would stop the timer permanently after one tick.
+            var timer = _clockTimer;
+            if (timer is null) return;
+
+            // Reschedule to the next minute boundary so the display always
+            // changes exactly when the minute changes, not on a fixed interval.
+            var now = DateTime.Now;
+            var nextMinute = now.Date.AddHours(now.Hour).AddMinutes(now.Minute + 1);
+            timer.Interval = Math.Max(1.0, (nextMinute - now).TotalMilliseconds);
+            timer.Start();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Timer was disposed during tick; expected during shutdown.
+        }
+        catch (Exception ex)
+        {
+            _iLogger.Error("Clock timer tick failed", ex);
+        }
     }
     private void UpdateTimeDisplay()
     {
-        Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+        MainThread.BeginInvokeOnMainThread(() =>
         {
             _currentTime = DateTime.Now;
             OnPropertyChanged(nameof(TimeDayOfWeekDisplay));
